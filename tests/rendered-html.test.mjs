@@ -72,16 +72,16 @@ test("source keeps window controls and entrance clear", async () => {
 });
 
 test("private room media stay outside the public site", async () => {
-  await Promise.all([
-    access(new URL("public/reference-plan.png", projectRoot)),
-    access(new URL("public/zimmer1-handplan.png", projectRoot)),
-    access(new URL("public/zimmer1-plan-detail.png", projectRoot)),
-  ]);
-  for (const name of ["window", "entrance", "wardrobe", "free-wall", "desk"]) {
-    await assert.rejects(access(new URL(`public/zimmer1-photo-${name}.jpg`, projectRoot)), (error) => error?.code === "ENOENT");
+  for (const path of [
+    "public/reference-plan.png",
+    "public/zimmer1-handplan.png",
+    "public/zimmer1-plan-detail.png",
+    ...["window", "entrance", "wardrobe", "free-wall", "desk"].map((name) => `public/zimmer1-photo-${name}.jpg`),
+  ]) {
+    await assert.rejects(access(new URL(path, projectRoot)), (error) => error?.code === "ENOENT");
   }
   const html = await (await render()).text();
-  assert.doesNotMatch(html, /zimmer1-photo-/);
+  assert.doesNotMatch(html, /reference-plan|handplan|plan-detail|zimmer1-photo-/);
 });
 
 test("all product references use official Austrian Action and Möbelix pages", async () => {
