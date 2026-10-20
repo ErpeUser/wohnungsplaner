@@ -19,9 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: "Raumplaner · Wohnung",
       description: "Zimmer 1 und Vorraum in 2D und 3D möblieren.",
-      images: [{ url: `${baseUrl}/og-v2.png`, width: 1668, height: 940, alt: "Interaktiver 2D- und 3D-Raumplaner" }],
     },
-    twitter: { card: "summary_large_image", images: [`${baseUrl}/og-v2.png`] },
   };
 }
 
