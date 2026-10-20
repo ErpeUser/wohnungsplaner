@@ -3,7 +3,6 @@
 import { ChangeEvent, PointerEvent as ReactPointerEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import * as THREE from "three";
-import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import {
   cameraFieldOfViewForZoom,
   centeredCameraLookTarget,
@@ -105,29 +104,6 @@ type WallSnapshot = {
   title: string;
   dimensions: string;
   image: string;
-};
-
-type ReferenceKind = "plan" | "detail" | "hand";
-type ReferenceAsset = {
-  label: string;
-  src: string;
-  alt: string;
-  width: number;
-  height: number;
-  rotation?: 90;
-};
-
-const referenceSets: Record<RoomId, Record<ReferenceKind, ReferenceAsset>> = {
-  zimmer1: {
-    plan: { label: "Gesamtplan", src: "/reference-plan.png", alt: "Vermietungsplan der gesamten Wohnung", width: 3308, height: 2339 },
-    detail: { label: "Planausschnitt", src: "/zimmer1-plan-detail.png", alt: "Vergrößerter Ausschnitt von Zimmer 1 im Vermietungsplan", width: 1350, height: 1500 },
-    hand: { label: "Handskizze · planrichtig", src: "/zimmer1-handplan.png", alt: "Planrichtig gedrehte Handskizze von Zimmer 1 mit Wand-, Fenster- und Schrankmaßen", width: 1400, height: 1043, rotation: 90 },
-  },
-  vorraum: {
-    plan: { label: "Gesamtplan", src: "/reference-plan.png", alt: "Vermietungsplan der gesamten Wohnung", width: 3308, height: 2339 },
-    detail: { label: "Planausschnitt", src: "/vorraum-plan-detail.png", alt: "Vergrößerter Ausschnitt des Vorraums im Vermietungsplan", width: 1725, height: 1470 },
-    hand: { label: "Handskizze", src: "/vorraum-handplan.png", alt: "Handskizze des Vorraums mit Wand- und Türmaßen", width: 1400, height: 1372 },
-  },
 };
 
 const sourceLabel = {
@@ -1399,7 +1375,7 @@ function ThreeRoom({
   return <div ref={mountRef} className={captureOnly ? "three-stage capture-stage" : "three-stage"} />;
 }
 
-function FloorPlan({ room, items, selectedId, showPlanOverlay, overlayOpacity, onSelect, onMove, idPrefix = "interactive", showProposalDimensions = true }: { room: Room; items: Furniture[]; selectedId: string | null; showPlanOverlay: boolean; overlayOpacity: number; onSelect: (id: string) => void; onMove: (id: string, x: number, y: number) => void; idPrefix?: string; showProposalDimensions?: boolean }) {
+function FloorPlan({ room, items, selectedId, onSelect, onMove, idPrefix = "interactive", showProposalDimensions = true }: { room: Room; items: Furniture[]; selectedId: string | null; onSelect: (id: string) => void; onMove: (id: string, x: number, y: number) => void; idPrefix?: string; showProposalDimensions?: boolean }) {
   const svgRef = useRef<SVGSVGElement>(null);
   const drag = useRef<{ id: string; dx: number; dy: number } | null>(null);
   const viewBox = `-0.55 -0.58 ${room.width + 1.55} ${room.height + 1.2}`;
@@ -1467,19 +1443,6 @@ function FloorPlan({ room, items, selectedId, showPlanOverlay, overlayOpacity, o
       <polygon points={polygon} className={`room-floor ${room.id}`} />
       {room.id === "zimmer1" && <polygon points={polygon} fill={`url(#parquet-${idPrefix}-${room.id})`} className="parquet-floor" />}
       {room.id === "vorraum" && <polygon points={polygon} fill={`url(#tile-${idPrefix}-${room.id})`} className="tile-floor" />}
-      {showPlanOverlay && room.id === "zimmer1" && (
-        <image
-          href="/reference-plan.png"
-          x="-9.138"
-          y="-0.794"
-          width="21.005"
-          height="14.853"
-          preserveAspectRatio="none"
-          opacity={overlayOpacity}
-          clipPath={`url(#room-clip-${idPrefix}-${room.id})`}
-          className="plan-underlay"
-        />
-      )}
       <polygon points={polygon} fill={`url(#grid-${idPrefix}-${room.id})`} className="grid-fill" />
       <polygon points={polygon} className="room-wall" />
 
@@ -2098,60 +2061,11 @@ function WindowTreatmentStep() {
   );
 }
 
-function ReferenceViewer({ roomId, active, onChange }: { roomId: RoomId; active: ReferenceKind; onChange: (kind: ReferenceKind) => void }) {
-  const references = referenceSets[roomId];
-  const reference = references[active];
-  const isAlignedZimmerSketch = roomId === "zimmer1" && active === "hand";
-
-  return (
-    <div className="reference-viewer">
-      <div className="reference-tabs" role="tablist" aria-label="Referenz auswählen">
-        {(Object.keys(references) as ReferenceKind[]).map((kind) => (
-          <button key={kind} role="tab" aria-selected={active === kind} className={active === kind ? "active" : ""} onClick={() => onChange(kind)}>
-            {references[kind].label}
-          </button>
-        ))}
-      </div>
-      <TransformWrapper key={`${roomId}-${active}`} initialScale={0.65} minScale={0.45} maxScale={6} centerOnInit limitToBounds={false}>
-        {({ zoomIn, zoomOut, resetTransform }) => (
-          <>
-            <div className="zoom-actions" aria-label="Referenz vergrößern">
-              <button onClick={() => zoomOut()} aria-label="Verkleinern">−</button>
-              <button onClick={() => resetTransform()} aria-label="Ansicht zurücksetzen">Einpassen</button>
-              <button onClick={() => zoomIn()} aria-label="Vergrößern">+</button>
-            </div>
-            <TransformComponent wrapperClass="reference-zoom" contentClass="reference-content">
-              <div className={`reference-image-frame ${reference.rotation === 90 ? "rotated-clockwise" : ""}`}>
-                <Image src={reference.src} alt={reference.alt} width={reference.width} height={reference.height} draggable="false" unoptimized />
-              </div>
-            </TransformComponent>
-          </>
-        )}
-      </TransformWrapper>
-      {isAlignedZimmerSketch && (
-        <div className="orientation-proof">
-          <strong>Planrichtig ausgerichtet · nicht gespiegelt</strong>
-          <span>oben: 356 cm</span>
-          <span>rechts: Tisch 129 + Fenster 131 + Restwand 137 cm</span>
-          <span>unten: Schrank 225 × 62 cm · bündig + 25 cm zur Eingangsseite</span>
-        </div>
-      )}
-      <p className="reference-hint">
-        Scrollen oder ziehen zum Prüfen. Bei Zimmer 1 sind 225 × 62 cm das Schrankmaß, 25 cm nur der Abstand zur Eingangsseite und 270 cm die freie Tiefe bis zur Schrankfront – keine zusätzlichen Raumwände.
-      </p>
-    </div>
-  );
-}
-
 export default function Home() {
   const [roomId, setRoomId] = useState<RoomId>("zimmer1");
   const [view, setView] = useState<"2d" | "3d">("2d");
   const [itemsByRoom, setItemsByRoom] = useState<Record<RoomId, Furniture[]>>(() => createDefaultItemsByRoom());
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [referencesOpen, setReferencesOpen] = useState(false);
-  const [referenceKind, setReferenceKind] = useState<ReferenceKind>("hand");
-  const [showPlanOverlay, setShowPlanOverlay] = useState(false);
-  const [overlayOpacity, setOverlayOpacity] = useState(0.28);
   const [importError, setImportError] = useState<string | null>(null);
   const [wallSnapshots, setWallSnapshots] = useState<WallSnapshot[]>([]);
   const [printPreparing, setPrintPreparing] = useState(false);
@@ -2386,7 +2300,7 @@ export default function Home() {
           <h1>Raumplaner</h1>
         </div>
         <div className="top-actions">
-          <button className="button quiet" onClick={() => setReferencesOpen(true)}>Referenzen vergleichen</button>
+          <span className="source-privacy-note">Originalquellen lokal geprüft · nicht veröffentlicht</span>
           <button className="button" onClick={printPlan} disabled={printPreparing}>{printPreparing ? "PDF wird vorbereitet …" : "Drucken / PDF"}</button>
           <button className="button quiet" onClick={exportPlan}>Plan sichern</button>
           <button className="button quiet" onClick={() => importRef.current?.click()}>Plan laden</button>
@@ -2445,12 +2359,6 @@ export default function Home() {
                 <button className={view === "2d" ? "active" : ""} onClick={() => setView("2d")}>2D Plan</button>
                 <button className={view === "3d" ? "active" : ""} onClick={() => setView("3d")}>3D Raum</button>
               </div>
-              {view === "2d" && room.id === "zimmer1" && (
-                <div className="overlay-control">
-                  <button className={showPlanOverlay ? "active" : ""} onClick={() => setShowPlanOverlay((shown) => !shown)} aria-pressed={showPlanOverlay}>Plan-Unterlage</button>
-                  {showPlanOverlay && <label>Deckkraft <input type="range" min="10" max="65" value={Math.round(overlayOpacity * 100)} onChange={(event) => setOverlayOpacity(Number(event.target.value) / 100)} /></label>}
-                </div>
-              )}
             </div>
           </div>
           {room.id === "zimmer1" && (
@@ -2463,7 +2371,7 @@ export default function Home() {
           )}
           <div className={`plan-stage ${view}`}>
             {view === "2d" ? (
-              <FloorPlan room={room} items={items} selectedId={selectedId} showPlanOverlay={showPlanOverlay} overlayOpacity={overlayOpacity} onSelect={setSelectedId} onMove={moveItem} showProposalDimensions={hasZimmer1Design} />
+              <FloorPlan room={room} items={items} selectedId={selectedId} onSelect={setSelectedId} onMove={moveItem} showProposalDimensions={hasZimmer1Design} />
             ) : (
               <div ref={threeViewRef} className="three-view-shell" data-testid="three-view-shell">
                 <ThreeRoom room={room} items={items} selectedId={selectedId} onSelect={setSelectedId} initialView={mainThreeView} />
@@ -2537,7 +2445,7 @@ export default function Home() {
               <section className="measurement-panel" aria-labelledby="measurement-heading">
                 <div className="measurement-heading-row">
                   <h3 id="measurement-heading">Messquellen</h3>
-                  <button className="text-link" onClick={() => setReferencesOpen(true)}>Bilder prüfen</button>
+                  <span className="source-privacy-note">lokal geprüft</span>
                 </div>
                 <ul className="measurement-list">
                   {room.measurements.map((measurement) => (
@@ -2666,7 +2574,7 @@ export default function Home() {
               <p>{roomId === "zimmer1" ? "356 × 397 cm · BERO außen 142 × 220 cm · Tisch 129 × 55 cm · Schrank 225 × 62 cm · 25 cm frei" : "226 × 233 cm · fünf Türöffnungen je 80 cm · Installationen nach Plan, Fotos und Video"}</p>
             </div>
             <div className="print-floor-plan">
-              <FloorPlan room={room} items={items} selectedId={null} showPlanOverlay={false} overlayOpacity={0} onSelect={() => undefined} onMove={() => undefined} idPrefix="print" showProposalDimensions={roomId === "zimmer1" && hasZimmer1Design} />
+              <FloorPlan room={room} items={items} selectedId={null} onSelect={() => undefined} onMove={() => undefined} idPrefix="print" showProposalDimensions={roomId === "zimmer1" && hasZimmer1Design} />
             </div>
             <p className="print-dimension-key"><strong>Alle Maße:</strong> {roomId === "zimmer1" ? "Raum 356 × 397 cm · Fensterwand 129 + 131 + 137 = 397 cm · Schrankwand 225 + 25 = 250 cm · Tür 80 cm · Tisch 129 × 55 cm · Schrank 225 × 62 cm · Bett außen 142 × 220 cm / Liegefläche 120 × 200 cm · Spiegel 110 × 70 cm." : "Raum 226 × 233 cm · Eingang 80 cm · WC 80 cm · Abstellraum 80 cm · Wohnküche 80 cm · Bad 80 cm · geschätzte Raumhöhe ca. 260 cm."}</p>
             <p className="print-orientation-note"><strong>Ausrichtung:</strong> {roomId === "zimmer1" ? "Das BERO steht in der Nordwest-Ecke: Kopfteil an der linken Wand, 220-cm-Längsachse entlang der oberen Wand. Der Tisch steht parallel zur Fensterwand im 129-cm-Abschnitt; davor bleiben 81 cm zum Bett. Nach dem 25-cm-Abstand rechts vom geschlossenen Schrank folgt der kurze Wandvorsprung und danach die 80-cm-Tür. Vor einer geöffneten 45-cm-Schranktür bleiben 84 cm. Fensterseite und Schrank-/Eingangsseite sind planrichtig, nicht gespiegelt." : "Eingang links, Wohnküche rechts, WC und Abstellraum an der oberen Wand, Bad an der unteren Wand. Alle fünf lichten Türöffnungen sind mit 80 cm eingetragen."}</p>
@@ -2716,14 +2624,6 @@ export default function Home() {
           )}
         </section>
 
-      {referencesOpen && (
-        <div className="modal-backdrop" role="presentation" onMouseDown={() => setReferencesOpen(false)}>
-          <div className="plan-modal reference-modal" role="dialog" aria-modal="true" aria-label={`Plan- und Handskizzen für ${room.name}`} onMouseDown={(event) => event.stopPropagation()}>
-            <div className="modal-head"><div><span className="eyebrow">Maßquellen</span><h2>{room.name} genau prüfen</h2></div><button className="close-button" onClick={() => setReferencesOpen(false)} aria-label="Schließen">×</button></div>
-            <ReferenceViewer roomId={room.id} active={referenceKind} onChange={setReferenceKind} />
-          </div>
-        </div>
-      )}
     </main>
   );
 }
