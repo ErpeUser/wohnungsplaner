@@ -7,18 +7,21 @@
   },
   "scripts": {
     "dev": "vinext dev",
-    "build": "vinext build",
-    "start": "vinext start",
-    "test": "npm run build && node --test tests/rendered-html.test.mjs",
+    "build": "vinext build && node sync-client-assets.mjs",
+    "start": "node serve-local.mjs",
+    "start:vinext": "vinext start",
+    "test:room": "tsx --test tests/room-model.test.ts",
+    "test": "npm run build && npm run test:room && node --test tests/rendered-html.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
     "@types/three": "^0.186.0",
     "drizzle-orm": "0.45.2",
-    "next": "16.2.6",
+    "next": "^16.4.2",
     "react": "19.2.6",
     "react-dom": "19.2.6",
+    "react-zoom-pan-pinch": "^4.0.3",
     "three": "^0.186.1"
   },
   "devDependencies": {
