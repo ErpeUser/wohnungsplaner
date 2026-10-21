@@ -15,29 +15,29 @@ async function render() {
   );
 }
 
-test("server-renders the fully decorated room planner", async () => {
+test("server-renders the restored previous room version", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.match(html, /<title>Raumplaner · Wohnung<\/title>/i);
-  assert.match(html, /Bett \+ Deko · aktiv/);
-  assert.match(html, /Tisch Fensterwand · Spiegel 110 × 70/);
+  assert.match(html, /Vorige Version · wiederhergestellt/);
+  assert.match(html, /Tisch 129 × 55 cm an der oberen Wand, Blickrichtung Tür/);
   assert.match(html, /Liegefläche 120 × 200 · außen 142 × 220/);
-  assert.match(html, /81 cm bis Tisch · 84 cm vor offener Schranktür/);
-  assert.match(html, /4 Paneele · 2 leichte Leinwände/);
-  assert.match(html, /Westbild · Pflanze · Uhr/);
+  assert.match(html, /7 cm bis Tisch · 84 cm vor offener Schranktür/);
+  assert.match(html, /Vorige Version neu laden/);
+  assert.match(html, /Vorhänge und gestaffelte Wandboards neben dem Tisch/);
 });
 
-test("offers recoverable snapshot, corrected ground and decorated variants", async () => {
+test("offers the restored version and a separate ground reset", async () => {
   const html = await (await render()).text();
   const source = await readFile(new URL("app/page.tsx", projectRoot), "utf8");
-  assert.match(html, /Bett \+ Deko laden/);
+  assert.match(html, /Vorige Version neu laden/);
   assert.match(html, /Bett \+ Deko entfernen/);
-  assert.match(html, /Gesicherten Vorzustand laden/);
+  assert.doesNotMatch(html, />Bett \+ Deko laden</);
   assert.match(source, /createSavedPreDecorSnapshot/);
   assert.match(source, /createBaseFurniture/);
   assert.match(source, /createDecoratedFurniture/);
-  assert.match(source, /wohnung-plan-v7/);
+  assert.match(source, /wohnung-plan-v8-restored/);
 });
 
 test("shows four wall views, placement ledger and verified product list", async () => {
@@ -64,11 +64,14 @@ test("print view includes one measured model, four wall views and product table"
   assert.match(styles.slice(styles.indexOf("@media print")), /\.print-products-sheet\s*\{[^}]*break-before:\s*page/);
 });
 
-test("source keeps window controls and entrance clear", async () => {
+test("restored version contains the previous curtains and desk-side decoration", async () => {
   const html = await (await render()).text();
-  assert.match(html, /Eingang links\/rechts wegen 20-\/6-cm-Restflächen/);
-  assert.match(html, /Jalousie, Fensterbedienung und Lüftungsdeckel bleiben frei/);
-  assert.doesNotMatch(html, /CARLO Wandboard|Studio Home Vorhangstange|Lorris Leinenoptik/);
+  assert.match(html, /Fensterbedienung, Lüftungsdeckel und Flügelschwenk nochmals vermessen/);
+  assert.match(html, /Vorhänge sowie die gestaffelte Wandgestaltung neben dem Tisch/);
+  const source = await readFile(new URL("app/room-model.ts", projectRoot), "utf8");
+  assert.match(source, /CARLO Wandboard/);
+  assert.match(source, /Studio Home Vorhangstange/);
+  assert.match(source, /Lorris Leinenoptik/);
 });
 
 test("private room media stay outside the public site", async () => {

@@ -656,12 +656,12 @@ export const ZIMMER1_PC_AND_WARDROBE_PRESET: EvidenceFurniturePlacement[] = [
     w: 1.29,
     d: 0.55,
     h: 0.75,
-    x: 3.285,
-    y: 0.645,
-    rotation: 90,
+    x: 2.915,
+    y: 0.275,
+    rotation: 180,
     confidence: "estimated",
     fixed: true,
-    evidence: "129 × 55 × ca. 75 cm; Fotos, Video, Handskizze und das ältere Grundbestands-PDF belegen den Tisch parallel an der Fenster-/Ostwand im 129-cm-Abschnitt vor dem Fenster. Fußfläche x=301–356 cm und y=0–129 cm.",
+    evidence: "129 × 55 × ca. 75 cm; auf ausdrücklichen Nutzerwunsch aus der gesicherten vorigen Version übernommen: 129-cm-Seite an der oberen Wand, Sitzplatz mit Blick zur Tür. Rechts endet der Tisch an der Fensterwand, links bleiben 7 cm bis zum Bettfuß.",
   },
   {
     key: "wardrobe",
@@ -688,7 +688,7 @@ export type Zimmer1LayoutComparison = {
   recommended: boolean;
 };
 
-const deskAtWindowWall = { x: 3.285, y: 0.645, w: 1.29, d: 0.55, rotation: 90 };
+const deskTowardDoor = { x: 2.915, y: 0.275, w: 1.29, d: 0.55, rotation: 180 };
 
 /**
  * Four like-for-like bedside studies with the confirmed desk direction fixed.
@@ -701,8 +701,8 @@ export const ZIMMER1_LAYOUT_COMPARISONS: Zimmer1LayoutComparison[] = [
     id: "door-none",
     title: "Ohne Ablage",
     bedside: "none",
-    desk: deskAtWindowWall,
-    deskToBedCm: 81,
+    desk: deskTowardDoor,
+    deskToBedCm: 7,
     openWardrobeDoorClearanceCm: 84,
     recommended: false,
   },
@@ -710,8 +710,8 @@ export const ZIMMER1_LAYOUT_COMPARISONS: Zimmer1LayoutComparison[] = [
     id: "door-nightstand",
     title: "Action-Nachttisch",
     bedside: "nightstand",
-    desk: deskAtWindowWall,
-    deskToBedCm: 81,
+    desk: deskTowardDoor,
+    deskToBedCm: 7,
     openWardrobeDoorClearanceCm: 54.5,
     recommended: true,
   },
@@ -719,8 +719,8 @@ export const ZIMMER1_LAYOUT_COMPARISONS: Zimmer1LayoutComparison[] = [
     id: "door-lack-vertical",
     title: "LACK hochkant",
     bedside: "lack-vertical",
-    desk: deskAtWindowWall,
-    deskToBedCm: 81,
+    desk: deskTowardDoor,
+    deskToBedCm: 7,
     openWardrobeDoorClearanceCm: 54,
     recommended: false,
   },
@@ -728,8 +728,8 @@ export const ZIMMER1_LAYOUT_COMPARISONS: Zimmer1LayoutComparison[] = [
     id: "door-lack-horizontal",
     title: "LACK waagerecht",
     bedside: "lack-horizontal",
-    desk: deskAtWindowWall,
-    deskToBedCm: 81,
+    desk: deskTowardDoor,
+    deskToBedCm: 7,
     openWardrobeDoorClearanceCm: 84,
     recommended: false,
   },
@@ -1069,7 +1069,7 @@ export function buildZimmer1ComparisonPlacements(comparisonId: string): Zimmer1C
   const placements: Zimmer1ComparisonPlacement[] = [
     { key: "desk", x: variant.desk.x, y: variant.desk.y, rotation: variant.desk.rotation },
     { key: "wardrobe", x: 1.125, y: 3.02, rotation: 180 },
-    { key: "wallMirror", x: 3.52, y: 0.645, rotation: 90 },
+    { key: "wallMirror", x: 2.915, y: 0.04, rotation: 0 },
     { key: "bed120", x: 1.1, y: 0.71, rotation: 270 },
   ];
   if (variant.bedside === "nightstand") {
@@ -1103,7 +1103,7 @@ export const ZIMMER1_ANNOTATED_MEASURES = [
   { label: "Bett außen", value: "142 × 220 cm" },
   { label: "Schreibtisch", value: "129 × 55 cm" },
   { label: "Spiegel", value: "110 × 70 cm" },
-  { label: "Bett–Tisch", value: "81 cm" },
+  { label: "Bett–Tisch", value: "7 cm" },
   { label: "vor offener Schranktür", value: "84 cm" },
   { label: "Eingangsspalt", value: "25 cm" },
 ] as const;
@@ -1131,19 +1131,19 @@ export const ROOM_DEFINITIONS: Record<RoomId, Room> = {
     measurements: [
       { id: "overall-width", label: "Gesamtbreite", centimeters: 356, source: "hand", confidence: "confirmed", note: "Direkt in der Handskizze eingetragen." },
       { id: "window-wall", label: "Fensterwand gesamt", centimeters: 397, source: "hand", confidence: "confirmed", note: "Maßkette 129 + 131 + 137 cm." },
-      { id: "window-start", label: "Wandabschnitt vor Fenster", centimeters: 129, source: "hand", confidence: "confirmed", note: "Erster Abschnitt der Fensterwand. Der 129-cm-Schreibtisch steht hier parallel zur Fenster-/Ostwand; Fotos, Video, Handskizze und Grundbestands-PDF stimmen überein." },
+      { id: "window-start", label: "Wandabschnitt vor Fenster", centimeters: 129, source: "hand", confidence: "confirmed", note: "Erster Abschnitt der Fensterwand. In der wiederhergestellten vorigen Version endet der 129-cm-Schreibtisch hier an der Fensterwand; seine lange Kante liegt an der oberen Wand." },
       { id: "window-width", label: "Fensteröffnung", centimeters: 131, source: "hand", confidence: "confirmed", note: "Nicht mit der 80-cm-Tür verwechseln." },
       { id: "window-end", label: "Wand nach Fenster", centimeters: 137, source: "hand", confidence: "confirmed", note: "Letzter Abschnitt der Fensterwand." },
       { id: "door-width", label: "Türöffnung", centimeters: 80, source: "plan", confidence: "confirmed", note: "Im Vermietungsplan mit 80/200 cm bemaßt." },
       { id: "door-wall-return", label: "Hinter geöffnetem Türblatt", centimeters: 6, source: "plan", confidence: "plan-scaled", note: "Kurzer Wandrücksprung zwischen rechtem Türanschlag und Fensterwand; aus dem Vermietungsplan maßstäblich abgeleitet." },
       { id: "wardrobe-width", label: "Schrankbreite (Bestand)", centimeters: 225, source: "hand", confidence: "confirmed", note: "Direkt an der Schrankfront eingetragen; das Video zeigt denselben fünftürigen Schrank." },
       { id: "clear-depth-to-wardrobe", label: "Freie Tiefe bis Schrankfront", centimeters: 270, source: "hand", confidence: "limited", note: "Bis zur Vorderkante des vorhandenen Schranks gemessen, nicht bis zur dahinterliegenden Wand." },
-      { id: "desk-size", label: "Schreibtisch (Bestand)", centimeters: 129, source: "hand", confidence: "confirmed", note: "Handschriftliches Möbelmaß 129 × 55 cm; parallel an der Fenster-/Ostwand im 129-cm-Abschnitt." },
+      { id: "desk-size", label: "Schreibtisch (Bestand)", centimeters: 129, source: "hand", confidence: "confirmed", note: "Handschriftliches Möbelmaß 129 × 55 cm; wiederhergestellte lange Kante an der oberen Wand, Blickrichtung Tür." },
       { id: "desk-depth", label: "Schreibtischtiefe", centimeters: 55, source: "hand", confidence: "confirmed", note: "Zweites handschriftliches Möbelmaß; die Tischplatte ist 55 cm tief." },
       { id: "wardrobe-depth", label: "Schranktiefe (Bestand)", centimeters: 62, source: "hand", confidence: "confirmed", note: "225 × 62 cm ist das Möbelmaß des vorhandenen Schranks, keine Raumwand." },
       { id: "wardrobe-gap", label: "Abstand zur Eingangsseite", centimeters: 25, source: "hand", confidence: "confirmed", note: "Der Abstand liegt nur auf der Eingangsseite; die gegenüberliegende Schrankseite steht bündig." },
     ],
-    facts: ["Breite 356 cm", "Fensterwand 397 cm", "Wand 129 cm + Fenster 131 cm + Restwand 137 cm", "Tür 80 cm", "Schreibtisch 129 × 55 cm · parallel an der Fensterwand", "Schrank 225 × 62 cm", "Links bündig · rechts exakt 25 cm bis zur Eingangswand", "Freie Tiefe bis Schrankfront ca. 270 cm", "Stabparkett · weiße Wände"],
+    facts: ["Breite 356 cm", "Fensterwand 397 cm", "Wand 129 cm + Fenster 131 cm + Restwand 137 cm", "Tür 80 cm", "Schreibtisch 129 × 55 cm · lange Kante an der oberen Wand", "Schrank 225 × 62 cm", "Links bündig · rechts exakt 25 cm bis zur Eingangswand", "Freie Tiefe bis Schrankfront ca. 270 cm", "Stabparkett · weiße Wände"],
   },
   vorraum: {
     id: "vorraum",

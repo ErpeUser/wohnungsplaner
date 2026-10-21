@@ -188,25 +188,16 @@ const makeDesignFurniture = (placement: DesignFurniturePlacement, stableIds = fa
 });
 
 const createBaseMirror = (stableIds = false): Furniture => {
-  return {
-    id: stableIds ? "zimmer1-base-wallMirror" : createId(),
-    type: "wallMirror",
-    name: "Spiegel 110 × 70 · Grundausstattung",
-    w: 1.1,
-    d: 0.04,
-    h: 0.7,
-    x: 3.52,
-    y: 0.645,
-    rotation: 90,
-    color: catalog.wallMirror.color,
-    mountHeight: 1.22,
-    nonBlocking: true,
-    role: "Grundausstattung über dem PC-Tisch an der Fensterwand",
-    wall: "Fensterwand · 129-cm-Abschnitt",
-    evidenceStatus: "belegt",
-    evidence: "110 × 70 cm laut Auftrag; mittig über dem quellenbestätigten Schreibtisch an der Ost-/Fensterwand. Bei 75 cm Tischhöhe und 12 cm Abstand liegt die Spiegelunterkante bei 87 cm und der Mittelpunkt bei 122 cm. Die Montagehöhe bleibt vor Ort zu bestätigen.",
-    fixed: true,
-  };
+  const placement = ZIMMER1_DESIGN_PRESET.find((candidate) => candidate.key === "wallMirror");
+  if (!placement) throw new Error("Grundausstattung-Spiegel fehlt");
+  const item = makeDesignFurniture(placement, false);
+  item.id = stableIds ? "zimmer1-base-wallMirror" : createId();
+  item.name = "Spiegel 110 × 70 · Grundausstattung";
+  item.role = "Grundausstattung über dem PC-Tisch an der oberen Wand";
+  item.wall = "Obere Wand · Tischzone";
+  item.evidenceStatus = "belegt";
+  item.fixed = true;
+  return item;
 };
 
 const createVariantABed = (stableIds = false): Furniture => {
@@ -262,7 +253,7 @@ const createDecoratedFurniture = (stableIds = false) => [
   }),
 ];
 
-/** Exact in-app model that was active immediately before this correction pass. */
+/** Exact in-app model that was active before the rejected decoration pass. */
 const createSavedPreDecorSnapshot = (stableIds = false): Furniture[] => {
   const [desk, wardrobe] = createPcAndWardrobe(false);
   Object.assign(desk, {
@@ -270,8 +261,8 @@ const createSavedPreDecorSnapshot = (stableIds = false): Furniture[] => {
     x: 2.915,
     y: 0.275,
     rotation: 180,
-    evidenceStatus: "offen" as const,
-    evidence: "Gesicherter Vorzustand: Tisch war an der oberen Wand modelliert. Die spätere Quellenprüfung hat diese Lage als Regression erkannt.",
+    evidenceStatus: "belegt" as const,
+    evidence: "Vom Nutzer ausdrücklich wiederhergestellter Vorzustand: 129 × 55 cm, lange Tischkante an der oberen Wand, Blickrichtung zur Tür.",
   });
   wardrobe.id = stableIds ? "zimmer1-snapshot-wardrobe" : createId();
   const mirrorPlacement = ZIMMER1_DESIGN_PRESET.find((candidate) => candidate.key === "wallMirror");
@@ -408,8 +399,31 @@ const purchaseSuggestions = [
   },
 ] as const;
 
+const productNeutralWallPlan = [
+  {
+    wall: "Obere Wand · Bett und Tisch",
+    dimensions: "Bett x 0–220 cm · 7 cm Abstand · Tisch x 227–356 cm",
+    plan: "Die vorige Tischlage und der Spiegel 110 × 70 bleiben. Über dem Bett keine schwere Ablage; die große gestalterische Fläche wird an die Kopfteilwand verlegt. Die Tischzone bleibt ruhig, damit Spiegel und Arbeitsplatz nicht mit Kleinteilen überladen werden.",
+  },
+  {
+    wall: "Linke Wand · Kopfteil und freie Zone",
+    dimensions: "Kopfteilzone 0–142 cm · freie Wand bis Schrankfront 129 cm",
+    plan: "Ein zusammenhängendes, helles Paneelfeld über die volle Kopfteilbreite, maximal 2,5 cm tief und bis etwa 225–230 cm hoch. Danach eine schwebende Miniablage 25–30 × 10–12 cm und ein leichtes vertikales Textilbild; Steckdose und Schranktürzone ab 226 cm bleiben frei.",
+  },
+  {
+    wall: "Fensterwand · Vorhang und Deko neben Tisch",
+    dimensions: "129 cm Wand + 131 cm Fenster + 137 cm Restwand",
+    plan: "Vorhänge und die gestaffelte Wandgestaltung neben dem Tisch bleiben als Bestandteil der vorigen Version sichtbar. Vor der endgültigen Produktauswahl werden Fensterbedienung, Lüftungsdeckel und Flügelschwenk nochmals vermessen; keine zusätzliche Pflanze oder Uhr in der Türschwenkzone.",
+  },
+  {
+    wall: "Schrank / Eingang",
+    dimensions: "Schrank 225 × 62 cm · 25 cm frei · Tür 80 cm",
+    plan: "Schrankfront geschlossen lassen. Die 64-cm-Eingangsnische flächig in warmem Greige fassen, beide schmalen Türseiten ohne Aufbau gestalten und den 25-cm-Streifen vollständig frei halten. Oberhalb des Schranks nur geordnete leichte Boxen und optional eine flache warme Lichtlinie nach Vor-Ort-Messung.",
+  },
+] as const;
+
 const createDefaultItemsByRoom = (): Record<RoomId, Furniture[]> => ({
-  zimmer1: createDecoratedFurniture(true),
+  zimmer1: createSavedPreDecorSnapshot(true),
   vorraum: [],
 });
 
@@ -436,8 +450,8 @@ const createComparisonFurniture = (comparisonId: string): Furniture[] => {
 const comparisonCamera = zimmer1ComparisonCamera();
 const annotatedCornerCamera = zimmer1AnnotatedCornerCamera();
 
-const STORAGE_KEY = "wohnung-plan-v7";
-const LEGACY_STORAGE_KEYS = ["wohnung-plan-v6", "wohnung-plan-v5", "wohnung-plan-v4", "wohnung-plan-v3", "wohnung-plan-v2", "wohnung-plan-v1"];
+const STORAGE_KEY = "wohnung-plan-v8-restored";
+const LEGACY_STORAGE_KEYS = ["wohnung-plan-v7", "wohnung-plan-v6", "wohnung-plan-v5", "wohnung-plan-v4", "wohnung-plan-v3", "wohnung-plan-v2", "wohnung-plan-v1"];
 
 function pointInPolygon(point: Point, polygon: Point[]) {
   const onBoundary = polygon.some((start, index) => {
@@ -1669,10 +1683,10 @@ function FloorPlan({ room, items, selectedId, onSelect, onMove, idPrefix = "inte
       })}
       {room.id === "zimmer1" && (
         <g className="dimension furniture-dimensions" aria-label="Möbelmaße aus der Handskizze">
-          <line x1="3.01" y1="0.14" x2="3.56" y2="0.14" />
-          <line x1="3.01" y1="0.07" x2="3.01" y2="0.21" />
-          <line x1="3.56" y1="0.07" x2="3.56" y2="0.21" />
-          <text x="3.285" y="0.1" textAnchor="middle">55 cm Tiefe</text>
+          <line x1="3.43" y1="0" x2="3.43" y2="0.55" />
+          <line x1="3.36" y1="0" x2="3.5" y2="0" />
+          <line x1="3.36" y1="0.55" x2="3.5" y2="0.55" />
+          <text x="3.37" y="0.275" textAnchor="middle" transform="rotate(-90 3.37 .275)">55 cm Tiefe</text>
 
           <line x1="0.16" y1="2.71" x2="0.16" y2="3.33" />
           <line x1="0.09" y1="2.71" x2="0.23" y2="2.71" />
@@ -1692,7 +1706,7 @@ function FloorPlan({ room, items, selectedId, onSelect, onMove, idPrefix = "inte
           <line x1="2.25" y1="1.42" x2="2.39" y2="1.42" />
           <text x="2.38" y="0.71" textAnchor="middle" transform="rotate(-90 2.38 .71)">142 cm außen · kurze Seite zum Tisch</text>
 
-          <text x="2.605" y="1.67" textAnchor="middle" className="dimension-detail">81 cm Bett–Tisch</text>
+          <text x="2.235" y="0.82" textAnchor="middle" className="dimension-detail">7 cm Bett–Tisch</text>
           <text x="1.83" y="2.63" textAnchor="middle" className="dimension-detail">84 cm vor offener Schranktür</text>
         </g>
       )}
@@ -2092,15 +2106,16 @@ export default function Home() {
       : items.some((item) => item.id.startsWith("zimmer1-decor-"))
         ? "decorated"
         : "ground";
-  const hasZimmer1Design = roomVariant === "decorated";
+  const hasZimmer1Design = roomVariant === "decorated" || roomVariant === "snapshot";
+  const hasVerifiedProductVariant = roomVariant === "decorated";
   const variantLabel = roomVariant === "decorated"
     ? "Bett + Deko · aktiv"
     : roomVariant === "snapshot"
-      ? "Gesicherter Vorzustand · unverändert"
+      ? "Vorige Version · wiederhergestellt"
       : roomVariant === "ground"
         ? "Korrigierter Grundbestand"
         : "Vorraum";
-  const placementItems = roomId === "zimmer1"
+  const placementItems = roomId === "zimmer1" && hasVerifiedProductVariant
     ? createDecoratedFurniture(true).filter((item) => item.id.startsWith("zimmer1-decor-") && item.type !== "bed120")
     : [];
   const receiveWallSnapshots = useCallback((snapshots: WallSnapshot[]) => {
@@ -2127,7 +2142,7 @@ export default function Home() {
         if (saved) {
           const current = JSON.parse(saved) as Partial<Record<RoomId, Furniture[]>>;
           setItemsByRoom({
-            zimmer1: Array.isArray(current.zimmer1) ? current.zimmer1 : createDecoratedFurniture(true),
+            zimmer1: Array.isArray(current.zimmer1) ? current.zimmer1 : createSavedPreDecorSnapshot(true),
             vorraum: Array.isArray(current.vorraum) ? current.vorraum : [],
           });
         } else {
@@ -2136,7 +2151,7 @@ export default function Home() {
           if (legacy) {
             const previous = JSON.parse(legacy) as Partial<Record<RoomId, Furniture[]>>;
             setItemsByRoom({
-              zimmer1: createDecoratedFurniture(true),
+              zimmer1: createSavedPreDecorSnapshot(true),
               vorraum: Array.isArray(previous.vorraum) ? previous.vorraum : [],
             });
           }
@@ -2205,12 +2220,6 @@ export default function Home() {
   const loadCorrectedGround = () => {
     if (roomId !== "zimmer1") return;
     updateRoomItems(() => createBaseFurniture(true));
-    setSelectedId(null);
-  };
-
-  const loadDecoratedVariant = () => {
-    if (roomId !== "zimmer1") return;
-    updateRoomItems(() => createDecoratedFurniture(true));
     setSelectedId(null);
   };
 
@@ -2336,9 +2345,8 @@ export default function Home() {
             ))}
           </div>
           <div className="preset-actions">
-            {roomId === "zimmer1" && <button className="button" onClick={loadDecoratedVariant}>Bett + Deko laden</button>}
+            {roomId === "zimmer1" && <button className="button" onClick={loadSavedSnapshot}>Vorige Version neu laden</button>}
             {roomId === "zimmer1" && <button className="button secondary" onClick={loadCorrectedGround}>Bett + Deko entfernen</button>}
-            {roomId === "zimmer1" && <button className="button text-button" onClick={loadSavedSnapshot}>Gesicherten Vorzustand laden</button>}
             {roomId === "vorraum" && <button className="button secondary" onClick={loadPhotoEstimate}>Bestand aus Fotos</button>}
             {roomId === "vorraum" && <button className="button text-button" onClick={() => { updateRoomItems(() => []); setSelectedId(null); }}>Raum leeren</button>}
           </div>
@@ -2349,7 +2357,7 @@ export default function Home() {
             <div>
               <span className="eyebrow">{room.subtitle}</span>
               <h2>{room.name} <em>{room.area}</em></h2>
-              {room.id === "zimmer1" && <p className="orientation-path">Fensterwand: Wand 129 → Fenster 131 → Restwand 137 cm · Tisch parallel zur Fensterwand</p>}
+              {room.id === "zimmer1" && <p className="orientation-path">Fensterwand: Wand 129 → Fenster 131 → Restwand 137 cm · Tisch 129 × 55 cm an der oberen Wand, Blickrichtung Tür</p>}
               {room.id === "zimmer1" && <span className={`variant-badge ${roomVariant}`}>{variantLabel}</span>}
             </div>
             <div className="canvas-actions">
@@ -2363,10 +2371,10 @@ export default function Home() {
           </div>
           {room.id === "zimmer1" && (
             <div className="final-plan-strip" aria-label="Festgelegte Endplanung">
-              <div><span>Grundausstattung</span><strong>Tisch Fensterwand · Spiegel 110 × 70</strong><small>Schrank 225 × 62 · Türen geschlossen</small></div>
-              <div><span>Bettzone</span><strong>Liegefläche 120 × 200 · außen 142 × 220</strong><small>81 cm bis Tisch · 84 cm vor offener Schranktür</small></div>
-              <div><span>Kopfteil + Nordwand</span><strong>4 Paneele · 2 leichte Leinwände</strong><small>Keine schwere Ablage über dem Bett</small></div>
-              <div><span>Freie Zonen</span><strong>Westbild · Pflanze · Uhr</strong><small>Eingang beidseits bewusst frei</small></div>
+              <div><span>Grundausstattung</span><strong>Tisch obere Wand · Spiegel 110 × 70</strong><small>Schrank 225 × 62 · Türen geschlossen</small></div>
+              <div><span>Bettzone</span><strong>Liegefläche 120 × 200 · außen 142 × 220</strong><small>7 cm bis Tisch · 84 cm vor offener Schranktür</small></div>
+              <div><span>Fenster</span><strong>Vorhangstange · 2 Vorhänge</strong><small>Wiederhergestellter Stand</small></div>
+              <div><span>Neben dem Tisch</span><strong>3 gestaffelte Wandboards</strong><small>Wandgestaltung aus der vorigen Version</small></div>
             </div>
           )}
           <div className={`plan-stage ${view}`}>
@@ -2495,7 +2503,24 @@ export default function Home() {
             <PrintWallSnapshots snapshots={wallSnapshots} />
           </section>
 
-          <section className="placement-panel" aria-labelledby="placement-heading">
+          <section className="purchase-panel" aria-labelledby="neutral-plan-heading">
+            <div className="purchase-heading">
+              <div><span className="eyebrow">Schritt 1 · noch ohne Produkte</span><h2 id="neutral-plan-heading">Wandweiser Gestaltungsplan</h2></div>
+              <p>Dieser Plan beschreibt zuerst nur Flächen, Maße, Freizonen und Wirkung. Produkte, Links und Preise werden erst danach passend zu diesen Grenzen ausgewählt.</p>
+            </div>
+            <div className="purchase-grid">
+              {productNeutralWallPlan.map((zone) => (
+                <article className="purchase-card" key={zone.wall}>
+                  <div className="purchase-card-top"><span className="shop-pill">produktneutral</span></div>
+                  <strong>{zone.wall}</strong>
+                  <span className="purchase-role">{zone.dimensions}</span>
+                  <p>{zone.plan}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="placement-panel" aria-labelledby="placement-heading" hidden={!hasVerifiedProductVariant}>
             <div className="section-copy">
               <span className="eyebrow">Maßgetreuer Einbau</span>
               <h2 id="placement-heading">Platzierungsprotokoll · Variante Bett + Deko</h2>
@@ -2520,7 +2545,7 @@ export default function Home() {
             </div>
           </section>
 
-          <section className="purchase-panel" aria-labelledby="purchase-heading">
+          <section className="purchase-panel" aria-labelledby="purchase-heading" hidden={!hasVerifiedProductVariant}>
             <div className="purchase-heading">
               <div><span className="eyebrow">Action + Möbelix Österreich</span><h2 id="purchase-heading">Verifizierte Produktliste</h2></div>
               <p>Produktseiten, Maße und veröffentlichte Preise wurden am 20.10.2026 geprüft. Es wurde nichts bestellt; lokalen Filialbestand vor dem Kauf erneut prüfen.</p>
@@ -2549,10 +2574,10 @@ export default function Home() {
           <section className="evidence-panel" aria-labelledby="evidence-heading">
             <div className="section-copy"><span className="eyebrow">Quellenstatus + Änderungsprotokoll</span><h2 id="evidence-heading">Belegt, geschätzt und offen</h2></div>
             <div className="evidence-grid">
-              <article><span className="evidence-pill belegt">belegt</span><h3>Korrigiert und eingebaut</h3><p>Tisch und Spiegel liegen wieder an der Fensterwand. Schrankfronten bleiben geschlossen. Bett, sieben Dekoelement-Gruppen und alle vier Wandansichten nutzen dasselbe Modell.</p></article>
+              <article><span className="evidence-pill belegt">wiederhergestellt</span><h3>Vorige Version aktiv</h3><p>Tisch 129 × 55 cm wieder an der oberen Wand, Bett, Spiegel, geschlossener Schrank, Vorhänge und Wandboards neben dem Tisch stammen aus dem gesicherten Stand vor der abgelehnten Dekoration.</p></article>
               <article><span className="evidence-pill geschätzt">geschätzt</span><h3>Vor Ort kontrollieren</h3><p>Raumhöhe 260 cm sowie einzelne Installations- und Montagehöhen stammen aus Foto-/Planableitungen. Vor dem Bohren Wandaufbau, Leitungen und Höhen messen.</p></article>
-              <article><span className="evidence-pill offen">offen</span><h3>Nicht vorgetäuscht</h3><p>Die Planfläche 12,36 m² weicht von ca. 12,53 m² aus Handmaßen ab. BERO-Farbe ist im Shop widersprüchlich; Action-Filialbestand ist offen.</p></article>
-              <article><span className="evidence-pill belegt">frei gehalten</span><h3>Eingang und Fenster</h3><p>Die 20-cm- und 6-cm-Bereiche beidseits der Tür bleiben wegen Schalter, Leibung und Türschwenk leer. Jalousie, Fensterbedienung und Lüftungsdeckel bleiben frei; Vorhang und CARLO-Regale wurden deshalb nicht übernommen.</p></article>
+              <article><span className="evidence-pill offen">offen</span><h3>Neue Deko noch ohne Produktzwang</h3><p>Die nächste Variante wird zuerst wandweise räumlich geplant. Produktnamen, Preise und Links werden erst danach geprüft und nur bei passender Größe übernommen.</p></article>
+              <article><span className="evidence-pill belegt">erhalten</span><h3>Fenster und Tischzone</h3><p>Die vorige Version enthält wieder die Vorhänge sowie die gestaffelte Wandgestaltung neben dem Tisch. Fensterbedienung, Jalousie und Lüftungsdeckel bleiben in der nächsten Prüfung zwingend frei.</p></article>
             </div>
           </section>
         </>
@@ -2577,17 +2602,26 @@ export default function Home() {
               <FloorPlan room={room} items={items} selectedId={null} onSelect={() => undefined} onMove={() => undefined} idPrefix="print" showProposalDimensions={roomId === "zimmer1" && hasZimmer1Design} />
             </div>
             <p className="print-dimension-key"><strong>Alle Maße:</strong> {roomId === "zimmer1" ? "Raum 356 × 397 cm · Fensterwand 129 + 131 + 137 = 397 cm · Schrankwand 225 + 25 = 250 cm · Tür 80 cm · Tisch 129 × 55 cm · Schrank 225 × 62 cm · Bett außen 142 × 220 cm / Liegefläche 120 × 200 cm · Spiegel 110 × 70 cm." : "Raum 226 × 233 cm · Eingang 80 cm · WC 80 cm · Abstellraum 80 cm · Wohnküche 80 cm · Bad 80 cm · geschätzte Raumhöhe ca. 260 cm."}</p>
-            <p className="print-orientation-note"><strong>Ausrichtung:</strong> {roomId === "zimmer1" ? "Das BERO steht in der Nordwest-Ecke: Kopfteil an der linken Wand, 220-cm-Längsachse entlang der oberen Wand. Der Tisch steht parallel zur Fensterwand im 129-cm-Abschnitt; davor bleiben 81 cm zum Bett. Nach dem 25-cm-Abstand rechts vom geschlossenen Schrank folgt der kurze Wandvorsprung und danach die 80-cm-Tür. Vor einer geöffneten 45-cm-Schranktür bleiben 84 cm. Fensterseite und Schrank-/Eingangsseite sind planrichtig, nicht gespiegelt." : "Eingang links, Wohnküche rechts, WC und Abstellraum an der oberen Wand, Bad an der unteren Wand. Alle fünf lichten Türöffnungen sind mit 80 cm eingetragen."}</p>
+            <p className="print-orientation-note"><strong>Ausrichtung:</strong> {roomId === "zimmer1" ? "Das BERO steht in der Nordwest-Ecke: Kopfteil an der linken Wand, 220-cm-Längsachse entlang der oberen Wand. In der wiederhergestellten vorigen Version liegt die 129-cm-Längskante des Tisches an der oberen Wand; die 55-cm-Tiefe zeigt zur Tür. Der geschlossene Schrank bleibt 225 × 62 cm groß und der 25-cm-Abstand zur Eingangsseite erhalten. Fensterseite und Schrank-/Eingangsseite sind planrichtig, nicht gespiegelt." : "Eingang links, Wohnküche rechts, WC und Abstellraum an der oberen Wand, Bad an der unteren Wand. Alle fünf lichten Türöffnungen sind mit 80 cm eingetragen."}</p>
           </div>
           <div className="print-elevations-sheet">
             <div className="print-section-heading"><div><span>Vier Wände des Raums</span><h3>Automatische 3D-Wandansichten</h3></div><p>Fensterwand, obere Wand, Schrank/Eingang und linke Wand werden aus demselben aktiven Modell erzeugt. Keine privaten Fotos.</p></div>
             <PrintWallSnapshots snapshots={wallSnapshots} />
           </div>
-          {roomId === "zimmer1" && hasZimmer1Design ? (
+          {roomVariant === "snapshot" ? (
+            <div className="print-design-summary">
+              <strong>Vorige Version · wiederhergestellt</strong>
+              <span>Bett BERO außen 142 × 220 cm / Liegefläche 120 × 200 cm ist enthalten.</span>
+              <span>Tisch 129 × 55 cm wieder mit langer Kante an der oberen Wand und Blickrichtung Tür.</span>
+              <span>Spiegel 110 × 70 cm, Vorhänge und gestaffelte Wandboards neben dem Tisch sind wieder enthalten.</span>
+              <span>Schrank 225 × 62 cm mit geschlossenen Fronten und 25 cm Abstand zur Eingangsseite bleibt erhalten.</span>
+              <span>Die abgelehnte Produktdekoration ist nicht aktiv; die neue Planung erfolgt zuerst wandweise und produktunabhängig.</span>
+            </div>
+          ) : roomId === "zimmer1" && hasZimmer1Design ? (
             <>
               <div className="print-design-summary">
                 <strong>Bett + Deko</strong>
-                <span>BERO außen 142 × 220 cm; Liegefläche 120 × 200 cm; 81 cm zum quellenrichtig ausgerichteten Tisch</span>
+                <span>BERO außen 142 × 220 cm; Liegefläche 120 × 200 cm; 7 cm zum Tisch der wiederhergestellten vorigen Version</span>
                 <span>Westwand: 4 Holzpaneele als 120 × 60 cm Feld, LED-Leselicht und Leinwandbild 100 × 40 cm</span>
                 <span>Nordwand: 2 leichte Leinwände je 40 × 60 × 1,2 cm; keine schwere Ablage über dem Bett</span>
                 <span>Ostwand: Miscanthus 20 × 90 × 20 cm und Uhr Ø 20 × 4 cm; Fensterfunktion bleibt frei</span>
@@ -2601,7 +2635,7 @@ export default function Home() {
               <span>Bett und sämtliche Deko-Elemente sind aus dem aktuellen Plan entfernt.</span>
               <span>Übrig bleiben der neutral-weiße Bestandstisch 129 × 55 cm, der Spiegel 110 × 70 cm und die planbestätigten Installationen; die Tischlampe ist entfernt.</span>
               <span>Der vollständige Schrank 225 × 62 cm erscheint mit fünf geschlossenen Fronten, mittigem Spiegel und zwei schwarzen Doppelschubladen.</span>
-              <span>Die Schaltfläche „Bett + Deko laden“ stellt die dekorierte Variante wieder her, ohne den Grundbestand zu überschreiben.</span>
+              <span>Die Schaltfläche „Vorige Version neu laden“ stellt den gesicherten Stand mit Bett, Vorhängen und Wandboards wieder her, ohne den Grundbestand zu überschreiben.</span>
             </div>
           ) : (
             <div className="print-design-summary">
@@ -2612,7 +2646,7 @@ export default function Home() {
               <span>Helles quadratisches Feinsteinzeug; keine privaten Raumfotos im PDF.</span>
             </div>
           )}
-          {roomId === "zimmer1" && (
+          {roomId === "zimmer1" && hasVerifiedProductVariant && (
             <div className="print-products-sheet">
               <div className="print-section-heading"><div><span>Action + Möbelix Österreich</span><h3>Produkt- und Platzierungsliste</h3></div><p>Prüfstand 20.10.2026 · keine Bestellung ausgelöst · Filialbestand vor Kauf kontrollieren.</p></div>
               <table className="print-product-table">
