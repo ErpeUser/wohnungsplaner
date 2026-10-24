@@ -33,6 +33,8 @@ export type PlannerWall = {
 export type PlannerRoom = {
   id: string;
   name: string;
+  area: number;
+  includedInWnf: boolean;
   boundary: WallRef[];
   surfaces: {
     floor: string;
@@ -44,6 +46,7 @@ export type PlannerRoom = {
 
 export type PlannerOpening = {
   id: string;
+  label: string;
   wallId: string;
   offset: number;
   width: number;
@@ -57,10 +60,12 @@ export type PlannerOpening = {
 
 export type PlannerBuiltIn = {
   id: string;
+  label: string;
   roomId: string;
   kind: "kitchen" | "sanitary" | "storage" | "other";
   catalogId?: string;
   position: Point2;
+  elevation?: number;
   rotation: number;
   size: Size3;
   locked: true;
@@ -70,15 +75,9 @@ export type PlannerBuiltIn = {
 
 export type PlannerFixture = {
   id: string;
+  label: string;
   roomId: string;
-  kind:
-    | "switch"
-    | "outlet"
-    | "blind-control"
-    | "vent"
-    | "light"
-    | "radiator"
-    | "other";
+  kind: string;
   position: Point2;
   wallId?: string;
   height?: number;

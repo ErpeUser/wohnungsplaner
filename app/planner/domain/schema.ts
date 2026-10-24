@@ -47,6 +47,8 @@ const wallSchema = z.object({
 const roomSchema = z.object({
   id: entityId,
   name: z.string().trim().min(1),
+  area: positiveNumber,
+  includedInWnf: z.boolean(),
   boundary: z.array(wallRefSchema).min(3),
   surfaces: z.object({
     floor: entityId,
@@ -58,6 +60,7 @@ const roomSchema = z.object({
 
 const openingSchema = z.object({
   id: entityId,
+  label: z.string().trim().min(1),
   wallId: entityId,
   offset: nonNegativeNumber,
   width: positiveNumber,
@@ -71,10 +74,12 @@ const openingSchema = z.object({
 
 const builtInSchema = z.object({
   id: entityId,
+  label: z.string().trim().min(1),
   roomId: entityId,
   kind: z.enum(["kitchen", "sanitary", "storage", "other"]),
   catalogId: entityId.optional(),
   position: pointSchema,
+  elevation: nonNegativeNumber.optional(),
   rotation: finiteNumber,
   size: sizeSchema,
   locked: z.literal(true),
@@ -84,16 +89,9 @@ const builtInSchema = z.object({
 
 const fixtureSchema = z.object({
   id: entityId,
+  label: z.string().trim().min(1),
   roomId: entityId,
-  kind: z.enum([
-    "switch",
-    "outlet",
-    "blind-control",
-    "vent",
-    "light",
-    "radiator",
-    "other",
-  ]),
+  kind: entityId,
   position: pointSchema,
   wallId: entityId.optional(),
   height: nonNegativeNumber.optional(),

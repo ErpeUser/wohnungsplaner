@@ -18,6 +18,8 @@ const validDocument = {
     {
       id: "room-living",
       name: "Wohnzimmer",
+      area: 12,
+      includedInWnf: true,
       boundary: [
         { wallId: "wall-north", direction: 1 },
         { wallId: "wall-east", direction: 1 },
@@ -30,6 +32,7 @@ const validDocument = {
   openings: [
     {
       id: "opening-door",
+      label: "Wohnzimmertür",
       wallId: "wall-north",
       offset: 0.7,
       width: 0.9,
