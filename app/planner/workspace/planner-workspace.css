@@ -409,6 +409,64 @@
   line-height: 1.6;
 }
 
+.planner-plan-canvas {
+  position: absolute;
+  inset: 8px 0 0 8px;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.planner-plan-canvas canvas {
+  cursor: grab;
+}
+
+.planner-plan-canvas canvas:active {
+  cursor: grabbing;
+}
+
+.planner-plan-canvas__controls {
+  position: absolute;
+  z-index: 4;
+  top: 14px;
+  left: 14px;
+  display: flex;
+  gap: 5px;
+  padding: 4px;
+  border: 1px solid rgba(105, 113, 109, 0.3);
+  border-radius: 8px;
+  background: rgba(255, 253, 249, 0.92);
+  box-shadow: 0 6px 20px rgba(32, 48, 52, 0.09);
+  backdrop-filter: blur(8px);
+}
+
+.planner-plan-canvas__controls button {
+  min-height: 32px;
+  padding: 0 9px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--muted);
+  background: transparent;
+  font-size: 10px;
+  font-weight: 680;
+}
+
+.planner-plan-canvas__controls button[aria-pressed="true"] {
+  color: #fff;
+  background: var(--accent);
+}
+
+.planner-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .planner-canvas__error,
 .planner-canvas__warning {
   position: absolute;

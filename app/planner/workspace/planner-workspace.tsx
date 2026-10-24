@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useStore } from "zustand";
 
 import { DEFAULT_APARTMENT_DOCUMENT } from "../domain/apartment-v3.ts";
+import { PlanCanvas } from "../plan-2d/plan-canvas.tsx";
 import { createLocalStoragePlannerRepository } from "../store/persistence.ts";
 import { createPlannerStore, type PlannerStore } from "../store/planner-store.ts";
 import { CatalogPanel } from "./catalog-panel.tsx";
@@ -107,11 +108,20 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
           <div className="planner-canvas__stage">
             <div className="planner-canvas__ruler planner-canvas__ruler--top" aria-hidden="true" />
             <div className="planner-canvas__ruler planner-canvas__ruler--left" aria-hidden="true" />
-            <div className="planner-canvas__placeholder">
-              <span className="planner-kicker">{state.viewMode === "2d" ? "Planfläche" : "Raummodell"}</span>
-              <strong>{state.viewMode === "2d" ? "Maßhaltiger 2D-Plan" : "Realistische 3D-Ansicht"}</strong>
-              <p>{state.viewMode === "2d" ? "Wände, Türen und Einbauten werden aus dem V3-Wohnungsmodell gezeichnet." : "Dieselbe Planung wird ohne zweites Datenmodell räumlich dargestellt."}</p>
-            </div>
+            {state.viewMode === "2d" ? (
+              <PlanCanvas
+                document={state.document}
+                activeRoomId={state.activeRoomId}
+                overlays={state.overlays}
+                onOverlayChange={state.setOverlay}
+              />
+            ) : (
+              <div className="planner-canvas__placeholder">
+                <span className="planner-kicker">Raummodell</span>
+                <strong>Realistische 3D-Ansicht</strong>
+                <p>Dieselbe Planung wird ohne zweites Datenmodell räumlich dargestellt.</p>
+              </div>
+            )}
           </div>
           {state.lastError ? <p className="planner-canvas__error" role="alert">{state.lastError.message}</p> : null}
           {state.warnings.length ? <p className="planner-canvas__warning">Hinweis: {state.warnings[0].message}</p> : null}

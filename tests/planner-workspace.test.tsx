@@ -3,7 +3,20 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
+
+vi.mock("react-konva", () => ({
+  Arc: () => null,
+  Circle: () => null,
+  Group: ({ children }: React.PropsWithChildren) => <>{children}</>,
+  Layer: ({ children }: React.PropsWithChildren) => <>{children}</>,
+  Line: () => null,
+  Rect: () => null,
+  Stage: ({ children }: React.PropsWithChildren) => <div data-konva-node="Stage">{children}</div>,
+  Text: () => null,
+}));
+
+vi.mock("konva", () => ({ default: { pixelRatio: 1 } }));
 
 import { DEFAULT_APARTMENT_DOCUMENT } from "../app/planner/domain/apartment-v3.ts";
 import { createPlannerStore } from "../app/planner/store/planner-store.ts";
