@@ -1,0 +1,15 @@
+{
+  "profile": "product-admin",
+  "sourceRoots": ["app/planner"],
+  "locale": "de-AT",
+  "canonicalMap": "UX-CONTRACT.md",
+  "requiredCapabilities": ["Select/Listbox", "Scrollbar"],
+  "ownership": {
+    "Select/Listbox": "native"
+  },
+  "evidence": {
+    "workspaceInteractions": "tests/planner-workspace.test.tsx",
+    "commandSafety": "tests/planner-commands.test.ts",
+    "persistenceFailures": "tests/planner-persistence.test.ts"
+  }
+}

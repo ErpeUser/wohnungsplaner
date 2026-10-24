@@ -1,0 +1,808 @@
+.planner-workspace {
+  --planner-chrome: #172629;
+  --planner-chrome-soft: #24383b;
+  --planner-surface: #fffdf9;
+  --planner-canvas: #ebe8df;
+  --planner-grid: rgba(57, 77, 80, 0.09);
+  --planner-measure: #94502f;
+  min-width: 320px;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  color: var(--ink);
+  background: #e6e2d9;
+}
+
+.planner-workspace button,
+.planner-workspace select,
+.planner-workspace input {
+  font: inherit;
+}
+
+.planner-workspace button {
+  cursor: pointer;
+}
+
+.planner-workspace button:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+}
+
+.planner-workspace button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.planner-workspace button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.planner-workspace button:focus-visible,
+.planner-workspace select:focus-visible,
+.planner-workspace input:focus-visible {
+  outline: 3px solid #dca06f;
+  outline-offset: 2px;
+}
+
+.planner-toolbar {
+  position: relative;
+  z-index: 20;
+  min-height: 74px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  color: #f7f4ed;
+  background: var(--planner-chrome);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 6px 22px rgba(23, 38, 41, 0.18);
+}
+
+.planner-brand {
+  min-width: 196px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.planner-brand__mark {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  color: #f1c8a8;
+  font: 650 14px/1 var(--font-geist-mono), ui-monospace, monospace;
+  letter-spacing: -0.04em;
+}
+
+.planner-brand > span:last-child {
+  display: grid;
+  gap: 2px;
+}
+
+.planner-brand small {
+  color: #aebcba;
+  font-size: 9px;
+  font-weight: 650;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.planner-brand strong {
+  font-size: 17px;
+  font-weight: 620;
+  letter-spacing: -0.03em;
+}
+
+.planner-room-selector {
+  min-width: 192px;
+  display: grid;
+  gap: 3px;
+}
+
+.planner-room-selector > span {
+  color: #aebcba;
+  font-size: 9px;
+  font-weight: 680;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.planner-room-selector select {
+  width: 100%;
+  min-height: 34px;
+  padding: 0 30px 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 7px;
+  color: #fff;
+  background: var(--planner-chrome-soft);
+  cursor: pointer;
+}
+
+.planner-room-selector option {
+  color: var(--ink);
+  background: var(--panel);
+}
+
+.planner-segmented {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  background: #0f1e20;
+}
+
+.planner-segmented button,
+.planner-toolbar__history button,
+.planner-toolbar__tools button {
+  min-height: 34px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: #dce5e3;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.planner-segmented button {
+  min-width: 42px;
+  padding: 0 10px;
+}
+
+.planner-segmented button[aria-pressed="true"] {
+  color: var(--planner-chrome);
+  background: #f4eee4;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.planner-segmented--quiet button[aria-pressed="true"] {
+  color: #fff;
+  background: #36575b;
+}
+
+.planner-toolbar__history,
+.planner-toolbar__tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.planner-toolbar__history {
+  margin-left: auto;
+}
+
+.planner-toolbar__history button,
+.planner-toolbar__tools button {
+  padding: 0 9px;
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.planner-toolbar__history button span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.planner-toolbar__tools .planner-button--primary {
+  padding-inline: 13px;
+  color: #1d2b2e;
+  background: #f1c8a8;
+  border-color: #f1c8a8;
+}
+
+.planner-workspace__body {
+  min-height: 0;
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: 264px minmax(0, 1fr) 288px;
+  gap: 1px;
+  background: #cbc7bd;
+}
+
+.planner-workspace__body[data-catalog-open="false"][data-inspector-open="true"] {
+  grid-template-columns: minmax(0, 1fr) 288px;
+}
+
+.planner-workspace__body[data-catalog-open="true"][data-inspector-open="false"] {
+  grid-template-columns: 264px minmax(0, 1fr);
+}
+
+.planner-workspace__body[data-catalog-open="false"][data-inspector-open="false"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.planner-panel {
+  min-width: 0;
+  padding: 18px 16px;
+  background: var(--planner-surface);
+  scrollbar-gutter: stable;
+}
+
+.planner-panel__header {
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--line);
+}
+
+.planner-kicker {
+  color: var(--planner-measure);
+  font: 720 9px/1.2 var(--font-geist-mono), ui-monospace, monospace;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.planner-panel__header h2,
+.planner-details h2 {
+  margin: 5px 0 4px;
+  font-size: 17px;
+  font-weight: 640;
+  letter-spacing: -0.035em;
+}
+
+.planner-panel__header p,
+.planner-panel__note,
+.planner-empty-state p,
+.planner-locked-state p,
+.planner-details p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.planner-catalog__groups {
+  display: grid;
+  gap: 6px;
+  padding-block: 14px;
+}
+
+.planner-catalog__group {
+  min-height: 54px;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border: 1px solid #e6e1d8;
+  border-radius: 8px;
+  background: #faf7f1;
+}
+
+.planner-catalog__group > span:first-child {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 5px;
+  font-size: 17px;
+}
+
+.planner-catalog__group > span:last-child {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.planner-catalog__group strong {
+  font-size: 11px;
+  font-weight: 680;
+}
+
+.planner-catalog__group small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.planner-panel__note {
+  padding: 11px;
+  border-left: 2px solid var(--warm);
+  background: #f8efe7;
+}
+
+.planner-canvas {
+  min-width: 0;
+  min-height: 620px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--planner-canvas);
+}
+
+.planner-canvas__meta {
+  min-height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 18px;
+  color: #536164;
+  background: rgba(255, 253, 249, 0.84);
+  border-bottom: 1px solid #cec9bf;
+  font: 640 10px/1.2 var(--font-geist-mono), ui-monospace, monospace;
+  letter-spacing: 0.02em;
+}
+
+.planner-canvas__stage {
+  min-height: 540px;
+  flex: 1;
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background-color: #f0ede6;
+  background-image:
+    linear-gradient(var(--planner-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--planner-grid) 1px, transparent 1px),
+    linear-gradient(rgba(57, 77, 80, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(57, 77, 80, 0.045) 1px, transparent 1px);
+  background-size: 50px 50px, 50px 50px, 10px 10px, 10px 10px;
+}
+
+.planner-canvas__stage::after {
+  content: "N";
+  position: absolute;
+  top: 28px;
+  right: 28px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #7f8988;
+  border-radius: 50%;
+  color: #435457;
+  font: 700 10px/1 var(--font-geist-mono), ui-monospace, monospace;
+}
+
+.planner-canvas__ruler {
+  position: absolute;
+  z-index: 1;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.planner-canvas__ruler--top {
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 8px;
+  background: repeating-linear-gradient(90deg, var(--planner-measure) 0 1px, transparent 1px 10px);
+}
+
+.planner-canvas__ruler--left {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 8px;
+  background: repeating-linear-gradient(180deg, var(--planner-measure) 0 1px, transparent 1px 10px);
+}
+
+.planner-canvas__placeholder {
+  width: min(470px, calc(100% - 64px));
+  padding: 42px;
+  border: 1px solid rgba(55, 73, 76, 0.38);
+  background: rgba(255, 253, 249, 0.88);
+  box-shadow: 18px 20px 0 rgba(39, 76, 82, 0.08);
+  text-align: center;
+}
+
+.planner-canvas__placeholder strong {
+  display: block;
+  margin: 8px 0;
+  font-size: clamp(20px, 3vw, 30px);
+  font-weight: 560;
+  letter-spacing: -0.045em;
+}
+
+.planner-canvas__placeholder p {
+  max-width: 370px;
+  margin: 0 auto;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.planner-canvas__error,
+.planner-canvas__warning {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  left: 16px;
+  z-index: 3;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 620;
+}
+
+.planner-canvas__error {
+  color: var(--danger);
+  background: var(--danger-soft);
+  border: 1px solid color-mix(in srgb, var(--danger) 34%, white);
+}
+
+.planner-canvas__warning {
+  color: #6e4528;
+  background: #f8e8d8;
+  border: 1px solid #d5aa86;
+}
+
+.planner-empty-state {
+  min-height: 210px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 7px;
+  padding: 20px;
+  text-align: center;
+}
+
+.planner-empty-state > span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px dashed #9ca7a4;
+  color: var(--accent);
+  font-size: 22px;
+}
+
+.planner-empty-state strong {
+  font-size: 12px;
+}
+
+.planner-locked-state,
+.planner-selection-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f5f3ed;
+}
+
+.planner-locked-state {
+  margin-top: 14px;
+}
+
+.planner-inspector__form {
+  display: grid;
+  gap: 14px;
+  padding-top: 14px;
+}
+
+.planner-selection-summary > span:last-child {
+  display: grid;
+  gap: 2px;
+}
+
+.planner-selection-summary__swatch {
+  width: 30px;
+  height: 30px;
+  background: #a8bbb7;
+  border: 1px solid #78918c;
+}
+
+.planner-selection-summary strong {
+  font-size: 11px;
+}
+
+.planner-selection-summary small {
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.planner-inspector__form fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.planner-inspector__form legend {
+  padding-inline: 5px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.planner-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.planner-number-field {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 620;
+}
+
+.planner-number-field__control {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  border: 1px solid #cbc8c0;
+  border-radius: 7px;
+  background: #fff;
+}
+
+.planner-number-field input {
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  padding: 0 7px;
+  border: 0;
+  color: var(--ink);
+  background: transparent;
+  font: 620 11px/1 var(--font-geist-mono), ui-monospace, monospace;
+}
+
+.planner-number-field input:focus-visible {
+  outline-offset: 0;
+}
+
+.planner-number-field small {
+  padding-right: 7px;
+  color: #8b9694;
+  font-size: 9px;
+}
+
+.planner-details {
+  position: fixed;
+  z-index: 40;
+  top: 86px;
+  right: 14px;
+  width: min(360px, calc(100vw - 28px));
+  max-height: calc(100svh - 132px);
+  overflow: auto;
+  padding: 18px;
+  border: 1px solid #c9c5bb;
+  border-radius: 11px;
+  background: var(--planner-surface);
+  box-shadow: 0 22px 60px rgba(24, 38, 40, 0.26);
+  scrollbar-gutter: stable;
+}
+
+.planner-details > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.planner-details > header button {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #f7f4ee;
+  font-size: 20px;
+}
+
+.planner-details dl {
+  display: grid;
+  gap: 1px;
+  margin: 18px 0;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+
+.planner-details dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px;
+  background: #fff;
+}
+
+.planner-details dt {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.planner-details dd {
+  margin: 0;
+  font: 650 10px/1.3 var(--font-geist-mono), ui-monospace, monospace;
+}
+
+.planner-details section {
+  padding: 12px;
+  border-left: 2px solid var(--accent);
+  background: var(--accent-soft);
+}
+
+.planner-details h3 {
+  margin: 0 0 5px;
+  font-size: 11px;
+}
+
+.planner-status {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  color: #b9c4c2;
+  background: #142225;
+  font: 590 9px/1.2 var(--font-geist-mono), ui-monospace, monospace;
+}
+
+.planner-status strong {
+  color: #f3f1eb;
+  font-weight: 650;
+}
+
+.planner-status > span:not(.planner-status__dot) + span {
+  padding-left: 10px;
+  border-left: 1px solid #3b4d50;
+}
+
+.planner-status__dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #8c9997;
+}
+
+.planner-status__dot--saving { background: #e0a66f; }
+.planner-status__dot--saved { background: #87b79c; }
+.planner-status__dot--error { background: #d57269; }
+
+@media (max-width: 1279px) {
+  .planner-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .planner-brand {
+    min-width: 174px;
+  }
+
+  .planner-toolbar__tools {
+    flex: 1 1 100%;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 1023px) {
+  .planner-toolbar {
+    align-items: flex-end;
+  }
+
+  .planner-brand {
+    flex: 1 1 auto;
+  }
+
+  .planner-room-selector {
+    order: 3;
+    flex: 1 1 220px;
+  }
+
+  .planner-toolbar__history {
+    margin-left: 0;
+  }
+
+  .planner-toolbar__tools {
+    order: 4;
+  }
+
+  .planner-workspace__body,
+  .planner-workspace__body[data-catalog-open="false"][data-inspector-open="true"],
+  .planner-workspace__body[data-catalog-open="true"][data-inspector-open="false"],
+  .planner-workspace__body[data-catalog-open="false"][data-inspector-open="false"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .planner-panel--catalog,
+  .planner-panel--inspector {
+    position: fixed;
+    z-index: 30;
+    top: 138px;
+    bottom: 44px;
+    width: min(320px, calc(100vw - 24px));
+    overflow: auto;
+    border: 1px solid #c8c3ba;
+    box-shadow: 0 18px 48px rgba(23, 38, 41, 0.24);
+  }
+
+  .planner-panel--catalog { left: 12px; }
+  .planner-panel--inspector { right: 12px; }
+
+  .planner-canvas {
+    min-height: 610px;
+  }
+}
+
+@media (max-width: 639px) {
+  .planner-toolbar {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .planner-brand {
+    min-width: 0;
+  }
+
+  .planner-brand__mark {
+    width: 34px;
+    height: 34px;
+  }
+
+  .planner-segmented--quiet {
+    order: 5;
+  }
+
+  .planner-toolbar__history button,
+  .planner-toolbar__tools button {
+    padding-inline: 7px;
+    font-size: 10px;
+  }
+
+  .planner-toolbar__tools {
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .planner-toolbar__tools button {
+    flex: 0 0 auto;
+  }
+
+  .planner-panel--catalog,
+  .planner-panel--inspector {
+    top: 188px;
+  }
+
+  .planner-canvas__meta,
+  .planner-status {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .planner-canvas__placeholder {
+    width: calc(100% - 40px);
+    padding: 28px 20px;
+    box-shadow: 10px 12px 0 rgba(39, 76, 82, 0.08);
+  }
+
+  .planner-status {
+    padding-inline: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .planner-workspace *,
+  .planner-workspace *::before,
+  .planner-workspace *::after {
+    scroll-behavior: auto;
+    transition-duration: 0.01ms;
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+  }
+}
+
+@media (forced-colors: active) {
+  .planner-workspace,
+  .planner-toolbar,
+  .planner-status,
+  .planner-panel,
+  .planner-canvas {
+    forced-color-adjust: auto;
+  }
+}
