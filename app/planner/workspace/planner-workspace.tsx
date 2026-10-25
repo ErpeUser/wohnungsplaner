@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Component, lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { useStore } from "zustand";
 
 import { DEFAULT_APARTMENT_DOCUMENT } from "../domain/apartment-v3.ts";
@@ -14,6 +14,10 @@ import { InspectorPanel } from "./inspector-panel.tsx";
 import { PlannerStatus } from "./planner-status.tsx";
 import { PlannerToolbar } from "./planner-toolbar.tsx";
 import "./planner-workspace.css";
+
+const LazyPlanner3D = lazy(() => import("../scene-3d/planner-3d.tsx").then((module) => ({
+  default: module.Planner3D,
+})));
 
 export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStore }) {
   const [internalStore] = useState(() => createPlannerStore({
@@ -131,11 +135,17 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
                 onRotate={interactions.rotatePlacement}
               />
             ) : (
-              <div className="planner-canvas__placeholder">
-                <span className="planner-kicker">Raummodell</span>
-                <strong>Realistische 3D-Ansicht</strong>
-                <p>Dieselbe Planung wird ohne zweites Datenmodell räumlich dargestellt.</p>
-              </div>
+              <Workspace3DErrorBoundary onReturn2D={() => state.setViewMode("2d")}>
+                <Suspense fallback={<ThreeLoading />}>
+                  <LazyPlanner3D
+                    document={state.document}
+                    activeRoomId={state.activeRoomId}
+                    selectionId={state.selectionId}
+                    onSelect={state.select}
+                    onReturn2D={() => state.setViewMode("2d")}
+                  />
+                </Suspense>
+              </Workspace3DErrorBoundary>
             )}
           </div>
           {state.lastError ? <p className="planner-canvas__error" role="alert">{state.lastError.message}</p> : null}
@@ -156,6 +166,41 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
       />
     </main>
   );
+}
+
+function ThreeLoading() {
+  return (
+    <div className="planner-3d-loading" role="status">
+      <span className="planner-3d-loading__mark" aria-hidden="true" />
+      <strong>3D-Raum wird vorbereitet</strong>
+      <p>Geometrie, Materialien und Licht werden aus derselben Planung abgeleitet.</p>
+    </div>
+  );
+}
+
+class Workspace3DErrorBoundary extends Component<{
+  children: ReactNode;
+  onReturn2D(): void;
+}, { failed: boolean }> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  render() {
+    if (this.state.failed) {
+      return (
+        <div className="planner-3d-fallback" role="alert">
+          <span className="planner-kicker">Sichere Ansicht</span>
+          <strong>3D-Modul konnte nicht geladen werden</strong>
+          <p>Die Planung bleibt vollständig erhalten.</p>
+          <button type="button" onClick={this.props.onReturn2D}>Zu 2D</button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
 }
 
 function browserRepository() {

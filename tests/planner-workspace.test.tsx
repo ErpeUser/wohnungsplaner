@@ -19,6 +19,12 @@ vi.mock("react-konva", () => ({
 
 vi.mock("konva", () => ({ default: { pixelRatio: 1 } }));
 
+vi.mock("../app/planner/scene-3d/planner-3d.tsx", () => ({
+  Planner3D: ({ onReturn2D }: { onReturn2D(): void }) => (
+    <div data-testid="mock-planner-3d"><button type="button" onClick={onReturn2D}>Zu 2D</button></div>
+  ),
+}));
+
 import { DEFAULT_APARTMENT_DOCUMENT } from "../app/planner/domain/apartment-v3.ts";
 import { createPlannerStore } from "../app/planner/store/planner-store.ts";
 import { PlannerWorkspace } from "../app/planner/workspace/planner-workspace.tsx";
