@@ -117,7 +117,7 @@ const fixtures: PlannerFixture[] = [
 ];
 
 const placements: PlannerPlacement[] = [
-  placement("zimmer1-bed", "zimmer1", "bed-120", 1.1, 0.71, 2.2, 1.42, 1.3, 270),
+  placement("zimmer1-bed", "zimmer1", "bed-120", 1.1, 1.12, 2.2, 1.42, 1.3, 270),
   placement("zimmer1-wardrobe", "zimmer1", "wardrobe-225", 1.125, 3.02, 2.25, 0.62, 2.2, 0),
   placement("zimmer1-desk", "zimmer1", "desk-standard", 2.915, 0.315, 1.29, 0.55, 0.75, 0),
   placement("zimmer1-chair", "zimmer1", "chair-office", 2.7, 0.94, 0.55, 0.55, 0.82, 90),
@@ -213,11 +213,32 @@ function toPlannerOpening(source: LegacyOpening, forcedKind?: "passage"): Planne
 function findOpeningWall(source: LegacyOpening): PlannerWall {
   const candidates = wallGraph.walls
     .filter((wall) => wall.roomIds.some((roomId) => source.rooms.includes(roomId)))
-    .filter((wall) => pointOnWall(source.start, wall) && pointOnWall(source.end, wall))
-    .sort((left, right) => deriveWallLength(left) - deriveWallLength(right));
+    .filter((wall) => pointOnWall(source.start, wall) || pointOnWall(source.end, wall))
+    .filter((wall) => openingCollinearWithWall(source, wall))
+    .sort((left, right) => candidateOpeningScore(source, left) - candidateOpeningScore(source, right));
   const wall = candidates[0];
   if (!wall) throw new Error(`No wall found for opening ${source.id}`);
   return wall;
+}
+
+function openingCollinearWithWall(source: LegacyOpening, wall: PlannerWall) {
+  const length = deriveWallLength(wall);
+  return [source.start, source.end].every((candidate) => Math.abs(
+    (candidate.x - wall.start.x) * (wall.end.z - wall.start.z)
+      - (candidate.z - wall.start.z) * (wall.end.x - wall.start.x),
+  ) / length <= 0.012);
+}
+
+function candidateOpeningScore(source: LegacyOpening, wall: PlannerWall) {
+  const tangent = {
+    x: (wall.end.x - wall.start.x) / deriveWallLength(wall),
+    z: (wall.end.z - wall.start.z) / deriveWallLength(wall),
+  };
+  const projected = [source.start, source.end].map((point) => (
+    (point.x - wall.start.x) * tangent.x + (point.z - wall.start.z) * tangent.z
+  ));
+  const beginsOnWall = Math.min(...projected) >= -0.012 && Math.min(...projected) <= deriveWallLength(wall) + 0.012;
+  return (beginsOnWall ? 0 : 1000) + deriveWallLength(wall);
 }
 
 function pointOnWall(candidate: Point2, wall: PlannerWall) {

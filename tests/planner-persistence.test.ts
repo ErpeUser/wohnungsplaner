@@ -4,6 +4,7 @@ import test from "node:test";
 import { DEFAULT_APARTMENT_DOCUMENT } from "../app/planner/domain/apartment-v3.ts";
 import {
   PLANNER_BACKUP_KEY,
+  PLANNER_MIGRATION_BACKUP_KEY,
   PLANNER_STORAGE_KEY,
   createLocalStoragePlannerRepository,
   type PlannerRepository,
@@ -40,6 +41,35 @@ test("migrates raw v2 data and reports corrupted or schema-invalid data", () => 
   const invalid = repository.load();
   assert.equal(invalid.document, DEFAULT_APARTMENT_DOCUMENT);
   assert.ok(invalid.warnings.length > 0);
+});
+
+test("durably preserves legacy source data before autosave replaces the current value", () => {
+  const legacyJson = JSON.stringify({
+    zimmer1: [
+      { id: "known", type: "desk", x: 1, y: 1, w: 1.2, d: 0.6, h: 0.75, rotation: 0 },
+      { id: "unknown", type: "teleporter", x: 2, y: 1, w: 1, d: 1, h: 1, rotation: 0 },
+    ],
+  });
+  const storage = new MemoryStorage({ [PLANNER_STORAGE_KEY]: legacyJson });
+  const repository = createLocalStoragePlannerRepository(storage, fixedClock);
+
+  const migrated = repository.load();
+  repository.save(migrated.document);
+
+  const reloaded = createLocalStoragePlannerRepository(storage, fixedClock);
+  assert.equal(reloaded.getMigrationBackup(), legacyJson);
+  assert.equal(storage.getItem(PLANNER_MIGRATION_BACKUP_KEY), legacyJson);
+  assert.equal(JSON.parse(storage.getItem(PLANNER_STORAGE_KEY)!).schemaVersion, 3);
+});
+
+test("preserves an imported legacy payload before committing its migration", () => {
+  const storage = new MemoryStorage();
+  const repository = createLocalStoragePlannerRepository(storage, fixedClock);
+  const legacy = { zimmer1: [{ id: "desk", type: "desk", x: 1, y: 1, w: 1, d: 0.6, h: 0.75, rotation: 0 }] };
+
+  repository.commitImport(repository.previewImport(legacy));
+
+  assert.deepEqual(JSON.parse(repository.getMigrationBackup()!), legacy);
 });
 
 test("backs up the last valid document before atomically overwriting it", () => {
@@ -186,6 +216,7 @@ function repositorySpy(saved: PlannerDocumentV3[], fail = false): PlannerReposit
       return document;
     },
     restoreBackup: () => null,
+    getMigrationBackup: () => null,
     previewImport: () => ({
       document: DEFAULT_APARTMENT_DOCUMENT,
       warnings: [],

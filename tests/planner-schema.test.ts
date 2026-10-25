@@ -97,3 +97,10 @@ test("rejects room boundaries that do not form a closed wall loop", () => {
 
   assert.throws(() => parsePlannerDocument(invalidLoop), /closed.*loop/i);
 });
+
+test("rejects placements outside or crossing the room boundary", () => {
+  const outside = structuredClone(validDocument);
+  outside.placements[0].position = { x: 4.2, z: 2 };
+
+  assert.throws(() => parsePlannerDocument(outside), /fully inside room/i);
+});

@@ -75,10 +75,25 @@ describe("furniture interactions", () => {
   });
 
   test("snaps drag to 5 cm, while Alt keeps a free position", () => {
-    const snapped = resolvePlacementMove(DEFAULT_APARTMENT_DOCUMENT, chair, { x: 2.713, z: 0.937 });
-    const free = resolvePlacementMove(DEFAULT_APARTMENT_DOCUMENT, chair, { x: 2.713, z: 0.937 }, { disableGrid: true });
+    const document = { ...DEFAULT_APARTMENT_DOCUMENT, placements: [chair] };
+    const snapped = resolvePlacementMove(document, chair, { x: 2.713, z: 0.937 });
+    const free = resolvePlacementMove(document, chair, { x: 2.713, z: 0.937 }, { disableGrid: true });
     assert.deepEqual(snapped.position, { x: 2.7, z: 0.95 });
     assert.deepEqual(free.position, { x: 2.713, z: 0.937 });
+  });
+
+  test("uses real wall and object guides during production placement moves", () => {
+    const nearWall = resolvePlacementMove(DEFAULT_APARTMENT_DOCUMENT, chair, { x: 0.24, z: 2 }, { disableGrid: true });
+    assert.ok(nearWall.guides.some((guide) => guide.kind === "wall"));
+
+    const other = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id !== chair.id)!;
+    const nearObject = resolvePlacementMove(
+      DEFAULT_APARTMENT_DOCUMENT,
+      chair,
+      { x: other.position.x, z: other.position.z },
+      { disableGrid: true },
+    );
+    assert.ok(nearObject.guides.some((guide) => guide.kind === "object"));
   });
 
   test("transfers the complete placement when its center enters another room", () => {

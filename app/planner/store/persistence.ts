@@ -8,6 +8,7 @@ import type { PlannerDocumentV3 } from "../domain/types.ts";
 
 export const PLANNER_STORAGE_KEY = "wohnung-planner-v3";
 export const PLANNER_BACKUP_KEY = "wohnung-planner-v3-backup";
+export const PLANNER_MIGRATION_BACKUP_KEY = "wohnung-planner-v3-migration-backup";
 
 export type PlannerImportPreview = MigrationResult & {
   canCommit: boolean;
@@ -17,6 +18,7 @@ export type PlannerRepository = {
   load(): MigrationResult;
   save(document: PlannerDocumentV3): PlannerDocumentV3;
   restoreBackup(): MigrationResult | null;
+  getMigrationBackup(): string | null;
   previewImport(value: unknown): PlannerImportPreview;
   commitImport(preview: PlannerImportPreview): PlannerDocumentV3;
 };
@@ -28,7 +30,12 @@ export function createLocalStoragePlannerRepository(
   return {
     load() {
       const raw = storage.getItem(PLANNER_STORAGE_KEY);
-      return raw === null ? emptyResult() : readStoredValue(raw);
+      if (raw === null) return emptyResult();
+      const result = readStoredValue(raw);
+      if (result.legacyBackupJson !== null) {
+        storage.setItem(PLANNER_MIGRATION_BACKUP_KEY, result.legacyBackupJson);
+      }
+      return result;
     },
 
     save(document) {
@@ -37,14 +44,19 @@ export function createLocalStoragePlannerRepository(
       const nextJson = JSON.stringify(persisted);
       const previousCurrent = storage.getItem(PLANNER_STORAGE_KEY);
       const previousBackup = storage.getItem(PLANNER_BACKUP_KEY);
+      const previousMigrationBackup = storage.getItem(PLANNER_MIGRATION_BACKUP_KEY);
       const validCurrent = validDocumentJson(previousCurrent);
 
       try {
+        if (previousCurrent !== null && validCurrent === null) {
+          storage.setItem(PLANNER_MIGRATION_BACKUP_KEY, previousCurrent);
+        }
         if (validCurrent !== null) storage.setItem(PLANNER_BACKUP_KEY, validCurrent);
         storage.setItem(PLANNER_STORAGE_KEY, nextJson);
       } catch (error) {
         restoreValue(storage, PLANNER_STORAGE_KEY, previousCurrent);
         restoreValue(storage, PLANNER_BACKUP_KEY, previousBackup);
+        restoreValue(storage, PLANNER_MIGRATION_BACKUP_KEY, previousMigrationBackup);
         throw error;
       }
       return persisted;
@@ -53,6 +65,10 @@ export function createLocalStoragePlannerRepository(
     restoreBackup() {
       const raw = storage.getItem(PLANNER_BACKUP_KEY);
       return raw === null ? null : readStoredValue(raw);
+    },
+
+    getMigrationBackup() {
+      return storage.getItem(PLANNER_MIGRATION_BACKUP_KEY);
     },
 
     previewImport(value) {
@@ -66,6 +82,9 @@ export function createLocalStoragePlannerRepository(
     commitImport(preview) {
       if (!preview.canCommit) {
         throw new Error("Diese Vorschau kann nicht importiert werden.");
+      }
+      if (preview.legacyBackupJson !== null) {
+        storage.setItem(PLANNER_MIGRATION_BACKUP_KEY, preview.legacyBackupJson);
       }
       return this.save(preview.document);
     },

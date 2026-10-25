@@ -4,6 +4,8 @@ import Konva from "konva";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Stage } from "react-konva";
 
+import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
+import type { SnapGuide } from "../domain/snapping.ts";
 import type { PlannerDocumentV3, PlannerViewPreferences } from "../domain/types.ts";
 import { ArchitectureLayer } from "./architecture-layer.tsx";
 import { FurnitureLayer } from "./furniture-layer.tsx";
@@ -25,6 +27,7 @@ type PlanCanvasProps = {
   onMove: React.ComponentProps<typeof FurnitureLayer>["onMove"];
   onResize: React.ComponentProps<typeof FurnitureLayer>["onResize"];
   onRotate: React.ComponentProps<typeof FurnitureLayer>["onRotate"];
+  onToggleDoor(openingId: string): void;
   onStageChange?(stage: Konva.Stage | null): void;
 };
 
@@ -40,6 +43,7 @@ export function PlanCanvas({
   onMove,
   onResize,
   onRotate,
+  onToggleDoor,
   onStageChange,
 }: PlanCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -48,6 +52,13 @@ export function PlanCanvas({
     () => createPlanScene(document, { activeRoomId, overlays }),
     [activeRoomId, document, overlays],
   );
+  const doors = useMemo(() => scene.openings.filter((opening) => opening.kind === "door"), [scene.openings]);
+  const [doorControlId, setDoorControlId] = useState("");
+  const controlledDoor = doors.find((door) => door.id === doorControlId) ?? doors[0];
+  useEffect(() => {
+    if (controlledDoor && controlledDoor.id !== doorControlId) setDoorControlId(controlledDoor.id);
+    if (!controlledDoor && doorControlId) setDoorControlId("");
+  }, [controlledDoor, doorControlId]);
   useEffect(() => {
     Konva.pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
     const container = containerRef.current;
@@ -81,12 +92,45 @@ export function PlanCanvas({
         >
           Elektro
         </button>
+        <label className="planner-plan-canvas__object-select">
+          <span>Planobjekt</span>
+          <select
+            aria-label="Planobjekt auswählen"
+            value={selectionId ?? ""}
+            onChange={(event) => onSelect(event.currentTarget.value || null)}
+          >
+            <option value="">Kein Objekt gewählt</option>
+            {document.placements
+              .filter((item) => !activeRoomId || item.roomId === activeRoomId)
+              .map((item) => <option key={item.id} value={item.id}>{getFurnitureCatalogItem(item.catalogId)?.name ?? item.catalogId}</option>)}
+            {document.builtIns
+              .filter((item) => !activeRoomId || item.roomId === activeRoomId)
+              .map((item) => <option key={item.id} value={item.id}>{item.label} (fix)</option>)}
+          </select>
+        </label>
+        {controlledDoor ? (
+          <label className="planner-plan-canvas__object-select">
+            <span>Tür</span>
+            <select aria-label="Tür auswählen" value={controlledDoor.id} onChange={(event) => setDoorControlId(event.currentTarget.value)}>
+              {doors.map((door) => <option key={door.id} value={door.id}>{door.label}</option>)}
+            </select>
+          </label>
+        ) : null}
+        {controlledDoor ? (
+          <button
+            type="button"
+            aria-label={`${controlledDoor.label} ${controlledDoor.state === "open" ? "schließen" : "öffnen"}`}
+            onClick={() => onToggleDoor(controlledDoor.id)}
+          >
+            {controlledDoor.state === "open" ? "Tür schließen" : "Tür öffnen"}
+          </button>
+        ) : null}
       </div>
       <p className="planner-visually-hidden">
         Grundriss mit {scene.rooms.length} {scene.rooms.length === 1 ? "Raum" : "Räumen"}, {scene.openings.length} Öffnungen und {scene.builtIns.length} festen Einbauten.
       </p>
       <InteractivePlanStage
-        key={`${activeRoomId ?? "all"}:${document.updatedAt}:${size.width}x${size.height}`}
+        key={`${activeRoomId ?? "all"}:${size.width}x${size.height}`}
         scene={scene}
         size={size}
         document={document}
@@ -128,7 +172,15 @@ function InteractivePlanStage({
   onStageChange,
 }: InteractivePlanStageProps) {
   const [viewport, setViewport] = useState<PlanViewport>(() => fitPlanViewport(scene, size));
+  const [previewGuides, setPreviewGuides] = useState<SnapGuide[]>([]);
+  const [previewMessage, setPreviewMessage] = useState<string | null>(null);
   const stageRef = useRef<Konva.Stage | null>(null);
+  const displayScene = useMemo(() => ({
+    ...scene,
+    guides: previewGuides
+      .filter((guide) => guide.kind !== "grid")
+      .map((guide, index) => ({ id: `drag-guide-${index}`, axis: guide.axis, value: guide.value })),
+  }), [previewGuides, scene]);
 
   useEffect(() => {
     onStageChange?.(stageRef.current);
@@ -181,9 +233,18 @@ function InteractivePlanStage({
           onMove={onMove}
           onResize={onResize}
           onRotate={onRotate}
+          onPreview={(guides, message) => {
+            setPreviewGuides(guides);
+            setPreviewMessage(message);
+          }}
         />
-        <OverlayLayer scene={scene} />
+        <OverlayLayer scene={displayScene} />
       </Stage>
+      {previewMessage || previewGuides.length ? (
+        <p className="planner-plan-canvas__drag-status" role="status" aria-live="polite">
+          {previewMessage ?? "Ausrichtung eingerastet"}
+        </p>
+      ) : null}
     </form>
   );
 }

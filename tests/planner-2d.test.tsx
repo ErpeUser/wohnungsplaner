@@ -145,6 +145,7 @@ describe("PlanCanvas", () => {
         onMove={vi.fn()}
         onResize={vi.fn()}
         onRotate={vi.fn()}
+        onToggleDoor={vi.fn()}
       />,
     );
 

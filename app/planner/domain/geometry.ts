@@ -63,12 +63,13 @@ export function roomContainsPlacement(
 ): boolean {
   const room = deriveRoomPolygon(document, roomId);
   const footprint = placementPolygon(placement);
-  const samples = [
-    ...footprint,
-    placement.position,
-    ...footprint.map((point, index) => midpoint(point, footprint[(index + 1) % footprint.length])),
-  ];
-  return samples.every((point) => pointInPolygon(point, room));
+  if (!footprint.every((point) => pointInPolygon(point, room))) return false;
+  return !footprint.some((start, index) => {
+    const end = footprint[(index + 1) % footprint.length];
+    return room.some((roomStart, roomIndex) => (
+      segmentsProperlyIntersect(start, end, roomStart, room[(roomIndex + 1) % room.length])
+    ));
+  });
 }
 
 export function doorSweepPolygon(document: PlannerDocumentV3, openingId: string): Point2[] {
@@ -152,6 +153,18 @@ function segmentsIntersect(a: Point2, b: Point2, c: Point2, d: Point2) {
   return (values[0] > 0) !== (values[1] > 0) && (values[2] > 0) !== (values[3] > 0);
 }
 
+function segmentsProperlyIntersect(a: Point2, b: Point2, c: Point2, d: Point2) {
+  const ab = { x: b.x - a.x, z: b.z - a.z };
+  const cd = { x: d.x - c.x, z: d.z - c.z };
+  const denominator = ab.x * cd.z - ab.z * cd.x;
+  if (Math.abs(denominator) <= GEOMETRY_EPSILON) return false;
+  const ac = { x: c.x - a.x, z: c.z - a.z };
+  const t = (ac.x * cd.z - ac.z * cd.x) / denominator;
+  const u = (ac.x * ab.z - ac.z * ab.x) / denominator;
+  return t > GEOMETRY_EPSILON && t < 1 - GEOMETRY_EPSILON
+    && u > GEOMETRY_EPSILON && u < 1 - GEOMETRY_EPSILON;
+}
+
 function unitVector(start: Point2, end: Point2) {
   const length = Math.hypot(end.x - start.x, end.z - start.z);
   if (length <= GEOMETRY_EPSILON) throw new Error("Cannot derive a direction from a zero-length segment");
@@ -160,10 +173,6 @@ function unitVector(start: Point2, end: Point2) {
 
 function addScaled(point: Point2, vector: Point2, scale: number): Point2 {
   return { x: normalize(point.x + vector.x * scale), z: normalize(point.z + vector.z * scale) };
-}
-
-function midpoint(left: Point2, right: Point2): Point2 {
-  return { x: (left.x + right.x) / 2, z: (left.z + right.z) / 2 };
 }
 
 function normalize(value: number) {

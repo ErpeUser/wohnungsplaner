@@ -73,6 +73,21 @@ describe("ExportDialog", () => {
     assert.ok(screen.getByRole("img", { name: "Grundriss für den PDF-Plan" }));
   });
 
+  test("offers the untouched migration source as a separate recovery download", async () => {
+    const user = userEvent.setup();
+    const download = vi.fn();
+    const source = '{"zimmer1":[{"type":"legacy"}]}';
+    const repo = repository();
+    repo.getMigrationBackup = () => source;
+    render(
+      <ExportDialog open document={DEFAULT_APARTMENT_DOCUMENT} scene={scene} stage={null} repository={repo}
+        onImport={vi.fn()} onClose={vi.fn()} onDownload={download} />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Legacy-Sicherung herunterladen" }));
+    expect(download).toHaveBeenCalledWith("wohnung-legacy-sicherung.json", source);
+  });
+
   test("previews imports with warnings and requires an explicit replacement", async () => {
     const user = userEvent.setup();
     const onImport = vi.fn();
@@ -137,6 +152,7 @@ function repository(preview = importPreview()): PlannerRepository {
     load: () => preview,
     save: (document) => document,
     restoreBackup: () => null,
+    getMigrationBackup: () => null,
     previewImport: vi.fn(() => preview),
     commitImport: vi.fn(() => preview.document),
   };

@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import type { PlannerDocumentV3, PlannerWall, Point2, WallRef } from "./types.ts";
+import { roomContainsPlacement } from "./geometry.ts";
 
 const FINITE_MESSAGE = "Value must be finite";
 const EPSILON = 0.001;
@@ -167,7 +168,7 @@ const plannerDocumentSchema = z
         addIssue(context, ["openings"], `Opening ${opening.id} references an unknown wall`);
         continue;
       }
-      if (opening.offset + opening.width > distance(wall.start, wall.end) + EPSILON) {
+      if (!wallChainSupportsOpening(document.walls, wall, opening.offset, opening.width)) {
         addIssue(context, ["openings"], `Opening ${opening.id} extends outside its wall`);
       }
     }
@@ -178,6 +179,12 @@ const plannerDocumentSchema = z
       }
       if ("wallId" in item && item.wallId && !wallById.has(item.wallId)) {
         addIssue(context, [], `${item.id} references unknown wall ${item.wallId}`);
+      }
+    }
+
+    for (const placement of document.placements) {
+      if (roomIds.has(placement.roomId) && !roomContainsPlacement(document, placement.roomId, placement)) {
+        addIssue(context, ["placements"], `Placement ${placement.id} must be fully inside room ${placement.roomId}`);
       }
     }
 
@@ -255,6 +262,32 @@ function pointsEqual(left: Point2, right: Point2) {
 
 function distance(left: Point2, right: Point2) {
   return Math.hypot(right.x - left.x, right.z - left.z);
+}
+
+function wallChainSupportsOpening(walls: PlannerWall[], base: PlannerWall, offset: number, width: number) {
+  const length = distance(base.start, base.end);
+  const tangent = { x: (base.end.x - base.start.x) / length, z: (base.end.z - base.start.z) / length };
+  const intervals = walls
+    .filter((wall) => wall.roomIds.some((roomId) => base.roomIds.includes(roomId)))
+    .filter((wall) => [wall.start, wall.end].every((point) => {
+      const cross = (point.x - base.start.x) * tangent.z - (point.z - base.start.z) * tangent.x;
+      return Math.abs(cross) <= EPSILON;
+    }))
+    .map((wall) => {
+      const values = [wall.start, wall.end].map((point) => (
+        (point.x - base.start.x) * tangent.x + (point.z - base.start.z) * tangent.z
+      ));
+      return { start: Math.min(...values), end: Math.max(...values) };
+    })
+    .sort((left, right) => left.start - right.start);
+  let covered = offset;
+  const required = offset + width;
+  for (const interval of intervals) {
+    if (interval.start > covered + EPSILON) break;
+    if (interval.end >= covered - EPSILON) covered = Math.max(covered, interval.end);
+    if (covered >= required - EPSILON) return true;
+  }
+  return false;
 }
 
 function addIssue(context: z.RefinementCtx, path: PropertyKey[], message: string) {

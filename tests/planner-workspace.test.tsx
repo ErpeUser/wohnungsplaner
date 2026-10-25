@@ -130,6 +130,34 @@ describe("PlannerWorkspace", () => {
     assert.ok(screen.getByRole("spinbutton", { name: "Drehung in Grad" }));
   });
 
+  test("selects plan objects and toggles doors with keyboard-accessible controls", async () => {
+    const user = userEvent.setup();
+    const store = createPlannerStore({ initialDocument: DEFAULT_APARTMENT_DOCUMENT });
+    render(<PlannerWorkspace store={store} />);
+
+    await user.selectOptions(screen.getByRole("combobox", { name: "Planobjekt auswählen" }), "zimmer1-chair");
+    assert.equal(store.getState().selectionId, "zimmer1-chair");
+
+    const door = DEFAULT_APARTMENT_DOCUMENT.openings.find((opening) => opening.id === "zimmer1-door")!;
+    await user.click(screen.getByRole("button", { name: `${door.label} öffnen` }));
+    assert.equal(store.getState().document.doorStates[door.id], "open");
+    assert.ok(screen.getByRole("button", { name: `${door.label} schließen` }));
+  });
+
+  test("supports standard undo and redo keyboard shortcuts", async () => {
+    const user = userEvent.setup();
+    const store = createPlannerStore({ initialDocument: DEFAULT_APARTMENT_DOCUMENT });
+    render(<PlannerWorkspace store={store} />);
+    act(() => store.getState().dispatch({
+      type: "setSurfaceMaterial", roomId: "zimmer1", surface: "floor", materialId: "shortcut-test",
+    }));
+
+    await user.keyboard("{Control>}z{/Control}");
+    assert.notEqual(store.getState().document.rooms.find((room) => room.id === "zimmer1")?.surfaces.floor, "shortcut-test");
+    await user.keyboard("{Control>}y{/Control}");
+    assert.equal(store.getState().document.rooms.find((room) => room.id === "zimmer1")?.surfaces.floor, "shortcut-test");
+  });
+
   test("defines a readable compact layout below 1024 pixels", async () => {
     const originalMatchMedia = window.matchMedia;
     Object.defineProperty(window, "matchMedia", {

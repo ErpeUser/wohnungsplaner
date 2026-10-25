@@ -94,12 +94,15 @@ function OpeningShape({ opening }: { opening: PlanOpeningDescriptor }) {
 
   const hinge = opening.hinge === "end" ? opening.end : opening.start;
   const leafEnd = opening.hinge === "end" ? opening.start : opening.end;
+  const displayedLeafEnd = opening.state === "open"
+    ? rotateAround(leafEnd, hinge, (opening.hinge === "end" ? -1 : 1) * opening.swingDegrees)
+    : leafEnd;
   const baseAngle = Math.atan2(leafEnd.z - hinge.z, leafEnd.x - hinge.x) * 180 / Math.PI;
   const arcRotation = opening.hinge === "end" ? baseAngle - opening.swingDegrees : baseAngle;
   return (
     <Group>
       <Line points={common} stroke="#f7f5ef" strokeWidth={0.17} />
-      <Line points={[hinge.x, hinge.z, leafEnd.x, leafEnd.z]} stroke="#536568" strokeWidth={0.035} />
+      <Line points={[hinge.x, hinge.z, displayedLeafEnd.x, displayedLeafEnd.z]} stroke="#536568" strokeWidth={0.035} />
       <Arc
         x={hinge.x}
         y={hinge.z}
@@ -113,6 +116,16 @@ function OpeningShape({ opening }: { opening: PlanOpeningDescriptor }) {
       />
     </Group>
   );
+}
+
+function rotateAround(point: { x: number; z: number }, origin: { x: number; z: number }, degrees: number) {
+  const radians = degrees * Math.PI / 180;
+  const x = point.x - origin.x;
+  const z = point.z - origin.z;
+  return {
+    x: origin.x + x * Math.cos(radians) - z * Math.sin(radians),
+    z: origin.z + x * Math.sin(radians) + z * Math.cos(radians),
+  };
 }
 
 function flatten(points: Array<{ x: number; z: number }>) {

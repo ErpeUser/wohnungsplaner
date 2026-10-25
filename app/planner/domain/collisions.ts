@@ -6,6 +6,7 @@ import {
   polygonsIntersect,
   roomContainsPlacement,
 } from "./geometry.ts";
+import { deriveRoomPolygon } from "./wall-graph.ts";
 
 export type CollisionHit = {
   kind: "room-boundary" | "built-in" | "placement" | "door-sweep" | "door-passage";
@@ -56,11 +57,12 @@ export function inspectPlacement(
     }
   }
 
-  const roomWallIds = new Set(
-    document.rooms.find((room) => room.id === placement.roomId)?.boundary.map((reference) => reference.wallId) ?? [],
-  );
+  const roomPolygon = deriveRoomPolygon(document, placement.roomId);
   const doors = document.openings.filter(
-    (opening) => opening.kind === "door" && roomWallIds.has(opening.wallId),
+    (opening) => opening.kind === "door" && (
+      document.walls.find((wall) => wall.id === opening.wallId)?.roomIds.includes(placement.roomId)
+      || polygonsIntersect(doorPassagePolygon(document, opening.id), roomPolygon)
+    ),
   );
   for (const door of doors) {
     if (polygonsIntersect(footprint, doorSweepPolygon(document, door.id))) {

@@ -7,6 +7,8 @@ import { Circle, Group, Layer, Line, Rect, Text, Transformer } from "react-konva
 import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
 import type { CommandResult } from "../domain/commands.ts";
 import type { PlannerDocumentV3, PlannerPlacement, Point2 } from "../domain/types.ts";
+import type { SnapGuide } from "../domain/snapping.ts";
+import { previewPlacementMove } from "./use-plan-interactions.ts";
 
 type FurnitureLayerProps = {
   document: PlannerDocumentV3;
@@ -16,6 +18,7 @@ type FurnitureLayerProps = {
   onMove(id: string, position: Point2, options?: { disableGrid?: boolean }): CommandResult | null;
   onResize(id: string, scaleX: number, scaleZ: number): CommandResult | null;
   onRotate(id: string, rotation: number, freeRotation?: boolean): CommandResult | null;
+  onPreview?(guides: SnapGuide[], message: string | null): void;
 };
 
 export function FurnitureLayer(props: FurnitureLayerProps) {
@@ -28,11 +31,13 @@ export function FurnitureLayer(props: FurnitureLayerProps) {
         <FurnitureItem
           key={placement.id}
           placement={placement}
+          document={props.document}
           selected={placement.id === props.selectionId}
           onSelect={props.onSelect}
           onMove={props.onMove}
           onResize={props.onResize}
           onRotate={props.onRotate}
+          onPreview={props.onPreview}
         />
       ))}
     </Layer>
@@ -41,21 +46,26 @@ export function FurnitureLayer(props: FurnitureLayerProps) {
 
 function FurnitureItem({
   placement,
+  document,
   selected,
   onSelect,
   onMove,
   onResize,
   onRotate,
+  onPreview,
 }: {
   placement: PlannerPlacement;
+  document: PlannerDocumentV3;
   selected: boolean;
   onSelect: FurnitureLayerProps["onSelect"];
   onMove: FurnitureLayerProps["onMove"];
   onResize: FurnitureLayerProps["onResize"];
   onRotate: FurnitureLayerProps["onRotate"];
+  onPreview: FurnitureLayerProps["onPreview"];
 }) {
   const groupRef = useRef<Konva.Group>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
+  const cancelledRef = useRef(false);
   const item = getFurnitureCatalogItem(placement.catalogId);
   const materialId = placement.materialVariants?.main;
   const fill = item?.materials.find((material) => material.id === materialId)?.color ?? "#b78d68";
@@ -68,6 +78,25 @@ function FurnitureItem({
     transformer.getLayer()?.batchDraw();
   }, [selected]);
 
+  useEffect(() => {
+    if (!selected) return;
+    const cancelInteraction = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      const group = groupRef.current;
+      if (!group || (!group.isDragging() && !transformerRef.current?.isTransforming())) return;
+      cancelledRef.current = true;
+      group.stopDrag();
+      transformerRef.current?.stopTransform();
+      group.position({ x: placement.position.x, y: placement.position.z });
+      group.scale({ x: 1, y: 1 });
+      group.rotation(placement.rotation);
+      group.getLayer()?.batchDraw();
+      onPreview?.([], null);
+    };
+    window.addEventListener("keydown", cancelInteraction);
+    return () => window.removeEventListener("keydown", cancelInteraction);
+  }, [onPreview, placement.position.x, placement.position.z, placement.rotation, selected]);
+
   const finishTransform = (event: Konva.KonvaEventObject<Event>) => {
     const node = event.target;
     const scaleX = node.scaleX();
@@ -77,6 +106,10 @@ function FurnitureItem({
     node.scale({ x: 1, y: 1 });
     node.position({ x: placement.position.x, y: placement.position.z });
     node.rotation(placement.rotation);
+    if (cancelledRef.current) {
+      cancelledRef.current = false;
+      return;
+    }
     if (Math.abs(scaleX - 1) > 0.01 || Math.abs(scaleZ - 1) > 0.01) {
       onResize(placement.id, scaleX, scaleZ);
     } else if (rotationChanged) {
@@ -105,10 +138,28 @@ function FurnitureItem({
         }}
         onDragStart={(event) => {
           event.cancelBubble = true;
+          cancelledRef.current = false;
           onSelect(placement.id);
+        }}
+        onDragMove={(event) => {
+          const preview = previewPlacementMove(
+            document,
+            placement,
+            { x: event.target.x(), z: event.target.y() },
+            { disableGrid: event.evt instanceof MouseEvent && event.evt.altKey },
+          );
+          event.target.position({ x: preview.position.x, y: preview.position.z });
+          const hit = preview.report.hard[0] ?? preview.report.warnings[0];
+          onPreview?.(preview.guides, hit?.message ?? null);
         }}
         onDragEnd={(event) => {
           event.cancelBubble = true;
+          onPreview?.([], null);
+          if (cancelledRef.current) {
+            cancelledRef.current = false;
+            event.target.position({ x: placement.position.x, y: placement.position.z });
+            return;
+          }
           const result = onMove(
             placement.id,
             { x: event.target.x(), z: event.target.y() },
@@ -116,6 +167,7 @@ function FurnitureItem({
           );
           if (result?.error) event.target.position({ x: placement.position.x, y: placement.position.z });
         }}
+        onTransformStart={() => { cancelledRef.current = false; }}
         onTransformEnd={finishTransform}
       >
         <FurnitureSymbol placement={placement} fill={fill} symbol={item?.symbol ?? "storage"} />

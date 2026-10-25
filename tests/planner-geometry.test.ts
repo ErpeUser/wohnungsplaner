@@ -13,6 +13,7 @@ import { inspectPlacement } from "../app/planner/domain/collisions.ts";
 import { snapPlacement } from "../app/planner/domain/snapping.ts";
 import { DEFAULT_APARTMENT_DOCUMENT } from "../app/planner/domain/apartment-v3.ts";
 import type { PlannerDocumentV3, PlannerPlacement } from "../app/planner/domain/types.ts";
+import { buildWallGraph } from "../app/planner/domain/wall-graph.ts";
 
 test("builds the footprint of a rotated rectangular placement", () => {
   const polygon = placementPolygon(placement({ x: 0, z: 0 }, 2, 1, 90));
@@ -33,6 +34,31 @@ test("requires a transferred placement to fit completely inside the target room"
 
   assert.equal(roomContainsPlacement(DEFAULT_APARTMENT_DOCUMENT, "zimmer2", inside), true);
   assert.equal(roomContainsPlacement(DEFAULT_APARTMENT_DOCUMENT, "zimmer2", crossing), false);
+});
+
+test("rejects a footprint whose edge crosses a concave room notch", () => {
+  const document = concaveRoomDocument();
+  const crossing = placement({ x: 2, z: 2 }, 3, 1, 0, "concave");
+
+  assert.equal(roomContainsPlacement(document, "concave", crossing), false);
+});
+
+test("splits partially overlapping room edges into canonical shared wall segments", () => {
+  const graph = buildWallGraph([
+    roomOutline("left", [{ x: 0, z: 0 }, { x: 3, z: 0 }, { x: 3, z: 4 }, { x: 0, z: 4 }]),
+    roomOutline("right", [{ x: 3, z: 1 }, { x: 5, z: 1 }, { x: 5, z: 3 }, { x: 3, z: 3 }]),
+  ]);
+
+  const shared = graph.walls.filter((wall) => wall.roomIds.includes("left") && wall.roomIds.includes("right"));
+  assert.equal(shared.length, 1);
+  assert.deepEqual([shared[0].start, shared[0].end], [{ x: 3, z: 1 }, { x: 3, z: 3 }]);
+  assert.equal(graph.rooms.find((room) => room.id === "left")?.boundary.length, 6);
+});
+
+test("checks a shared doorway from the room on either side", () => {
+  const document = adjacentRoomsDocument();
+  const report = inspectPlacement(document, placement({ x: 1.75, z: 2 }, 0.2, 0.2, 0, "left"));
+  assert.ok(report.hard.some((hit) => hit.kind === "door-sweep"));
 });
 
 test("adds five centimetres to the 90 degree door sweep", () => {
@@ -177,5 +203,41 @@ function squareRoomDocument(): PlannerDocumentV3 {
       activeRoomId: "room-square",
       overlays: { dimensions: false, fixtures: false, evidence: false },
     },
+  };
+}
+
+function roomOutline(id: string, outline: Array<{ x: number; z: number }>) {
+  return {
+    id,
+    name: id,
+    area: 10,
+    includedInWnf: true,
+    surfaces: { floor: "oak", walls: "white", ceiling: "white" },
+    outline,
+  };
+}
+
+function concaveRoomDocument(): PlannerDocumentV3 {
+  const graph = buildWallGraph([roomOutline("concave", [
+    { x: 0, z: 0 }, { x: 4, z: 0 }, { x: 4, z: 4 },
+    { x: 2.5, z: 4 }, { x: 2.5, z: 1.5 }, { x: 1.5, z: 1.5 },
+    { x: 1.5, z: 4 }, { x: 0, z: 4 },
+  ])]);
+  return { ...squareRoomDocument(), walls: graph.walls, rooms: graph.rooms, openings: [], builtIns: [], fixtures: [], doorStates: {}, viewPreferences: { ...squareRoomDocument().viewPreferences, activeRoomId: "concave" } };
+}
+
+function adjacentRoomsDocument(): PlannerDocumentV3 {
+  const graph = buildWallGraph([
+    roomOutline("left", [{ x: 0, z: 0 }, { x: 2, z: 0 }, { x: 2, z: 4 }, { x: 0, z: 4 }]),
+    roomOutline("right", [{ x: 2, z: 0 }, { x: 4, z: 0 }, { x: 4, z: 4 }, { x: 2, z: 4 }]),
+  ]);
+  const shared = graph.walls.find((wall) => wall.roomIds.length === 2)!;
+  return {
+    ...squareRoomDocument(),
+    walls: graph.walls,
+    rooms: graph.rooms,
+    openings: [{ id: "shared-door", label: "Shared", wallId: shared.id, offset: 1.6, width: 0.8, height: 2.05, sill: 0, kind: "door", hinge: "start", swingDegrees: 90 }],
+    builtIns: [], fixtures: [], doorStates: { "shared-door": "closed" },
+    viewPreferences: { ...squareRoomDocument().viewPreferences, activeRoomId: "right" },
   };
 }

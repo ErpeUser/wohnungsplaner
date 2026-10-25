@@ -5,7 +5,7 @@ import { useEffect, useMemo } from "react";
 import { getFurnitureCatalogItem, type FurnitureCatalogItem } from "../catalog/catalog.ts";
 import { inspectPlacement } from "../domain/collisions.ts";
 import type { CommandResult, PlannerCommand } from "../domain/commands.ts";
-import { roomAtPoint } from "../domain/geometry.ts";
+import { placementPolygon, roomAtPoint } from "../domain/geometry.ts";
 import { snapPlacement, type SnapGuide } from "../domain/snapping.ts";
 import type { PlannerDocumentV3, PlannerPlacement, Point2, Size3 } from "../domain/types.ts";
 import { deriveRoomPolygon } from "../domain/wall-graph.ts";
@@ -41,10 +41,21 @@ export function resolvePlacementMove(
   position: Point2,
   options: PlanInteractionOptions = {},
 ): { position: Point2; guides: SnapGuide[]; command: PlannerCommand } {
+  const preview = previewPlacementMove(document, placement, position, options);
+  return { position: preview.position, guides: preview.guides, command: preview.command };
+}
+
+export function previewPlacementMove(
+  document: PlannerDocumentV3,
+  placement: PlannerPlacement,
+  position: Point2,
+  options: PlanInteractionOptions = {},
+) {
   const snapped = snapPlacement({
     position,
     size: placement.size,
     rotation: placement.rotation,
+    guides: createPlacementGuides(document, placement),
     disableGrid: options.disableGrid,
     gridSize: GRID_SIZE,
   });
@@ -52,7 +63,38 @@ export function resolvePlacementMove(
   const command: PlannerCommand = roomId === placement.roomId
     ? { type: "movePlacement", placementId: placement.id, position: snapped.position }
     : { type: "transferPlacement", placementId: placement.id, roomId, position: snapped.position };
-  return { ...snapped, command };
+  const candidate = { ...placement, roomId, position: snapped.position };
+  return { ...snapped, command, report: inspectPlacement(document, candidate) };
+}
+
+export function createPlacementGuides(document: PlannerDocumentV3, placement: PlannerPlacement): SnapGuide[] {
+  const guides: SnapGuide[] = [];
+  for (const wall of document.walls.filter((candidate) => candidate.roomIds.includes(placement.roomId))) {
+    if (Math.abs(wall.start.x - wall.end.x) <= 0.001) {
+      guides.push({ axis: "x", value: wall.start.x, kind: "wall", sourceId: wall.id });
+    }
+    if (Math.abs(wall.start.z - wall.end.z) <= 0.001) {
+      guides.push({ axis: "z", value: wall.start.z, kind: "wall", sourceId: wall.id });
+    }
+  }
+  const objects = [
+    ...document.builtIns.filter((item) => item.roomId === placement.roomId),
+    ...document.placements.filter((item) => item.roomId === placement.roomId && item.id !== placement.id),
+  ];
+  for (const object of objects) {
+    const points = placementPolygon(object);
+    for (const axis of ["x", "z"] as const) {
+      const values = points.map((point) => point[axis]);
+      const minimum = Math.min(...values);
+      const maximum = Math.max(...values);
+      for (const value of [minimum, (minimum + maximum) / 2, maximum]) {
+        guides.push({ axis, value: normalize(value), kind: "object", sourceId: object.id });
+      }
+    }
+  }
+  return guides.filter((guide, index) => guides.findIndex((candidate) => (
+    candidate.axis === guide.axis && candidate.kind === guide.kind && candidate.value === guide.value
+  )) === index);
 }
 
 export function nudgePlacement(placement: PlannerPlacement, key: string, largeStep: boolean): Point2 {

@@ -40,6 +40,7 @@ export function ExportDialog({
   const [preview, setPreview] = useState<PlannerImportPreview | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const printModel = useMemo(() => createPrintModel(document, scene), [document, scene]);
+  const migrationBackup = repository.getMigrationBackup();
 
   useEffect(() => {
     if (!open) return;
@@ -130,6 +131,16 @@ export function ExportDialog({
                 <strong>PDF-Plan</strong>
                 <span>Kompaktes Druckblatt mit Plan und Listen</span>
               </button>
+              {migrationBackup ? (
+                <button
+                  type="button"
+                  aria-label="Legacy-Sicherung herunterladen"
+                  onClick={() => onDownload("wohnung-legacy-sicherung.json", migrationBackup)}
+                >
+                  <strong>Legacy-Sicherung</strong>
+                  <span>Unveränderte Quelldaten vor der Migration</span>
+                </button>
+              ) : null}
             </div>
           </section>
 

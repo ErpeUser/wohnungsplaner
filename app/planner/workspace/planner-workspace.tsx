@@ -60,6 +60,24 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
   }, [providedStore, store]);
 
   useEffect(() => {
+    const onHistoryShortcut = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target?.closest("input, select, textarea, [contenteditable='true']")) return;
+      if (!(event.ctrlKey || event.metaKey)) return;
+      const key = event.key.toLowerCase();
+      if (key === "z" && !event.shiftKey) {
+        event.preventDefault();
+        store.getState().undo();
+      } else if (key === "y" || (key === "z" && event.shiftKey)) {
+        event.preventDefault();
+        store.getState().redo();
+      }
+    };
+    window.addEventListener("keydown", onHistoryShortcut);
+    return () => window.removeEventListener("keydown", onHistoryShortcut);
+  }, [store]);
+
+  useEffect(() => {
     if (!detailsOpen) return;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
@@ -137,6 +155,7 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
                 onMove={interactions.movePlacement}
                 onResize={interactions.resizePlacement}
                 onRotate={interactions.rotatePlacement}
+                onToggleDoor={(openingId) => state.dispatch({ type: "toggleDoor", openingId })}
                 onStageChange={setPlanStage}
               />
             ) : (
