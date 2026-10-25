@@ -138,6 +138,7 @@ function InteractivePlanStage({
   return (
     <form
       id="planner-fit-view"
+      noValidate
       onSubmit={(event) => {
         event.preventDefault();
         setViewport(fitPlanViewport(scene, size));

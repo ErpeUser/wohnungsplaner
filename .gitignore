@@ -43,3 +43,11 @@ next-env.d.ts
 
 # private, local-only room sources
 /local-sources/
+
+# local QA output and recoverable legacy archive
+/legacy-archive/
+/.runtime/
+/tmp/
+/output/
+*.log
+tsconfig.tsbuildinfo

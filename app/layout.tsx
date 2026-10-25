@@ -14,11 +14,11 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(baseUrl),
     title: "Raumplaner · Wohnung",
-    description: "Interaktive 2D- und 3D-Möblierungsplanung für Zimmer 1 und Vorraum.",
+    description: "Maßhaltige 2D- und 3D-Raumplanung für die gesamte Wohnung.",
     icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
     openGraph: {
       title: "Raumplaner · Wohnung",
-      description: "Zimmer 1 und Vorraum in 2D und 3D möblieren.",
+      description: "Die gesamte Wohnung in 2D und 3D planen.",
     },
   };
 }
