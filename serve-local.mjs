@@ -18,6 +18,8 @@ const contentTypes = {
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
   ".webp": "image/webp",
+  ".glb": "model/gltf-binary",
+  ".hdr": "application/octet-stream",
   ".woff2": "font/woff2",
 };
 
@@ -45,7 +47,7 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(200, { "Content-Type": contentTypes[path.extname(file)] || "application/octet-stream", "Cache-Control": "no-cache" });
       return res.end(data);
     }
-    if (url.pathname.startsWith("/room-studies/") || url.pathname.startsWith("/zimmer1-") || url.pathname.startsWith("/vorraum-") || url.pathname === "/og-v2.png" || url.pathname === "/og.png" || url.pathname === "/favicon.svg") {
+    if (url.pathname.startsWith("/planner-assets/") || url.pathname.startsWith("/room-studies/") || url.pathname.startsWith("/zimmer1-") || url.pathname.startsWith("/vorraum-") || url.pathname === "/og-v2.png" || url.pathname === "/og.png" || url.pathname === "/favicon.svg") {
       const file = safePublicPath(url.pathname);
       if (!file) return res.writeHead(400).end("Bad public path");
       const data = await fs.readFile(file);

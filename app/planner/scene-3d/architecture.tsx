@@ -5,7 +5,7 @@ import { BoxGeometry, DoubleSide, Shape } from "three";
 
 import { getPlannerMaterial } from "./materials.ts";
 import type { SceneFloor, SceneModel, SceneObject } from "./scene-model.ts";
-import type { PlannerBuiltIn, PlannerPlacement } from "../domain/types.ts";
+import type { PlannerBuiltIn } from "../domain/types.ts";
 
 const SHARED_BOX = new BoxGeometry(1, 1, 1);
 
@@ -57,9 +57,6 @@ export function PlannerArchitecture({
       {scene.builtIns.map((item) => (
         <ObjectBox key={item.id} item={item} selected={selectionId === item.id} onSelect={onSelect} />
       ))}
-      {scene.placements.map((item) => (
-        <ObjectBox key={item.id} item={item} selected={selectionId === item.id} onSelect={onSelect} />
-      ))}
     </group>
   );
 }
@@ -87,7 +84,7 @@ function ObjectBox({
   selected,
   onSelect,
 }: {
-  item: SceneObject<PlannerBuiltIn | PlannerPlacement>;
+  item: SceneObject<PlannerBuiltIn>;
   selected: boolean;
   onSelect(id: string | null): void;
 }) {

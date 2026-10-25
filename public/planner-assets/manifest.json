@@ -1,0 +1,172 @@
+{
+  "version": 1,
+  "generatedBy": "scripts/generate-planner-assets.mjs",
+  "units": "metres",
+  "assets": [
+    {
+      "id": "model-sofa",
+      "type": "model",
+      "path": "/planner-assets/models/sofa.glb",
+      "mediaType": "model/gltf-binary",
+      "license": {
+        "spdx": "MIT",
+        "sourceUrl": "https://github.com/mrdoob/three.js/blob/dev/LICENSE",
+        "note": "Project-authored normalized geometry generated with Three.js primitives."
+      },
+      "sha256": "9c206ee049c720ddb79e35ec42892e75b1c33e3ad395c6e9b7b11436a7879502",
+      "byteLength": 18884,
+      "meterScale": 1,
+      "catalogIds": [
+        "sofa-3seat"
+      ]
+    },
+    {
+      "id": "model-chair",
+      "type": "model",
+      "path": "/planner-assets/models/chair.glb",
+      "mediaType": "model/gltf-binary",
+      "license": {
+        "spdx": "MIT",
+        "sourceUrl": "https://github.com/mrdoob/three.js/blob/dev/LICENSE",
+        "note": "Project-authored normalized geometry generated with Three.js primitives."
+      },
+      "sha256": "a32c83e07ca028233cfd167659eb53d65ad0a018a1e0ba399a2cd3d45306f2df",
+      "byteLength": 21728,
+      "meterScale": 1,
+      "catalogIds": [
+        "chair-dining",
+        "chair-office"
+      ]
+    },
+    {
+      "id": "model-bed",
+      "type": "model",
+      "path": "/planner-assets/models/bed.glb",
+      "mediaType": "model/gltf-binary",
+      "license": {
+        "spdx": "MIT",
+        "sourceUrl": "https://github.com/mrdoob/three.js/blob/dev/LICENSE",
+        "note": "Project-authored normalized geometry generated with Three.js primitives."
+      },
+      "sha256": "8866e9d5be6694af1dedf1ecd2b618b6c09bd58d02b0db6017346701e551c56a",
+      "byteLength": 15772,
+      "meterScale": 1,
+      "catalogIds": [
+        "bed-120",
+        "bed-160"
+      ]
+    },
+    {
+      "id": "model-table",
+      "type": "model",
+      "path": "/planner-assets/models/table.glb",
+      "mediaType": "model/gltf-binary",
+      "license": {
+        "spdx": "MIT",
+        "sourceUrl": "https://github.com/mrdoob/three.js/blob/dev/LICENSE",
+        "note": "Project-authored normalized geometry generated with Three.js primitives."
+      },
+      "sha256": "c6f2e535f260994e30539f952f97d9f942ca3d2af91d28c89e695b8a1a48e8fd",
+      "byteLength": 11044,
+      "meterScale": 1,
+      "catalogIds": [
+        "desk-standard",
+        "dining-table"
+      ]
+    },
+    {
+      "id": "model-storage",
+      "type": "model",
+      "path": "/planner-assets/models/storage.glb",
+      "mediaType": "model/gltf-binary",
+      "license": {
+        "spdx": "MIT",
+        "sourceUrl": "https://github.com/mrdoob/three.js/blob/dev/LICENSE",
+        "note": "Project-authored normalized geometry generated with Three.js primitives."
+      },
+      "sha256": "b15b06890e0ed9efb665f171849d4e7b25c13f9bf51a667eb8e84c4ad94a1ad4",
+      "byteLength": 16908,
+      "meterScale": 1,
+      "catalogIds": [
+        "nightstand",
+        "wardrobe-200",
+        "dresser",
+        "shelf",
+        "lowboard"
+      ]
+    },
+    {
+      "id": "model-plant",
+      "type": "model",
+      "path": "/planner-assets/models/plant.glb",
+      "mediaType": "model/gltf-binary",
+      "license": {
+        "spdx": "MIT",
+        "sourceUrl": "https://github.com/mrdoob/three.js/blob/dev/LICENSE",
+        "note": "Project-authored normalized geometry generated with Three.js primitives."
+      },
+      "sha256": "bb8d23253c2fa79c84cdf2606b713ee9339b4c5c23a7abca6d0b45aa75e89273",
+      "byteLength": 39192,
+      "meterScale": 1,
+      "catalogIds": [
+        "plant-medium"
+      ]
+    },
+    {
+      "id": "texture-oak",
+      "type": "texture",
+      "path": "/planner-assets/textures/wood/oak.svg",
+      "mediaType": "image/svg+xml",
+      "license": {
+        "spdx": "CC0-1.0",
+        "sourceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "note": "Project-authored procedural asset released under CC0-1.0."
+      },
+      "sha256": "882286c7b2a709b514c4651ab5dce48cda3c6b4de7da42232d5ff7df56eb38c2",
+      "byteLength": 431,
+      "meterScale": 1
+    },
+    {
+      "id": "texture-fabric",
+      "type": "texture",
+      "path": "/planner-assets/textures/fabric/weave.svg",
+      "mediaType": "image/svg+xml",
+      "license": {
+        "spdx": "CC0-1.0",
+        "sourceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "note": "Project-authored procedural asset released under CC0-1.0."
+      },
+      "sha256": "f240fd659412fda98acd3834b752ecc5a49674c3320f966cc260ce86c06ca8b8",
+      "byteLength": 263,
+      "meterScale": 1
+    },
+    {
+      "id": "texture-rug",
+      "type": "texture",
+      "path": "/planner-assets/textures/fabric/rug.svg",
+      "mediaType": "image/svg+xml",
+      "license": {
+        "spdx": "CC0-1.0",
+        "sourceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "note": "Project-authored procedural asset released under CC0-1.0."
+      },
+      "sha256": "c0804d1d9345b105f2bdec1d1124e849e96ff616c99121000c87fad1ed8727c3",
+      "byteLength": 297,
+      "meterScale": 1
+    },
+    {
+      "id": "environment-studio",
+      "type": "environment",
+      "path": "/planner-assets/environment/studio-soft.hdr",
+      "mediaType": "application/octet-stream",
+      "license": {
+        "spdx": "CC0-1.0",
+        "sourceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "note": "Project-authored procedural asset released under CC0-1.0."
+      },
+      "sha256": "9de7c1e90f6f2d263a3bdeb0d0a86d9e700a929a6fd420d7adb8c0e39354b6d6",
+      "byteLength": 77,
+      "meterScale": 1
+    }
+  ]
+}

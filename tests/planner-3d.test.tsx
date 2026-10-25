@@ -111,4 +111,24 @@ describe("3D quality and resilience", () => {
     await user.click(screen.getByRole("button", { name: "Zu 2D" }));
     expect(onReturn2D).toHaveBeenCalledOnce();
   });
+
+  test("exposes a visible walk controller without changing planner data", () => {
+    const before = JSON.stringify(DEFAULT_APARTMENT_DOCUMENT);
+    render(
+      <Planner3D
+        document={DEFAULT_APARTMENT_DOCUMENT}
+        activeRoomId="wohnkueche"
+        selectionId={DEFAULT_APARTMENT_DOCUMENT.placements[0]?.id ?? null}
+        cameraMode="walk"
+        onSelect={vi.fn()}
+        onReturn2D={vi.fn()}
+        quality="low"
+        supportOverride={{ supported: true, webgl2: true }}
+      />,
+    );
+    assert.ok(screen.getByLabelText("Rundgangsteuerung"));
+    assert.ok(screen.getByRole("button", { name: "Vorwärts" }));
+    assert.ok(screen.getByRole("button", { name: "Start" }));
+    assert.equal(JSON.stringify(DEFAULT_APARTMENT_DOCUMENT), before);
+  });
 });

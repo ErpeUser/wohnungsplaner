@@ -141,6 +141,7 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
                     document={state.document}
                     activeRoomId={state.activeRoomId}
                     selectionId={state.selectionId}
+                    cameraMode={state.cameraMode}
                     onSelect={state.select}
                     onReturn2D={() => state.setViewMode("2d")}
                   />

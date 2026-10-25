@@ -1,6 +1,6 @@
 "use client";
 
-import { ContactShadows, Environment, Lightformer } from "@react-three/drei";
+import { ContactShadows, Environment } from "@react-three/drei";
 
 import type { QualitySettings } from "./quality.ts";
 import type { SceneModel } from "./scene-model.ts";
@@ -33,10 +33,11 @@ export function PlannerLighting({
         shadow-camera-bottom={-depth}
         shadow-bias={-0.0003}
       />
-      <Environment resolution={quality.effects ? 128 : 64} background={false} environmentIntensity={0.65}>
-        <Lightformer form="rect" intensity={3.2} color="#fff4e5" position={[0, 8, -5]} scale={[10, 10, 1]} />
-        <Lightformer form="ring" intensity={1.4} color="#d8e8ed" position={[-5, 4, 2]} scale={5} />
-      </Environment>
+      <Environment
+        files="/planner-assets/environment/studio-soft.hdr"
+        background={false}
+        environmentIntensity={0.72}
+      />
       {quality.effects ? (
         <ContactShadows
           position={[scene.center[0], 0.018, scene.center[2]]}

@@ -1,12 +1,13 @@
 "use client";
 
-import { OrbitControls } from "@react-three/drei";
 import { Canvas, type RootState } from "@react-three/fiber";
 import { Component, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 
 import type { PlannerDocumentV3 } from "../domain/types.ts";
 import { PlannerArchitecture } from "./architecture.tsx";
+import { CameraController, dispatchWalkCommand, type CameraMode } from "./camera-controller.tsx";
+import { Furniture3D } from "./furniture.tsx";
 import { PlannerLighting } from "./lighting.tsx";
 import {
   chooseQualityTier,
@@ -23,6 +24,7 @@ export type Planner3DProps = {
   selectionId: string | null;
   onSelect(id: string | null): void;
   onReturn2D(): void;
+  cameraMode?: CameraMode;
   quality?: QualityTier;
   supportOverride?: ThreeSupport;
 };
@@ -33,11 +35,13 @@ export function Planner3D({
   selectionId,
   onSelect,
   onReturn2D,
+  cameraMode = "orbit",
   quality: qualityOverride,
   supportOverride,
 }: Planner3DProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const [failure, setFailure] = useState<string | null>(null);
+  const reducedMotion = useReducedMotion();
   const support = useMemo(() => supportOverride ?? detectThreeSupport(), [supportOverride]);
   const tier = useMemo(() => qualityOverride ?? chooseQualityTier(), [qualityOverride]);
   const quality = useMemo(() => qualitySettings(tier), [tier]);
@@ -67,6 +71,7 @@ export function Planner3D({
   return (
     <div ref={hostRef} className="planner-3d" data-quality={tier}>
       <Canvas
+        id="planner-3d-canvas"
         frameloop="demand"
         dpr={quality.dpr}
         shadows={quality.shadows ? "soft" : false}
@@ -83,21 +88,55 @@ export function Planner3D({
         <Suspense fallback={null}>
           <PlannerLighting quality={quality} scene={scene} />
           <PlannerArchitecture scene={scene} selectionId={selectionId} onSelect={onSelect} />
+          <Furniture3D scene={scene} selectionId={selectionId} onSelect={onSelect} />
         </Suspense>
-        <OrbitControls
-          makeDefault
-          target={scene.center}
-          enableDamping
-          dampingFactor={0.08}
-          minDistance={1.4}
-          maxDistance={Math.max(16, span * 3.2)}
-          minPolarAngle={0.12}
-          maxPolarAngle={Math.PI / 2.02}
+        <CameraController
+          document={document}
+          scene={scene}
+          mode={cameraMode}
+          activeRoomId={activeRoomId}
+          reducedMotion={reducedMotion}
         />
       </Canvas>
+      <CameraOverlay mode={cameraMode} />
       <div className="planner-3d__quality" aria-hidden="true">3D · {tier === "high" ? "Hoch" : tier === "balanced" ? "Ausgewogen" : "Effizient"}</div>
     </div>
   );
+}
+
+function CameraOverlay({ mode }: { mode: CameraMode }) {
+  if (mode === "orbit") {
+    return (
+      <div className="planner-3d__camera planner-3d__camera--orbit">
+        <button type="button" onClick={() => dispatchWalkCommand("reset")}>Ansicht zurücksetzen</button>
+      </div>
+    );
+  }
+  return (
+    <div className="planner-3d__camera" aria-label="Rundgangsteuerung">
+      <span>Klicken zum Umsehen · WASD zum Gehen</span>
+      <div>
+        <button type="button" aria-label="Vorwärts" onClick={() => dispatchWalkCommand("forward")}>↑</button>
+        <button type="button" aria-label="Links" onClick={() => dispatchWalkCommand("left")}>←</button>
+        <button type="button" aria-label="Zurück" onClick={() => dispatchWalkCommand("back")}>↓</button>
+        <button type="button" aria-label="Rechts" onClick={() => dispatchWalkCommand("right")}>→</button>
+        <button type="button" onClick={() => dispatchWalkCommand("reset")}>Start</button>
+      </div>
+    </div>
+  );
+}
+
+function useReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    if (typeof window.matchMedia !== "function") return;
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReduced(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+  return reduced;
 }
 
 function configureRenderer({ gl }: RootState) {

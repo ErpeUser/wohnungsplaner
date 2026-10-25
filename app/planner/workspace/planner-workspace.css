@@ -510,6 +510,55 @@
   backdrop-filter: blur(8px);
 }
 
+.planner-3d__camera {
+  position: absolute;
+  left: 18px;
+  bottom: 16px;
+  display: grid;
+  gap: 7px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  color: #edf2ef;
+  background: rgba(21, 35, 37, 0.82);
+  box-shadow: 0 10px 28px rgba(17, 28, 30, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.planner-3d__camera span {
+  font-size: 9px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+
+.planner-3d__camera > div {
+  display: flex;
+  gap: 5px;
+}
+
+.planner-3d__camera button {
+  min-width: 31px;
+  height: 31px;
+  padding: 0 9px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 5px;
+  color: #f8f5ef;
+  background: rgba(255, 255, 255, 0.1);
+  font: 680 10px/1 var(--font-geist-sans), sans-serif;
+  cursor: pointer;
+}
+
+.planner-3d__camera button:hover,
+.planner-3d__camera button:focus-visible {
+  border-color: #e9b28c;
+  background: rgba(233, 178, 140, 0.18);
+  outline: none;
+}
+
+.planner-3d__camera--orbit {
+  padding: 7px;
+}
+
 .planner-3d-loading,
 .planner-3d-fallback {
   width: min(430px, calc(100% - 48px));

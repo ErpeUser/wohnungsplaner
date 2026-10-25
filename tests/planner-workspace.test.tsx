@@ -20,8 +20,8 @@ vi.mock("react-konva", () => ({
 vi.mock("konva", () => ({ default: { pixelRatio: 1 } }));
 
 vi.mock("../app/planner/scene-3d/planner-3d.tsx", () => ({
-  Planner3D: ({ onReturn2D }: { onReturn2D(): void }) => (
-    <div data-testid="mock-planner-3d"><button type="button" onClick={onReturn2D}>Zu 2D</button></div>
+  Planner3D: ({ onReturn2D, cameraMode }: { onReturn2D(): void; cameraMode: string }) => (
+    <div data-testid="mock-planner-3d" data-camera-mode={cameraMode}><button type="button" onClick={onReturn2D}>Zu 2D</button></div>
   ),
 }));
 
@@ -43,6 +43,10 @@ describe("PlannerWorkspace", () => {
     await user.click(threeD);
     assert.equal(threeD.getAttribute("aria-pressed"), "true");
     assert.equal(store.getState().viewMode, "3d");
+
+    await user.click(screen.getByRole("button", { name: "Begehen" }));
+    assert.equal(store.getState().cameraMode, "walk");
+    assert.equal(screen.getByTestId("mock-planner-3d").getAttribute("data-camera-mode"), "walk");
   });
 
   test("collapses panels and exposes truthful undo and redo states", async () => {
