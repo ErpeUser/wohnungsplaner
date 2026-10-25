@@ -56,10 +56,6 @@ export function PlanCanvas({
   const [doorControlId, setDoorControlId] = useState("");
   const controlledDoor = doors.find((door) => door.id === doorControlId) ?? doors[0];
   useEffect(() => {
-    if (controlledDoor && controlledDoor.id !== doorControlId) setDoorControlId(controlledDoor.id);
-    if (!controlledDoor && doorControlId) setDoorControlId("");
-  }, [controlledDoor, doorControlId]);
-  useEffect(() => {
     Konva.pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
     const container = containerRef.current;
     if (!container || typeof ResizeObserver === "undefined") return;

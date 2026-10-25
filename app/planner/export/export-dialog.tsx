@@ -41,6 +41,7 @@ export function ExportDialog({
   const [importError, setImportError] = useState<string | null>(null);
   const printModel = useMemo(() => createPrintModel(document, scene), [document, scene]);
   const migrationBackup = repository.getMigrationBackup();
+  const importSourceBackup = repository.getImportSourceBackup();
 
   useEffect(() => {
     if (!open) return;
@@ -139,6 +140,16 @@ export function ExportDialog({
                 >
                   <strong>Legacy-Sicherung</strong>
                   <span>Unveränderte Quelldaten vor der Migration</span>
+                </button>
+              ) : null}
+              {importSourceBackup ? (
+                <button
+                  type="button"
+                  aria-label="Import-Quelle herunterladen"
+                  onClick={() => onDownload("wohnung-import-quelle.json", importSourceBackup)}
+                >
+                  <strong>Import-Quelle</strong>
+                  <span>Unveränderte Quelldaten des letzten Legacy-Imports</span>
                 </button>
               ) : null}
             </div>

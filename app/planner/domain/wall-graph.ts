@@ -108,8 +108,9 @@ function collectSplitPoints(
       if (t > POINT_EPSILON && t < 1 - POINT_EPSILON) values.push(t);
     }
   }
-  return [...new Set(values.map((value) => normalize(value)))]
+  return values
     .sort((left, right) => left - right)
+    .filter((value, index, sorted) => index === 0 || Math.abs(value - sorted[index - 1]) > POINT_EPSILON)
     .map((value) => normalizePoint({ x: start.x + dx * value, z: start.z + dz * value }));
 }
 

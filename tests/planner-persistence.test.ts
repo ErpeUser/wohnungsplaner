@@ -5,6 +5,7 @@ import { DEFAULT_APARTMENT_DOCUMENT } from "../app/planner/domain/apartment-v3.t
 import {
   PLANNER_BACKUP_KEY,
   PLANNER_MIGRATION_BACKUP_KEY,
+  PLANNER_IMPORT_SOURCE_BACKUP_KEY,
   PLANNER_STORAGE_KEY,
   createLocalStoragePlannerRepository,
   type PlannerRepository,
@@ -69,7 +70,20 @@ test("preserves an imported legacy payload before committing its migration", () 
 
   repository.commitImport(repository.previewImport(legacy));
 
-  assert.deepEqual(JSON.parse(repository.getMigrationBackup()!), legacy);
+  assert.deepEqual(JSON.parse(repository.getImportSourceBackup()!), legacy);
+});
+
+test("preserves both a malformed current source and a separately imported legacy source", () => {
+  const malformedCurrent = "{kaputt";
+  const imported = { zimmer1: [{ id: "desk", type: "desk", x: 1, y: 1, w: 1, d: 0.6, h: 0.75, rotation: 0 }] };
+  const storage = new MemoryStorage({ [PLANNER_STORAGE_KEY]: malformedCurrent });
+  const repository = createLocalStoragePlannerRepository(storage, fixedClock);
+
+  repository.commitImport(repository.previewImport(imported));
+
+  assert.equal(repository.getMigrationBackup(), malformedCurrent);
+  assert.deepEqual(JSON.parse(repository.getImportSourceBackup()!), imported);
+  assert.equal(storage.getItem(PLANNER_IMPORT_SOURCE_BACKUP_KEY), repository.getImportSourceBackup());
 });
 
 test("backs up the last valid document before atomically overwriting it", () => {
@@ -217,6 +231,7 @@ function repositorySpy(saved: PlannerDocumentV3[], fail = false): PlannerReposit
     },
     restoreBackup: () => null,
     getMigrationBackup: () => null,
+    getImportSourceBackup: () => null,
     previewImport: () => ({
       document: DEFAULT_APARTMENT_DOCUMENT,
       warnings: [],

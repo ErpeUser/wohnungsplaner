@@ -88,6 +88,19 @@ describe("ExportDialog", () => {
     expect(download).toHaveBeenCalledWith("wohnung-legacy-sicherung.json", source);
   });
 
+  test("offers a separately preserved legacy import source", async () => {
+    const user = userEvent.setup();
+    const download = vi.fn();
+    const repo = repository();
+    repo.getImportSourceBackup = () => '{"import":"legacy"}';
+    render(
+      <ExportDialog open document={DEFAULT_APARTMENT_DOCUMENT} scene={scene} stage={null} repository={repo}
+        onImport={vi.fn()} onClose={vi.fn()} onDownload={download} />,
+    );
+    await user.click(screen.getByRole("button", { name: "Import-Quelle herunterladen" }));
+    expect(download).toHaveBeenCalledWith("wohnung-import-quelle.json", '{"import":"legacy"}');
+  });
+
   test("previews imports with warnings and requires an explicit replacement", async () => {
     const user = userEvent.setup();
     const onImport = vi.fn();
@@ -153,6 +166,7 @@ function repository(preview = importPreview()): PlannerRepository {
     save: (document) => document,
     restoreBackup: () => null,
     getMigrationBackup: () => null,
+    getImportSourceBackup: () => null,
     previewImport: vi.fn(() => preview),
     commitImport: vi.fn(() => preview.document),
   };

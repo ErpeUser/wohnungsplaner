@@ -96,8 +96,9 @@ export function createSceneModel(
   const sourceWalls = document.walls.filter((wall) => (
     wall.roomIds.some((roomId) => roomIds.has(roomId)) || touchingOpeningWallIds.has(wall.id)
   ));
-  const wallIds = new Set(sourceWalls.map((wall) => wall.id));
-  const openings = document.openings.filter((opening) => wallIds.has(opening.wallId));
+  const openings = document.openings.filter((opening) => (
+    sourceWalls.some((wall) => openingSliceOnWall(document, opening, wall) !== null)
+  ));
   const floors = rooms.map((room) => ({
     id: `floor-${room.id}`,
     roomId: room.id,
@@ -105,7 +106,10 @@ export function createSceneModel(
     points: deriveRoomPolygon(document, room.id),
   }));
   const walls = sourceWalls.map((wall) => {
-    const wallOpenings = openings.filter((opening) => opening.wallId === wall.id);
+    const wallOpenings = openings.flatMap((opening) => {
+      const slice = openingSliceOnWall(document, opening, wall);
+      return slice ? [slice] : [];
+    });
     return {
       id: wall.id,
       start: wall.start,
@@ -139,6 +143,28 @@ export function createSceneModel(
     bounds,
     center: [(bounds.minX + bounds.maxX) / 2, 0, (bounds.minZ + bounds.maxZ) / 2],
   };
+}
+
+function openingSliceOnWall(
+  document: PlannerDocumentV3,
+  opening: PlannerOpening,
+  wall: PlannerWall,
+): PlannerOpening | null {
+  const openingLine = openingSegment(document, opening);
+  const length = distance(wall.start, wall.end);
+  if (length <= 0.001) return null;
+  const tangent = { x: (wall.end.x - wall.start.x) / length, z: (wall.end.z - wall.start.z) / length };
+  const collinear = [openingLine.start, openingLine.end].every((point) => Math.abs(
+    (point.x - wall.start.x) * tangent.z - (point.z - wall.start.z) * tangent.x
+  ) <= 0.012);
+  if (!collinear) return null;
+  const projected = [openingLine.start, openingLine.end].map((point) => (
+    (point.x - wall.start.x) * tangent.x + (point.z - wall.start.z) * tangent.z
+  ));
+  const from = Math.max(0, Math.min(...projected));
+  const to = Math.min(length, Math.max(...projected));
+  if (to - from <= 0.001) return null;
+  return { ...opening, wallId: wall.id, offset: from, width: to - from };
 }
 
 function createWallSegments(wall: PlannerWall, openings: PlannerOpening[]): SceneWallSegment[] {

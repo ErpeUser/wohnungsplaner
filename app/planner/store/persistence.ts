@@ -9,6 +9,7 @@ import type { PlannerDocumentV3 } from "../domain/types.ts";
 export const PLANNER_STORAGE_KEY = "wohnung-planner-v3";
 export const PLANNER_BACKUP_KEY = "wohnung-planner-v3-backup";
 export const PLANNER_MIGRATION_BACKUP_KEY = "wohnung-planner-v3-migration-backup";
+export const PLANNER_IMPORT_SOURCE_BACKUP_KEY = "wohnung-planner-v3-import-source-backup";
 
 export type PlannerImportPreview = MigrationResult & {
   canCommit: boolean;
@@ -19,6 +20,7 @@ export type PlannerRepository = {
   save(document: PlannerDocumentV3): PlannerDocumentV3;
   restoreBackup(): MigrationResult | null;
   getMigrationBackup(): string | null;
+  getImportSourceBackup(): string | null;
   previewImport(value: unknown): PlannerImportPreview;
   commitImport(preview: PlannerImportPreview): PlannerDocumentV3;
 };
@@ -71,6 +73,10 @@ export function createLocalStoragePlannerRepository(
       return storage.getItem(PLANNER_MIGRATION_BACKUP_KEY);
     },
 
+    getImportSourceBackup() {
+      return storage.getItem(PLANNER_IMPORT_SOURCE_BACKUP_KEY);
+    },
+
     previewImport(value) {
       const migration = migrateStoredPlannerData(value, DEFAULT_APARTMENT_DOCUMENT);
       return {
@@ -84,7 +90,7 @@ export function createLocalStoragePlannerRepository(
         throw new Error("Diese Vorschau kann nicht importiert werden.");
       }
       if (preview.legacyBackupJson !== null) {
-        storage.setItem(PLANNER_MIGRATION_BACKUP_KEY, preview.legacyBackupJson);
+        storage.setItem(PLANNER_IMPORT_SOURCE_BACKUP_KEY, preview.legacyBackupJson);
       }
       return this.save(preview.document);
     },

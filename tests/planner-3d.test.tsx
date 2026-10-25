@@ -47,6 +47,20 @@ describe("createSceneModel", () => {
     assert.equal(scene.floors.length, 1);
   });
 
+  test("cuts current apartment doors across every atomic collinear wall segment", () => {
+    const scene = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, null);
+    for (const openingId of ["zimmer1-door", "zimmer2-balcony-door"]) {
+      const supportingWalls = scene.walls.filter((wall) => wall.openingIds.includes(openingId));
+      const source = DEFAULT_APARTMENT_DOCUMENT.openings.find((opening) => opening.id === openingId)!;
+      assert.ok(supportingWalls.length >= 1, `${openingId} should cut a supporting atomic wall`);
+      assert.ok(supportingWalls.some((wall) => wall.id !== source.wallId), `${openingId} should continue beyond its anchor wall`);
+      const openWidth = supportingWalls.reduce((sum, wall) => sum + wall.length - wall.segments
+        .filter((segment) => Math.abs(segment.size[1] - wall.height) <= 0.001)
+        .reduce((wallSum, segment) => wallSum + segment.size[0], 0), 0);
+      assert.ok(openWidth >= source.width - 0.001, `${openingId} remains blocked across atomic walls`);
+    }
+  });
+
   test("includes built-ins and movable furniture without a second document model", () => {
     const scene = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, null);
     assert.equal(scene.builtIns.length, DEFAULT_APARTMENT_DOCUMENT.builtIns.length);
