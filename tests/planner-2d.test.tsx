@@ -21,6 +21,7 @@ vi.mock("react-konva", () => {
     Rect: node("Rect"),
     Stage: node("Stage"),
     Text: node("Text"),
+    Transformer: node("Transformer"),
   };
 });
 
@@ -139,11 +140,16 @@ describe("PlanCanvas", () => {
         activeRoomId={null}
         overlays={{ dimensions: false, fixtures: false, evidence: false }}
         onOverlayChange={onOverlayChange}
+        selectionId={null}
+        onSelect={vi.fn()}
+        onMove={vi.fn()}
+        onResize={vi.fn()}
+        onRotate={vi.fn()}
       />,
     );
 
     assert.ok(screen.getByTestId("plan-stage"));
-    assert.equal(document.querySelectorAll('[data-konva-node="Layer"]').length, 2);
+    assert.equal(document.querySelectorAll('[data-konva-node="Layer"]').length, 3);
     expect(screen.getByText(/9 Räume/)).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "Alles anzeigen" }));
     await user.click(screen.getByRole("button", { name: "Maße anzeigen" }));

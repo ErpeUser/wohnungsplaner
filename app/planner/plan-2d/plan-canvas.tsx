@@ -6,6 +6,7 @@ import { Stage } from "react-konva";
 
 import type { PlannerDocumentV3, PlannerViewPreferences } from "../domain/types.ts";
 import { ArchitectureLayer } from "./architecture-layer.tsx";
+import { FurnitureLayer } from "./furniture-layer.tsx";
 import { OverlayLayer } from "./overlay-layer.tsx";
 import {
   createPlanScene,
@@ -19,11 +20,26 @@ type PlanCanvasProps = {
   activeRoomId: string | null;
   overlays: PlannerViewPreferences["overlays"];
   onOverlayChange(overlay: keyof PlannerViewPreferences["overlays"], visible: boolean): void;
+  selectionId: string | null;
+  onSelect(id: string | null): void;
+  onMove: React.ComponentProps<typeof FurnitureLayer>["onMove"];
+  onResize: React.ComponentProps<typeof FurnitureLayer>["onResize"];
+  onRotate: React.ComponentProps<typeof FurnitureLayer>["onRotate"];
 };
 
 const INITIAL_SIZE = { width: 960, height: 640 };
 
-export function PlanCanvas({ document, activeRoomId, overlays, onOverlayChange }: PlanCanvasProps) {
+export function PlanCanvas({
+  document,
+  activeRoomId,
+  overlays,
+  onOverlayChange,
+  selectionId,
+  onSelect,
+  onMove,
+  onResize,
+  onRotate,
+}: PlanCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState(INITIAL_SIZE);
   const scene = useMemo(
@@ -71,6 +87,13 @@ export function PlanCanvas({ document, activeRoomId, overlays, onOverlayChange }
         key={`${activeRoomId ?? "all"}:${document.updatedAt}:${size.width}x${size.height}`}
         scene={scene}
         size={size}
+        document={document}
+        activeRoomId={activeRoomId}
+        selectionId={selectionId}
+        onSelect={onSelect}
+        onMove={onMove}
+        onResize={onResize}
+        onRotate={onRotate}
       />
     </div>
   );
@@ -79,9 +102,26 @@ export function PlanCanvas({ document, activeRoomId, overlays, onOverlayChange }
 type InteractivePlanStageProps = {
   scene: ReturnType<typeof createPlanScene>;
   size: typeof INITIAL_SIZE;
+  document: PlannerDocumentV3;
+  activeRoomId: string | null;
+  selectionId: string | null;
+  onSelect: PlanCanvasProps["onSelect"];
+  onMove: PlanCanvasProps["onMove"];
+  onResize: PlanCanvasProps["onResize"];
+  onRotate: PlanCanvasProps["onRotate"];
 };
 
-function InteractivePlanStage({ scene, size }: InteractivePlanStageProps) {
+function InteractivePlanStage({
+  scene,
+  size,
+  document,
+  activeRoomId,
+  selectionId,
+  onSelect,
+  onMove,
+  onResize,
+  onRotate,
+}: InteractivePlanStageProps) {
   const [viewport, setViewport] = useState<PlanViewport>(() => fitPlanViewport(scene, size));
 
   return (
@@ -100,6 +140,9 @@ function InteractivePlanStage({ scene, size }: InteractivePlanStageProps) {
         scaleX={viewport.scale}
         scaleY={viewport.scale}
         draggable
+        onMouseDown={(event) => {
+          if (event.target === event.currentTarget) onSelect(null);
+        }}
         onDragEnd={(event) => setViewport((current) => ({
           ...current,
           x: event.currentTarget.x(),
@@ -117,6 +160,15 @@ function InteractivePlanStage({ scene, size }: InteractivePlanStageProps) {
         }}
       >
         <ArchitectureLayer scene={scene} />
+        <FurnitureLayer
+          document={document}
+          activeRoomId={activeRoomId}
+          selectionId={selectionId}
+          onSelect={onSelect}
+          onMove={onMove}
+          onResize={onResize}
+          onRotate={onRotate}
+        />
         <OverlayLayer scene={scene} />
       </Stage>
     </form>

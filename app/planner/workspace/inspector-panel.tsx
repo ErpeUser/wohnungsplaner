@@ -1,10 +1,15 @@
-import type { PlannerCommand } from "../domain/commands.ts";
+"use client";
+
+import { useId, useState } from "react";
+
+import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
+import type { CommandResult, PlannerCommand } from "../domain/commands.ts";
 import type { PlannerDocumentV3, PlannerPlacement } from "../domain/types.ts";
 
 type InspectorPanelProps = {
   document: PlannerDocumentV3;
   selectionId: string | null;
-  dispatch(command: PlannerCommand): void;
+  dispatch(command: PlannerCommand): CommandResult | void;
 };
 
 export function InspectorPanel({ document, selectionId, dispatch }: InspectorPanelProps) {
@@ -18,19 +23,18 @@ export function InspectorPanel({ document, selectionId, dispatch }: InspectorPan
         <h2>Eigenschaften</h2>
         <p>{selected ? "Position und Maß präzise anpassen." : builtIn ? "Fest eingebautes Element." : "Element im Plan auswählen."}</p>
       </header>
-      {selected ? <PlacementFields placement={selected} dispatch={dispatch} /> : (
+      {selected ? <PlacementFields placement={selected} dispatch={dispatch} /> : builtIn ? (
+        <div className="planner-locked-state">
+          <span aria-hidden="true">◆</span>
+          <div><strong>{builtIn.label}</strong><p>Bestand · gegen Verschieben und Entfernen geschützt</p></div>
+        </div>
+      ) : (
         <div className="planner-empty-state">
           <span aria-hidden="true">＋</span>
           <strong>Noch nichts ausgewählt</strong>
           <p>Klicke ein Möbel im Plan an. Alle Ziehbewegungen bleiben hier numerisch nachvollziehbar.</p>
         </div>
       )}
-      {builtIn ? (
-        <div className="planner-locked-state">
-          <span aria-hidden="true">◆</span>
-          <div><strong>{builtIn.label}</strong><p>Bestand · gegen Verschieben und Entfernen geschützt</p></div>
-        </div>
-      ) : null}
     </aside>
   );
 }
@@ -40,71 +44,164 @@ function PlacementFields({
   dispatch,
 }: {
   placement: PlannerPlacement;
-  dispatch(command: PlannerCommand): void;
+  dispatch(command: PlannerCommand): CommandResult | void;
 }) {
-  const number = (
-    label: string,
-    value: number,
-    onValue: (value: number) => void,
-    options: { step?: number; min?: number; suffix?: string } = {},
-  ) => (
-    <label className="planner-number-field">
-      <span>{label}</span>
-      <span className="planner-number-field__control">
-        <input
-          type="number"
-          aria-label={label}
-          value={Number(value.toFixed(2))}
-          step={options.step ?? 1}
-          min={options.min}
-          onChange={(event) => onValue(Number(event.target.value))}
-        />
-        <small>{options.suffix ?? "cm"}</small>
-      </span>
-    </label>
-  );
+  const catalogItem = getFurnitureCatalogItem(placement.catalogId);
+  const send = (command: PlannerCommand) => dispatch(command)?.error?.message ?? null;
 
   return (
     <div className="planner-inspector__form" aria-label="Numerische Objektbearbeitung">
       <div className="planner-selection-summary">
         <span className="planner-selection-summary__swatch" aria-hidden="true" />
-        <span><strong>{placement.catalogId}</strong><small>{placement.roomId}</small></span>
+        <span><strong>{catalogItem?.name ?? placement.catalogId}</strong><small>{placement.roomId}</small></span>
       </div>
       <fieldset>
         <legend>Position</legend>
         <div className="planner-field-grid">
-          {number("Position X in Zentimetern", placement.position.x * 100, (value) => dispatch({
-            type: "movePlacement",
-            placementId: placement.id,
-            position: { ...placement.position, x: value / 100 },
-          }))}
-          {number("Position Y in Zentimetern", placement.position.z * 100, (value) => dispatch({
-            type: "movePlacement",
-            placementId: placement.id,
-            position: { ...placement.position, z: value / 100 },
-          }))}
+          <NumericField
+            label="Position X in Zentimetern"
+            value={placement.position.x * 100}
+            onCommit={(value) => send({
+              type: "movePlacement",
+              placementId: placement.id,
+              position: { ...placement.position, x: value / 100 },
+            })}
+          />
+          <NumericField
+            label="Position Z in Zentimetern"
+            value={placement.position.z * 100}
+            onCommit={(value) => send({
+              type: "movePlacement",
+              placementId: placement.id,
+              position: { ...placement.position, z: value / 100 },
+            })}
+          />
         </div>
       </fieldset>
       <fieldset>
         <legend>Maße</legend>
         <div className="planner-field-grid">
-          {number("Breite in Zentimetern", placement.size.width * 100, (value) => dispatch({
-            type: "resizePlacement",
-            placementId: placement.id,
-            size: { ...placement.size, width: value / 100 },
-          }), { min: 1 })}
-          {number("Tiefe in Zentimetern", placement.size.depth * 100, (value) => dispatch({
-            type: "resizePlacement",
-            placementId: placement.id,
-            size: { ...placement.size, depth: value / 100 },
-          }), { min: 1 })}
+          <NumericField
+            label="Breite in Zentimetern"
+            value={placement.size.width * 100}
+            minimum={10}
+            onCommit={(value) => send({ type: "resizePlacement", placementId: placement.id, size: { ...placement.size, width: value / 100 } })}
+          />
+          <NumericField
+            label="Tiefe in Zentimetern"
+            value={placement.size.depth * 100}
+            minimum={10}
+            onCommit={(value) => send({ type: "resizePlacement", placementId: placement.id, size: { ...placement.size, depth: value / 100 } })}
+          />
+          <NumericField
+            label="Höhe in Zentimetern"
+            value={placement.size.height * 100}
+            minimum={1}
+            onCommit={(value) => send({ type: "resizePlacement", placementId: placement.id, size: { ...placement.size, height: value / 100 } })}
+          />
+          <NumericField
+            label="Drehung in Grad"
+            value={placement.rotation}
+            step={5}
+            suffix="°"
+            onCommit={(value) => send({ type: "rotatePlacement", placementId: placement.id, rotation: value })}
+          />
         </div>
       </fieldset>
-      {number("Drehung in Grad", placement.rotation, (value) => dispatch({
-        type: "rotatePlacement",
-        placementId: placement.id,
-        rotation: value,
-      }), { step: 5, suffix: "°" })}
+      <label className="planner-select-field">
+        <span>Material</span>
+        <select
+          aria-label="Material"
+          value={placement.materialVariants?.main ?? catalogItem?.materials[0]?.id ?? "default"}
+          onChange={(event) => send({
+            type: "setPlacementMaterial",
+            placementId: placement.id,
+            slot: "main",
+            materialId: event.target.value,
+          })}
+        >
+          {(catalogItem?.materials ?? [{ id: "default", label: "Standard" }]).map((material) => (
+            <option key={material.id} value={material.id}>{material.label}</option>
+          ))}
+        </select>
+      </label>
+      <button
+        type="button"
+        className="planner-button--danger"
+        onClick={() => dispatch({ type: "removePlacement", placementId: placement.id })}
+      >
+        Möbel entfernen
+      </button>
     </div>
   );
+}
+
+function NumericField({
+  label,
+  value,
+  onCommit,
+  step = 1,
+  minimum,
+  suffix = "cm",
+}: {
+  label: string;
+  value: number;
+  onCommit(value: number): string | null;
+  step?: number;
+  minimum?: number;
+  suffix?: string;
+}) {
+  const errorId = useId();
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(() => formatNumber(value));
+  const [error, setError] = useState<string | null>(null);
+  const commit = () => {
+    setEditing(false);
+    const parsed = Number(draft.replace(",", "."));
+    if (!Number.isFinite(parsed) || (minimum !== undefined && parsed < minimum)) {
+      setError(minimum === undefined ? "Bitte eine gültige Zahl eingeben." : `Der Wert muss mindestens ${minimum} sein.`);
+      return;
+    }
+    const commandError = onCommit(parsed);
+    setError(commandError);
+    if (commandError) setDraft(formatNumber(value));
+  };
+
+  return (
+    <label className="planner-number-field">
+      <span>{label}</span>
+      <span className="planner-number-field__control" data-invalid={Boolean(error)}>
+        <input
+          type="number"
+          inputMode="decimal"
+          aria-label={label}
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? errorId : undefined}
+          value={editing ? draft : formatNumber(value)}
+          onFocus={() => {
+            setDraft(formatNumber(value));
+            setEditing(true);
+          }}
+          onChange={(event) => setDraft(event.target.value)}
+          onBlur={commit}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") event.currentTarget.blur();
+            if (event.key === "Escape") {
+              setDraft(formatNumber(value));
+              setError(null);
+              event.currentTarget.blur();
+            }
+          }}
+          step={step}
+          min={minimum}
+        />
+        <small>{suffix}</small>
+      </span>
+      {error ? <small id={errorId} className="planner-field-error" role="alert">{error}</small> : null}
+    </label>
+  );
+}
+
+function formatNumber(value: number) {
+  return String(Number(value.toFixed(2)));
 }

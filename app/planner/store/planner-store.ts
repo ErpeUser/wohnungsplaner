@@ -109,6 +109,7 @@ export function createPlannerStore(options: {
       const document = history.undo();
       set({
         document,
+        selectionId: validSelection(get().selectionId, document),
         warnings: [],
         lastError: null,
         canUndo: history.canUndo(),
@@ -121,6 +122,7 @@ export function createPlannerStore(options: {
       const document = history.redo();
       set({
         document,
+        selectionId: validSelection(get().selectionId, document),
         warnings: [],
         lastError: null,
         canUndo: history.canUndo(),
@@ -131,7 +133,15 @@ export function createPlannerStore(options: {
     replaceDocument(document) {
       cancelPendingAutosave();
       history.reset(document);
-      set({ document, warnings: [], lastError: null, canUndo: false, canRedo: false, autosaveStatus: "idle" });
+      set({
+        document,
+        selectionId: validSelection(get().selectionId, document),
+        warnings: [],
+        lastError: null,
+        canUndo: false,
+        canRedo: false,
+        autosaveStatus: "idle",
+      });
     },
     select(selectionId) { set({ selectionId }); },
     setActiveRoom(activeRoomId) { set({ activeRoomId }); },
@@ -152,6 +162,7 @@ export function createPlannerStore(options: {
       history.reset(result.document);
       set({
         document: result.document,
+        selectionId: validSelection(get().selectionId, result.document),
         activeRoomId: result.document.viewPreferences.activeRoomId,
         overlays: { ...result.document.viewPreferences.overlays },
         migrationResult: result,
@@ -191,6 +202,7 @@ export function createPlannerStore(options: {
       history.reset(document);
       set({
         document,
+        selectionId: validSelection(get().selectionId, document),
         activeRoomId: document.viewPreferences.activeRoomId,
         overlays: { ...document.viewPreferences.overlays },
         migrationResult: preview,
@@ -211,6 +223,7 @@ export function createPlannerStore(options: {
       history.reset(document);
       set({
         document,
+        selectionId: validSelection(get().selectionId, document),
         activeRoomId: document.viewPreferences.activeRoomId,
         overlays: { ...document.viewPreferences.overlays },
         migrationResult: result,
@@ -223,4 +236,12 @@ export function createPlannerStore(options: {
       return result;
     },
   }));
+}
+
+function validSelection(selectionId: string | null, document: PlannerDocumentV3) {
+  if (!selectionId) return null;
+  return document.placements.some((item) => item.id === selectionId)
+    || document.builtIns.some((item) => item.id === selectionId)
+    ? selectionId
+    : null;
 }

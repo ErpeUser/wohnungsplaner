@@ -14,6 +14,7 @@ vi.mock("react-konva", () => ({
   Rect: () => null,
   Stage: ({ children }: React.PropsWithChildren) => <div data-konva-node="Stage">{children}</div>,
   Text: () => null,
+  Transformer: () => null,
 }));
 
 vi.mock("konva", () => ({ default: { pixelRatio: 1 } }));
@@ -100,7 +101,7 @@ describe("PlannerWorkspace", () => {
     render(<PlannerWorkspace store={store} />);
 
     assert.ok(screen.getByRole("spinbutton", { name: "Position X in Zentimetern" }));
-    assert.ok(screen.getByRole("spinbutton", { name: "Position Y in Zentimetern" }));
+    assert.ok(screen.getByRole("spinbutton", { name: "Position Z in Zentimetern" }));
     assert.ok(screen.getByRole("spinbutton", { name: "Breite in Zentimetern" }));
     assert.ok(screen.getByRole("spinbutton", { name: "Tiefe in Zentimetern" }));
     assert.ok(screen.getByRole("spinbutton", { name: "Drehung in Grad" }));

@@ -5,6 +5,7 @@ import { useStore } from "zustand";
 
 import { DEFAULT_APARTMENT_DOCUMENT } from "../domain/apartment-v3.ts";
 import { PlanCanvas } from "../plan-2d/plan-canvas.tsx";
+import { usePlanInteractions } from "../plan-2d/use-plan-interactions.ts";
 import { createLocalStoragePlannerRepository } from "../store/persistence.ts";
 import { createPlannerStore, type PlannerStore } from "../store/planner-store.ts";
 import { CatalogPanel } from "./catalog-panel.tsx";
@@ -24,6 +25,13 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
   const detailsButtonRef = useRef<HTMLButtonElement>(null);
   const detailsOpen = state.panels.details;
   const setPanel = state.setPanel;
+  const interactions = usePlanInteractions({
+    document: state.document,
+    activeRoomId: state.activeRoomId,
+    selectionId: state.selectionId,
+    dispatch: state.dispatch,
+    select: state.select,
+  });
 
   useEffect(() => {
     if (providedStore) return;
@@ -99,7 +107,9 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
       />
 
       <div className="planner-workspace__body" data-catalog-open={state.panels.catalog} data-inspector-open={state.panels.inspector}>
-        {state.panels.catalog ? <CatalogPanel /> : null}
+        {state.panels.catalog ? (
+          <CatalogPanel activeRoomId={state.activeRoomId} onAdd={interactions.addCatalogItem} />
+        ) : null}
         <section className="planner-canvas" aria-label={state.viewMode === "2d" ? "2D-Planungsfläche" : "3D-Planungsfläche"}>
           <div className="planner-canvas__meta">
             <span>{state.activeRoomId ? state.document.rooms.find((room) => room.id === state.activeRoomId)?.name : "Gesamtwohnung"}</span>
@@ -114,6 +124,11 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
                 activeRoomId={state.activeRoomId}
                 overlays={state.overlays}
                 onOverlayChange={state.setOverlay}
+                selectionId={state.selectionId}
+                onSelect={state.select}
+                onMove={interactions.movePlacement}
+                onResize={interactions.resizePlacement}
+                onRotate={interactions.rotatePlacement}
               />
             ) : (
               <div className="planner-canvas__placeholder">
@@ -132,7 +147,13 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
       </div>
 
       {state.panels.details ? <DetailsDrawer document={state.document} onClose={closeDetails} /> : null}
-      <PlannerStatus document={state.document} autosaveStatus={state.autosaveStatus} />
+      <PlannerStatus
+        document={state.document}
+        autosaveStatus={state.autosaveStatus}
+        selectionId={state.selectionId}
+        warningCount={state.warnings.length}
+        hasError={Boolean(state.lastError)}
+      />
     </main>
   );
 }

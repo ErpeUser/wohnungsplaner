@@ -8,9 +8,18 @@ const SAVE_LABELS: Record<AutosaveStatus, string> = {
   error: "Speichern fehlgeschlagen · Änderungen bleiben geöffnet",
 };
 
-export function PlannerStatus({ document, autosaveStatus }: {
+export function PlannerStatus({
+  document,
+  autosaveStatus,
+  selectionId = null,
+  warningCount = 0,
+  hasError = false,
+}: {
   document: PlannerDocumentV3;
   autosaveStatus: AutosaveStatus;
+  selectionId?: string | null;
+  warningCount?: number;
+  hasError?: boolean;
 }) {
   const wnf = document.rooms
     .filter((room) => room.includedInWnf)
@@ -22,6 +31,10 @@ export function PlannerStatus({ document, autosaveStatus }: {
       <span>{wnf.toLocaleString("de-AT", { minimumFractionDigits: 2 })} m² WNF</span>
       <span>{document.rooms.length} Bereiche</span>
       <span>Raster 5 cm</span>
+      {selectionId ? <span>Auswahl: {selectionId}</span> : null}
+      {hasError ? <span className="planner-status__problem">Aktion abgelehnt</span> : warningCount > 0 ? (
+        <span className="planner-status__warning">{warningCount} Hinweis{warningCount === 1 ? "" : "e"}</span>
+      ) : null}
     </footer>
   );
 }

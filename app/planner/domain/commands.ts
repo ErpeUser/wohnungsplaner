@@ -11,6 +11,7 @@ export type PlannerCommand =
   | { type: "movePlacement"; placementId: string; position: Point2 }
   | { type: "resizePlacement"; placementId: string; size: Size3 }
   | { type: "rotatePlacement"; placementId: string; rotation: number }
+  | { type: "setPlacementMaterial"; placementId: string; slot: string; materialId: string }
   | { type: "removePlacement"; placementId: string }
   | { type: "transferPlacement"; placementId: string; roomId: string; position: Point2 }
   | { type: "toggleDoor"; openingId: string; state?: "open" | "closed" }
@@ -68,6 +69,15 @@ export function applyPlannerCommand(
       return updatePlacement(document, command.placementId, (placement) => ({
         ...placement,
         rotation: normalizeRotation(command.rotation),
+      }));
+
+    case "setPlacementMaterial":
+      if (!command.slot.trim() || !command.materialId.trim()) {
+        return reject(document, "invalid", "Material-Slot und Material dürfen nicht leer sein.");
+      }
+      return updatePlacement(document, command.placementId, (placement) => ({
+        ...placement,
+        materialVariants: { ...placement.materialVariants, [command.slot]: command.materialId },
       }));
 
     case "transferPlacement":

@@ -1,0 +1,177 @@
+import assert from "node:assert/strict";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import React from "react";
+import { describe, expect, test, vi } from "vitest";
+
+vi.mock("react-konva", () => {
+  const node = (name: string) => {
+    function KonvaNode({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) {
+      return <div data-konva-node={name} data-object-id={String(props.id ?? "")} data-testid={String(props["data-testid"] ?? "")}>{children}</div>;
+    }
+    KonvaNode.displayName = `Konva${name}`;
+    return KonvaNode;
+  };
+  return {
+    Circle: node("Circle"),
+    Group: node("Group"),
+    Line: node("Line"),
+    Layer: node("Layer"),
+    Rect: node("Rect"),
+    Text: node("Text"),
+    Transformer: node("Transformer"),
+  };
+});
+
+import { FURNITURE_CATALOG, filterFurnitureCatalog } from "../app/planner/catalog/catalog.ts";
+import { DEFAULT_APARTMENT_DOCUMENT } from "../app/planner/domain/apartment-v3.ts";
+import { applyPlannerCommand } from "../app/planner/domain/commands.ts";
+import { createPlannerStore } from "../app/planner/store/planner-store.ts";
+import { FurnitureLayer } from "../app/planner/plan-2d/furniture-layer.tsx";
+import {
+  createCatalogPlacement,
+  nudgePlacement,
+  resolvePlacementMove,
+  resolvePlacementResize,
+  resolvePlacementRotation,
+} from "../app/planner/plan-2d/use-plan-interactions.ts";
+import { CatalogPanel } from "../app/planner/workspace/catalog-panel.tsx";
+import { InspectorPanel } from "../app/planner/workspace/inspector-panel.tsx";
+
+describe("furniture catalog", () => {
+  test("contains realistic parametric objects across all planned categories", () => {
+    assert.ok(FURNITURE_CATALOG.length >= 13);
+    assert.deepEqual(
+      new Set(FURNITURE_CATALOG.map((item) => item.category)),
+      new Set(["Schlafen", "Sitzen", "Arbeiten", "Aufbewahren", "Tische", "Licht/Deko"]),
+    );
+    assert.ok(FURNITURE_CATALOG.every((item) => item.defaultSize.width > 0 && item.fallback3d));
+  });
+
+  test("filters by search and category and inserts into the active room", async () => {
+    const user = userEvent.setup();
+    const onAdd = vi.fn();
+    render(<CatalogPanel activeRoomId="zimmer2" onAdd={onAdd} />);
+
+    await user.type(screen.getByRole("searchbox", { name: "Möbel suchen" }), "sofa");
+    expect(screen.getByRole("button", { name: /Sofa hinzufügen/ })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /Bett hinzufügen/ })).toBeNull();
+    await user.click(screen.getByRole("button", { name: /Sofa hinzufügen/ }));
+    expect(onAdd).toHaveBeenCalledWith("sofa-3seat");
+
+    assert.equal(filterFurnitureCatalog("tisch", "Arbeiten")[0]?.id, "desk-standard");
+  });
+});
+
+describe("furniture interactions", () => {
+  const chair = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "zimmer1-chair")!;
+
+  test("creates a catalog placement with real dimensions and material", () => {
+    const item = FURNITURE_CATALOG.find((candidate) => candidate.id === "sofa-3seat")!;
+    const placement = createCatalogPlacement(item, "zimmer2", { x: 1.5, z: 10.3 }, "new-sofa");
+    assert.equal(placement.id, "new-sofa");
+    assert.deepEqual(placement.size, item.defaultSize);
+    assert.equal(placement.materialVariants?.main, item.materials[0].id);
+  });
+
+  test("snaps drag to 5 cm, while Alt keeps a free position", () => {
+    const snapped = resolvePlacementMove(DEFAULT_APARTMENT_DOCUMENT, chair, { x: 2.713, z: 0.937 });
+    const free = resolvePlacementMove(DEFAULT_APARTMENT_DOCUMENT, chair, { x: 2.713, z: 0.937 }, { disableGrid: true });
+    assert.deepEqual(snapped.position, { x: 2.7, z: 0.95 });
+    assert.deepEqual(free.position, { x: 2.713, z: 0.937 });
+  });
+
+  test("transfers the complete placement when its center enters another room", () => {
+    const document = { ...DEFAULT_APARTMENT_DOCUMENT, placements: [chair] };
+    const result = resolvePlacementMove(document, chair, { x: 1.8, z: 10.4 }, { disableGrid: true });
+    assert.equal(result.command.type, "transferPlacement");
+    if (result.command.type === "transferPlacement") assert.equal(result.command.roomId, "zimmer2");
+  });
+
+  test("supports 1/10 cm keyboard movement, 45 degree/free rotation and allowed resizing", () => {
+    assert.deepEqual(nudgePlacement(chair, "ArrowRight", false), { x: 2.71, z: 0.94 });
+    assert.deepEqual(nudgePlacement(chair, "ArrowUp", true), { x: 2.7, z: 0.84 });
+    assert.equal(resolvePlacementRotation(32, false), 45);
+    assert.equal(resolvePlacementRotation(32, true), 32);
+
+    const desk = FURNITURE_CATALOG.find((item) => item.id === "desk-standard")!;
+    assert.deepEqual(resolvePlacementResize(desk, desk.defaultSize, 1.2, 0.8), {
+      ...desk.defaultSize,
+      width: Number((desk.defaultSize.width * 1.2).toFixed(3)),
+      depth: Number((desk.defaultSize.depth * 0.8).toFixed(3)),
+    });
+  });
+
+  test("renders selectable furniture and a transformer for the selection", () => {
+    render(
+      <FurnitureLayer
+        document={DEFAULT_APARTMENT_DOCUMENT}
+        activeRoomId="zimmer1"
+        selectionId="zimmer1-chair"
+        onSelect={vi.fn()}
+        onMove={vi.fn()}
+        onResize={vi.fn()}
+        onRotate={vi.fn()}
+      />,
+    );
+    expect(screen.getByTestId("furniture-zimmer1-chair")).toBeTruthy();
+    assert.equal(document.querySelectorAll('[data-konva-node="Transformer"]').length, 1);
+  });
+
+  test("rejects hard collisions and preserves undo/redo history", () => {
+    const store = createPlannerStore({ initialDocument: DEFAULT_APARTMENT_DOCUMENT });
+    const collision = store.getState().dispatch({
+      type: "movePlacement",
+      placementId: "zimmer1-chair",
+      position: DEFAULT_APARTMENT_DOCUMENT.placements[0].position,
+    });
+    assert.equal(collision.error?.code, "collision");
+
+    store.getState().dispatch({ type: "movePlacement", placementId: "zimmer1-chair", position: { x: 3.15, z: 0.94 } });
+    assert.equal(store.getState().canUndo, true);
+    store.getState().undo();
+    assert.equal(store.getState().document.placements.find((item) => item.id === "zimmer1-chair")?.position.x, 2.7);
+    store.getState().redo();
+    assert.equal(store.getState().document.placements.find((item) => item.id === "zimmer1-chair")?.position.x, 3.15);
+  });
+
+  test("clears a selection when undo removes the selected placement", () => {
+    const document = { ...DEFAULT_APARTMENT_DOCUMENT, placements: [] };
+    const store = createPlannerStore({ initialDocument: document });
+    const item = FURNITURE_CATALOG.find((candidate) => candidate.id === "plant-medium")!;
+    const placement = createCatalogPlacement(item, "zimmer2", { x: 1.5, z: 10.45 }, "temporary-plant");
+
+    const result = store.getState().dispatch({ type: "addPlacement", placement });
+    assert.equal(result.error, undefined);
+    store.getState().select(placement.id);
+    store.getState().undo();
+
+    assert.equal(store.getState().selectionId, null);
+  });
+});
+
+describe("furniture inspector", () => {
+  test("offers complete labelled numeric and material alternatives", () => {
+    render(
+      <InspectorPanel
+        document={DEFAULT_APARTMENT_DOCUMENT}
+        selectionId="zimmer1-chair"
+        dispatch={(command) => applyPlannerCommand(DEFAULT_APARTMENT_DOCUMENT, command)}
+      />,
+    );
+    for (const label of [
+      "Position X in Zentimetern",
+      "Position Z in Zentimetern",
+      "Breite in Zentimetern",
+      "Tiefe in Zentimetern",
+      "Höhe in Zentimetern",
+      "Drehung in Grad",
+      "Material",
+    ]) expect(screen.getByLabelText(label)).toBeTruthy();
+  });
+
+  test("explains that built-ins are locked", () => {
+    render(<InspectorPanel document={DEFAULT_APARTMENT_DOCUMENT} selectionId="builtin-kitchen-fridge" dispatch={vi.fn()} />);
+    expect(screen.getByText(/gegen Verschieben und Entfernen geschützt/)).toBeTruthy();
+  });
+});
