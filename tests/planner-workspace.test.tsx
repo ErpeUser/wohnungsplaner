@@ -105,6 +105,19 @@ describe("PlannerWorkspace", () => {
     assert.equal(document.activeElement, trigger);
   });
 
+  test("opens the export and import dialog and restores its toolbar trigger", async () => {
+    const user = userEvent.setup();
+    const store = createPlannerStore({ initialDocument: DEFAULT_APARTMENT_DOCUMENT });
+    render(<PlannerWorkspace store={store} />);
+
+    const trigger = screen.getByRole("button", { name: "Export & Import" });
+    await user.click(trigger);
+    assert.ok(screen.getByRole("dialog", { name: "Export und Import" }));
+    await user.keyboard("{Escape}");
+    assert.equal(screen.queryByRole("dialog"), null);
+    assert.equal(document.activeElement, trigger);
+  });
+
   test("keeps precise numeric alternatives available for selected furniture", () => {
     const store = createPlannerStore({ initialDocument: DEFAULT_APARTMENT_DOCUMENT });
     act(() => store.getState().select(DEFAULT_APARTMENT_DOCUMENT.placements[0].id));

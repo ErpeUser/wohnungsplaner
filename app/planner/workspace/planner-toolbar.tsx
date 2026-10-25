@@ -15,6 +15,7 @@ type PlannerToolbarProps = {
   inspectorOpen: boolean;
   detailsOpen: boolean;
   detailsButtonRef: RefObject<HTMLButtonElement | null>;
+  exportButtonRef: RefObject<HTMLButtonElement | null>;
   onRoomChange(roomId: string | null): void;
   onViewChange(mode: PlannerViewMode): void;
   onCameraChange(mode: PlannerCameraMode): void;
@@ -37,6 +38,7 @@ export function PlannerToolbar({
   inspectorOpen,
   detailsOpen,
   detailsButtonRef,
+  exportButtonRef,
   onRoomChange,
   onViewChange,
   onCameraChange,
@@ -139,8 +141,14 @@ export function PlannerToolbar({
         >
           Details
         </button>
-        <button type="button" className="planner-button planner-button--primary" onClick={onExport}>
-          JSON exportieren
+        <button
+          ref={exportButtonRef}
+          type="button"
+          className="planner-button planner-button--primary"
+          aria-haspopup="dialog"
+          onClick={onExport}
+        >
+          Export & Import
         </button>
       </div>
     </header>

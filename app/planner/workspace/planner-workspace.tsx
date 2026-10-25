@@ -1,10 +1,13 @@
 "use client";
 
-import { Component, lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
+import type Konva from "konva";
+import { Component, lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useStore } from "zustand";
 
 import { DEFAULT_APARTMENT_DOCUMENT } from "../domain/apartment-v3.ts";
+import { ExportDialog } from "../export/export-dialog.tsx";
 import { PlanCanvas } from "../plan-2d/plan-canvas.tsx";
+import { createPlanScene } from "../plan-2d/plan-scene.ts";
 import { usePlanInteractions } from "../plan-2d/use-plan-interactions.ts";
 import { createLocalStoragePlannerRepository } from "../store/persistence.ts";
 import { createPlannerStore, type PlannerStore } from "../store/planner-store.ts";
@@ -20,13 +23,19 @@ const LazyPlanner3D = lazy(() => import("../scene-3d/planner-3d.tsx").then((modu
 })));
 
 export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStore }) {
+  const [repository] = useState(() => browserRepository());
   const [internalStore] = useState(() => createPlannerStore({
     initialDocument: DEFAULT_APARTMENT_DOCUMENT,
-    repository: browserRepository(),
+    repository,
   }));
   const store = providedStore ?? internalStore;
   const state = useStore(store);
   const detailsButtonRef = useRef<HTMLButtonElement>(null);
+  const exportButtonRef = useRef<HTMLButtonElement>(null);
+  const [planStage, setPlanStage] = useState<Konva.Stage | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
+  const openExport = useCallback(() => setExportOpen(true), []);
+  const closeExport = useCallback(() => setExportOpen(false), []);
   const detailsOpen = state.panels.details;
   const setPanel = state.setPanel;
   const interactions = usePlanInteractions({
@@ -36,6 +45,10 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
     dispatch: state.dispatch,
     select: state.select,
   });
+  const exportScene = useMemo(() => createPlanScene(state.document, {
+    activeRoomId: null,
+    overlays: state.overlays,
+  }), [state.document, state.overlays]);
 
   useEffect(() => {
     if (providedStore) return;
@@ -76,16 +89,6 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
     detailsButtonRef.current?.focus();
   };
 
-  const exportJson = () => {
-    if (typeof window === "undefined") return;
-    const url = URL.createObjectURL(new Blob([JSON.stringify(state.document, null, 2)], { type: "application/json" }));
-    const link = window.document.createElement("a");
-    link.href = url;
-    link.download = "wohnung.json";
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
   return (
     <main className="planner-workspace">
       <PlannerToolbar
@@ -99,6 +102,7 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
         inspectorOpen={state.panels.inspector}
         detailsOpen={state.panels.details}
         detailsButtonRef={detailsButtonRef}
+        exportButtonRef={exportButtonRef}
         onRoomChange={state.setActiveRoom}
         onViewChange={state.setViewMode}
         onCameraChange={state.setCameraMode}
@@ -107,7 +111,7 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
         onToggleCatalog={() => state.setPanel("catalog", !state.panels.catalog)}
         onToggleInspector={() => state.setPanel("inspector", !state.panels.inspector)}
         onToggleDetails={() => state.setPanel("details", !state.panels.details)}
-        onExport={exportJson}
+        onExport={openExport}
       />
 
       <div className="planner-workspace__body" data-catalog-open={state.panels.catalog} data-inspector-open={state.panels.inspector}>
@@ -133,6 +137,7 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
                 onMove={interactions.movePlacement}
                 onResize={interactions.resizePlacement}
                 onRotate={interactions.rotatePlacement}
+                onStageChange={setPlanStage}
               />
             ) : (
               <Workspace3DErrorBoundary onReturn2D={() => state.setViewMode("2d")}>
@@ -158,6 +163,19 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
       </div>
 
       {state.panels.details ? <DetailsDrawer document={state.document} onClose={closeDetails} /> : null}
+      {repository ? (
+        <ExportDialog
+          open={exportOpen}
+          document={state.document}
+          scene={exportScene}
+          stage={state.viewMode === "2d" ? planStage : null}
+          repository={repository}
+          onImport={(preview) => {
+            if (!state.importDocument(preview)) state.replaceDocument(preview.document);
+          }}
+          onClose={closeExport}
+        />
+      ) : null}
       <PlannerStatus
         document={state.document}
         autosaveStatus={state.autosaveStatus}

@@ -25,6 +25,7 @@ type PlanCanvasProps = {
   onMove: React.ComponentProps<typeof FurnitureLayer>["onMove"];
   onResize: React.ComponentProps<typeof FurnitureLayer>["onResize"];
   onRotate: React.ComponentProps<typeof FurnitureLayer>["onRotate"];
+  onStageChange?(stage: Konva.Stage | null): void;
 };
 
 const INITIAL_SIZE = { width: 960, height: 640 };
@@ -39,6 +40,7 @@ export function PlanCanvas({
   onMove,
   onResize,
   onRotate,
+  onStageChange,
 }: PlanCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState(INITIAL_SIZE);
@@ -94,6 +96,7 @@ export function PlanCanvas({
         onMove={onMove}
         onResize={onResize}
         onRotate={onRotate}
+        onStageChange={onStageChange}
       />
     </div>
   );
@@ -109,6 +112,7 @@ type InteractivePlanStageProps = {
   onMove: PlanCanvasProps["onMove"];
   onResize: PlanCanvasProps["onResize"];
   onRotate: PlanCanvasProps["onRotate"];
+  onStageChange: PlanCanvasProps["onStageChange"];
 };
 
 function InteractivePlanStage({
@@ -121,8 +125,15 @@ function InteractivePlanStage({
   onMove,
   onResize,
   onRotate,
+  onStageChange,
 }: InteractivePlanStageProps) {
   const [viewport, setViewport] = useState<PlanViewport>(() => fitPlanViewport(scene, size));
+  const stageRef = useRef<Konva.Stage | null>(null);
+
+  useEffect(() => {
+    onStageChange?.(stageRef.current);
+    return () => onStageChange?.(null);
+  }, [onStageChange]);
 
   return (
     <form
@@ -133,6 +144,7 @@ function InteractivePlanStage({
       }}
     >
       <Stage
+        ref={stageRef}
         width={size.width}
         height={size.height}
         x={viewport.x}
