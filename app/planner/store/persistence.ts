@@ -44,8 +44,11 @@ const BASELINE_VISUAL_REFRESH_IDS = new Set([
   "builtin-bath-tub-side-apron",
   "builtin-bath-round-mirror",
   "builtin-bath-mat",
+  "builtin-wc-mat",
+  "builtin-bath-towel-hook-rail",
   "builtin-bath-shower-rod",
   "builtin-bath-shower-curtain",
+  "builtin-wc-paper-holder",
   "builtin-z1-bed-accent-wall",
   "builtin-z1-entry-wallpaper-return",
   "builtin-z1-entry-wallpaper-door-strip",
@@ -71,7 +74,6 @@ const RETIRED_BASELINE_BUILT_IN_IDS = new Set([
   "builtin-z1-curtain-north",
   "builtin-z1-curtain-south",
   "builtin-z1-wall-panel",
-  "builtin-wc-paper-holder",
   "builtin-wc-brush",
 ]);
 
@@ -281,18 +283,18 @@ function readStoredValue(raw: string): MigrationResult {
     try {
       const normalized = normalizeLegacyV3Aliases(value);
       const parsed = parsePlannerDocument(normalized.document);
-      if (normalized.changed) {
+      if (isOlderBaselineModel(parsed)) {
         return {
-          document: parsed,
-          warnings: ["Das gespeicherte Dokument wurde auf die zusammengeführte Balkon-/Loggia-Struktur aktualisiert."],
+          document: rebaseBaselineModel(parsed),
+          warnings: ["Das gespeicherte Möbel-Layout und die Bad-/WC-Materialien wurden auf den aktuellen Stand aktualisiert."],
           legacyBackupJson: raw,
           unmapped: [],
         };
       }
-      if (isOlderBaselineModel(parsed)) {
+      if (normalized.changed) {
         return {
-          document: rebaseBaselineModel(parsed),
-          warnings: ["Das gespeicherte Möbel-Layout wurde auf den korrigierten Plan- und Ausstattungsstand aktualisiert."],
+          document: parsed,
+          warnings: ["Das gespeicherte Dokument wurde auf die zusammengeführte Balkon-/Loggia-Struktur aktualisiert."],
           legacyBackupJson: raw,
           unmapped: [],
         };
@@ -404,7 +406,11 @@ function isOlderBaselineModel(document: PlannerDocumentV3) {
       || (previous.elevation ?? 0) !== (item.elevation ?? 0)
       || previous.size.width !== item.size.width
       || previous.size.depth !== item.size.depth
-      || previous.size.height !== item.size.height;
+      || previous.size.height !== item.size.height
+      || previous.catalogId !== item.catalogId
+      || (BASELINE_VISUAL_REFRESH_IDS.has(item.id) && (
+        previous.materialVariants?.main !== item.materialVariants?.main
+      ));
   });
   if (builtInsNeedRefresh) return true;
   const storedFixtures = new Map(document.fixtures.map((item) => [item.id, item]));

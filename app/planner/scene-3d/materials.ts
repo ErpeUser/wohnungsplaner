@@ -186,7 +186,6 @@ const TEXTURES: Record<string, string> = {
   "rug-gala-taupe": "/planner-assets/textures/fabric/rug.svg",
   "rug-temu-shaggy-white": "/planner-assets/products/temu-shaggy-rug-white-607474249752115.svg",
   "bath-mat-shaggy-cream": "/planner-assets/textures/fabric/bath-mat-shaggy-cream.svg",
-  "temu-bath-rug-woven": "/planner-assets/products/temu-bath-rug-606121368598635-texture.png",
   "rug-temu-shaggy-shadow": "/planner-assets/textures/fabric/rug.svg",
   "rug-temu-easy-line-colorblock": "/planner-assets/textures/fabric/temu-easy-line-colorblock-rug.svg",
   "rug-hall-overlap-taupe": "/planner-assets/textures/fabric/hall-rug-overlap-taupe.svg",

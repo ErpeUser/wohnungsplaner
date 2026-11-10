@@ -218,6 +218,35 @@ test("refreshes an older bathroom door to the requested half-open presentation o
   assert.ok(result.warnings.some((warning) => /aktualisiert/i.test(warning)));
 });
 
+test("migrates saved WC rugs from marketing-image material to seamless waffle finish", () => {
+  const old = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
+  const wcRug = old.builtIns.find((item) => item.id === "builtin-wc-mat")!;
+  const bathRug = old.builtIns.find((item) => item.id === "builtin-bath-mat")!;
+  wcRug.materialVariants = { main: "bath-mat-shaggy-cream" };
+  wcRug.rotation = 90;
+  bathRug.materialVariants = { main: "bath-mat-shaggy-cream" };
+  const stored = new MemoryStorage({ [PLANNER_STORAGE_KEY]: JSON.stringify(old) });
+  const upgraded = createLocalStoragePlannerRepository(stored, fixedClock).load();
+  assert.equal(upgraded.document.builtIns.find((item) => item.id === "builtin-wc-mat")?.materialVariants?.main, "temu-bath-rug-woven");
+  assert.equal(upgraded.document.builtIns.find((item) => item.id === "builtin-bath-mat")?.materialVariants?.main, "temu-bath-rug-woven");
+  assert.equal(upgraded.document.builtIns.find((item) => item.id === "builtin-wc-mat")?.rotation, 0);
+  assert.ok(upgraded.warnings.some((warning) => /aktualisiert/.test(warning)));
+  assert.equal(upgraded.document.placements.length, old.placements.length, "no furniture is removed");
+});
+
+test("restores current WC shelf and replaces obsolete bathroom hook rail in saved layouts", () => {
+  const old = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
+  old.builtIns = old.builtIns.filter((item) => item.id !== "builtin-wc-paper-holder");
+  const hooks = old.builtIns.find((item) => item.id === "builtin-bath-towel-hook-rail")!;
+  hooks.catalogId = "bath-towel-hook-rail";
+  hooks.materialVariants = { main: "chrome-polished" };
+  const upgraded = createLocalStoragePlannerRepository(
+    new MemoryStorage({ [PLANNER_STORAGE_KEY]: JSON.stringify(old) }), fixedClock,
+  ).load().document;
+  assert.equal(upgraded.builtIns.filter((item) => item.id === "builtin-wc-paper-holder").length, 1);
+  assert.equal(upgraded.builtIns.find((item) => item.id === "builtin-bath-towel-hook-rail")?.catalogId, "bath-towel-hooks-wood-black");
+});
+
 test("migrates raw v2 data and reports corrupted or schema-invalid data", () => {
   const storage = new MemoryStorage();
   const repository = createLocalStoragePlannerRepository(storage, fixedClock);
