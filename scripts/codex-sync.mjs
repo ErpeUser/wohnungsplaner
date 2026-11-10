@@ -6,7 +6,7 @@ async function snapshotWorkingTree(before) {
   await ensureLocalDir();
   const patch = await git(["diff", "HEAD", "--binary"], { allowFailure: true });
   const untracked = await git(["ls-files", "--others", "--exclude-standard", "-z"], { allowFailure: true });
-  const files = untracked.stdout.split("\\0").filter(Boolean);
+  const files = untracked.stdout.split("\0").filter(Boolean);
   const copied = [];
   for (const relative of files) {
     const source = path.resolve(repoRoot, relative);
