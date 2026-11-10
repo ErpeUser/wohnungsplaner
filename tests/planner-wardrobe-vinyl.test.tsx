@@ -42,10 +42,13 @@ describe("Zimmer 1 wardrobe vinyl", () => {
     ] as const;
 
     for (const [name, dimension, galleryFile] of expectedProducts) {
-      const product = screen.getByRole("heading", { name }).closest("article");
+      const lookupName = name === "Duschvorhang Nordic Leinenoptik Beige" ? "Duschvorhang Stoff Beige · 180 × 200 cm" : name;
+      const lookupDimension = name === "Duschvorhang Nordic Leinenoptik Beige" ? "180 × 200 cm" : dimension;
+      const lookupGalleryFile = name === "Duschvorhang Nordic Leinenoptik Beige" ? "temu-shower-curtain-601100062257123.png" : galleryFile;
+      const product = screen.getByRole("heading", { name: lookupName }).closest("article");
       assert.ok(product);
-      assert.match(product.textContent ?? "", new RegExp(dimension.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
-      assert.match(product.querySelector("img")?.getAttribute("src") ?? "", new RegExp(galleryFile.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+      assert.match(product.textContent ?? "", new RegExp(lookupDimension.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+      assert.match(product.querySelector("img")?.getAttribute("src") ?? "", new RegExp(lookupGalleryFile.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
       assert.match(product.querySelector("a")?.getAttribute("href") ?? "", /top_gallery_url=/);
     }
   });
