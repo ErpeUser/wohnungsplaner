@@ -4,8 +4,12 @@
 
 - Repository: `ErpeUser/wohnungsplaner` (privat), Default-Branch `main`.
 - `main` ist der einzige Branch; offene/geschlossene PR-Abfrage liefert keine PRs.
-- Remote-HEAD: `8eff5009476c516844c00366b41682c6f2b67e6e`.
-- Der frühere Referenzstand `0a8a4416243aece82a02190e635f8fc7053b4525` ist Vorfahr von `main`; `main` ist vier Commits voraus und nicht zurück.
+- Audit-Ausgangsstand: `8eff5009476c516844c00366b41682c6f2b67e6e`.
+- Der Implementierungs-Push dieser Runde ist `1f10176dabced5d2512929b57d54f7be950feb6e`;
+  die nachfolgenden Doku-Synchronisierungen wurden als Fast-Forward auf `main`
+  veröffentlicht. Vor der letzten Audit-Doku-Synchronisierung stand `main` auf
+  `fde602c4ec47fff1d6111ff57aa229313c0a0ffd` und damit sieben Commits vor
+  `0a8a4416243aece82a02190e635f8fc7053b4525`, ohne Rückstand.
 - Es gibt keine integrierbaren Nebenbranches und nichts, das gefahrlos gelöscht werden könnte.
 
 ## Priorisierte Restpunkte mit Umsetzung
