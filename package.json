@@ -12,7 +12,7 @@
     "start:vinext": "vinext start",
     "test:planner": "node --import tsx --test tests/planner-*.test.ts",
     "test:ui": "vitest run",
-    "test:cutover": "node --test tests/rendered-html.test.mjs tests/planner-cutover.test.mjs && node scripts/check-client-bundle.mjs",
+    "test:cutover": "node --test tests/rendered-html.test.mjs tests/planner-cutover.test.mjs && node scripts/check-client-bundle.mjs && node --test tests/serve-local.test.mjs",
     "test": "npm run build && npm run test:planner && npm run test:ui && npm run test:cutover",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",

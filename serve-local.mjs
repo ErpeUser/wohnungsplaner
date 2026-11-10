@@ -1,13 +1,58 @@
 import http from "node:http";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
-import handler from "./dist/server/index.js";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
+const serverRoot = path.join(root, "dist", "server");
 const clientRoot = path.join(root, "dist", "client");
 const publicRoot = path.join(root, "public");
 const port = Number(process.env.PORT || 3000);
+const MAX_STATIC_BYTES = 12 * 1024 * 1024;
+const RATE_WINDOW_MS = 60_000;
+const RATE_LIMIT = 240;
+const requestBuckets = new Map();
+let runtimeHandler;
+let runtimeError;
+
+async function loadRuntimeHandler() {
+  try {
+    return (await import("./dist/server/index.js")).default;
+  } catch (error) {
+    if (error?.code !== "ERR_UNSUPPORTED_ESM_URL_SCHEME" || !String(error?.message).includes("cloudflare:")) {
+      runtimeError = error;
+      return null;
+    }
+    const shimName = "cloudflare-workers-shim.mjs";
+    const shimPath = path.join(serverRoot, shimName);
+    const adapterName = `.local-node-index-${process.pid}.mjs`;
+    const adapterPath = path.join(serverRoot, adapterName);
+    const source = await fs.readFile(path.join(serverRoot, "index.js"), "utf8");
+    await fs.writeFile(shimPath, "export const tracing = undefined;\n", "utf8");
+    await fs.writeFile(adapterPath, source.replaceAll("cloudflare:workers", `./${shimName}`), "utf8");
+    try {
+      return (await import(`${pathToFileURL(adapterPath).href}?pid=${process.pid}`)).default;
+    } catch (fallbackError) {
+      runtimeError = fallbackError;
+      return null;
+    } finally {
+      await fs.rm(adapterPath, { force: true }).catch(() => undefined);
+      await fs.rm(shimPath, { force: true }).catch(() => undefined);
+    }
+  }
+}
+
+const runtimeHandlerPromise = loadRuntimeHandler().then((handler) => {
+  runtimeHandler = handler;
+  return handler;
+});
+const cleanupBuckets = setInterval(() => {
+  const cutoff = Date.now() - RATE_WINDOW_MS;
+  for (const [key, bucket] of requestBuckets) {
+    if (bucket.startedAt < cutoff) requestBuckets.delete(key);
+  }
+}, RATE_WINDOW_MS);
+cleanupBuckets.unref();
 
 const contentTypes = {
   ".css": "text/css; charset=utf-8",
@@ -39,28 +84,76 @@ const safePublicPath = (pathname) => {
   return resolved.startsWith(path.resolve(publicRoot) + path.sep) ? resolved : null;
 };
 
+const securityHeaders = {
+  "X-Content-Type-Options": "nosniff",
+  "Referrer-Policy": "no-referrer",
+  "X-Frame-Options": "DENY",
+  "Cross-Origin-Opener-Policy": "same-origin",
+  "Cross-Origin-Resource-Policy": "same-origin",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+  "Content-Security-Policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: blob:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; worker-src 'self' blob:; connect-src 'self' ws: wss:;",
+};
+
+function clientAddress(req) {
+  return req.socket.remoteAddress || "unknown";
+}
+
+function consumeRateLimit(req) {
+  const now = Date.now();
+  const key = clientAddress(req);
+  const bucket = requestBuckets.get(key);
+  if (!bucket || now - bucket.startedAt >= RATE_WINDOW_MS) {
+    requestBuckets.set(key, { startedAt: now, count: 1 });
+    return true;
+  }
+  bucket.count += 1;
+  return bucket.count <= RATE_LIMIT;
+}
+
+async function readStaticFile(file) {
+  const stat = await fs.stat(file);
+  if (!stat.isFile()) throw Object.assign(new Error("Not a file"), { statusCode: 404 });
+  if (stat.size > MAX_STATIC_BYTES) {
+    throw Object.assign(new Error("Static asset too large"), { statusCode: 413 });
+  }
+  return { data: await fs.readFile(file), size: stat.size };
+}
+
+function fail(res, statusCode, message, extraHeaders = {}) {
+  res.writeHead(statusCode, {
+    ...securityHeaders,
+    "Content-Type": "text/plain; charset=utf-8",
+    ...extraHeaders,
+  });
+  return res.end(message);
+}
+
 const server = http.createServer(async (req, res) => {
   try {
-    if (req.method !== "GET" && req.method !== "HEAD") {
-      return res.writeHead(405, { Allow: "GET, HEAD" }).end("Method not allowed");
+    if (!consumeRateLimit(req)) {
+      return fail(res, 429, "Zu viele Anfragen. Bitte später erneut versuchen.", { "Retry-After": "60" });
     }
+    if (req.method !== "GET" && req.method !== "HEAD") {
+      return fail(res, 405, "Method not allowed", { Allow: "GET, HEAD" });
+    }
+    if ((req.url || "").length > 4096) return fail(res, 414, "Request-URI too long");
     const url = new URL(req.url || "/", `http://${req.headers.host || "127.0.0.1"}`);
-    const securityHeaders = {
-      "X-Content-Type-Options": "nosniff",
-      "Referrer-Policy": "no-referrer",
-      "Content-Security-Policy": "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; connect-src 'self' ws: wss:;",
-    };
     if (url.pathname.startsWith("/assets/") || url.pathname.startsWith("/_next/")) {
       const file = safeClientPath(url.pathname);
-      if (!file) return res.writeHead(400).end("Bad asset path");
-      const data = await fs.readFile(file);
-      return res.writeHead(200, { ...securityHeaders, "Content-Type": contentTypes[path.extname(file)] || "application/octet-stream", "Cache-Control": "no-cache", "Content-Length": data.byteLength }).end(req.method === "HEAD" ? undefined : data);
+      if (!file) return fail(res, 400, "Bad asset path");
+      const { data, size } = await readStaticFile(file);
+      return res.writeHead(200, { ...securityHeaders, "Content-Type": contentTypes[path.extname(file)] || "application/octet-stream", "Cache-Control": "no-cache", "Content-Length": size }).end(req.method === "HEAD" ? undefined : data);
     }
     if (url.pathname.startsWith("/planner-assets/") || url.pathname.startsWith("/room-studies/") || url.pathname.startsWith("/zimmer1-") || url.pathname.startsWith("/vorraum-") || url.pathname === "/og-v2.png" || url.pathname === "/og.png" || url.pathname === "/favicon.svg") {
       const file = safePublicPath(url.pathname);
-      if (!file) return res.writeHead(400).end("Bad public path");
-      const data = await fs.readFile(file);
-      return res.writeHead(200, { ...securityHeaders, "Content-Type": contentTypes[path.extname(file)] || "application/octet-stream", "Cache-Control": "public, max-age=3600", "Content-Length": data.byteLength }).end(req.method === "HEAD" ? undefined : data);
+      if (!file) return fail(res, 400, "Bad public path");
+      const { data, size } = await readStaticFile(file);
+      return res.writeHead(200, { ...securityHeaders, "Content-Type": contentTypes[path.extname(file)] || "application/octet-stream", "Cache-Control": "public, max-age=3600", "Content-Length": size }).end(req.method === "HEAD" ? undefined : data);
+    }
+    const handler = runtimeHandler ?? await runtimeHandlerPromise;
+    if (!handler) {
+      console.error(runtimeError);
+      return fail(res, 503, "Der lokale Vinext-Server ist in dieser Node-Laufzeit nicht verfügbar.");
     }
     const response = await handler.fetch(new Request(url, { method: req.method, headers: req.headers }));
     const body = Buffer.from(await response.arrayBuffer());
@@ -68,8 +161,7 @@ const server = http.createServer(async (req, res) => {
     return res.end(body);
   } catch (error) {
     console.error(error);
-    res.writeHead(500, { "Content-Type": "text/plain; charset=utf-8" });
-    return res.end("Lokaler Raumplaner konnte die Anfrage nicht verarbeiten.");
+    return fail(res, error?.statusCode || 500, error?.statusCode === 413 ? "Asset ist zu groß." : "Lokaler Raumplaner konnte die Anfrage nicht verarbeiten.");
   }
 });
 

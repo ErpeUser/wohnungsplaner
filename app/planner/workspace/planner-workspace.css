@@ -300,6 +300,129 @@
   background: var(--accent);
 }
 
+.planner-catalog__import {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 10px;
+  padding: 10px;
+  border: 1px solid #ded7cc;
+  border-radius: 9px;
+  background: #fffdf9;
+}
+
+.planner-catalog__import-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.planner-catalog__import h3,
+.planner-catalog__assets h3 {
+  margin: 2px 0 0;
+  font-size: 12px;
+}
+
+.planner-catalog__import-limit {
+  padding: 3px 5px;
+  border-radius: 5px;
+  color: var(--muted);
+  background: #f2ece3;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.planner-catalog__file,
+.planner-catalog__import-grid label {
+  display: grid;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.planner-catalog__file input,
+.planner-catalog__import-grid input,
+.planner-catalog__import-grid select {
+  min-width: 0;
+  min-height: 30px;
+  padding: 0 7px;
+  border: 1px solid #cbc8c0;
+  border-radius: 6px;
+  color: var(--ink);
+  background: #fff;
+  font: inherit;
+  font-weight: 500;
+}
+
+.planner-catalog__file input {
+  padding: 5px;
+}
+
+.planner-catalog__file-name {
+  overflow: hidden;
+  margin: 0;
+  color: var(--ink);
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.planner-catalog__import-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.planner-catalog__import-wide {
+  grid-column: 1 / -1;
+}
+
+.planner-catalog__import-button {
+  min-height: 34px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  color: #fff;
+  background: var(--accent);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.planner-catalog__import-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.planner-catalog__import-hint,
+.planner-catalog__import-error,
+.planner-catalog__import-success {
+  margin: 0;
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.planner-catalog__import-hint { color: var(--muted); }
+.planner-catalog__import-error { color: #9a3d35; }
+.planner-catalog__import-success { color: #3c6b4e; }
+
+.planner-catalog__assets {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.planner-catalog__asset-record {
+  display: grid;
+  gap: 2px;
+  padding: 7px;
+  border: 1px dashed #d4c8b8;
+  border-radius: 6px;
+  background: #faf7f1;
+}
+
+.planner-catalog__asset-record strong { font-size: 10px; }
+.planner-catalog__asset-record small { color: var(--muted); font-size: 9px; }
+
 .planner-catalog__items {
   max-height: min(48svh, 520px);
   display: grid;

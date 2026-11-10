@@ -141,10 +141,24 @@ describe("createPlanScene", () => {
     assert.ok(plain.openings.some((opening) => opening.kind === "door"));
     assert.ok(plain.openings.some((opening) => opening.kind === "window"));
     assert.equal(plain.builtIns.length, DEFAULT_APARTMENT_DOCUMENT.builtIns.length);
+    assert.equal(plain.placements.length, DEFAULT_APARTMENT_DOCUMENT.placements.length);
     assert.equal(plain.fixtures.length, 0);
     assert.equal(plain.dimensions.length, 0);
     assert.equal(annotated.fixtures.length, DEFAULT_APARTMENT_DOCUMENT.fixtures.length);
     assert.equal(annotated.dimensions.length, 49);
+  });
+
+  test("carries source and confidence through the shared scene descriptors", () => {
+    const source = DEFAULT_APARTMENT_DOCUMENT.placements[0];
+    const scene = createPlanScene({
+      ...DEFAULT_APARTMENT_DOCUMENT,
+      placements: [{ ...source, metadata: { source: "vision-review", confidence: "estimated" } }],
+    }, {
+      activeRoomId: null,
+      overlays: { dimensions: false, fixtures: false, evidence: false },
+    });
+
+    assert.deepEqual(scene.placements[0]?.metadata, { source: "vision-review", confidence: "estimated" });
   });
 
   test("fits the complete apartment and keeps north-up screen orientation", () => {

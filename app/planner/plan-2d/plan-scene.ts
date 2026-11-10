@@ -1,6 +1,7 @@
 import { openingSegment, placementPolygon } from "../domain/geometry.ts";
 import type {
   PlannerDocumentV3,
+  PlannerMetadata,
   PlannerOpening,
   PlannerViewPreferences,
   Point2,
@@ -14,6 +15,7 @@ export type PlanRoomDescriptor = {
   includedInWnf: boolean;
   floorMaterialId: string;
   points: Point2[];
+  metadata?: Pick<PlannerMetadata, "source" | "confidence" | "notes">;
 };
 
 export type PlanWallDescriptor = {
@@ -48,6 +50,7 @@ export type PlanObjectDescriptor = {
   materialId?: string;
   points: Point2[];
   locked: boolean;
+  metadata?: Pick<PlannerMetadata, "source" | "confidence" | "notes">;
 };
 
 export type PlanFixtureDescriptor = {
@@ -56,6 +59,7 @@ export type PlanFixtureDescriptor = {
   roomId: string;
   kind: string;
   position: Point2;
+  metadata?: Pick<PlannerMetadata, "source" | "confidence" | "notes">;
 };
 
 export type PlanDimensionDescriptor = {
@@ -89,6 +93,7 @@ export type PlanScene = {
   walls: PlanWallDescriptor[];
   openings: PlanOpeningDescriptor[];
   builtIns: PlanObjectDescriptor[];
+  placements: PlanObjectDescriptor[];
   fixtures: PlanFixtureDescriptor[];
   dimensions: PlanDimensionDescriptor[];
   guides: PlanGuideDescriptor[];
@@ -122,6 +127,7 @@ export function createPlanScene(
       includedInWnf: room.includedInWnf,
       floorMaterialId: room.surfaces.floor,
       points: deriveRoomPolygon(document, room.id),
+    metadata: room.metadata,
     }));
   const roomIds = new Set(rooms.map((room) => room.id));
   const walls = document.walls
@@ -167,6 +173,20 @@ export function createPlanScene(
       materialId: item.materialVariants?.main ?? item.materialVariants?.color,
       points: placementPolygon(item),
       locked: true,
+      metadata: item.metadata,
+    }));
+  const placements = document.placements
+    .filter((item) => roomIds.has(item.roomId))
+    .map((item) => ({
+      id: item.id,
+      label: item.catalogId,
+      roomId: item.roomId,
+      kind: "placement",
+      catalogId: item.catalogId,
+      materialId: item.materialVariants?.main ?? item.materialVariants?.color,
+      points: placementPolygon(item),
+      locked: false,
+      metadata: item.metadata,
     }));
   const fixtures = options.overlays.fixtures
     ? document.fixtures
@@ -177,6 +197,7 @@ export function createPlanScene(
         roomId: fixture.roomId,
         kind: fixture.kind,
         position: fixture.position,
+        metadata: fixture.metadata,
       }))
     : [];
   const dimensions = options.overlays.dimensions
@@ -190,6 +211,7 @@ export function createPlanScene(
     walls,
     openings,
     builtIns,
+    placements,
     fixtures,
     dimensions,
     guides: options.guides ?? [],

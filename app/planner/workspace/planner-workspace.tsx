@@ -5,6 +5,8 @@ import { Component, lazy, Suspense, useCallback, useEffect, useMemo, useRef, use
 import { useStore } from "zustand";
 
 import { DEFAULT_APARTMENT_DOCUMENT } from "../domain/apartment-v3.ts";
+import { deriveRoomPolygon } from "../domain/wall-graph.ts";
+import type { PlannerAssetRecord } from "../domain/types.ts";
 import { ExportDialog } from "../export/export-dialog.tsx";
 import { PlanCanvas } from "../plan-2d/plan-canvas.tsx";
 import { createPlanScene } from "../plan-2d/plan-scene.ts";
@@ -144,6 +146,37 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
     detailsButtonRef.current?.focus();
   };
 
+  const registerAsset = useCallback((asset: PlannerAssetRecord) => {
+    const registered = store.getState().dispatch({ type: "registerAsset", asset });
+    if (registered.error) return registered.error.message;
+    const roomId = store.getState().activeRoomId;
+    if (!roomId) return null;
+    const polygon = deriveRoomPolygon(store.getState().document, roomId);
+    const center = polygon.reduce((result, point) => ({ x: result.x + point.x, z: result.z + point.z }), { x: 0, z: 0 });
+    const position = polygon.length ? { x: center.x / polygon.length, z: center.z / polygon.length } : { x: 0, z: 0 };
+    const placementId = `asset-placeholder-${asset.assetId}`;
+    const placed = store.getState().dispatch({
+      type: "addPlacement",
+      placement: {
+        id: placementId,
+        roomId,
+        catalogId: asset.assetId,
+        position,
+        rotation: 0,
+        size: asset.normalizedSize,
+        materialVariants: { main: asset.materialId },
+        metadata: {
+          source: asset.source,
+          confidence: asset.confidence,
+          notes: ["Editierbarer Platzhalter: freigegebene Storage-URL fehlt."],
+        },
+      },
+    });
+    if (placed.error) return `Asset registriert, Platzhalter nicht platziert: ${placed.error.message}`;
+    store.getState().select(placementId);
+    return null;
+  }, [store]);
+
   return (
     <main className="planner-workspace">
       <PlannerToolbar
@@ -194,7 +227,12 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
           />
         ) : null}
         {state.panels.catalog ? (
-          <CatalogPanel activeRoomId={state.activeRoomId} onAdd={interactions.addCatalogItem} />
+          <CatalogPanel
+            document={state.document}
+            activeRoomId={state.activeRoomId}
+            onAdd={interactions.addCatalogItem}
+            onRegisterAsset={registerAsset}
+          />
         ) : null}
         <section className="planner-canvas" aria-label={state.viewMode === "2d" ? "2D-Planungsfläche" : "3D-Planungsfläche"}>
           <div className="planner-canvas__meta">

@@ -32,6 +32,7 @@ import { FurnitureLayer } from "../app/planner/plan-2d/furniture-layer.tsx";
 import {
   createCatalogPlacement,
   nudgePlacement,
+  nudgeRotation,
   resolvePlacementMove,
   resolvePlacementResize,
   resolvePlacementRotation,
@@ -130,6 +131,9 @@ describe("furniture interactions", () => {
   test("supports 1/10 cm keyboard movement, 45 degree/free rotation and allowed resizing", () => {
     assert.deepEqual(nudgePlacement(chair, "ArrowRight", false), { x: 2.97, z: 0.92 });
     assert.deepEqual(nudgePlacement(chair, "ArrowUp", true), { x: 2.96, z: 0.82 });
+    assert.equal(nudgeRotation(0, "]", false), 5);
+    assert.equal(nudgeRotation(0, "[", true), 315);
+    assert.equal(nudgeRotation(0, "ArrowLeft", false), null);
     assert.equal(resolvePlacementRotation(32, false), 45);
     assert.equal(resolvePlacementRotation(32, true), 32);
 

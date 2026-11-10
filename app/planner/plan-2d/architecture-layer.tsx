@@ -69,7 +69,9 @@ export function ArchitectureLayer({ scene, onToggleDoor, onSelect }: { scene: Pl
               stroke="#506366"
               strokeWidth={0.025}
               hitStrokeWidth={0.12}
-              dash={item.catalogId?.startsWith("floor-zone-") ? undefined : [0.08, 0.04]}
+              dash={item.metadata?.confidence === "estimated" || item.metadata?.confidence === "legacy"
+                ? [0.04, 0.03]
+                : item.catalogId?.startsWith("floor-zone-") ? undefined : [0.08, 0.04]}
               onClick={(event) => { event.cancelBubble = true; onSelect?.(item.id); }}
               onTap={(event) => { event.cancelBubble = true; onSelect?.(item.id); }}
             />
@@ -84,6 +86,18 @@ export function ArchitectureLayer({ scene, onToggleDoor, onSelect }: { scene: Pl
               fill="#405255"
               listening={false}
             /> : null}
+            {item.metadata?.confidence === "estimated" ? (
+              <Text
+                x={box.minX + 0.03}
+                y={box.maxZ - 0.14}
+                width={Math.max(0.2, box.maxX - box.minX - 0.06)}
+                text="Schätzung"
+                fontFamily="Arial"
+                fontSize={0.06}
+                fill="#8a5b2f"
+                listening={false}
+              />
+            ) : null}
           </Group>
         );
       })}

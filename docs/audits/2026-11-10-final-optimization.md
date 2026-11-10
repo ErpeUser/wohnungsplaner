@@ -33,3 +33,17 @@
 ## Nicht als fertig behauptet
 
 Reale Produktbilder, lizenzierte GLB-Modelle, HDR-Beleuchtung, Vision-Analyse, Storage-Worker und Firecrawl/Context7-Verträge sind in diesem Repository/Connector nicht vorhanden. Diese Punkte bleiben als präzise Anschlussaufträge in `docs/OFFENE_UMSETZUNG.md` dokumentiert.
+
+
+## Zweite Finalrunde
+
+Zusätzlich umgesetzt wurden der lokale Asset-Importdialog mit kollisionsgeprüftem
+Platzhalter, Source-/Confidence-Durchgabe in der gemeinsamen 2D-/SVG-Szene,
+Tastaturrotation, CSP-/Header-/Rate-Limit-Härtung im lokalen Adapter und ein
+Node-Shim für Vinexts cloudflare:workers-Bundle. Der neue serve-local-Smoke-Test
+prüft Start, 200-SSR, Schutzheader, 405 und Pfadschutz.
+
+Frische Nachweise: Typecheck 0, Lint 0, Build 0, UI 81/81, Cutover 5/5.
+Der vollständige Planner bleibt bei 100/101 wegen der nicht bytegenau
+rekonstruierten lokalen model-sofa-Datei; der nicht-binäre Subset ist 92/92.
+

@@ -113,6 +113,13 @@ export function nudgePlacement(placement: PlannerPlacement, key: string, largeSt
   };
 }
 
+/** Keyboard rotation step: five degrees normally, 45 degrees with Shift. */
+export function nudgeRotation(rotation: number, key: string, largeStep: boolean): number | null {
+  const amount = largeStep ? 45 : 5;
+  if (key !== "[" && key !== "]") return null;
+  return resolvePlacementRotation(rotation + (key === "]" ? amount : -amount), true);
+}
+
 export function resolvePlacementRotation(rotation: number, freeRotation: boolean) {
   const normalized = ((rotation % 360) + 360) % 360;
   return normalize(freeRotation ? normalized : Math.round(normalized / 45) * 45 % 360);
@@ -169,6 +176,12 @@ export function usePlanInteractions({
         event.preventDefault();
         const position = nudgePlacement(selectedPlacement, event.key, event.shiftKey);
         dispatch(resolvePlacementMove(document, selectedPlacement, position, { disableGrid: true }).command);
+      } else if (event.key === "[" || event.key === "]") {
+        event.preventDefault();
+        const rotation = nudgeRotation(selectedPlacement.rotation, event.key, event.shiftKey);
+        if (rotation !== null) {
+          dispatch({ type: "rotatePlacement", placementId: selectedPlacement.id, rotation });
+        }
       } else if (event.key === "Delete" || event.key === "Backspace") {
         event.preventDefault();
         const result = dispatch({ type: "removePlacement", placementId: selectedPlacement.id });

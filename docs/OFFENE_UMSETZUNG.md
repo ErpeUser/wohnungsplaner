@@ -220,3 +220,54 @@ Die autorisierte GitHub-Schnittstelle führte die Fast-Forward-Commits aus und
 bestätigte abschließend `main` auf
 `14926e84b72c0be93dfd284a20e3e230b7483788`, ohne offene PRs und ohne weitere
 Branches. Es gab deshalb nichts zu mergen, zu schließen oder zu löschen.
+
+
+## Zweite Finalrunde – zusätzlicher Umsetzungsstand
+
+Diese Nachrunde hat weitere lokal mögliche Punkte umgesetzt:
+
+- app/planner/workspace/catalog-panel.tsx besitzt jetzt einen lokalen Importdialog
+  für GLB, PNG, JPEG, SVG und WEBP mit 5-MB-Limit, Dateiprüfung, Maßeingabe,
+  Material, Lizenz, Quelle, Confidence, Statusmeldungen und registrierten Assets.
+- app/planner/workspace/planner-workspace.tsx verbindet den Import mit
+  registerAsset und erzeugt im aktiven Raum einen kollisionsgeprüften,
+  editierbaren Platzhalter mit den importierten Metermaßen.
+- app/planner/plan-2d/plan-scene.ts, architecture-layer.tsx und
+  plan-canvas.tsx führen Source/Confidence durch gemeinsame Szenendeskriptoren
+  und markieren geschätzte oder alte Daten gestrichelt und zugänglich.
+- app/planner/plan-2d/use-plan-interactions.ts unterstützt 5-Grad-Rotation,
+  45-Grad-Shift-Rotation und verwendet weiterhin dieselben Commands.
+- serve-local.mjs setzt Security-Header, CSP-Pfade für den lokalen Build,
+  GET/HEAD-Allowlist, URL-Limit 414, statische 12-MB-Grenze 413,
+  per-IP-Request-Limit 429 und Retry-After.
+- docs/superpowers/plans/2026-11-10-final-completion-plan.md und
+  docs/CODEX_FINAL_FORTSETZUNGSPROMPT.md enthalten den sequenziellen
+  Umsetzungsplan für die restlichen extern abhängigen Punkte.
+
+Frische Nachweise dieser Nachrunde:
+
+- npm run typecheck: Exit 0
+- npm run lint: Exit 0
+- npm run build: Exit 0
+- npm run test:ui -- --maxWorkers=1: 6 Dateien, 81/81
+- npm run test:cutover: 5/5 bestanden (4 Cutover-Tests plus serve-local-Smoke-Test),
+  Client-Bundle-Vertrag bestanden
+- fokussierter Workspace-/Furniture-Lauf: 2 Dateien, 26/26
+- vollständiger Planner-Lauf: 100/101; einziger Fehler bleibt die lokale
+  rekonstruierte model-sofa-Binärdatei in tests/planner-assets.test.ts
+- nicht-binärer Planner-Subset: 92/92
+- npm run assets:check: reproduziert denselben model-sofa-Byte-/SHA-Fehler
+
+Ein parallel gestarteter kombinierter Cutover-Lauf blieb nach zwei erfolgreichen
+SSR-Tests hängen, obwohl der isolierte npm run test:cutover-Lauf mit 4/4
+bestand. Das ist als Ressourcen-/Parallelitätsproblem dokumentiert, nicht als
+grüner kombinierter Lauf behauptet.
+
+Nicht abschließbar ohne externe Verträge bleiben:
+
+- echter Storage-Worker für assetId -> URL
+- dynamische GLB-/Bild-Ladung über freigegebene URLs
+- Vision-/Produktrecherche mit belegbaren Quellen
+- Produktionsorigin-Inventar für CSP und Worker-Allowlist
+- belastbare Dependency-/npm audit-Kompatibilitätsmatrix
+

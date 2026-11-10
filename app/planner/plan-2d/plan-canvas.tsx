@@ -407,6 +407,10 @@ function PlanSvgFallback({
           fill={item.id === selectionId ? "#d9a36d" : "#f1ece3"}
           stroke={item.id === selectionId ? "#b75f24" : "#596466"}
           strokeWidth={item.id === selectionId ? 0.045 : 0.025}
+          strokeDasharray={item.metadata?.confidence === "estimated" || item.metadata?.confidence === "legacy" ? "0.08 0.05" : undefined}
+          data-source={item.metadata?.source}
+          data-confidence={item.metadata?.confidence}
+          aria-label={`${getFurnitureCatalogItem(item.catalogId)?.name ?? item.catalogId}${item.metadata?.confidence === "estimated" ? " (Schätzung)" : ""}`}
           onClick={(event) => { event.stopPropagation(); onSelect(item.id); }}
         />
       ))}
