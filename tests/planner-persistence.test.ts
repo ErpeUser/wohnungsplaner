@@ -26,6 +26,16 @@ test("loads the default from empty storage and accepts a valid V3 document", () 
   assert.deepEqual(result.warnings, []);
 });
 
+test("persists the imported asset register across reload", () => {
+  const storage = new MemoryStorage();
+  const repository = createLocalStoragePlannerRepository(storage, fixedClock);
+  const document = parseAssetRegisterFixture();
+  repository.save(document);
+  const reloaded = repository.load().document;
+  assert.equal(reloaded.assets?.[0]?.assetId, document.assets?.[0]?.assetId);
+  assert.equal(reloaded.assets?.[0]?.assetUrl, "https://storage.example/assets/chair.glb");
+});
+
 test("replaces the two retired Amber placeholders in a live document with three Kaleo chairs", () => {
   const stale = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
   stale.placements = stale.placements.filter((item) => item.catalogId !== "chair-kaleo-chenille-beige");
@@ -394,6 +404,30 @@ test("keeps the edited store document intact when autosave fails", async () => {
 
 function documentNamed(name: string): PlannerDocumentV3 {
   return structuredClone({ ...DEFAULT_APARTMENT_DOCUMENT, name });
+}
+
+function parseAssetRegisterFixture(): PlannerDocumentV3 {
+  return {
+    ...structuredClone(DEFAULT_APARTMENT_DOCUMENT),
+    assets: [{
+      assetId: "import-chair-aaaaaaaaaaaa",
+      name: "Import Chair",
+      category: "Sitzen",
+      mediaType: "model/gltf-binary",
+      byteLength: 128,
+      sha256: "a".repeat(64),
+      normalizedSize: { width: 0.8, depth: 0.8, height: 0.9 },
+      floorOffset: 0,
+      pivot: "center",
+      materialId: "object-neutral",
+      assetUrl: "https://storage.example/assets/chair.glb",
+      license: "CC0-1.0",
+      source: "manual-import",
+      confidence: "estimated",
+      notes: [],
+      createdAt: "2026-11-10T00:00:00.000Z",
+    }],
+  };
 }
 
 function fixedClock() {

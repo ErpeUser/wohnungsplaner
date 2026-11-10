@@ -2,6 +2,32 @@
 
 Stand: 2026-11-10
 
+## Nachlauf dieser Finalrunde
+
+Die folgenden Angaben sind der aktuelle, nach dieser Runde verifizierte Stand
+und ersetzen ältere Zwischenstände weiter unten im Dokument:
+
+- Remote-HEAD auf `main`: `8eff5009476c516844c00366b41682c6f2b67e6e`.
+- `main` ist vier Commits vor `0a8a4416243aece82a02190e635f8fc7053b4525`,
+  ohne Rückstand; es gibt keine offenen oder geschlossenen PRs und nur den
+  Branch `main`.
+- Direkt implementiert: 5-MB-/MIME-/Magic-Byte-Importschutz inklusive WebP,
+  sichere SVG-Prüfung, korrigierbare Herkunft/Confidence, persistierbares
+  Asset-Register in V3, Register-/Remove-Commands, Schema- und Reload-Tests,
+  vollständige Footprint-Raumwahl beim Drag, begrenzte Kandidatensuche,
+  Canvas-scoped 2D-Tastatur, konkreter 3D-Pointer-Lock, Form-Control-Guards
+  sowie Drawer-Fokusinitialisierung, Tab-Trap, inert-Hintergrund und korrekte
+  Fokus-Rückgabe.
+- Nachweis: `npm run typecheck` und `npm run lint` erfolgreich; `npm run test:ui`
+  erfolgreich mit 80 Tests; Planner-Suite 100/101 bestanden. Der einzige
+  lokale Restfehler ist die Manifest-Byteprüfung der rekonstruierten Arbeitskopie,
+  weil der autorisierte Datei-Connector nicht jedes binäre PNG/HDR-Byte verlustfrei
+  materialisieren kann. Die Remote-Binärdateien wurden nicht verändert.
+- Reale Produktquellen, lizenzierte HDR-/GLB-Erweiterungen, Vision-API,
+  Storage-Worker und Firecrawl-/Context7-Verträge bleiben blockiert und werden
+  nicht erfunden. Die konkreten Anschlussaufträge in diesem Dokument bleiben
+  gültig.
+
 Dieses Dokument trennt ausgeführte Änderungen von Punkten, die in der
 vorliegenden Codebasis nicht nachweisbar bearbeitet werden konnten. Es ist als
 ausführbare Übergabe für die nächste Person oder Codex gedacht. Unbekannte

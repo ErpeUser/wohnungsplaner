@@ -22,6 +22,26 @@ const sizeSchema = z.object({
   height: positiveNumber,
 });
 
+const assetSchema = z.object({
+  assetId: entityId,
+  name: z.string().trim().min(1),
+  category: z.enum(["Schlafen", "Sitzen", "Arbeiten", "Aufbewahren", "Tische", "Licht/Deko"]),
+  mediaType: z.enum(["model/gltf-binary", "image/png", "image/jpeg", "image/svg+xml", "image/webp"]),
+  byteLength: z.number().int().positive().max(5 * 1024 * 1024),
+  sha256: z.string().regex(/^[a-f0-9]{64}$/i),
+  normalizedSize: sizeSchema,
+  floorOffset: finiteNumber,
+  pivot: z.literal("center"),
+  materialId: entityId,
+  assetUrl: z.string().url().optional(),
+  sourceUrl: z.string().url().optional(),
+  license: z.enum(["CC0-1.0", "MIT"]),
+  source: z.string().trim().min(1),
+  confidence: z.enum(["confirmed", "estimated", "legacy"]),
+  notes: z.array(z.string()),
+  createdAt: z.iso.datetime(),
+});
+
 const metadataSchema = z
   .object({
     source: z.string().trim().min(1).optional(),
@@ -135,6 +155,7 @@ const plannerDocumentSchema = z
     builtIns: z.array(builtInSchema),
     fixtures: z.array(fixtureSchema),
     placements: z.array(placementSchema),
+    assets: z.array(assetSchema).default([]),
     doorStates: z.record(entityId, z.enum(["open", "closed"])),
     viewPreferences: z.object({
       activeRoomId: entityId.nullable(),
@@ -147,6 +168,12 @@ const plannerDocumentSchema = z
   })
   .superRefine((document, context) => {
     validateUniqueIds(document, context);
+
+    const assetIds = new Set<string>();
+    for (const asset of document.assets) {
+      if (assetIds.has(asset.assetId)) addIssue(context, ["assets"], `Asset ${asset.assetId} ist doppelt registriert`);
+      assetIds.add(asset.assetId);
+    }
 
     const wallById = new Map(document.walls.map((wall) => [wall.id, wall]));
     const roomIds = new Set(document.rooms.map((room) => room.id));
@@ -172,8 +199,11 @@ const plannerDocumentSchema = z
         addIssue(context, ["rooms"], `Room ${room.id} boundary must form a closed wall loop`);
       } else {
         const polygon = orientedBoundary(room.boundary, wallById);
-        if (polygonArea(polygon) <= EPSILON || hasSelfIntersection(polygon)) {
+        const derivedArea = polygonArea(polygon);
+        if (derivedArea <= EPSILON || hasSelfIntersection(polygon)) {
           addIssue(context, ["rooms"], `Room ${room.id} boundary must be a simple polygon with positive area`);
+        } else if (room.metadata?.confidence === "confirmed" && Math.abs(derivedArea - room.area) > Math.max(0.5, room.area * 0.08)) {
+          addIssue(context, ["rooms", room.id, "area"], `Room ${room.id} area differs from wall geometry (${derivedArea.toFixed(2)} m²)`);
         }
       }
       if (room.wnfArea !== undefined && room.wnfArea > room.area + EPSILON) {

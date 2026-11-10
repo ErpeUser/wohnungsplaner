@@ -191,7 +191,7 @@ export function CameraController({
   reducedMotion: boolean;
   onOrbitCameraChange?(position: Point2): void;
 }) {
-  const { camera, invalidate } = useThree();
+  const { camera, invalidate, gl } = useThree();
   const keys = useRef(new Set<string>());
   const walkPose = useMemo(
     () => createWalkStartPose(document, scene, activeRoomId),
@@ -310,6 +310,9 @@ export function CameraController({
     if (mode !== "walk") return;
     const activeKeys = keys.current;
     const down = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target?.closest("input, select, textarea, button, a, [contenteditable='true'], [role='button']")) return;
+      if (globalThis.document.pointerLockElement !== gl.domElement && globalThis.document.activeElement !== gl.domElement) return;
       const zoomCommand = walkZoomCommandForKey(event);
       if (zoomCommand) {
         event.preventDefault();
@@ -329,7 +332,7 @@ export function CameraController({
       window.removeEventListener("keydown", down);
       window.removeEventListener("keyup", up);
     };
-  }, [invalidate, mode, zoomCamera]);
+  }, [gl.domElement, invalidate, mode, zoomCamera]);
 
   useFrame((_state, delta) => {
     if (mode !== "walk" || keys.current.size === 0) return;
@@ -358,9 +361,9 @@ export function CameraController({
 }
 
 function SafePointerLockControls() {
+  const { gl } = useThree();
   useEffect(() => {
-    const canvas = document.querySelector<HTMLElement>("#planner-3d-canvas");
-    if (!canvas) return;
+    const canvas = gl.domElement;
 
     const lockPointer = () => {
       try {
@@ -374,7 +377,7 @@ function SafePointerLockControls() {
 
     canvas.addEventListener("click", lockPointer);
     return () => canvas.removeEventListener("click", lockPointer);
-  }, []);
+  }, [gl.domElement]);
 
   // Drei still owns camera rotation after a successful lock. The deliberately
   // empty selector prevents its internal click handler from dropping the

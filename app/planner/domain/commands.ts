@@ -1,6 +1,7 @@
 import { inspectPlacement, type CollisionHit } from "./collisions.ts";
 import { isKnownMaterialId } from "./material-registry.ts";
 import type {
+  PlannerAssetRecord,
   PlannerDocumentV3,
   PlannerPlacement,
   Point2,
@@ -8,6 +9,8 @@ import type {
 } from "./types.ts";
 
 export type PlannerCommand =
+  | { type: "registerAsset"; asset: PlannerAssetRecord }
+  | { type: "removeAsset"; assetId: string }
   | { type: "addPlacement"; placement: PlannerPlacement }
   | { type: "movePlacement"; placementId: string; position: Point2 }
   | { type: "resizePlacement"; placementId: string; size: Size3 }
@@ -40,6 +43,30 @@ export function applyPlannerCommand(
   command: PlannerCommand,
 ): CommandResult {
   switch (command.type) {
+    case "registerAsset": {
+      if ((document.assets ?? []).some((asset) => asset.assetId === command.asset.assetId)) {
+        return reject(document, "duplicate-id", `Das Asset ${command.asset.assetId} ist bereits registriert.`);
+      }
+      if (!validAsset(command.asset)) {
+        return reject(document, "invalid", "Das Asset enthält ungültige Hash-, Größen- oder Maßdaten.");
+      }
+      return accept({ ...document, updatedAt: timestamp(), assets: [...(document.assets ?? []), command.asset] });
+    }
+
+    case "removeAsset": {
+      if (!(document.assets ?? []).some((asset) => asset.assetId === command.assetId)) {
+        return reject(document, "not-found", `Das Asset ${command.assetId} wurde nicht gefunden.`);
+      }
+      if (document.placements.some((placement) => placement.catalogId === command.assetId)) {
+        return reject(document, "invalid", "Das Asset wird noch von einer Platzierung verwendet.");
+      }
+      return accept({
+        ...document,
+        updatedAt: timestamp(),
+        assets: (document.assets ?? []).filter((asset) => asset.assetId !== command.assetId),
+      });
+    }
+
     case "addPlacement": {
       if (hasEntityId(document, command.placement.id)) {
         return reject(document, "duplicate-id", `Die ID ${command.placement.id} ist bereits vergeben.`);
@@ -294,6 +321,15 @@ function validPlacement(placement: PlannerPlacement) {
     && placement.size.width > 0
     && placement.size.depth > 0
     && placement.size.height > 0;
+}
+
+function validAsset(asset: PlannerAssetRecord) {
+  return asset.assetId.trim().length > 0
+    && /^[a-f0-9]{64}$/i.test(asset.sha256)
+    && asset.byteLength > 0
+    && asset.byteLength <= 5 * 1024 * 1024
+    && Object.values(asset.normalizedSize).every((value) => Number.isFinite(value) && value > 0)
+    && Number.isFinite(asset.floorOffset);
 }
 
 function normalizeRotation(rotation: number) {

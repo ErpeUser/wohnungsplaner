@@ -1,5 +1,20 @@
 import { z } from "zod";
 
+import { isKnownAssetMaterialId } from "../domain/material-registry.ts";
+
+export const MAX_PLANNER_ASSET_BYTES = 5 * 1024 * 1024;
+
+const extensionToMediaType = {
+  glb: "model/gltf-binary",
+  png: "image/png",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  svg: "image/svg+xml",
+  webp: "image/webp",
+} as const;
+
+const supportedExtension = z.enum(["glb", "png", "jpg", "jpeg", "svg", "webp"]);
+
 const assetImportMetadataSchema = z.object({
   name: z.string().trim().min(1),
   category: z.enum(["Schlafen", "Sitzen", "Arbeiten", "Aufbewahren", "Tische", "Licht/Deko"]),
@@ -9,7 +24,13 @@ const assetImportMetadataSchema = z.object({
   materialId: z.string().trim().min(1).default("object-neutral"),
   sourceUrl: z.string().url().optional(),
   license: z.enum(["CC0-1.0", "MIT"]).default("CC0-1.0"),
+  confidence: z.enum(["confirmed", "estimated", "legacy"]).default("estimated"),
+  source: z.string().trim().min(1).default("manual-import"),
   notes: z.array(z.string().trim().min(1)).default([]),
+}).superRefine((value, context) => {
+  if (!isKnownAssetMaterialId(value.materialId)) {
+    context.addIssue({ code: "custom", path: ["materialId"], message: `Unbekanntes Material: ${value.materialId}` });
+  }
 });
 
 export type AssetImportMetadata = z.infer<typeof assetImportMetadataSchema>;
@@ -22,6 +43,8 @@ export type PreparedAsset = AssetImportMetadata & {
   normalizedSize: { width: number; depth: number; height: number };
   floorOffset: number;
   pivot: "center";
+  confidence: "confirmed" | "estimated" | "legacy";
+  source: string;
 };
 
 export function parseAssetImportMetadata(value: unknown): AssetImportMetadata {
@@ -35,10 +58,19 @@ export async function preparePlannerAsset(
 ): Promise<PreparedAsset> {
   const parsed = parseAssetImportMetadata(metadata);
   if (bytes.byteLength === 0) throw new Error("Das Asset ist leer.");
+  if (bytes.byteLength > MAX_PLANNER_ASSET_BYTES) {
+    throw new Error(`Das Asset ist zu groß (maximal ${MAX_PLANNER_ASSET_BYTES / (1024 * 1024)} MB).`);
+  }
   const sha256 = await sha256Hex(bytes);
-  const extension = options.filename.toLowerCase().split(".").pop() ?? "asset";
-  const mediaType = options.mediaType ?? mediaTypeForExtension(extension);
-  assertSupportedSignature(bytes, extension, mediaType);
+  const extension = options.filename.toLowerCase().split(".").pop() ?? "";
+  const extensionResult = supportedExtension.safeParse(extension);
+  if (!extensionResult.success) throw new Error("Nicht unterstütztes Asset-Format. Erlaubt sind GLB, PNG, JPEG, SVG und WEBP.");
+  const normalizedExtension = extensionResult.data;
+  const mediaType = options.mediaType ?? mediaTypeForExtension(normalizedExtension);
+  if (mediaType !== mediaTypeForExtension(normalizedExtension)) {
+    throw new Error("Dateiendung und MIME-Typ des Assets passen nicht zusammen.");
+  }
+  assertSupportedSignature(bytes, normalizedExtension);
   const slug = parsed.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "asset";
   return {
     ...parsed,
@@ -52,12 +84,12 @@ export async function preparePlannerAsset(
   };
 }
 
-function assertSupportedSignature(bytes: Uint8Array, extension: string, mediaType: string) {
-  const isGlb = extension === "glb" || mediaType === "model/gltf-binary";
-  const isPng = extension === "png" || mediaType === "image/png";
-  const isJpeg = extension === "jpg" || extension === "jpeg" || mediaType === "image/jpeg";
-  const isSvg = extension === "svg" || mediaType === "image/svg+xml";
-  const isWebp = extension === "webp" || mediaType === "image/webp";
+function assertSupportedSignature(bytes: Uint8Array, extension: string) {
+  const isGlb = extension === "glb";
+  const isPng = extension === "png";
+  const isJpeg = extension === "jpg" || extension === "jpeg";
+  const isSvg = extension === "svg";
+  const isWebp = extension === "webp";
   const valid = isGlb
     ? bytes.length >= 4 && bytes[0] === 0x67 && bytes[1] === 0x6c && bytes[2] === 0x54 && bytes[3] === 0x46
     : isPng
@@ -66,19 +98,23 @@ function assertSupportedSignature(bytes: Uint8Array, extension: string, mediaTyp
       : isJpeg
         ? bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff
         : isSvg
-          ? new TextDecoder().decode(bytes.subarray(0, 256)).includes("<svg")
+          ? isSafeSvg(bytes)
           : isWebp
             ? bytes.length >= 12 && new TextDecoder().decode(bytes.subarray(0, 4)) === "RIFF"
               && new TextDecoder().decode(bytes.subarray(8, 12)) === "WEBP"
-            : bytes.length > 0;
+            : false;
   if (!valid) throw new Error(`Die ${extension.toUpperCase()}-Signatur des Assets ist ungültig.`);
 }
 
 function mediaTypeForExtension(extension: string) {
-  return extension === "glb" ? "model/gltf-binary"
-    : extension === "svg" ? "image/svg+xml"
-      : extension === "png" ? "image/png"
-        : extension === "jpg" || extension === "jpeg" ? "image/jpeg" : "application/octet-stream";
+  return extensionToMediaType[extension as keyof typeof extensionToMediaType] ?? "application/octet-stream";
+}
+
+function isSafeSvg(bytes: Uint8Array) {
+  const text = new TextDecoder().decode(bytes);
+  return /^\s*(?:<\?xml[^>]*>\s*)?<svg(?:\s|>)/i.test(text)
+    && !/<\s*script\b/i.test(text)
+    && !/\bon[a-z]+\s*=|javascript:/i.test(text);
 }
 
 async function sha256Hex(bytes: Uint8Array) {

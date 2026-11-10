@@ -15,6 +15,26 @@ export type PlannerMetadata = {
   notes?: string[];
 };
 
+export type PlannerAssetRecord = {
+  assetId: string;
+  name: string;
+  category: "Schlafen" | "Sitzen" | "Arbeiten" | "Aufbewahren" | "Tische" | "Licht/Deko";
+  mediaType: "model/gltf-binary" | "image/png" | "image/jpeg" | "image/svg+xml" | "image/webp";
+  byteLength: number;
+  sha256: string;
+  normalizedSize: Size3;
+  floorOffset: number;
+  pivot: "center";
+  materialId: string;
+  assetUrl?: string;
+  sourceUrl?: string;
+  license: "CC0-1.0" | "MIT";
+  source: string;
+  confidence: "confirmed" | "estimated" | "legacy";
+  notes: string[];
+  createdAt: string;
+};
+
 export type WallRef = {
   wallId: string;
   direction: 1 | -1;
@@ -127,6 +147,8 @@ export type PlannerDocumentV3 = {
   builtIns: PlannerBuiltIn[];
   fixtures: PlannerFixture[];
   placements: PlannerPlacement[];
+  /** Persisted imported assets. Legacy in-memory fixtures may omit this before parsing. */
+  assets?: PlannerAssetRecord[];
   doorStates: Record<string, "open" | "closed">;
   viewPreferences: PlannerViewPreferences;
 };

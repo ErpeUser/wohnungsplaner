@@ -5,7 +5,7 @@ import { useEffect, useMemo } from "react";
 import { getFurnitureCatalogItem, type FurnitureCatalogItem } from "../catalog/catalog.ts";
 import { inspectPlacement } from "../domain/collisions.ts";
 import type { CommandResult, PlannerCommand } from "../domain/commands.ts";
-import { placementPolygon, roomAtPoint } from "../domain/geometry.ts";
+import { placementPolygon, roomContainsPlacement } from "../domain/geometry.ts";
 import { snapPlacement, type SnapGuide } from "../domain/snapping.ts";
 import type { PlannerDocumentV3, PlannerPlacement, Point2, Size3 } from "../domain/types.ts";
 import { deriveRoomPolygon } from "../domain/wall-graph.ts";
@@ -59,11 +59,12 @@ export function previewPlacementMove(
     disableGrid: options.disableGrid,
     gridSize: GRID_SIZE,
   });
-  const roomId = roomAtPoint(document, snapped.position) ?? placement.roomId;
+  const provisional = { ...placement, position: snapped.position };
+  const roomId = document.rooms.find((room) => roomContainsPlacement(document, room.id, provisional))?.id ?? placement.roomId;
   const command: PlannerCommand = roomId === placement.roomId
     ? { type: "movePlacement", placementId: placement.id, position: snapped.position }
     : { type: "transferPlacement", placementId: placement.id, roomId, position: snapped.position };
-  const candidate = { ...placement, roomId, position: snapped.position };
+  const candidate = { ...provisional, roomId };
   return { ...snapped, command, report: inspectPlacement(document, candidate) };
 }
 
@@ -157,7 +158,8 @@ export function usePlanInteractions({
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
-      if (target?.closest("input, select, textarea, [contenteditable='true']")) return;
+      if (!target?.closest("[data-planner-editor='2d']")) return;
+      if (target.closest("input, select, textarea, button, a, [contenteditable='true'], [role='button']")) return;
       if (event.key === "Escape") {
         select(null);
         return;
@@ -240,8 +242,9 @@ function gridCandidates(polygon: Point2[], center: Point2) {
   const minZ = Math.min(...polygon.map((point) => point.z));
   const maxZ = Math.max(...polygon.map((point) => point.z));
   const candidates: Point2[] = [];
-  for (let z = minZ; z <= maxZ; z += 0.25) {
-    for (let x = minX; x <= maxX; x += 0.25) candidates.push({ x, z });
+  const step = Math.max(0.25, Math.sqrt(Math.max(0.0625, (maxX - minX) * (maxZ - minZ)) / 4000));
+  for (let z = minZ; z <= maxZ && candidates.length < 4000; z += step) {
+    for (let x = minX; x <= maxX && candidates.length < 4000; x += step) candidates.push({ x, z });
   }
   return candidates.sort((left, right) => distance(left, center) - distance(right, center));
 }

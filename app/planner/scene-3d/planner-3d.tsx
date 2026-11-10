@@ -106,6 +106,8 @@ export function Planner3D({
     <div ref={hostRef} className="planner-3d" data-quality={tier}>
       <Canvas
         id="planner-3d-canvas"
+        aria-label="3D-Planungsfläche"
+        tabIndex={0}
         frameloop="demand"
         dpr={quality.dpr}
         shadows={quality.shadows ? "soft" : false}
@@ -116,7 +118,11 @@ export function Planner3D({
           far: 80,
         }}
         gl={{ antialias: tier !== "low", alpha: false, powerPreference: "high-performance" }}
-        onCreated={configureRenderer}
+        onCreated={(state) => {
+          configureRenderer(state);
+          state.gl.domElement.tabIndex = 0;
+          state.gl.domElement.setAttribute("aria-label", "3D-Planungsfläche");
+        }}
       >
         <PlannerTextureInvalidator />
         <color attach="background" args={[activeRoomId === "balkon" ? "#dbe9ed" : "#e4e2dc"]} />

@@ -4,7 +4,7 @@ import test from "node:test";
 import { applyPlannerCommand } from "../app/planner/domain/commands.ts";
 import { createPlannerHistory } from "../app/planner/store/history.ts";
 import { createPlannerStore } from "../app/planner/store/planner-store.ts";
-import type { PlannerDocumentV3, PlannerPlacement } from "../app/planner/domain/types.ts";
+import type { PlannerAssetRecord, PlannerDocumentV3, PlannerPlacement } from "../app/planner/domain/types.ts";
 
 test("applies placement commands immutably and rejects hard collisions", () => {
   const original = commandDocument();
@@ -72,6 +72,32 @@ test("rejects material ids that are not in the planner material registry", () =>
   });
 
   assert.equal(result.error?.code, "invalid");
+});
+
+test("registers and removes imported assets through the same command history", () => {
+  const asset: PlannerAssetRecord = {
+    assetId: "import-chair-" + "a".repeat(12),
+    name: "Import Chair",
+    category: "Sitzen",
+    mediaType: "model/gltf-binary",
+    byteLength: 128,
+    sha256: "a".repeat(64),
+    normalizedSize: { width: 0.8, depth: 0.8, height: 0.9 },
+    floorOffset: 0,
+    pivot: "center",
+    materialId: "object-neutral",
+    license: "CC0-1.0",
+    source: "manual-import",
+    confidence: "estimated",
+    notes: [],
+    createdAt: "2026-11-10T00:00:00.000Z",
+  };
+  const registered = applyPlannerCommand(commandDocument(), { type: "registerAsset", asset });
+  assert.equal(registered.error, undefined);
+  assert.equal(registered.document.assets?.[0].assetId, asset.assetId);
+  const removed = applyPlannerCommand(registered.document, { type: "removeAsset", assetId: asset.assetId });
+  assert.equal(removed.error, undefined);
+  assert.deepEqual(removed.document.assets, []);
 });
 
 test("moves every member of a linked furniture group by the same delta", () => {

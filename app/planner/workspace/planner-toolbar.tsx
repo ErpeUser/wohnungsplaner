@@ -16,6 +16,7 @@ type PlannerToolbarProps = {
   detailsOpen: boolean;
   shoppingOpen: boolean;
   detailsButtonRef: RefObject<HTMLButtonElement | null>;
+  shoppingButtonRef: RefObject<HTMLButtonElement | null>;
   exportButtonRef: RefObject<HTMLButtonElement | null>;
   onRoomChange(roomId: string | null): void;
   onViewChange(mode: PlannerViewMode): void;
@@ -41,6 +42,7 @@ export function PlannerToolbar({
   detailsOpen,
   shoppingOpen,
   detailsButtonRef,
+  shoppingButtonRef,
   exportButtonRef,
   onRoomChange,
   onViewChange,
@@ -71,6 +73,7 @@ export function PlannerToolbar({
 
       <div className="planner-segmented" aria-label="Ansicht">
         <button
+          ref={shoppingButtonRef}
           type="button"
           aria-label="2D-Ansicht"
           aria-pressed={viewMode === "2d"}

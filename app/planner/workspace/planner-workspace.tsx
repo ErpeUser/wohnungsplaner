@@ -32,6 +32,7 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
   const store = providedStore ?? internalStore;
   const state = useStore(store);
   const detailsButtonRef = useRef<HTMLButtonElement>(null);
+  const shoppingButtonRef = useRef<HTMLButtonElement>(null);
   const exportButtonRef = useRef<HTMLButtonElement>(null);
   const [planStage, setPlanStage] = useState<Konva.Stage | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
@@ -39,6 +40,7 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
   const openExport = useCallback(() => setExportOpen(true), []);
   const closeExport = useCallback(() => setExportOpen(false), []);
   const detailsOpen = state.panels.details;
+  const drawerOpen = detailsOpen || shoppingOpen;
   const setPanel = state.setPanel;
   const interactions = usePlanInteractions({
     document: state.document,
@@ -89,16 +91,35 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
   }, [store]);
 
   useEffect(() => {
-    if (!detailsOpen && !shoppingOpen) return;
+    if (!drawerOpen) return;
+    const dialog = document.querySelector<HTMLElement>("#planner-details, #planner-shopping-list");
+    const focusable = dialog?.querySelector<HTMLElement>("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])");
+    (focusable ?? dialog)?.focus();
+    const trapFocus = (event: KeyboardEvent) => {
+      if (event.key !== "Tab" || !dialog) return;
+      const elements = [...dialog.querySelectorAll<HTMLElement>("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])")]
+        .filter((element) => !element.hasAttribute("disabled") && element.offsetParent !== null);
+      if (elements.length === 0) { event.preventDefault(); dialog.focus(); return; }
+      const first = elements[0];
+      const last = elements[elements.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    window.addEventListener("keydown", trapFocus);
+    return () => window.removeEventListener("keydown", trapFocus);
+  }, [drawerOpen]);
+
+  useEffect(() => {
+    if (!drawerOpen) return;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
       setPanel("details", false);
       setShoppingOpen(false);
-      detailsButtonRef.current?.focus();
+      (shoppingOpen ? shoppingButtonRef : detailsButtonRef).current?.focus();
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [detailsOpen, setPanel, shoppingOpen]);
+  }, [drawerOpen, setPanel, shoppingOpen]);
 
   useEffect(() => {
     if (typeof window.matchMedia !== "function") return;
@@ -137,6 +158,7 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
         detailsOpen={state.panels.details}
         shoppingOpen={shoppingOpen}
         detailsButtonRef={detailsButtonRef}
+        shoppingButtonRef={shoppingButtonRef}
         exportButtonRef={exportButtonRef}
         onRoomChange={state.setActiveRoom}
         onViewChange={state.setViewMode}
@@ -156,7 +178,7 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
         onExport={openExport}
       />
 
-      <div className="planner-workspace__body" data-catalog-open={state.panels.catalog} data-inspector-open={state.panels.inspector}>
+      <div className="planner-workspace__body" inert={drawerOpen ? true : undefined} data-catalog-open={state.panels.catalog} data-inspector-open={state.panels.inspector}>
         {(state.panels.catalog || state.panels.inspector || state.panels.details || shoppingOpen) ? (
           <button
             type="button"
@@ -167,6 +189,7 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
               state.setPanel("inspector", false);
               state.setPanel("details", false);
               setShoppingOpen(false);
+              (shoppingOpen ? shoppingButtonRef : detailsButtonRef).current?.focus();
             }}
           />
         ) : null}
@@ -220,7 +243,7 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
       </div>
 
       {state.panels.details ? <DetailsDrawer document={state.document} onClose={closeDetails} /> : null}
-      {shoppingOpen ? <ShoppingListDrawer onClose={() => setShoppingOpen(false)} /> : null}
+      {shoppingOpen ? <ShoppingListDrawer onClose={() => { setShoppingOpen(false); shoppingButtonRef.current?.focus(); }} /> : null}
       {repository ? (
         <ExportDialog
           open={exportOpen}

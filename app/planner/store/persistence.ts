@@ -279,7 +279,16 @@ function readStoredValue(raw: string): MigrationResult {
   }
   if (value && typeof value === "object" && (value as { schemaVersion?: unknown }).schemaVersion === 3) {
     try {
-      const parsed = parsePlannerDocument(value);
+      const normalized = normalizeLegacyV3Aliases(value);
+      const parsed = parsePlannerDocument(normalized.document);
+      if (normalized.changed) {
+        return {
+          document: parsed,
+          warnings: ["Das gespeicherte Dokument wurde auf die zusammengeführte Balkon-/Loggia-Struktur aktualisiert."],
+          legacyBackupJson: raw,
+          unmapped: [],
+        };
+      }
       if (isOlderBaselineModel(parsed)) {
         return {
           document: rebaseBaselineModel(parsed),
@@ -304,6 +313,62 @@ function readStoredValue(raw: string): MigrationResult {
     }
   }
   return migrateStoredPlannerData(value, DEFAULT_APARTMENT_DOCUMENT);
+}
+
+/**
+ * V3 documents written before the balcony/loggia merge can still contain a
+ * duplicate `loggia` room with the old 2.23 m² label. Normalize this alias
+ * before strict geometry validation so the legacy save can be recovered.
+ */
+function normalizeLegacyV3Aliases(value: object): { document: object; changed: boolean } {
+  const record = value as Record<string, unknown>;
+  const rooms = Array.isArray(record.rooms) ? record.rooms : [];
+  const hasLoggia = rooms.some((room) => (
+    room && typeof room === "object" && (room as { id?: unknown }).id === "loggia"
+  ));
+  const hasBalkon = rooms.some((room) => (
+    room && typeof room === "object" && (room as { id?: unknown }).id === "balkon"
+  ));
+  const preferences = record.viewPreferences && typeof record.viewPreferences === "object"
+    ? record.viewPreferences as Record<string, unknown>
+    : null;
+  const activeRoomId = preferences?.activeRoomId === "loggia";
+  if (!hasLoggia && !activeRoomId) return { document: value, changed: false };
+
+  const mapRoomId = (roomId: unknown) => roomId === "loggia" ? "balkon" : roomId;
+  const normalizedRooms = rooms.flatMap((room) => {
+    if (!room || typeof room !== "object" || (room as { id?: unknown }).id !== "loggia") return [room];
+    return hasBalkon ? [] : [{ ...(room as Record<string, unknown>), id: "balkon" }];
+  });
+  const normalizeEntityRoomIds = (items: unknown) => Array.isArray(items)
+    ? items.map((item) => item && typeof item === "object" && (item as { roomId?: unknown }).roomId === "loggia"
+      ? { ...(item as Record<string, unknown>), roomId: "balkon" }
+      : item)
+    : items;
+
+  const normalized = {
+    ...record,
+    rooms: normalizedRooms,
+    walls: Array.isArray(record.walls)
+      ? record.walls.map((wall) => wall && typeof wall === "object"
+        ? { ...(wall as Record<string, unknown>), roomIds: Array.isArray((wall as { roomIds?: unknown }).roomIds)
+            ? ((wall as { roomIds: unknown[] }).roomIds).filter((roomId) => roomId !== "loggia").map(mapRoomId)
+            : (wall as Record<string, unknown>).roomIds }
+        : wall)
+      : record.walls,
+    openings: Array.isArray(record.openings)
+      ? record.openings.map((opening) => opening && typeof opening === "object"
+        ? { ...(opening as Record<string, unknown>), roomIds: Array.isArray((opening as { roomIds?: unknown }).roomIds)
+            ? ((opening as { roomIds: unknown[] }).roomIds).map(mapRoomId)
+            : (opening as Record<string, unknown>).roomIds }
+        : opening)
+      : record.openings,
+    builtIns: normalizeEntityRoomIds(record.builtIns),
+    fixtures: normalizeEntityRoomIds(record.fixtures),
+    placements: normalizeEntityRoomIds(record.placements),
+    viewPreferences: preferences ? { ...preferences, activeRoomId: activeRoomId ? "balkon" : preferences.activeRoomId } : record.viewPreferences,
+  };
+  return { document: normalized, changed: true };
 }
 
 function isOlderBaselineModel(document: PlannerDocumentV3) {

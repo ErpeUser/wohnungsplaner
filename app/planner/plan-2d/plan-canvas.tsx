@@ -100,7 +100,7 @@ export function PlanCanvas({
   }, []);
 
   return (
-    <div ref={containerRef} className="planner-plan-canvas" data-testid="plan-stage">
+    <div ref={containerRef} className="planner-plan-canvas" data-testid="plan-stage" data-planner-editor="2d" tabIndex={0}>
       <div className="planner-plan-canvas__controls" aria-label="Planansicht steuern">
         <button
           type="button"

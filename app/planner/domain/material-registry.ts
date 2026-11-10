@@ -24,3 +24,7 @@ export function isKnownMaterialId(document: PlannerDocumentV3, materialId: strin
     ...document.placements.flatMap((item) => Object.values(item.materialVariants ?? {})),
   ].includes(materialId);
 }
+
+export function isKnownAssetMaterialId(materialId: string) {
+  return SURFACE_MATERIAL_IDS.has(materialId) || CATALOG_MATERIAL_IDS.has(materialId);
+}
