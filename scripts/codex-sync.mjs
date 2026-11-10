@@ -2,18 +2,11 @@ import { git, repositorySnapshot, saveState, parseArgs, ensureLocalDir, localDir
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-function untrackedPaths(status = "") {
-  return status
-    .split(/\r?\n/)
-    .filter((line) => line.startsWith("?? "))
-    .map((line) => line.slice(3).trim())
-    .filter(Boolean);
-}
-
 async function snapshotWorkingTree(before) {
   await ensureLocalDir();
   const patch = await git(["diff", "HEAD", "--binary"], { allowFailure: true });
-  const files = untrackedPaths(before.status);
+  const untracked = await git(["ls-files", "--others", "--exclude-standard", "-z"], { allowFailure: true });
+  const files = untracked.stdout.split("\\0").filter(Boolean);
   const copied = [];
   for (const relative of files) {
     const source = path.resolve(repoRoot, relative);
