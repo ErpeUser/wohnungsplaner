@@ -170,6 +170,30 @@ describe("furniture interactions", () => {
     assert.equal(document.querySelectorAll('[data-konva-node="Transformer"]').length, 1);
   });
 
+  test("renders individual 2D graphics for every existing product family", () => {
+    render(
+      <FurnitureLayer
+        document={DEFAULT_APARTMENT_DOCUMENT}
+        activeRoomId={null}
+        selectionId={null}
+        onSelect={vi.fn()}
+        onMove={vi.fn()}
+        onResize={vi.fn()}
+        onRotate={vi.fn()}
+      />,
+    );
+    for (const id of [
+      "plant-zimmer1-olive",
+      "bed-bliss-120",
+      "sofa-chicago-206",
+      "hallway-tejo-115",
+      "vanity-vicco-sherry-120",
+      "chair-temu-executive-ivory",
+      "nightstand-led-2drawer-white",
+      "rug-living-concept-240x240",
+    ]) expect(screen.getByTestId(`plan-graphic-${id}`)).toBeTruthy();
+  });
+
   test("rejects hard collisions and preserves undo/redo history", () => {
     const store = createPlannerStore({ initialDocument: DEFAULT_APARTMENT_DOCUMENT });
     const collision = store.getState().dispatch({

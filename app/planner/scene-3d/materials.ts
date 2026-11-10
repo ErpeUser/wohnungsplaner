@@ -69,6 +69,8 @@ const RECIPES: Record<string, MaterialRecipe> = {
   "oak-natural": { color: "#b98a5e", roughness: 0.64 },
   "oak-artisan": { color: "#b78352", roughness: 0.58, clearcoat: 0.08, clearcoatRoughness: 0.68 },
   "oak-artisan-edge": { color: "#8d603c", roughness: 0.66 },
+  "oak-bozan-directional": { color: "#b78352", roughness: 0.62, clearcoat: 0.08, clearcoatRoughness: 0.7 },
+  "oak-bozan-edge": { color: "#8d603c", roughness: 0.68 },
   "oak-light": { color: "#c99d68", roughness: 0.7, clearcoat: 0.04, clearcoatRoughness: 0.78 },
   walnut: { color: "#704c35", roughness: 0.62 },
   "white-matte": { color: "#f4f2ec", roughness: 0.72 },
@@ -81,14 +83,20 @@ const RECIPES: Record<string, MaterialRecipe> = {
   "fabric-light-grey": { color: "#767a79", roughness: 0.97 },
   "fabric-blush": { color: "#e1a9b2", roughness: 0.94 },
   "leather-ivory": { color: "#e5ded4", roughness: 0.48, clearcoat: 0.18, clearcoatRoughness: 0.42 },
+  "leather-ivory-pebble": { color: "#e5ded4", roughness: 0.5, clearcoat: 0.2, clearcoatRoughness: 0.4 },
+  "white-lacquer": { color: "#f4f2ec", roughness: 0.34, clearcoat: 0.48, clearcoatRoughness: 0.24 },
   "fabric-bliss-beige": { color: "#ddd1bd", roughness: 0.97 },
+  "fabric-bliss-weave": { color: "#ddd1bd", roughness: 0.98 },
   "fabric-ecru": { color: "#eee6d9", roughness: 0.98 },
   "fabric-ecru-sheer": { color: "#f2ede4", roughness: 0.76, opacity: 0.64, transmission: 0.14, thickness: 0.006 },
   "shower-curtain-linen-beige": { color: "#d8cdbb", roughness: 0.96, clearcoat: 0.02, clearcoatRoughness: 0.9 },
   "fabric-taupe": { color: "#aa9684", roughness: 0.98 },
   "fabric-chicago-beige": { color: "#d8d5cc", roughness: 0.98 },
+  "fabric-chicago-chenille": { color: "#d8d5cc", roughness: 0.99 },
   "fabric-kaleo-beige": { color: "#ddd2c2", roughness: 0.98 },
+  "fabric-kaleo-chenille": { color: "#ddd2c2", roughness: 0.99 },
   "tejo-cashmere": { color: "#cbc2b6", roughness: 0.58 },
+  "tejo-cashmere-grain": { color: "#cbc2b6", roughness: 0.62 },
   "tejo-panel-greige": { color: "#b8afa5", roughness: 0.93 },
   "rug-woven": { color: "#d7c4a6", roughness: 0.98 },
   "rug-gala-beige-taupe": { color: "#e8e0d3", roughness: 1 },
@@ -103,6 +111,7 @@ const RECIPES: Record<string, MaterialRecipe> = {
   "rug-hall-beige-patchwork": { color: "#cfc2aa", roughness: 1 },
   "rug-hall-olive-lineart": { color: "#d8d2b8", roughness: 1 },
   "rug-temu-rabbit-ivory": { color: "#eee7da", roughness: 1 },
+  "rug-rabbit-pile": { color: "#eee7da", roughness: 1 },
   "rug-temu-rabbit-highlight": { color: "#fffaf0", roughness: 1 },
   "rug-temu-rabbit-shadow": { color: "#d4c9b8", roughness: 1 },
   "rug-living-ivory-greige": { color: "#ded5c7", roughness: 1 },
@@ -119,7 +128,9 @@ const RECIPES: Record<string, MaterialRecipe> = {
   terracotta: { color: "#9c5d3f", roughness: 0.86 },
   "leaf-green": { color: "#557b5d", roughness: 0.9 },
   "leaf-olive": { color: "#667358", roughness: 0.94 },
+  "leaf-olive-soft": { color: "#667358", roughness: 0.96 },
   "ceramic-beige": { color: "#d7c8b4", roughness: 0.64, clearcoat: 0.08, clearcoatRoughness: 0.72 },
+  "ceramic-pot-glazed": { color: "#d7c8b4", roughness: 0.58, clearcoat: 0.16, clearcoatRoughness: 0.52 },
   "paper-cream": { color: "#ece3d3", roughness: 0.96 },
   "paper-taupe": { color: "#b59c82", roughness: 0.96 },
   "led-warm": { color: "#ffd9a0", roughness: 0.3, clearcoat: 0.18, clearcoatRoughness: 0.35 },
@@ -156,7 +167,7 @@ const TEXTURES: Record<string, string> = {
   "rug-gala-beige-taupe": "/planner-assets/textures/fabric/rug.svg",
   "rug-gala-cream": "/planner-assets/textures/fabric/rug.svg",
   "rug-gala-taupe": "/planner-assets/textures/fabric/rug.svg",
-  "rug-temu-shaggy-white": "/planner-assets/textures/fabric/rug.svg",
+  "rug-temu-shaggy-white": "/planner-assets/products/temu-shaggy-rug-white-607474249752115.svg",
   "bath-mat-shaggy-cream": "/planner-assets/textures/fabric/bath-mat-shaggy-cream.svg",
   "rug-temu-shaggy-shadow": "/planner-assets/textures/fabric/rug.svg",
   "rug-temu-easy-line-colorblock": "/planner-assets/textures/fabric/temu-easy-line-colorblock-rug.svg",
@@ -225,6 +236,48 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
     material.bumpMap = worktopTexture;
     material.bumpScale = 0.008;
     material.needsUpdate = true;
+  } else if (["fabric-bliss-weave", "fabric-chicago-chenille", "fabric-kaleo-chenille"].includes(materialId)) {
+    const weave = loadProductWeaveTexture(materialId);
+    material.map = weave;
+    material.bumpMap = weave;
+    material.bumpScale = materialId === "fabric-chicago-chenille" ? 0.022 : 0.018;
+    material.needsUpdate = true;
+  } else if (materialId === "tejo-cashmere-grain") {
+    const grain = loadProductGrainTexture(materialId, [203, 194, 182], 0.76, 0.018);
+    material.map = grain;
+    material.bumpMap = grain;
+    material.bumpScale = 0.012;
+    material.needsUpdate = true;
+  } else if (materialId === "oak-bozan-directional" || materialId === "oak-bozan-edge") {
+    const oak = loadProductWoodTexture(materialId);
+    material.map = oak;
+    material.bumpMap = oak;
+    material.bumpScale = 0.014;
+    material.needsUpdate = true;
+  } else if (materialId === "leather-ivory-pebble") {
+    const leather = loadProductPebbleTexture();
+    material.map = leather;
+    material.bumpMap = leather;
+    material.bumpScale = 0.008;
+    material.needsUpdate = true;
+  } else if (materialId === "white-lacquer") {
+    material.map = loadProductLacquerTexture();
+    material.needsUpdate = true;
+  } else if (materialId === "rug-rabbit-pile" || materialId === "rug-living-relief") {
+    const pile = loadProductPileTexture(materialId);
+    material.map = pile;
+    material.bumpMap = pile;
+    material.bumpScale = materialId === "rug-rabbit-pile" ? 0.024 : 0.014;
+    material.needsUpdate = true;
+  } else if (materialId === "leaf-olive-soft") {
+    const leaves = loadProductLeafTexture();
+    material.map = leaves;
+    material.bumpMap = leaves;
+    material.bumpScale = 0.006;
+    material.needsUpdate = true;
+  } else if (materialId === "ceramic-pot-glazed") {
+    material.map = loadProductCeramicTexture();
+    material.needsUpdate = true;
   } else if (materialId === "vinyl-cashmere-cream") {
     material.map = loadCashmereVinylTexture();
     material.needsUpdate = true;
@@ -255,6 +308,98 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
     material.needsUpdate = true;
   }
   return material;
+}
+
+function createProductDataTexture(key: string, size: number, pixel: (x: number, y: number) => [number, number, number]) {
+  const cached = textureCache.get(key);
+  if (cached) return cached;
+  const data = new Uint8Array(size * size * 4);
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      const [r, g, b] = pixel(x, y);
+      const offset = (y * size + x) * 4;
+      data[offset] = Math.max(0, Math.min(255, Math.round(r)));
+      data[offset + 1] = Math.max(0, Math.min(255, Math.round(g)));
+      data[offset + 2] = Math.max(0, Math.min(255, Math.round(b)));
+      data[offset + 3] = 255;
+    }
+  }
+  const texture = new DataTexture(data, size, size, RGBAFormat, UnsignedByteType);
+  texture.name = key;
+  texture.colorSpace = SRGBColorSpace;
+  texture.wrapS = RepeatWrapping;
+  texture.wrapT = RepeatWrapping;
+  texture.repeat.set(2.2, 2.2);
+  texture.magFilter = LinearFilter;
+  texture.minFilter = LinearMipmapLinearFilter;
+  texture.generateMipmaps = true;
+  texture.needsUpdate = true;
+  textureCache.set(key, texture);
+  return texture;
+}
+
+function loadProductWeaveTexture(materialId: string) {
+  const base = materialId === "fabric-chicago-chenille" ? [216, 213, 204] : materialId === "fabric-kaleo-chenille" ? [221, 210, 194] : [221, 209, 189];
+  return createProductDataTexture(`generated:${materialId}`, 128, (x, y) => {
+    const diagonal = Math.sin((x + y * 0.7) * 0.58) * 5.6;
+    const cross = Math.sin((x - y * 0.45) * 0.74) * 3.4;
+    const fiber = ((x * 17 + y * 29 + x * y * 3) % 11) - 5;
+    return [base[0] + diagonal + fiber, base[1] + diagonal * 0.92 + cross * 0.28 + fiber, base[2] + diagonal * 0.72 + cross * 0.42 + fiber];
+  });
+}
+
+function loadProductGrainTexture(materialId: string, base: [number, number, number], direction: number, scale: number) {
+  return createProductDataTexture(`generated:${materialId}`, 128, (x, y) => {
+    const grain = Math.sin((x * direction + y * scale) * 2.2) * 4.8 + Math.sin((x * 0.14 + y * 0.024) * 3.1) * 2.1;
+    return [base[0] + grain, base[1] + grain * 0.95, base[2] + grain * 0.82];
+  });
+}
+
+function loadProductWoodTexture(materialId: string) {
+  const edge = materialId === "oak-bozan-edge";
+  return createProductDataTexture(`generated:${materialId}`, 128, (x, y) => {
+    const grain = Math.sin(x * 0.18 + Math.sin(y * 0.08) * 2.5) * 8 + Math.sin(x * 0.047 + y * 0.12) * 3;
+    const base = edge ? [141, 96, 60] : [183, 131, 82];
+    return [base[0] + grain, base[1] + grain * 0.76, base[2] + grain * 0.55];
+  });
+}
+
+function loadProductPebbleTexture() {
+  return createProductDataTexture("generated:leather-ivory-pebble", 96, (x, y) => {
+    const pebble = Math.sin(x * 0.9 + Math.sin(y * 0.43) * 2) * 2.6 + Math.sin(y * 1.2 + x * 0.22) * 1.8;
+    return [229 + pebble, 222 + pebble * 0.92, 212 + pebble * 0.72];
+  });
+}
+
+function loadProductLacquerTexture() {
+  return createProductDataTexture("generated:white-lacquer", 96, (x, y) => {
+    const reflection = Math.sin((x + y) * 0.08) * 2.2 + Math.sin(y * 0.32) * 1.1;
+    return [244 + reflection, 242 + reflection, 236 + reflection * 0.78];
+  });
+}
+
+function loadProductPileTexture(materialId: string) {
+  const living = materialId === "rug-living-relief";
+  return createProductDataTexture(`generated:${materialId}`, 128, (x, y) => {
+    const pile = Math.sin((x * 0.9 + y * 0.35) * (living ? 0.48 : 0.78)) * (living ? 4.5 : 8);
+    const stripe = living ? Math.sin(y * 0.12) * 2.8 : 0;
+    const base = living ? [222, 213, 199] : [238, 232, 220];
+    return [base[0] + pile + stripe, base[1] + pile * 0.96 + stripe, base[2] + pile * 0.88 + stripe];
+  });
+}
+
+function loadProductLeafTexture() {
+  return createProductDataTexture("generated:leaf-olive-soft", 96, (x, y) => {
+    const vein = Math.sin(x * 0.28 + y * 0.05) * 7 + Math.sin(y * 0.16) * 3;
+    return [102 + vein, 115 + vein * 0.9, 88 + vein * 0.6];
+  });
+}
+
+function loadProductCeramicTexture() {
+  return createProductDataTexture("generated:ceramic-pot-glazed", 64, (x, y) => {
+    const glaze = Math.sin(x * 0.14 + y * 0.04) * 2.8;
+    return [215 + glaze, 200 + glaze * 0.88, 180 + glaze * 0.6];
+  });
 }
 
 function loadKitchenWorktopTexture() {

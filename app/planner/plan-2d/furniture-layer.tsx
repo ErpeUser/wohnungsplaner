@@ -68,6 +68,7 @@ function FurnitureItem({
   const cancelledRef = useRef(false);
   const item = getFurnitureCatalogItem(placement.catalogId);
   const materialId = placement.materialVariants?.main;
+
   const fill = item?.materials.find((material) => material.id === materialId)?.color ?? "#b78d68";
 
   useEffect(() => {
@@ -246,6 +247,102 @@ function FurnitureSymbol({
   };
   const materialId = placement.materialVariants?.main;
 
+  if (placement.catalogId === "plant-zimmer1-olive") {
+    return (
+      <Group data-testid="plan-graphic-plant-zimmer1-olive">
+        <Circle radius={Math.min(width, depth) * 0.46} fill="#c9b59a" stroke="#8f806d" strokeWidth={0.02} shadowColor="#635447" shadowBlur={0.04} shadowOpacity={0.22} shadowOffsetY={0.02} />
+        <Circle radius={Math.min(width, depth) * 0.29} fill="#8b9a70" stroke="#607052" strokeWidth={0.018} />
+        {[-0.34, -0.16, 0.05, 0.22, 0.36].map((x, index) => (
+          <Line key={`olive-branch-${index}`} points={[0, 0, x * width, -depth * (0.27 + index % 2 * 0.08)]} stroke="#647453" strokeWidth={0.014} lineCap="round" />
+        ))}
+        {[-0.3, -0.12, 0.08, 0.24, 0.38].flatMap((x, index) => [
+          <Circle key={`olive-leaf-a-${index}`} x={x * width} y={-depth * (0.3 + index % 2 * 0.08)} radius={Math.min(width, depth) * 0.085} fill={index % 2 ? "#7d8e65" : "#9aa87b"} />,
+          <Circle key={`olive-leaf-b-${index}`} x={x * width * 0.72} y={-depth * (0.22 + index % 2 * 0.08)} radius={Math.min(width, depth) * 0.072} fill="#71835d" />,
+        ])}
+        <Text x={-width / 2} y={depth / 2 - 0.09} width={width} align="center" text="Olive · 110 cm" fontFamily="Arial" fontSize={0.06} fill="#39453b" listening={false} />
+      </Group>
+    );
+  }
+
+  if (placement.catalogId === "bed-bliss-120") {
+    return (
+      <Group data-testid="plan-graphic-bed-bliss-120">
+        <Rect {...common} fill="#ddd1bd" stroke="#8f8070" strokeWidth={0.022} cornerRadius={0.08} shadowColor="#645647" shadowBlur={0.05} shadowOpacity={0.22} shadowOffsetY={0.025} />
+        <Rect x={-width / 2 + 0.045} y={-depth / 2 + 0.045} width={width - 0.09} height={Math.min(0.28, depth * 0.2)} fill="#bba98f" cornerRadius={0.04} />
+        <Rect x={-width * 0.37} y={-depth * 0.1} width={width * 0.3} height={depth * 0.28} fill="#f3eee5" cornerRadius={0.055} rotation={-2} />
+        <Rect x={width * 0.07} y={-depth * 0.1} width={width * 0.3} height={depth * 0.28} fill="#f3eee5" cornerRadius={0.055} rotation={2} />
+        <Line points={[-width * 0.43, depth * 0.28, width * 0.43, depth * 0.28]} stroke="#9d8c77" strokeWidth={0.022} />
+        {[[-width * 0.39, depth * 0.36], [width * 0.39, depth * 0.36]].map(([x, y], index) => <Circle key={`bliss-foot-${index}`} x={x} y={y} radius={0.045} fill="#4d514f" />)}
+        <Text x={-width / 2} y={depth / 2 - 0.11} width={width} align="center" text="Bliss · 120 × 200" fontFamily="Arial" fontSize={0.065} fill="#544c43" listening={false} />
+      </Group>
+    );
+  }
+
+  if (placement.catalogId === "sofa-chicago-206") {
+    return (
+      <Group data-testid="plan-graphic-sofa-chicago-206">
+        <Rect {...common} fill="#d8d5cc" stroke="#7f7b73" strokeWidth={0.022} cornerRadius={0.12} shadowColor="#5f554b" shadowBlur={0.05} shadowOpacity={0.22} shadowOffsetY={0.025} />
+        {[-0.24, 0.24].map((x, index) => (
+          <Group key={`chicago-seat-${index}`} x={x * width}>
+            <Rect x={-width * 0.21} y={-depth * 0.26} width={width * 0.42} height={depth * 0.54} fill="#e4e0d8" cornerRadius={0.09} />
+            <Line points={[-width * 0.19, depth * 0.18, width * 0.19, depth * 0.18]} stroke="#b0aaa0" strokeWidth={0.018} />
+          </Group>
+        ))}
+        <Line points={[0, -depth * 0.42, 0, depth * 0.36]} stroke="#aaa49b" strokeWidth={0.018} />
+        {[[-width * 0.4, depth * 0.42], [width * 0.4, depth * 0.42]].map(([x, y], index) => <Circle key={`chicago-foot-${index}`} x={x} y={y} radius={0.045} fill="#252929" />)}
+        <Text x={-width / 2} y={depth / 2 - 0.1} width={width} align="center" text="Chicago · 206 cm" fontFamily="Arial" fontSize={0.065} fill="#484947" listening={false} />
+      </Group>
+    );
+  }
+
+  if (placement.catalogId === "hallway-tejo-115") {
+    return (
+      <Group data-testid="plan-graphic-hallway-tejo-115">
+        <Rect {...common} fill="#c9c0b4" stroke="#706960" strokeWidth={0.022} cornerRadius={0.035} shadowColor="#5e5349" shadowBlur={0.04} shadowOpacity={0.2} shadowOffsetY={0.02} />
+        <Rect x={-width * 0.36} y={-depth * 0.41} width={width * 0.22} height={depth * 0.82} fill="#dce5e5" stroke="#778689" strokeWidth={0.014} />
+        <Rect x={-width * 0.36} y={depth * 0.19} width={width * 0.72} height={depth * 0.2} fill="#b6a797" cornerRadius={0.025} />
+        {[0.16, 0.34, 0.52, 0.7].map((ratio) => <Line key={ratio} points={[width * (ratio - 0.5), -depth * 0.38, width * (ratio - 0.5), depth * 0.12]} stroke="#8b8074" strokeWidth={0.014} />)}
+        {[0.12, 0.28, 0.44, 0.6].map((x, index) => <Circle key={`tejo-hook-${index}`} x={width * (x - 0.5)} y={-depth * 0.12} radius={0.026} fill="#7b6d5d" />)}
+        <Text x={-width / 2} y={depth / 2 - 0.085} width={width} align="center" text="Tejo · 115 cm" fontFamily="Arial" fontSize={0.06} fill="#4c4943" listening={false} />
+      </Group>
+    );
+  }
+
+  if (placement.catalogId === "vanity-vicco-sherry-120") {
+    return (
+      <Group data-testid="plan-graphic-vanity-vicco-sherry-120">
+        <Rect {...common} fill="#f1eee7" stroke="#a49a8b" strokeWidth={0.022} cornerRadius={0.04} shadowColor="#67594f" shadowBlur={0.04} shadowOpacity={0.2} shadowOffsetY={0.02} />
+        <Rect x={-width * 0.38} y={-depth * 0.4} width={width * 0.76} height={depth * 0.28} fill="#dce5e5" stroke="#c99a45" strokeWidth={0.026} cornerRadius={0.035} />
+        {[-0.27, -0.09, 0.09, 0.27].map((x, index) => <Line key={`sherry-drawer-${index}`} points={[x * width, depth * 0.02, x * width, depth * 0.36]} stroke="#c5bbb0" strokeWidth={0.014} />)}
+        <Line points={[-width * 0.39, depth * 0.16, width * 0.39, depth * 0.16]} stroke="#c99a45" strokeWidth={0.018} />
+        <Text x={-width / 2} y={depth / 2 - 0.085} width={width} align="center" text="Sherry · 120 cm" fontFamily="Arial" fontSize={0.06} fill="#59524b" listening={false} />
+      </Group>
+    );
+  }
+
+  if (placement.catalogId === "chair-temu-executive-ivory") {
+    return (
+      <Group data-testid="plan-graphic-chair-temu-executive-ivory">
+        <Circle radius={Math.min(width, depth) * 0.32} fill="#c6c8c5" stroke="#707672" strokeWidth={0.02} />
+        <Rect {...common} fill="#e5ded4" stroke="#9c948a" strokeWidth={0.022} cornerRadius={0.12} />
+        <Rect x={-width * 0.28} y={-depth * 0.44} width={width * 0.56} height={depth * 0.36} fill="#eee8df" stroke="#c4bbb0" strokeWidth={0.016} cornerRadius={0.1} />
+        <Line points={[-width * 0.38, 0, width * 0.38, 0]} stroke="#b7aa9f" strokeWidth={0.018} />
+        <Text x={-width / 2} y={depth / 2 - 0.08} width={width} align="center" text="Chefsessel" fontFamily="Arial" fontSize={0.055} fill="#5e574f" listening={false} />
+      </Group>
+    );
+  }
+
+  if (placement.catalogId === "nightstand-led-2drawer-white") {
+    return (
+      <Group data-testid="plan-graphic-nightstand-led-2drawer-white">
+        <Rect {...common} fill="#f2f0ea" stroke="#9b9c96" strokeWidth={0.02} cornerRadius={0.025} shadowColor="#5d5348" shadowBlur={0.035} shadowOpacity={0.2} shadowOffsetY={0.018} />
+        <Rect x={-width * 0.34} y={-depth * 0.36} width={width * 0.68} height={depth * 0.22} fill="#e7d8bd" opacity={0.9} stroke="#c99a45" strokeWidth={0.014} cornerRadius={0.02} />
+        <Line points={[-width * 0.4, 0, width * 0.4, 0]} stroke="#9ca09b" strokeWidth={0.018} />
+        <Line points={[-width * 0.4, depth * 0.26, width * 0.4, depth * 0.26]} stroke="#9ca09b" strokeWidth={0.018} />
+        <Text x={-width / 2} y={depth / 2 - 0.065} width={width} align="center" text="LED-Nachtisch" fontFamily="Arial" fontSize={0.052} fill="#50534f" listening={false} />
+      </Group>
+    );
+  }
   if (symbol === "plant" || symbol === "light") {
     return (
       <Group>
@@ -460,7 +557,7 @@ function FurnitureSymbol({
   if (placement.catalogId === "rug-living-concept-240x240") {
     const bands = [-0.4, -0.2, 0, 0.2, 0.4];
     return (
-      <Group>
+      <Group data-testid="plan-graphic-rug-living-concept-240x240">
         <Rect
           {...common}
           fill="#ded5c7"

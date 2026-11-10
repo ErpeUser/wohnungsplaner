@@ -202,7 +202,7 @@ function ParametricFurniture({ fallback, materialId, catalogId }: { fallback: st
 }
 
 function LedChargingNightstand() {
-  const white = getPlannerMaterial("white-matte");
+  const white = getPlannerMaterial("white-lacquer");
   const dark = getPlannerMaterial("metal-dark");
   const black = getPlannerMaterial("screen-black");
   const drawerYs = [0.19, 0.43];
@@ -267,7 +267,7 @@ function LedChargingNightstand() {
 }
 
 function ChicagoSofa() {
-  const fabric = getPlannerMaterial("fabric-chicago-beige");
+  const fabric = getPlannerMaterial("fabric-chicago-chenille");
   const seam = getPlannerMaterial("fabric-sand");
   const dark = getPlannerMaterial("metal-black");
   const control = getPlannerMaterial("screen-black");
@@ -352,7 +352,7 @@ function ChicagoSofa() {
 }
 
 function TejoHallway() {
-  const cashmere = getPlannerMaterial("tejo-cashmere");
+  const cashmere = getPlannerMaterial("tejo-cashmere-grain");
   const panel = getPlannerMaterial("tejo-panel-greige");
   const mirror = getPlannerMaterial("mirror-glass");
   const dark = getPlannerMaterial("metal-dark");
@@ -434,7 +434,7 @@ function TejoHallway() {
 }
 
 function BlissBed() {
-  const fabric = getPlannerMaterial("fabric-bliss-beige");
+  const fabric = getPlannerMaterial("fabric-bliss-weave");
   const dark = getPlannerMaterial("metal-dark");
   const bedding = getPlannerMaterial("fabric-ecru");
   const taupe = getPlannerMaterial("fabric-taupe");
@@ -628,7 +628,7 @@ function TemuEasyLineRug({ materialId }: { materialId: string }) {
 }
 
 function TemuIvoryRabbitRug() {
-  const base = getPlannerMaterial("rug-temu-rabbit-ivory");
+  const base = getPlannerMaterial("rug-rabbit-pile");
   const highlight = getPlannerMaterial("rug-temu-rabbit-highlight");
   const shadow = getPlannerMaterial("rug-temu-rabbit-shadow");
   const columns = 8;
@@ -678,7 +678,7 @@ function TemuIvoryRabbitRug() {
 }
 
 function LivingIvoryGreigeRug() {
-  const base = getPlannerMaterial("rug-living-ivory-greige");
+  const base = getPlannerMaterial("rug-living-relief");
   const relief = getPlannerMaterial("rug-living-relief");
   const bands = [-0.38, -0.19, 0, 0.19, 0.38];
 
@@ -706,9 +706,9 @@ function LivingIvoryGreigeRug() {
 }
 
 function Zimmer1OlivePlant() {
-  const leaves = getPlannerMaterial("leaf-olive");
+  const leaves = getPlannerMaterial("leaf-olive-soft");
   const trunk = getPlannerMaterial("oak-artisan-edge");
-  const pot = getPlannerMaterial("ceramic-beige");
+  const pot = getPlannerMaterial("ceramic-pot-glazed");
   const branches = [
     [-0.24, 0.54, -0.12, -0.28], [0.22, 0.58, 0.16, 0.3],
     [-0.18, 0.7, 0.18, -0.24], [0.2, 0.76, -0.14, 0.26],
@@ -776,7 +776,7 @@ export function getWardrobeFrontLayout() {
 }
 
 function PhotoWardrobe() {
-  const white = getPlannerMaterial("white-matte");
+  const white = getPlannerMaterial("white-lacquer");
   const frame = getPlannerMaterial("wardrobe-frame-silver");
   const metal = getPlannerMaterial("metal-satin");
   const modules = getWardrobeFrontLayout();
@@ -855,7 +855,7 @@ function PhotoDesk() {
 }
 
 function ViccoSherryVanity() {
-  const white = getPlannerMaterial("white-matte");
+  const white = getPlannerMaterial("white-lacquer");
   const gold = getPlannerMaterial("metal-gold");
   const mirror = getPlannerMaterial("mirror-glass");
   const tabletopY = 0.75 / 1.55;
@@ -960,7 +960,7 @@ function PhotoOfficeChair() {
 }
 
 function TemuIvoryExecutiveChair() {
-  const leather = getPlannerMaterial("leather-ivory");
+  const leather = getPlannerMaterial("leather-ivory-pebble");
   const seam = getPlannerMaterial("fabric-sand");
   const chrome = getPlannerMaterial("chrome-polished");
   const black = getPlannerMaterial("screen-black");
@@ -1015,8 +1015,8 @@ function DetailedTable({ materialId }: { materialId: string }) {
 }
 
 function BozanDiningTable() {
-  const oak = getPlannerMaterial("oak-artisan");
-  const oakEdge = getPlannerMaterial("oak-artisan-edge");
+  const oak = getPlannerMaterial("oak-bozan-directional");
+  const oakEdge = getPlannerMaterial("oak-bozan-edge");
   const black = getPlannerMaterial("metal-black");
 
   return (
@@ -1050,7 +1050,7 @@ function BozanDiningTable() {
 }
 
 function KaleoArmchair() {
-  const fabric = getPlannerMaterial("fabric-kaleo-beige");
+  const fabric = getPlannerMaterial("fabric-kaleo-chenille");
   const metal = getPlannerMaterial("metal-black");
   const seam = getPlannerMaterial("fabric-sand");
 

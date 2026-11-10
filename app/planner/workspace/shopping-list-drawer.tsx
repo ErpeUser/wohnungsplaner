@@ -180,6 +180,7 @@ const SHOPPING_ITEMS: ShoppingItem[] = [
     quantity: 1,
     amountLabel: "1 Stück · Maße laut Produktabbildung bestätigt",
     url: "https://share.temu.com/FzWfw3FpnHB",
+    imageUrl: "https://img.kwcdn.com/product/fancy/e7d2e650-7aac-4dfe-a25e-d3247a7063c4.jpg",
     type: "chair" as const,
     retailer: "Temu",
   },
