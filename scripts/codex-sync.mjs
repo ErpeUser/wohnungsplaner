@@ -26,10 +26,10 @@ async function snapshotWorkingTree(before) {
   }
   await writeFile(
     path.join(localDir, "codex-uncommitted.patch"),
-    \`\${patch.stdout}\${copied.length ? \`\\n# Untracked file contents copied to .local/codex-untracked/:\\n\${copied.join("\\n")}\\n\` : ""}\`,
+    `${patch.stdout}${copied.length ? `\\n# Untracked file contents copied to .local/codex-untracked/:\\n${copied.join("\\n")}\\n` : ""}`,
     "utf8",
   );
-  await writeFile(path.join(localDir, "codex-untracked.json"), \`\${JSON.stringify({ files: copied }, null, 2)}\\n\`, "utf8");
+  await writeFile(path.join(localDir, "codex-untracked.json"), `${JSON.stringify({ files: copied }, null, 2)}\\n`, "utf8");
   return { patch: ".local/codex-uncommitted.patch", untracked: copied, manifest: ".local/codex-untracked.json" };
 }
 
@@ -58,7 +58,7 @@ export async function synchronize({ dryRun = false, push = false } = {}) {
   if (before.ahead === 0 && before.behind === 0) actions.push({ action: "none" });
   else if (before.behind > 0 && before.ahead === 0) {
     actions.push({ action: "fast-forward", branch: before.defaultBranch });
-    if (!dryRun) await git(["merge", "--ff-only", \`origin/\${before.defaultBranch}\`]);
+    if (!dryRun) await git(["merge", "--ff-only", `origin/${before.defaultBranch}`]);
   } else if (before.ahead > 0 && before.behind === 0) {
     actions.push({ action: "publish", branch: before.defaultBranch });
     if (push && !dryRun) await git(["push", "origin", before.defaultBranch]);
