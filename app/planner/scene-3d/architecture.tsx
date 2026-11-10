@@ -605,13 +605,18 @@ function Floor({ floor }: { floor: SceneFloor }) {
     if (clone.map) {
       const width = Math.max(...floor.points.map((point) => point.x)) - Math.min(...floor.points.map((point) => point.x));
       const depth = Math.max(...floor.points.map((point) => point.z)) - Math.min(...floor.points.map((point) => point.z));
-      const scale = floor.materialId.includes("parquet") || floor.materialId.includes("oak") ? 0.42 : 0.32;
+      const isWood = floor.materialId.includes("parquet") || floor.materialId.includes("oak");
+      const isTile = floor.materialId.includes("tile") || floor.materialId.includes("porcelain");
+      // Tile atlases contain two cells across their 0..1 UV range.  A 0.64 m
+      // UV repeat therefore produces the photographed 32 cm floor modules;
+      // the previous 0.32 m repeat made the grout read as tiny mosaic.
+      const scale = isWood ? 0.42 : isTile ? 0.64 : null;
       clone.map = clone.map.clone();
-      clone.map.repeat.set(Math.max(1, width / scale), Math.max(1, depth / scale));
+      if (scale) clone.map.repeat.set(Math.max(1, width / scale), Math.max(1, depth / scale));
       clone.map.needsUpdate = true;
       if (clone.bumpMap) {
         clone.bumpMap = clone.map;
-        clone.bumpScale = floor.materialId.includes("tile") ? 0.035 : 0.018;
+        clone.bumpScale = isTile ? 0.022 : isWood ? 0.018 : 0.006;
       }
       clone.needsUpdate = true;
     }
@@ -709,6 +714,7 @@ function ParametricBuiltIn({ item }: { item: SceneObject<PlannerBuiltIn> }) {
     );
   }
   if (item.catalogId === "floor-zone-kitchen") return <KitchenFloorZone item={item} />;
+  if (item.catalogId === "kitchen-worktop") return <KitchenWorktop item={item} />;
   if (item.catalogId === "kitchen-backsplash-oak") return <KitchenBacksplash item={item} />;
   if (item.catalogId === "kitchen-base") return <KitchenBase item={item} />;
   if (item.catalogId === "kitchen-corner-base") return <KitchenCornerBase item={item} />;
@@ -813,10 +819,23 @@ function VorraumWallDecor({ item }: { item: SceneObject<PlannerBuiltIn> }) {
 
 function KitchenBacksplash({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   const [width, height, depth] = item.size;
+  const wood = getPlannerMaterial(item.materialId);
+  const edge = getPlannerMaterial("oak-artisan-edge");
   return (
-    <group>
+    <group name={`kitchen-backsplash-${item.source.id}`}>
       <mesh scale={[width, height, depth]} geometry={SHARED_BOX} renderOrder={12} castShadow receiveShadow>
-        <primitive object={getPlannerMaterial(item.materialId)} attach="material" />
+        <primitive object={wood} attach="material" />
+      </mesh>
+      {/* A slim lower and side reveal keeps the veneer legible where it meets
+          the worktop and makes the panel read as a mounted wall finish. */}
+      <mesh position={[0, -height / 2 + 0.012, depth / 2 + 0.006]} scale={[Math.max(0.04, width - 0.018), 0.024, 0.012]} geometry={SHARED_BOX} renderOrder={13} castShadow>
+        <primitive object={edge} attach="material" />
+      </mesh>
+      <mesh position={[-width / 2 + 0.008, 0, depth / 2 + 0.006]} scale={[0.016, height, 0.012]} geometry={SHARED_BOX} renderOrder={13} castShadow>
+        <primitive object={edge} attach="material" />
+      </mesh>
+      <mesh position={[width / 2 - 0.008, 0, depth / 2 + 0.006]} scale={[0.016, height, 0.012]} geometry={SHARED_BOX} renderOrder={13} castShadow>
+        <primitive object={edge} attach="material" />
       </mesh>
     </group>
   );
@@ -824,6 +843,7 @@ function KitchenBacksplash({ item }: { item: SceneObject<PlannerBuiltIn> }) {
 
 function KitchenFloorZone({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   const [width, height, depth] = item.size;
+  const tileSize = 0.32;
   const tileHeight = Math.min(height, 0.006);
   const tileMaterial = useMemo(() => {
     const base = getPlannerMaterial(item.materialId);
@@ -831,9 +851,10 @@ function KitchenFloorZone({ item }: { item: SceneObject<PlannerBuiltIn> }) {
     clone.name = `${base.name}-${item.source.id}`;
     if (base.map) {
       clone.map = base.map.clone();
-      // The room photos show square floor tiles of roughly 32 cm including
-      // the grout joint. Keep the same physical grid across both L segments.
-      clone.map.repeat.set(Math.max(1, width / 0.32), Math.max(1, depth / 0.32));
+      // The generated tile atlas contains two 32-px cells across its 64-px
+      // texture. Repeat at half the apparent tile count so the rendered
+      // joints are the measured 32 cm grid, rather than 16 cm micro-tiles.
+      clone.map.repeat.set(Math.max(1, width / (tileSize * 2)), Math.max(1, depth / (tileSize * 2)));
       clone.map.needsUpdate = true;
     }
     return clone;
@@ -844,16 +865,16 @@ function KitchenFloorZone({ item }: { item: SceneObject<PlannerBuiltIn> }) {
         <primitive object={tileMaterial} attach="material" />
       </mesh>
       <group position={[0, -height / 2 + tileHeight + 0.0015, 0]}>
-        {Array.from({ length: Math.max(1, Math.floor(width / 0.32)) }, (_, index) => {
-          const x = -width / 2 + (index + 1) * 0.32;
+        {Array.from({ length: Math.max(1, Math.floor(width / tileSize)) }, (_, index) => {
+          const x = -width / 2 + (index + 1) * tileSize;
           return x < width / 2 - 0.015 ? (
             <mesh key={`tile-x-${index}`} position={[x, 0, 0]} scale={[0.009, 0.004, depth]} geometry={SHARED_BOX}>
               <primitive object={getPlannerMaterial("tile-grout")} attach="material" />
             </mesh>
           ) : null;
         })}
-        {Array.from({ length: Math.max(1, Math.floor(depth / 0.32)) }, (_, index) => {
-          const z = -depth / 2 + (index + 1) * 0.32;
+        {Array.from({ length: Math.max(1, Math.floor(depth / tileSize)) }, (_, index) => {
+          const z = -depth / 2 + (index + 1) * tileSize;
           return z < depth / 2 - 0.015 ? (
             <mesh key={`tile-z-${index}`} position={[0, 0, z]} scale={[width, 0.004, 0.009]} geometry={SHARED_BOX}>
               <primitive object={getPlannerMaterial("tile-grout")} attach="material" />
@@ -861,6 +882,37 @@ function KitchenFloorZone({ item }: { item: SceneObject<PlannerBuiltIn> }) {
           ) : null;
         })}
       </group>
+    </group>
+  );
+}
+
+function KitchenWorktop({ item }: { item: SceneObject<PlannerBuiltIn> }) {
+  const [width, thickness, depth] = item.size;
+  const worktop = getPlannerMaterial("kitchen-worktop-black");
+  const edge = getPlannerMaterial("metal-dark");
+  const bevel = Math.min(0.018, Math.max(0.004, thickness * 0.4));
+  return (
+    <group name={`kitchen-worktop-${item.source.id}`}>
+      <RoundedBox
+        args={[width, thickness, depth]}
+        radius={bevel}
+        smoothness={3}
+        castShadow
+        receiveShadow
+      >
+        <primitive object={worktop} attach="material" />
+      </RoundedBox>
+      <mesh position={[0, thickness / 2 + 0.003, 0]} scale={[Math.max(0.04, width - 0.034), 0.006, Math.max(0.04, depth - 0.034)]} geometry={SHARED_BOX} castShadow receiveShadow>
+        <primitive object={worktop} attach="material" />
+      </mesh>
+      {/* The front edge catches a narrow highlight and separates the slab
+          from the glossy white cabinet faces below it. */}
+      <mesh position={[0, -thickness * 0.16, depth / 2 + 0.006]} scale={[Math.max(0.04, width - 0.028), thickness * 0.54, 0.012]} geometry={SHARED_BOX} castShadow>
+        <primitive object={edge} attach="material" />
+      </mesh>
+      <mesh position={[0, thickness / 2 + 0.008, 0]} scale={[Math.max(0.04, width - 0.12), 0.003, 0.003]} geometry={SHARED_BOX}>
+        <meshBasicMaterial color="#5d6461" transparent opacity={0.48} />
+      </mesh>
     </group>
   );
 }
@@ -910,7 +962,7 @@ function KitchenBase({ item }: { item: SceneObject<PlannerBuiltIn> }) {
                   {[0.27, -0.02, -0.31].map((y, drawerIndex) => (
                     <group key={drawerIndex} position={[0, y * height, 0]}>
                       <mesh scale={[segment.width - 0.018, height * 0.275, 0.027]} geometry={SHARED_BOX} castShadow><primitive object={white} attach="material" /></mesh>
-                      <mesh position={[0, height * 0.075, 0.027]} scale={[segment.width * 0.56, 0.018, 0.022]} geometry={SHARED_BOX} castShadow><primitive object={metal} attach="material" /></mesh>
+                      <mesh position={[0, height * 0.075, 0.027]} scale={[segment.width * 0.56, 0.026, 0.028]} geometry={SHARED_BOX} castShadow><primitive object={metal} attach="material" /></mesh>
                     </group>
                   ))}
                 </group>
@@ -925,7 +977,7 @@ function KitchenBase({ item }: { item: SceneObject<PlannerBuiltIn> }) {
               <mesh scale={[segment.width - 0.012, height, depth]} geometry={SHARED_BOX} castShadow receiveShadow><primitive object={white} attach="material" /></mesh>
               <group position={[0, -height * 0.04, depth / 2 + 0.013]}>
                 <mesh scale={[segment.width - 0.018, height * 0.78, 0.027]} geometry={SHARED_BOX} castShadow><primitive object={white} attach="material" /></mesh>
-                <mesh position={[0, height * 0.31, 0.027]} scale={[segment.width * 0.58, 0.018, 0.022]} geometry={SHARED_BOX} castShadow><primitive object={metal} attach="material" /></mesh>
+                <mesh position={[0, height * 0.31, 0.027]} scale={[segment.width * 0.58, 0.026, 0.028]} geometry={SHARED_BOX} castShadow><primitive object={metal} attach="material" /></mesh>
               </group>
             </group>
           );
@@ -948,7 +1000,7 @@ function KitchenBase({ item }: { item: SceneObject<PlannerBuiltIn> }) {
           return (
             <group key={index} position={[x, -height * 0.035, depth / 2 + 0.013]}>
               <mesh scale={[moduleWidth - 0.018, height * 0.79, 0.027]} geometry={SHARED_BOX} castShadow><primitive object={white} attach="material" /></mesh>
-              <mesh position={[0, height * 0.315, 0.027]} scale={[moduleWidth * 0.58, 0.018, 0.022]} geometry={SHARED_BOX} castShadow><primitive object={metal} attach="material" /></mesh>
+              <mesh position={[0, height * 0.315, 0.027]} scale={[moduleWidth * 0.58, 0.026, 0.028]} geometry={SHARED_BOX} castShadow><primitive object={metal} attach="material" /></mesh>
             </group>
           );
         })}
@@ -968,7 +1020,7 @@ function KitchenBase({ item }: { item: SceneObject<PlannerBuiltIn> }) {
           <group key={index} position={[x, 0, depth / 2 + 0.012]}>
             <mesh position={[0, -height * 0.1, 0]} scale={[moduleWidth - 0.018, height * 0.72, 0.025]} geometry={SHARED_BOX} castShadow><primitive object={white} attach="material" /></mesh>
             <mesh position={[0, height * 0.34, 0.002]} scale={[moduleWidth - 0.018, height * 0.17, 0.027]} geometry={SHARED_BOX} castShadow><primitive object={white} attach="material" /></mesh>
-            <mesh position={[0, height * 0.245, 0.026]} scale={[moduleWidth * 0.58, 0.018, 0.022]} geometry={SHARED_BOX} castShadow><primitive object={metal} attach="material" /></mesh>
+            <mesh position={[0, height * 0.245, 0.026]} scale={[moduleWidth * 0.58, 0.026, 0.028]} geometry={SHARED_BOX} castShadow><primitive object={metal} attach="material" /></mesh>
           </group>
         );
       })}

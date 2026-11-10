@@ -56,7 +56,7 @@ const RECIPES: Record<string, MaterialRecipe> = {
   "scout-oak": { color: "#b9a68c", roughness: 0.66 },
   "oak-backsplash": { color: "#f2eee8", roughness: 0.6, clearcoat: 0.04, clearcoatRoughness: 0.74 },
   "walnut-grain-dark": { color: "#493a31", roughness: 0.78 },
-  "kitchen-worktop-black": { color: "#111313", roughness: 0.38, clearcoat: 0.16, clearcoatRoughness: 0.48 },
+  "kitchen-worktop-black": { color: "#191d1c", roughness: 0.3, clearcoat: 0.28, clearcoatRoughness: 0.34 },
   "kitchen-plinth-grey": { color: "#a7a8a4", roughness: 0.46, metalness: 0.18 },
   "slat-oak-dark": { color: "#c08a5b", roughness: 0.7 },
   "moss-green": { color: "#405539", roughness: 0.98 },
@@ -219,6 +219,12 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
     material.bumpMap = backsplashTexture;
     material.bumpScale = 0.004;
     material.needsUpdate = true;
+  } else if (materialId === "kitchen-worktop-black") {
+    const worktopTexture = loadKitchenWorktopTexture();
+    material.map = worktopTexture;
+    material.bumpMap = worktopTexture;
+    material.bumpScale = 0.008;
+    material.needsUpdate = true;
   } else if (materialId === "vinyl-cashmere-cream") {
     material.map = loadCashmereVinylTexture();
     material.needsUpdate = true;
@@ -249,6 +255,38 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
     material.needsUpdate = true;
   }
   return material;
+}
+
+function loadKitchenWorktopTexture() {
+  const key = "generated:kitchen-worktop-black";
+  const cached = textureCache.get(key);
+  if (cached) return cached;
+  const size = 128;
+  const data = new Uint8Array(size * size * 4);
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      const broad = Math.sin(x * 0.09 + y * 0.012) * 4 + Math.sin((x + y) * 0.17) * 1.8;
+      const grain = ((x * 29 + y * 47 + x * y * 5) % 13) - 6;
+      const value = Math.max(0, Math.min(255, 26 + broad + grain));
+      const offset = (y * size + x) * 4;
+      data[offset] = value;
+      data[offset + 1] = Math.max(0, Math.min(255, value + 3));
+      data[offset + 2] = Math.max(0, Math.min(255, value + 2));
+      data[offset + 3] = 255;
+    }
+  }
+  const texture = new DataTexture(data, size, size, RGBAFormat, UnsignedByteType);
+  texture.name = "planner-texture-kitchen-worktop-black";
+  texture.colorSpace = SRGBColorSpace;
+  texture.wrapS = RepeatWrapping;
+  texture.wrapT = RepeatWrapping;
+  texture.repeat.set(2.8, 2.8);
+  texture.magFilter = LinearFilter;
+  texture.minFilter = LinearMipmapLinearFilter;
+  texture.generateMipmaps = true;
+  texture.needsUpdate = true;
+  textureCache.set(key, texture);
+  return texture;
 }
 
 function loadKitchenWalnutBacksplashTexture() {
