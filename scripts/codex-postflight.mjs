@@ -15,12 +15,12 @@ export async function runPostflight({ dryRun = false, tests = true, audit = true
     ];
     for (const [script, extraArgs] of checksToRun) {
       const result = await command(npm, ["run", script, ...(extraArgs.length ? ["--", ...extraArgs] : [])], { dryRun, allowFailure: true });
-      checks.push({ name: script, code: result.code, output: \`\${result.stdout}\${result.stderr}\`.slice(-4000) });
+      checks.push({ name: script, code: result.code, output: `${result.stdout}${result.stderr}`.slice(-4000) });
     }
   }
   if (audit) {
     const result = await command(npm, ["audit", "--json"], { dryRun, allowFailure: true });
-    checks.push({ name: "audit", code: result.code, output: \`\${result.stdout}\${result.stderr}\`.slice(-4000) });
+    checks.push({ name: "audit", code: result.code, output: `${result.stdout}${result.stderr}`.slice(-4000) });
   }
   const snapshot = await repositorySnapshot();
   const result = {
