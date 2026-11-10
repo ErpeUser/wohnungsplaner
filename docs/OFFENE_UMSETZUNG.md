@@ -12,7 +12,8 @@ und ersetzen ältere Zwischenstände weiter unten im Dokument:
 - Zum Zeitpunkt dieser Verifikation war `main` sechs Commits vor
   `0a8a4416243aece82a02190e635f8fc7053b4525`, ohne Rückstand; es gab keine
   offenen oder geschlossenen PRs und nur den Branch `main`. Der abschließende
-  Doku-Commit erhöht diesen Abstand um einen weiteren Commit.
+  Doku-Commit erhöht diesen Abstand um einen weiteren Commit; die beiden
+  abschließenden Audit-Doku-Commits erhöhen ihn insgesamt auf acht.
 - Direkt implementiert: 5-MB-/MIME-/Magic-Byte-Importschutz inklusive WebP,
   sichere SVG-Prüfung, korrigierbare Herkunft/Confidence, persistierbares
   Asset-Register in V3, Register-/Remove-Commands, Schema- und Reload-Tests,
