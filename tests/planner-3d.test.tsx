@@ -27,7 +27,7 @@ import { createOrbitPose, orbitFovForRoom } from "../app/planner/scene-3d/camera
 import { Planner3D } from "../app/planner/scene-3d/planner-3d.tsx";
 import { getPlannerMaterial, PLANNER_TEXTURE_READY_EVENT } from "../app/planner/scene-3d/materials.ts";
 import { qualitySettings, detectThreeSupport } from "../app/planner/scene-3d/quality.ts";
-import { createSceneModel } from "../app/planner/scene-3d/scene-model.ts";
+import { createSceneModel, furnitureRenderTransform } from "../app/planner/scene-3d/scene-model.ts";
 import * as sceneModelModule from "../app/planner/scene-3d/scene-model.ts";
 
 describe("createSceneModel", () => {
@@ -295,6 +295,43 @@ describe("createSceneModel", () => {
     const scene = createSceneModel(document, null);
     expect(scene.placements[0]?.asset).toBe(asset);
     expect(scene.placements[0]?.position[1]).toBeCloseTo(source.size.height / 2 + asset.floorOffset);
+  });
+
+  test("applies meterScale to real models while placeholders keep the requested footprint", () => {
+    const source = DEFAULT_APARTMENT_DOCUMENT.placements[0]!;
+    const asset = {
+      assetId: "import-transform-aaaaaaaaaaaa",
+      name: "Imported chair",
+      category: "Sitzen" as const,
+      mediaType: "model/gltf-binary" as const,
+      byteLength: 4,
+      sha256: "a".repeat(64),
+      normalizedSize: {
+        width: source.size.width * 2,
+        depth: source.size.depth * 2,
+        height: source.size.height * 2,
+      },
+      meterScale: 0.01,
+      floorOffset: 0.06,
+      pivot: "center" as const,
+      materialId: "object-neutral",
+      license: "CC0-1.0" as const,
+      source: "test",
+      confidence: "confirmed" as const,
+      notes: [],
+      createdAt: "2026-01-01T00:00:00.000Z",
+    };
+    const document = {
+      ...DEFAULT_APARTMENT_DOCUMENT,
+      assets: [asset],
+      placements: [{ ...source, catalogId: asset.assetId }],
+    };
+    const item = createSceneModel(document, null).placements[0]!;
+
+    expect(furnitureRenderTransform(item).scale).toEqual([0.005, 0.005, 0.005]);
+    expect(furnitureRenderTransform(item).floorOffset).toBe(0.06);
+    expect(furnitureRenderTransform(item, { meterScale: 1, useAssetDimensions: false }).scale)
+      .toEqual([item.size[0], item.size[1], item.size[2]]);
   });
 
   test("uses the same explicit door pose as collision and 2D geometry", () => {

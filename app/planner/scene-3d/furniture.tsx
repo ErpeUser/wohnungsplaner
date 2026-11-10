@@ -8,7 +8,7 @@ import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
 import { resolveFurnitureAsset } from "../catalog/asset-manifest.ts";
 import { resolvePlannerAsset } from "../catalog/asset-resolver.ts";
 import { getPlannerMaterial } from "./materials.ts";
-import type { SceneModel, SceneObject } from "./scene-model.ts";
+import { furnitureRenderTransform, type SceneModel, type SceneObject } from "./scene-model.ts";
 import type { PlannerPlacement } from "../domain/types.ts";
 
 const SHARED_BOX = new BoxGeometry(1, 1, 1);
@@ -63,13 +63,23 @@ function FurnitureInstance({
   const fallback = catalogItem?.fallback3d ?? "cabinet";
   const materialId = item.source.materialVariants?.main ?? item.source.materialVariants?.color ?? item.materialId;
   const importedGlb = importedResolution?.kind === "remote" && importedResolution.asset.mediaType === "model/gltf-binary";
+  const catalogGlb = resolution?.kind === "gltf" && catalogItem?.renderMode !== "parametric";
+  const modelMeterScale = importedGlb
+    ? importedResolution.asset.meterScale ?? 1
+    : catalogGlb
+      ? resolution.asset.meterScale
+      : 1;
+  const renderTransform = furnitureRenderTransform(item, {
+    meterScale: modelMeterScale,
+    useAssetDimensions: importedGlb || catalogGlb,
+  });
   const content = importedGlb ? (
     <FurnitureAssetBoundary fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} />}>
       <Suspense fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} />}>
         <GltfFurniture path={importedResolution.url} />
       </Suspense>
     </FurnitureAssetBoundary>
-  ) : resolution?.kind === "gltf" && catalogItem?.renderMode !== "parametric" ? (
+  ) : catalogGlb ? (
     <FurnitureAssetBoundary fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} />}>
       <Suspense fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} />}>
         <GltfFurniture path={resolution.asset.path} />
@@ -81,7 +91,7 @@ function FurnitureInstance({
     <group
       position={[item.position[0], item.position[1] - item.size[1] / 2, item.position[2]]}
       rotation={[0, item.rotationY, 0]}
-      scale={item.size}
+      scale={renderTransform.scale}
       onClick={(event) => {
         event.stopPropagation();
         onSelect(item.id);

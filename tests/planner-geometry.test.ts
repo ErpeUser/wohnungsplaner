@@ -11,7 +11,7 @@ import {
   roomAtPoint,
   roomContainsPlacement,
 } from "../app/planner/domain/geometry.ts";
-import { inspectPlacement } from "../app/planner/domain/collisions.ts";
+import { inspectPlacement, inspectPlacementLinear } from "../app/planner/domain/collisions.ts";
 import { snapPlacement } from "../app/planner/domain/snapping.ts";
 import { DEFAULT_APARTMENT_DOCUMENT } from "../app/planner/domain/apartment-v3.ts";
 import type { PlannerDocumentV3, PlannerPlacement } from "../app/planner/domain/types.ts";
@@ -144,6 +144,28 @@ test("reports walls, built-ins and door sweeps as hard collisions but fixtures a
   assert.ok(inspectPlacement(document, placement({ x: 1.35, z: 0.35 }, 0.2, 0.2)).hard.some((hit) => hit.kind === "door-sweep"));
   assert.ok(inspectPlacement(document, placement({ x: -0.05, z: 2 }, 0.2, 0.2)).hard.some((hit) => hit.kind === "room-boundary"));
   assert.deepEqual(inspectPlacement(document, placement({ x: 2.5, z: 2 }, 0.2, 0.2)).hard, []);
+});
+
+test("spatial collision index matches the linear check for 1000+ placements", () => {
+  const document = squareRoomDocument();
+  document.builtIns = [];
+  document.openings = [];
+  document.doorStates = {};
+  document.placements = Array.from({ length: 1024 }, (_, index) => {
+    const column = index % 32;
+    const row = Math.floor(index / 32);
+    return {
+      id: `grid-${index}`,
+      roomId: "room-square",
+      catalogId: "test-grid",
+      position: { x: 0.2 + column * 0.11, z: 0.2 + row * 0.11 },
+      rotation: index % 2 === 0 ? 0 : 17,
+      size: { width: 0.06, depth: 0.06, height: 0.3 },
+    } satisfies PlannerPlacement;
+  });
+  const candidate = placement({ x: 0.2 + 17 * 0.11, z: 0.2 + 8 * 0.11 }, 0.08, 0.08, 11);
+
+  assert.deepEqual(inspectPlacement(document, candidate), inspectPlacementLinear(document, candidate));
 });
 
 test("does not treat every thin object as a floor covering", () => {

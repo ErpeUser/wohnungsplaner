@@ -329,6 +329,8 @@ function validAsset(asset: PlannerAssetRecord) {
     && asset.byteLength > 0
     && asset.byteLength <= 5 * 1024 * 1024
     && Object.values(asset.normalizedSize).every((value) => Number.isFinite(value) && value > 0)
+    && Number.isFinite(asset.meterScale ?? 1)
+    && (asset.meterScale ?? 1) > 0
     && Number.isFinite(asset.floorOffset);
 }
 

@@ -80,6 +80,12 @@ export type SceneObject<T extends PlannerBuiltIn | PlannerPlacement> = {
   materialId: string;
   renderProfile: "box" | "bathtub" | "washer" | "wall-wc";
   asset?: PlannerAssetRecord;
+  assetTransform?: {
+    meterScale: number;
+    pivot: PlannerAssetRecord["pivot"];
+    floorOffset: number;
+    normalizedSize: PlannerAssetRecord["normalizedSize"];
+  };
   source: T;
 };
 
@@ -504,9 +510,37 @@ function objectDescriptor<T extends PlannerBuiltIn | PlannerPlacement>(item: T, 
         ? "washer"
         : catalogId === "sanitary-wall-wc"
           ? "wall-wc"
-          : "box",
+        : "box",
     asset,
+    assetTransform: asset
+      ? {
+        meterScale: asset.meterScale ?? 1,
+        pivot: asset.pivot,
+        floorOffset: asset.floorOffset,
+        normalizedSize: asset.normalizedSize,
+      }
+      : undefined,
     source: item,
+  };
+}
+
+export function furnitureRenderTransform(
+  item: SceneObject<PlannerPlacement>,
+  options: { meterScale?: number; useAssetDimensions?: boolean } = {},
+) {
+  const useAssetDimensions = options.useAssetDimensions ?? Boolean(item.assetTransform);
+  const reference = useAssetDimensions
+    ? item.assetTransform?.normalizedSize ?? { width: 1, depth: 1, height: 1 }
+    : { width: 1, depth: 1, height: 1 };
+  const meterScale = options.meterScale ?? item.assetTransform?.meterScale ?? 1;
+  return {
+    scale: [
+      (item.size[0] / reference.width) * meterScale,
+      (item.size[1] / reference.height) * meterScale,
+      (item.size[2] / reference.depth) * meterScale,
+    ] as [number, number, number],
+    floorOffset: item.assetTransform?.floorOffset ?? 0,
+    pivot: item.assetTransform?.pivot ?? "center" as const,
   };
 }
 

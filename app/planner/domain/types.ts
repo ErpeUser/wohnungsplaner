@@ -23,6 +23,7 @@ export type PlannerAssetRecord = {
   byteLength: number;
   sha256: string;
   normalizedSize: Size3;
+  meterScale?: number;
   floorOffset: number;
   pivot: "center";
   materialId: string;

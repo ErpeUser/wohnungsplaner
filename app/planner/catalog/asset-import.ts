@@ -41,6 +41,7 @@ export type PreparedAsset = AssetImportMetadata & {
   sha256: string;
   mediaType: string;
   normalizedSize: { width: number; depth: number; height: number };
+  meterScale: number;
   floorOffset: number;
   pivot: "center";
   confidence: "confirmed" | "estimated" | "legacy";
@@ -79,6 +80,7 @@ export async function preparePlannerAsset(
     sha256,
     mediaType,
     normalizedSize: { width: parsed.width, depth: parsed.depth, height: parsed.height },
+    meterScale: 1,
     floorOffset: 0,
     pivot: "center",
   };

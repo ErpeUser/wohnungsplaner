@@ -30,6 +30,7 @@ const assetSchema = z.object({
   byteLength: z.number().int().positive().max(5 * 1024 * 1024),
   sha256: z.string().regex(/^[a-f0-9]{64}$/i),
   normalizedSize: sizeSchema,
+  meterScale: positiveNumber.default(1),
   floorOffset: finiteNumber,
   pivot: z.literal("center"),
   materialId: entityId,
