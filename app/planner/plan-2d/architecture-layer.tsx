@@ -243,18 +243,39 @@ function BuiltInDetail({ item }: { item: PlanObjectDescriptor }) {
     </Group>;
   }
   if (id === "bath-mat" || id === "wc-mat") {
-    return <Line points={[box.minX, box.minZ, box.maxX, box.minZ, box.maxX, box.maxZ, box.minX, box.maxZ]} closed stroke="#b79a78" strokeWidth={0.03} dash={[0.06, 0.025]} listening={false} />;
+    const countX = Math.max(9, Math.round(width / 0.065));
+    const countZ = Math.max(7, Math.round(depth / 0.065));
+    return <Group listening={false}>
+      <Line points={[box.minX, box.minZ, box.maxX, box.minZ, box.maxX, box.maxZ, box.minX, box.maxZ]}
+        closed fill="#c9ae88" stroke="#aa8c64" strokeWidth={0.016} />
+      {Array.from({ length: countX - 1 }, (_, i) => {
+        const x = box.minX + (i + 1) * width / countX;
+        return <Line key={`waffle-x-${i}`} points={[x, box.minZ + 0.018, x, box.maxZ - 0.018]}
+          stroke="#eddbba" strokeWidth={0.007} opacity={0.85} />;
+      })}
+      {Array.from({ length: countZ - 1 }, (_, i) => {
+        const z = box.minZ + (i + 1) * depth / countZ;
+        return <Line key={`waffle-z-${i}`} points={[box.minX + 0.018, z, box.maxX - 0.018, z]}
+          stroke="#eddbba" strokeWidth={0.007} opacity={0.85} />;
+      })}
+      <Line points={[box.minX + 0.015, box.minZ + 0.018, box.maxX - 0.015, box.minZ + 0.018]}
+        stroke="#e7d4b6" strokeWidth={0.013} dash={[0.009, 0.006]} />
+      <Line points={[box.minX + 0.015, box.maxZ - 0.018, box.maxX - 0.015, box.maxZ - 0.018]}
+        stroke="#e7d4b6" strokeWidth={0.013} dash={[0.009, 0.006]} />
+    </Group>;
   }
-  if (id === "bath-towel-hook-rail") {
+  if (id === "bath-towel-hooks-wood-black") {
     const centerX = (box.minX + box.maxX) / 2;
     const centerZ = (box.minZ + box.maxZ) / 2;
-    const runsAlongZ = depth > width;
-    const hookSpacing = (runsAlongZ ? depth : width) * 0.34;
     return <Group listening={false}>
-      {runsAlongZ
-        ? <Line points={[centerX, box.minZ, centerX, box.maxZ]} stroke="#a7aaa6" strokeWidth={0.06} />
-        : <Line points={[box.minX, centerZ, box.maxX, centerZ]} stroke="#a7aaa6" strokeWidth={0.06} />}
-      {[-1, 0, 1].map((index) => <Circle key={index} x={runsAlongZ ? centerX : centerX + index * hookSpacing} y={runsAlongZ ? centerZ + index * hookSpacing : centerZ} radius={0.045} fill="#d6d9d5" stroke="#6f7774" strokeWidth={0.014} />)}
+      {[-1, 1].flatMap((row) => [-1, 1].map((column) => {
+        const x = centerX + column * width * 0.27;
+        const z = centerZ + row * depth * 0.27;
+        return <Group key={`oak-hook-${row}-${column}`}>
+          <Circle x={x} y={z} radius={0.034} fill="#d8b587" stroke="#ab8157" strokeWidth={0.009} />
+          <Circle x={x + 0.009} y={z + 0.004} radius={0.011} fill="#252320" />
+        </Group>;
+      }))}
     </Group>;
   }
   if (id === "bath-shower-rod") {
@@ -352,6 +373,7 @@ function planObjectColor(catalogId: string | undefined, kind: string) {
   if (catalogId === "vorraum-wall-decor") return "#c6ae8e";
   if (catalogId === "wall-finish-taupe") return "#B4A495";
   if (catalogId === "wall-finish-vintage-fabric-wallpaper") return "#a8876b";
+  if (catalogId === "bath-towel-hooks-wood-black") return "#d7b68c";
   if (catalogId === "living-tv" || catalogId === "living-floating-cabinet" || catalogId === "kitchen-worktop") return "#171919";
   if (kind === "kitchen") return "#ebe7de";
   if (kind === "sanitary") return "#e7efed";

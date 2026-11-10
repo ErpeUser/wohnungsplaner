@@ -52,4 +52,20 @@ describe("Zimmer 1 wardrobe vinyl", () => {
       assert.match(product.querySelector("a")?.getAttribute("href") ?? "", /top_gallery_url=/);
     }
   });
+  test("shows the 4-pack of oak-and-black bathroom hooks and the 180 × 200 cm washable curtain", () => {
+    render(<ShoppingListDrawer onClose={() => undefined} />);
+    const hooks = screen.getByRole("heading", { name: /4 runde Kleider- und Handtuchhaken/ }).closest("article");
+    assert.ok(hooks);
+    assert.match(hooks.textContent ?? "", /6,36\s*€/);
+    assert.match(hooks.textContent ?? "", /1 Packung = 4 Haken/);
+    assert.match(hooks.textContent ?? "", /118446205486445/);
+    assert.match(hooks.querySelector("a")?.getAttribute("href") ?? "", /goods_id=607039887632432&sku_id=118446205486445/);
+    assert.match(hooks.querySelector("img")?.getAttribute("src") ?? "", /temu-oak-black-hooks-607039887632432\.svg$/);
+
+    const curtain = screen.getByRole("heading", { name: "Duschvorhang Stoff Beige · 180 × 200 cm" }).closest("article");
+    assert.ok(curtain);
+    assert.match(curtain.textContent ?? "", /12 Metallhaken/);
+    assert.match(curtain.querySelector("a")?.getAttribute("href") ?? "", /goods_id=601100062257123&sku_id=17594540656721/);
+  });
+
 });

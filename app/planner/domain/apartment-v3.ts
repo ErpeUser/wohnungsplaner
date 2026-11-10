@@ -132,33 +132,33 @@ const builtIns: PlannerBuiltIn[] = [
     confidence: "estimated",
     notes: ["Festgelegt: Ø 60 cm, mittig über dem 60-cm-Waschtisch; rundum ausreichend Wandabstand für Beleuchtung und Reinigung."],
   }),
-  builtIn("bath-mat", "Badteppich · ruhige Creme-Textur · 122 × 61 cm", "bad", "other", "bath-mat", -1.25, 8.8, 1.22, 0.61, 0.018, 90, "bath-mat-shaggy-cream", 0.012, {
+  builtIn("bath-mat", "Badteppich · beige Baumwoll-Waffelstruktur · 122 × 61 cm", "bad", "other", "bath-mat", -1.25, 8.8, 1.22, 0.61, 0.018, 90, "temu-bath-rug-woven", 0.012, {
     source: "Vom Nutzer bereitgestelltes Temu-Produktbild · Art. 606121368598635",
     confidence: "confirmed",
-    notes: ["Badteppich exakt 122 × 61 cm, Florhöhe 1 cm; vor Wanne und Waschtisch mit freiem Türschwenk platziert."],
+    notes: ["Badteppich exakt 122 × 61 cm, Höhe ca. 1 cm; dichtes gewebtes Waffelrelief in Sandbeige mit gesäumten, leicht fransigen Kanten; vor Wanne und Waschtisch mit freiem Türschwenk platziert."],
   }),
   builtIn("bath-shower-rod", "Duschvorhangstange · Brilliant Silber · 171–210 cm", "bad", "other", "bath-shower-rod", -1.64, 9.19, 2.05, 0.03, 0.03, -90, "chrome-polished", 2.18, {
     source: "Badewannenmaß und Inspirationsbild",
     confidence: "estimated",
     notes: ["Temu-Variante Brilliant Silber, verstellbar 171–210 cm; im Bad auf 205 cm eingestellt und über die vollständige Wannenbreite geführt."],
   }),
-  builtIn("bath-shower-curtain", "Duschvorhang Stoff Beige · 180 × 200 cm", "bad", "other", "bath-shower-curtain", -1.64, 9.19, 1.8, 0.018, 2.0, -90, "temu-shower-curtain-beige", 0.54, {
+  builtIn("bath-shower-curtain", "Duschvorhang Stoff Beige · 180 × 200 cm", "bad", "other", "bath-shower-curtain", -1.64, 9.19, 1.8, 0.018, 2.0, -90, "temu-shower-curtain-beige", 0.16, {
     source: "Vom Nutzer bereitgestelltes Temu-Produktbild · Art. 601100062257123",
     confidence: "confirmed",
-    notes: ["12 Metallhaken · beige Stoffvorhang 180 × 200 cm; unter der vorhandenen 205-cm-Stange mit ruhiger Faltenstaffelung eingeplant."],
+    notes: ["Temu Art. 601100062257123 · SKU 17594540656721 · 12 Metallhaken · waschbarer, blickdichter beiger Stoff 180 × 200 cm ohne Quasten; glatte Saumabschlüsse und weiche vertikale Falten, Unterkante ca. 16 cm über dem Boden."],
   }),
-  builtIn("bath-towel-hook-rail", "Dreifach-Handtuchhaken · 45 × 8 × 8 cm", "bad", "other", "bath-towel-hook-rail", -0.16, 8.72, 0.45, 0.08, 0.08, 90, "chrome-polished", 1.3, {
-    source: "Nutzerwunsch anhand Badansicht · etwas größer als ein Einzelhaken",
+  builtIn("bath-towel-hook-rail", "4 einzelne Rundhaken · Eiche natur / Schwarz · 2 × 2", "bad", "other", "bath-towel-hooks-wood-black", -0.16, 8.72, 0.36, 0.09, 0.34, 90, "bath-hook-oak-natural", 1.3, {
+    source: "Nutzerbild und Temu Art. 607039887632432 · SKU 118446205486445 · 4er-Pack",
     confidence: "estimated",
-    notes: ["3 Haken · 45 cm Breite, 8 cm Tiefe und 8 cm Aufbauhöhe; an der freien Badwand neben der Wanne platziert."],
+    notes: ["Vier einzelne runde Naturholz-Wandplatten mit mattschwarzen gebogenen Haken in einer 2×2-Anordnung auf der bestehenden freien Badezimmerwand. Anordnung ca. 36 × 34 cm; reale Hakendurchmesser und die Eignung der Klebemontage auf den Fliesen vor Montage prüfen."],
   }),
   builtIn("wc-pan", "Wand-WC", "wc", "sanitary", "sanitary-wall-wc", -1.97, 4.4, 0.38, 0.58, 0.42, 0, "#f5f4f0", 0.18),
   builtIn("wc-flush", "WC-Betätigungsplatte", "wc", "sanitary", "wc-flush-plate", -1.97, 4.115, 0.24, 0.035, 0.16, 0, "metal-satin", 1.02),
   builtIn("wc-revision", "WC-Revisionsfeld", "wc", "sanitary", "wc-revision-panel", -1.97, 4.11, 0.42, 0.03, 0.3, 0, "tile-white-rect", 1.68),
-  builtIn("wc-mat", "WC-Teppich · ruhige Creme-Textur · 77 × 46 cm", "wc", "other", "wc-mat", -1.97, 5.25, 0.77, 0.46, 0.018, 90, "bath-mat-shaggy-cream", 0.012, {
+  builtIn("wc-mat", "WC-Teppich · beige Baumwoll-Waffelstruktur · 77 × 46 cm", "wc", "other", "wc-mat", -1.97, 5.25, 0.77, 0.46, 0.018, 0, "temu-bath-rug-woven", 0.012, {
     source: "Vom Nutzer bereitgestelltes Temu-Produktbild · Art. 606121368598635",
     confidence: "confirmed",
-    notes: ["WC-Teppich exakt 77 × 46 cm, Florhöhe 1 cm; vor dem Wand-WC auf der freien Bodenfläche platziert."],
+    notes: ["WC-Teppich exakt 77 × 46 cm mit 1-cm-Waffelrelief; um 90° gedreht, sodass die 77-cm-Seite quer vor dem Wand-WC liegt."],
   }),
   builtIn("living-slats", "Holzlamellen auf dunklem Träger", "wohnkueche", "other", "living-slat-wall", 4.3636, 6.5579, 1.052, 0.035, 2.54, 72.23, "slat-oak-dark", 0),
   builtIn("living-moss", "Moosfeld an Lamellenwand", "wohnkueche", "other", "living-moss-panel", 4.3208, 6.5716, 1.01, 0.055, 0.78, 72.23, "moss-green", 0.99),
@@ -255,9 +255,9 @@ const DECORATIVE_BUILT_IN_IDS = new Set([
 ]);
 
 const finalBuiltIns = builtIns.map((item) => item.id === "builtin-bath-mat"
-  ? { ...item, position: { x: -1.25, z: 8.8 }, rotation: 90, materialVariants: { ...item.materialVariants, main: "bath-mat-shaggy-cream" }, collision: "decorative" as const }
+  ? { ...item, position: { x: -1.25, z: 8.8 }, rotation: 90, materialVariants: { ...item.materialVariants, main: "temu-bath-rug-woven" }, collision: "decorative" as const }
   : item.id === "builtin-wc-mat"
-    ? { ...item, position: { x: -1.97, z: 5.25 }, rotation: 90, materialVariants: { ...item.materialVariants, main: "bath-mat-shaggy-cream" }, collision: "decorative" as const }
+    ? { ...item, position: { x: -1.97, z: 5.25 }, rotation: 0, materialVariants: { ...item.materialVariants, main: "temu-bath-rug-woven" }, collision: "decorative" as const }
   : item.id === "builtin-bath-basin-cabinet-scout"
     ? { ...item, position: { ...item.position, z: 9.8 } }
     : item.id === "builtin-bath-washer-cabinet-scout"

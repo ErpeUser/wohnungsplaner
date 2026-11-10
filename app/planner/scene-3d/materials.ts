@@ -95,7 +95,10 @@ const RECIPES: Record<string, MaterialRecipe> = {
   "fabric-ecru": { color: "#eee6d9", roughness: 0.98 },
   "fabric-ecru-sheer": { color: "#f2ede4", roughness: 0.76, opacity: 0.64, transmission: 0.14, thickness: 0.006 },
   "shower-curtain-linen-beige": { color: "#d8cdbb", roughness: 0.96, clearcoat: 0.02, clearcoatRoughness: 0.9 },
-  "temu-shower-curtain-beige": { color: "#e7ddd0", roughness: 0.98 },
+  "temu-shower-curtain-beige": { color: "#f2eade", roughness: 0.98 },
+  "shower-curtain-hem-beige": { color: "#e4dacb", roughness: 0.99 },
+  "bath-hook-oak-natural": { color: "#d6b486", roughness: 0.83 },
+  "bath-hook-black": { color: "#191918", roughness: 0.56, metalness: 0.14 },
   "fabric-taupe": { color: "#aa9684", roughness: 0.98 },
   "fabric-chicago-beige": { color: "#d8d5cc", roughness: 0.98 },
   "fabric-chicago-chenille": { color: "#d8d5cc", roughness: 0.99 },
@@ -110,7 +113,8 @@ const RECIPES: Record<string, MaterialRecipe> = {
   "rug-gala-taupe": { color: "#aa9b8e", roughness: 1 },
   "rug-temu-shaggy-white": { color: "#f1ede4", roughness: 1 },
   "bath-mat-shaggy-cream": { color: "#f1e8da", roughness: 1 },
-  "temu-bath-rug-woven": { color: "#c9ad8d", roughness: 1 },
+  "temu-bath-rug-woven": { color: "#e8d4b6", roughness: 1 },
+  "bath-mat-fringe-sand": { color: "#c9ad87", roughness: 1 },
   "rug-temu-shaggy-shadow": { color: "#d8d0c2", roughness: 1 },
   "rug-temu-easy-line-colorblock": { color: "#ded5bd", roughness: 1 },
   "rug-hall-overlap-taupe": { color: "#b9aa98", roughness: 1 },
@@ -279,9 +283,27 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
     material.bumpScale = materialId === "rug-rabbit-pile" ? 0.024 : 0.014;
     material.needsUpdate = true;
   } else if (materialId === "temu-bath-rug-woven") {
-    material.map = loadPlannerTexture(texturePath!);
-    material.bumpMap = material.map;
-    material.bumpScale = 0.012;
+    const waffle = createBathroomWaffleTexture();
+    waffle.repeat.set(7.6, 3.8);
+    material.color.set("#ffffff");
+    material.map = waffle;
+    material.bumpMap = waffle;
+    material.bumpScale = 0.010;
+    material.needsUpdate = true;
+  } else if (materialId === "temu-shower-curtain-beige") {
+    const linen = createShowerCurtainTextileTexture();
+    linen.repeat.set(2.8, 5.0);
+    material.color.set("#ffffff");
+    material.map = linen;
+    material.bumpMap = linen;
+    material.bumpScale = 0.003;
+    material.needsUpdate = true;
+  } else if (materialId === "bath-hook-oak-natural") {
+    const oak = loadProductWoodTexture("oak-bozan-directional");
+    material.color.set("#ffffff");
+    material.map = oak;
+    material.bumpMap = oak;
+    material.bumpScale = 0.003;
     material.needsUpdate = true;
   } else if (materialId === "leaf-olive-soft") {
     const leaves = loadProductLeafTexture();
@@ -334,6 +356,36 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
     material.needsUpdate = true;
   }
   return material;
+}
+
+/** 1-cm waffles sampled from the user photo: raised sand yarn borders and
+ * a slightly darker recessed square center.  A single local procedural texture
+ * works in the 2D/3D pipeline without downloading third-party image assets. */
+function createBathroomWaffleTexture() {
+  return createProductDataTexture("generated:temu-bath-rug-waffle-1cm", 256, (x, y) => {
+    const cell = 16; // 16 cells across the texture, sized as a real small waffle weave
+    const u = x % cell;
+    const v = y % cell;
+    const edge = Math.min(u, cell - 1 - u, v, cell - 1 - v);
+    const raised = edge < 3;
+    const yarn = Math.sin(x * 1.36) * 3.8 + Math.cos(y * 1.45) * 3.6;
+    const grain = ((x * 19 + y * 29 + x * y * 3) % 11 - 5) * 0.66;
+    const relief = raised ? 8 : -15;
+    return [198 + relief + yarn + grain, 167 + relief + yarn * 0.93 + grain, 131 + relief + yarn * 0.72 + grain];
+  });
+}
+
+/** Very fine pale beige fabric threads; the volume is in the curtain folds,
+ * not in a printed motif or artificial tassels. */
+function createShowerCurtainTextileTexture() {
+  return createProductDataTexture("generated:temu-curtain-fabric-beige", 256, (x, y) => {
+    const warp = Math.sin(x * 2.2) * 2.5;
+    const weft = Math.cos(y * 2.05) * 2.1;
+    const broad = Math.cos(x * 0.12) * 1.3;
+    const grain = ((x * 13 + y * 17 + x * y) % 7) - 3;
+    const value = warp + weft + broad + grain * 0.25;
+    return [228 + value, 216 + value * 0.97, 198 + value * 0.89];
+  });
 }
 
 function createProductDataTexture(key: string, size: number, pixel: (x: number, y: number) => [number, number, number]) {

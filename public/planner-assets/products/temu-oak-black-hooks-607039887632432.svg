@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="Vier runde Naturholz-Wandhaken mit mattschwarzen Haken, in zwei Reihen angeordnet">
+<defs>
+<linearGradient id="bg" x2=".95" y2="1"><stop stop-color="#f8f3ec"/><stop offset="1" stop-color="#e9ddd0"/></linearGradient>
+<radialGradient id="oak" cx=".31" cy=".23" r=".91"><stop stop-color="#f0d2a6"/><stop offset=".5" stop-color="#d9b286"/><stop offset="1" stop-color="#b68c62"/></radialGradient>
+<linearGradient id="metal" x2=".95" y2="1"><stop stop-color="#38332d"/><stop offset=".48" stop-color="#131516"/><stop offset="1" stop-color="#292b2b"/></linearGradient>
+<filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur in="SourceAlpha" stdDeviation="9"/><feOffset dx="8" dy="13" result="drop"/><feComponentTransfer><feFuncA type="linear" slope=".25"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<pattern id="grain" width="29" height="38" patternUnits="userSpaceOnUse">
+<path d="M3 0c7 13-3 25 2 38 M14 0c-6 10 6 21 0 38 M25 0c4 9-5 20 3 38" fill="none" stroke="#996b40" stroke-opacity=".19" stroke-width="1.4"/>
+</pattern>
+<g id="hook" filter="url(#shadow)">
+<circle r="127" fill="#ac815d"/><circle r="119" fill="url(#oak)"/><circle r="119" fill="url(#grain)"/>
+<ellipse cx="-27" cy="-22" rx="92" ry="93" fill="#fff4d8" opacity=".12"/>
+<rect x="-18" y="-2" width="48" height="76" rx="22" fill="url(#metal)" transform="rotate(-17 6 36)"/>
+<path d="M-7 53 Q15 33 60 37 Q77 39 77 59 L72 132 Q69 152 45 157 L3 160 Q-17 157 -20 134 Z" fill="url(#metal)" transform="rotate(-17 6 36)"/>
+<path d="M8 66Q32 55 52 58" stroke="#999" stroke-opacity=".25" stroke-width="4" fill="none"/>
+</g>
+</defs>
+<rect width="800" height="800" fill="url(#bg)"/>
+<path d="M0 0h800v800H0z" fill="none" stroke="#fefbf6" stroke-width="22"/>
+<use href="#hook" x="225" y="217"/><use href="#hook" x="568" y="217"/>
+<use href="#hook" x="225" y="563"/><use href="#hook" x="568" y="563"/>
+</svg>

@@ -733,7 +733,7 @@ function ParametricBuiltIn({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   if (item.catalogId === "living-wall-light") return <WallLight item={item} />;
   if (item.catalogId === "sanitary-washbasin") return <Washbasin item={item} />;
   if (item.catalogId === "bath-round-mirror") return <BathRoundMirror item={item} />;
-  if (item.catalogId === "bath-towel-hook-rail") return <BathTowelHookRail item={item} />;
+  if (item.catalogId === "bath-towel-hooks-wood-black") return <BathTowelHookRail item={item} />;
   if (item.catalogId === "bath-mat" || item.catalogId === "wc-mat") return <BathMat item={item} />;
   if (item.catalogId === "bath-shower-rod") return <BathShowerRod item={item} />;
   if (item.catalogId === "bath-shower-curtain") return <BathShowerCurtain item={item} />;
@@ -1256,32 +1256,65 @@ function BathRoundMirror({ item }: { item: SceneObject<PlannerBuiltIn> }) {
 
 function BathMat({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   const [width, height, depth] = item.size;
+  const sand = getPlannerMaterial("temu-bath-rug-woven");
+  const fringe = getPlannerMaterial("bath-mat-fringe-sand");
+  const stitches = Math.max(22, Math.round(width / 0.018));
+  // True footprint comes from the Temu variants: 122×61 cm and 77×46 cm.
+  // The relief is a tiny 1-cm waffle lattice, not a large tile pattern.
   return (
-    <RoundedBox args={[width, height, depth]} radius={0.04} smoothness={8} receiveShadow>
-      <primitive object={getPlannerMaterial(item.materialId || "rug-temu-shaggy-white")} attach="material" />
-    </RoundedBox>
+    <group name={`waffle-rug-${item.catalogId}`}>
+      <RoundedBox args={[width * 0.985, height, depth * 0.95]} radius={0.009} smoothness={3} receiveShadow castShadow>
+        <primitive object={sand} attach="material" />
+      </RoundedBox>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, height / 2 + 0.002, 0]} scale={[width * 0.973, depth * 0.928, 1]} geometry={SHARED_PLANE} receiveShadow>
+        <primitive object={sand} attach="material" side={DoubleSide} />
+      </mesh>
+      {[-1, 1].flatMap((side) => Array.from({ length: stitches }, (_, index) => {
+        const x = -width / 2 + (index + 0.5) * width / stitches;
+        const length = 0.008 + (index % 4) * 0.0009;
+        return <mesh key={`fringe-${side}-${index}`} position={[x, 0.002, side * (depth / 2 + length * 0.24)]}
+          rotation={[(index % 3 - 1) * 0.16, 0, (index % 5 - 2) * 0.1]}
+          scale={[0.0022, 0.005, length]} geometry={SHARED_BOX} castShadow>
+          <primitive object={fringe} attach="material" />
+        </mesh>;
+      }))}
+      {[-1, 1].map((side) => <mesh key={`hem-${side}`} position={[0, height / 2 + 0.002, side * (depth / 2 - 0.014)]}
+        scale={[width * 0.96, 0.003, 0.012]} geometry={SHARED_BOX} receiveShadow>
+        <primitive object={fringe} attach="material" />
+      </mesh>)}
+    </group>
   );
 }
 
 function BathTowelHookRail({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   const [width, height, depth] = item.size;
-  const metal = getPlannerMaterial(item.materialId || "chrome-polished");
-  const hookPositions = [-1, 0, 1].map((index) => index * width * 0.34);
+  const oak = getPlannerMaterial("bath-hook-oak-natural");
+  const black = getPlannerMaterial("bath-hook-black");
+  const diameter = Math.min(0.148, width * 0.39, height * 0.43);
+  const horizontal = width * 0.27;
+  const vertical = height * 0.27;
+  // Four independent round natural-oak plates, not a three-hook metal rail.
+  // Sizes are illustration assumptions because the listing does not state cm.
   return (
-    <group>
-      <RoundedBox args={[width, height, depth * 0.36]} radius={0.012} smoothness={3} castShadow receiveShadow>
-        <primitive object={metal} attach="material" />
-      </RoundedBox>
-      {hookPositions.map((x) => (
-        <group key={x} position={[x, -height * 0.54, depth * 0.48]}>
-          <mesh rotation={[Math.PI / 2, 0, 0]} scale={[0.018, 0.018, 0.018]} geometry={SHARED_TORUS} castShadow>
-            <primitive object={metal} attach="material" />
+    <group name="four-oak-black-bath-hooks">
+      {[-1, 1].flatMap((row) => [-1, 1].map((column) => (
+        <group key={`hook-${row}-${column}`} position={[column * horizontal, row * vertical, 0]}>
+          <mesh rotation={[Math.PI / 2, 0, 0]} scale={[diameter, depth * 0.16, diameter]} geometry={SHARED_CYLINDER} castShadow receiveShadow>
+            <primitive object={oak} attach="material" />
           </mesh>
-          <mesh position={[0, -height * 0.26, 0]} scale={[0.012, height * 0.9, 0.012]} geometry={SHARED_CYLINDER} castShadow>
-            <primitive object={metal} attach="material" />
+          <mesh position={[0, 0, depth * 0.14]} scale={[diameter * 0.92, diameter * 0.92, 0.012]} geometry={SHARED_CIRCLE} castShadow>
+            <primitive object={oak} attach="material" side={DoubleSide} />
           </mesh>
+          <mesh position={[0, -diameter * 0.04, depth * 0.37]} rotation={[Math.PI / 2, 0, 0]}
+            scale={[0.028, depth * 0.68, 0.028]} geometry={SHARED_CYLINDER} castShadow>
+            <primitive object={black} attach="material" />
+          </mesh>
+          <RoundedBox position={[0, -diameter * 0.13, depth * 0.72]} rotation={[0.2, 0, -0.12]}
+            args={[diameter * 0.46, diameter * 0.68, 0.017]} radius={0.008} smoothness={4} castShadow>
+            <primitive object={black} attach="material" />
+          </RoundedBox>
         </group>
-      ))}
+      )))}
     </group>
   );
 }
@@ -1336,79 +1369,37 @@ function BathShowerRod({ item }: { item: SceneObject<PlannerBuiltIn> }) {
 
 function BathShowerCurtain({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   const [width, height, depth] = item.size;
-  const folds = 12; // matches the supplied 12-hook variant
-  const curtain = getPlannerMaterial(item.materialId || "shower-curtain-linen-beige");
-  const chrome = getPlannerMaterial("chrome-polished");
-  return (
-    <group>
-      <RoundedBox
-        args={[width, 0.024, Math.max(depth * 1.25, 0.022)]}
-        radius={0.008}
-        smoothness={2}
-        position={[0, height / 2 - 0.014, 0]}
-        renderOrder={17}
-        castShadow
-        receiveShadow
-      >
-        <primitive object={curtain} attach="material" />
-      </RoundedBox>
-      {Array.from({ length: folds }, (_, index) => (
-        <RoundedBox
-          key={index}
-          args={[width / folds * 1.08, height - 0.03, Math.max(depth, 0.018)]}
-          radius={0.012}
-          smoothness={2}
-          position={[
-            -width / 2 + width * (index + 0.5) / folds,
-            -0.004,
-            Math.sin(index * 1.65) * 0.011,
-          ]}
-          rotation={[0, Math.sin(index * 1.65) * 0.028, 0]}
-          renderOrder={16}
-          castShadow
-          receiveShadow
-        >
-          <primitive object={curtain} attach="material" />
+  const hookCount = 12;
+  const cloth = getPlannerMaterial("temu-shower-curtain-beige");
+  const seam = getPlannerMaterial("shower-curtain-hem-beige");
+  const silver = getPlannerMaterial("chrome-polished");
+  const step = width / hookCount;
+  // Opaque washable textile, 180×200 cm; the document positions the hem
+  // 16 cm above floor and the hooks just below the 218-cm curtain rod.
+  // Draw rippling vertical sections with alternating front/back peaks.
+  return <group name="temu-beige-curtain-180x200">
+    {Array.from({ length: hookCount }, (_, index) => (
+      <group key={`pleat-${index}`} position={[-width / 2 + step * (index + 0.5), 0, 0]}>
+        <RoundedBox args={[step * 1.035, height - 0.026, Math.max(0.012, depth * 0.8)]}
+          position={[0, -0.004, Math.sin(index * 1.13) * 0.022]} rotation={[0, Math.sin(index * 1.13) * 0.10, 0]}
+          radius={0.006} smoothness={3} castShadow receiveShadow>
+          <primitive object={cloth} attach="material" />
         </RoundedBox>
-      ))}
-      {Array.from({ length: folds }, (_, index) => (
-        <group key={`hook-${index}`} position={[-width / 2 + width * (index + 0.5) / folds, height / 2 + 0.003, 0]}>
-          <mesh rotation={[0, Math.PI / 2, 0]} scale={[0.024, 0.024, 0.024]} geometry={SHARED_TORUS} castShadow>
-            <primitive object={chrome} attach="material" />
-          </mesh>
-          <mesh position={[0, -0.018, 0]} scale={[0.008, 0.035, 0.008]} geometry={SHARED_CYLINDER}>
-            <primitive object={chrome} attach="material" />
-          </mesh>
-        </group>
-      ))}
-      <RoundedBox
-        args={[width, 0.022, Math.max(depth * 1.18, 0.02)]}
-        radius={0.007}
-        smoothness={2}
-        position={[0, -height / 2 + 0.012, 0]}
-        renderOrder={17}
-        castShadow
-        receiveShadow
-      >
-        <primitive object={curtain} attach="material" />
-      </RoundedBox>
-      {Array.from({ length: folds }, (_, index) => (
-        <mesh
-          key={`tassel-${index}`}
-          position={[
-            -width / 2 + width * (index + 0.5) / folds,
-            -height / 2 - 0.024,
-            Math.sin(index * 1.65) * 0.011,
-          ]}
-          scale={[0.014, 0.026, 0.014]}
-          geometry={SHARED_SPHERE}
-          castShadow
-        >
-          <primitive object={curtain} attach="material" />
+        <mesh position={[0, height / 2 - 0.013, 0.002]} scale={[step * 0.95, 0.018, 0.018]} geometry={SHARED_BOX} castShadow>
+          <primitive object={seam} attach="material" />
         </mesh>
-      ))}
-    </group>
-  );
+        <mesh position={[0, -height / 2 + 0.018, Math.sin(index * 1.13) * 0.022]} scale={[step, 0.026, 0.019]} geometry={SHARED_BOX} castShadow>
+          <primitive object={seam} attach="material" />
+        </mesh>
+        <mesh position={[0, height / 2 + 0.023, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[0.026, 0.008, 0.026]} geometry={SHARED_TORUS} castShadow>
+          <primitive object={silver} attach="material" />
+        </mesh>
+        <mesh position={[0, height / 2 + 0.042, 0]} rotation={[0, Math.PI / 2, 0]} scale={[0.032, 0.032, 0.032]} geometry={SHARED_TORUS} castShadow>
+          <primitive object={silver} attach="material" />
+        </mesh>
+      </group>
+    ))}
+  </group>;
 }
 
 function ScoutBasinCabinet({ item }: { item: SceneObject<PlannerBuiltIn> }) {

@@ -165,9 +165,9 @@ test("places the supplied woven rugs in the bathroom and WC at measured sizes", 
   assert.deepEqual(bathMat.size, { width: 1.22, depth: 0.61, height: 0.018 });
   assert.deepEqual(wcMat.size, { width: 0.77, depth: 0.46, height: 0.018 });
   assert.deepEqual(wcMat.position, { x: -1.97, z: 5.25 });
-  assert.equal(wcMat.rotation, 90);
-  assert.equal(bathMat.materialVariants?.main, "bath-mat-shaggy-cream");
-  assert.equal(wcMat.materialVariants?.main, "bath-mat-shaggy-cream");
+  assert.equal(wcMat.rotation, 0, "77-cm-Seite liegt quer im WC");
+  assert.equal(bathMat.materialVariants?.main, "temu-bath-rug-woven");
+  assert.equal(wcMat.materialVariants?.main, "temu-bath-rug-woven");
   assert.equal(bathMat.collision, "decorative");
   assert.equal(wcMat.collision, "decorative");
   assert.ok(bathMat.metadata?.notes?.some((note) => /122.*61 cm/i.test(note)));
@@ -182,23 +182,26 @@ test("keeps the bathroom rug aligned like the original plan graphic and records 
   assert.ok(curtain);
   assert.deepEqual(bathMat.position, { x: -1.25, z: 8.8 });
   assert.equal(bathMat.rotation, 90);
-  assert.equal(bathMat.materialVariants?.main, "bath-mat-shaggy-cream");
+  assert.equal(bathMat.materialVariants?.main, "temu-bath-rug-woven");
   assert.deepEqual(curtain.size, { width: 1.8, depth: 0.018, height: 2 });
   assert.equal(curtain.materialVariants?.main, "temu-shower-curtain-beige");
+  assert.equal(curtain.elevation, 0.16, "2-m-Vorhang hängt unter der 218-cm-Stange");
   assert.ok(curtain.metadata?.notes?.some((note) => /12 Metallhaken.*180.*200 cm/i.test(note)));
 });
 
-test("places a slightly oversized three-hook towel rail on the free bathroom wall", () => {
-  const rail = DEFAULT_APARTMENT_DOCUMENT.builtIns.find((item) => item.catalogId === "bath-towel-hook-rail");
+test("places four individual oak and black hooks in a 2-by-2 group on the existing bathroom wall", () => {
+  const hooks = DEFAULT_APARTMENT_DOCUMENT.builtIns.find((item) => item.catalogId === "bath-towel-hooks-wood-black");
 
-  assert.ok(rail);
-  assert.equal(rail.roomId, "bad");
-  assert.deepEqual(rail.size, { width: 0.45, depth: 0.08, height: 0.08 });
-  assert.deepEqual(rail.position, { x: -0.16, z: 8.72 });
-  assert.equal(rail.rotation, 90);
-  assert.equal(rail.materialVariants?.main, "chrome-polished");
-  assert.equal(rail.collision, "decorative");
-  assert.ok(rail.metadata?.notes?.some((note) => /3 Haken.*45.*8.*8 cm/i.test(note)));
+  assert.ok(hooks);
+  assert.equal(hooks.id, "builtin-bath-towel-hook-rail", "existing stable identity stays intact");
+  assert.equal(hooks.roomId, "bad");
+  assert.deepEqual(hooks.size, { width: 0.36, depth: 0.09, height: 0.34 });
+  assert.deepEqual(hooks.position, { x: -0.16, z: 8.72 });
+  assert.equal(hooks.rotation, 90);
+  assert.equal(hooks.materialVariants?.main, "bath-hook-oak-natural");
+  assert.equal(hooks.collision, "decorative");
+  assert.match(hooks.metadata?.source ?? "", /607039887632432.*118446205486445.*4er-Pack/);
+  assert.ok(hooks.metadata?.notes?.some((note) => /Vier einzelne.*2×2/.test(note)));
 });
 
 test("includes the photographed finishes and requested fixed living-room composition", () => {
