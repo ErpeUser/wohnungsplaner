@@ -274,7 +274,7 @@ function InteractivePlanStage({
   if (!clientReady) return <form noValidate aria-hidden="true" />;
 
   return (
-    <form noValidate style={{ position: "relative", width: size.width, height: size.height }}>
+    <form noValidate onSubmit={(event) => event.preventDefault()} style={{ position: "relative", width: size.width, height: size.height }}>
       {!canvasReady ? (
         <PlanSvgFallback
           scene={scene}

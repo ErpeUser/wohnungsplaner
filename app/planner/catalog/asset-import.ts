@@ -37,17 +37,41 @@ export async function preparePlannerAsset(
   if (bytes.byteLength === 0) throw new Error("Das Asset ist leer.");
   const sha256 = await sha256Hex(bytes);
   const extension = options.filename.toLowerCase().split(".").pop() ?? "asset";
+  const mediaType = options.mediaType ?? mediaTypeForExtension(extension);
+  assertSupportedSignature(bytes, extension, mediaType);
   const slug = parsed.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "asset";
   return {
     ...parsed,
     assetId: `import-${slug}-${sha256.slice(0, 12)}`,
     byteLength: bytes.byteLength,
     sha256,
-    mediaType: options.mediaType ?? mediaTypeForExtension(extension),
+    mediaType,
     normalizedSize: { width: parsed.width, depth: parsed.depth, height: parsed.height },
     floorOffset: 0,
     pivot: "center",
   };
+}
+
+function assertSupportedSignature(bytes: Uint8Array, extension: string, mediaType: string) {
+  const isGlb = extension === "glb" || mediaType === "model/gltf-binary";
+  const isPng = extension === "png" || mediaType === "image/png";
+  const isJpeg = extension === "jpg" || extension === "jpeg" || mediaType === "image/jpeg";
+  const isSvg = extension === "svg" || mediaType === "image/svg+xml";
+  const isWebp = extension === "webp" || mediaType === "image/webp";
+  const valid = isGlb
+    ? bytes.length >= 4 && bytes[0] === 0x67 && bytes[1] === 0x6c && bytes[2] === 0x54 && bytes[3] === 0x46
+    : isPng
+      ? bytes.length >= 8 && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47
+        && bytes[4] === 0x0d && bytes[5] === 0x0a && bytes[6] === 0x1a && bytes[7] === 0x0a
+      : isJpeg
+        ? bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff
+        : isSvg
+          ? new TextDecoder().decode(bytes.subarray(0, 256)).includes("<svg")
+          : isWebp
+            ? bytes.length >= 12 && new TextDecoder().decode(bytes.subarray(0, 4)) === "RIFF"
+              && new TextDecoder().decode(bytes.subarray(8, 12)) === "WEBP"
+            : bytes.length > 0;
+  if (!valid) throw new Error(`Die ${extension.toUpperCase()}-Signatur des Assets ist ungültig.`);
 }
 
 function mediaTypeForExtension(extension: string) {

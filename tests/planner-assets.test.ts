@@ -33,7 +33,7 @@ test("planner asset manifest is local, licensed, hashed and meter-normalized", a
 
     const bytes = await readFile(resolve(process.cwd(), "public", asset.path.slice(1)));
     assert.equal(createHash("sha256").update(bytes).digest("hex"), asset.sha256, asset.id);
-    assert.equal(verifyPlannerAssetBytes(asset, bytes), true, asset.id);
+    assert.equal(await verifyPlannerAssetBytes(asset, bytes), true, asset.id);
   }
 });
 
@@ -57,9 +57,16 @@ test("every furniture item resolves to a local model or a deterministic parametr
   });
 });
 
-test("asset byte verification rejects a damaged payload", () => {
+test("asset byte verification rejects a damaged payload", async () => {
   const asset = PLANNER_ASSET_MANIFEST.assets[0];
-  assert.equal(verifyPlannerAssetBytes(asset, new Uint8Array([0, 1, 2, 3])), false);
+  assert.equal(await verifyPlannerAssetBytes(asset, new Uint8Array([0, 1, 2, 3])), false);
+});
+
+test("asset byte verification rejects same-length content with a wrong SHA-256", async () => {
+  const asset = PLANNER_ASSET_MANIFEST.assets.find((candidate) => candidate.type === "model")!;
+  const bytes = new Uint8Array(asset.byteLength);
+  bytes.set([0x67, 0x6c, 0x54, 0x46]);
+  assert.equal(await verifyPlannerAssetBytes(asset, bytes), false);
 });
 
 test("walk camera starts inside the chosen scope and rejects walls, built-ins and exterior", () => {

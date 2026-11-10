@@ -112,7 +112,7 @@ describe("PlannerWorkspace", () => {
         type: "setSurfaceMaterial",
         roomId: "zimmer1",
         surface: "floor",
-        materialId: "oak-workspace-test",
+        materialId: "oak-light",
       });
     });
     assert.equal(undo.disabled, false);
@@ -137,17 +137,17 @@ describe("PlannerWorkspace", () => {
 
     const trigger = screen.getByRole("button", { name: "Details öffnen" });
     await user.click(trigger);
-    const details = screen.getByRole("complementary", { name: "Plandetails" });
+    const details = screen.getByRole("dialog", { name: "Plandetails" });
     assert.match(details.textContent ?? "", /Innenräume7/);
     assert.match(details.textContent ?? "", /Außenbereiche1/);
     assert.match(details.textContent ?? "", /Wohnküche.*21,82 m²/);
     await user.click(screen.getByRole("button", { name: "Details schließen" }));
-    assert.equal(screen.queryByRole("complementary", { name: "Plandetails" }), null);
+    assert.equal(screen.queryByRole("dialog", { name: "Plandetails" }), null);
     assert.equal(document.activeElement, trigger);
 
     await user.click(trigger);
     await user.keyboard("{Escape}");
-    assert.equal(screen.queryByRole("complementary", { name: "Plandetails" }), null);
+    assert.equal(screen.queryByRole("dialog", { name: "Plandetails" }), null);
     assert.equal(document.activeElement, trigger);
   });
 
@@ -199,13 +199,13 @@ describe("PlannerWorkspace", () => {
     const store = createPlannerStore({ initialDocument: DEFAULT_APARTMENT_DOCUMENT });
     render(<PlannerWorkspace store={store} />);
     act(() => store.getState().dispatch({
-      type: "setSurfaceMaterial", roomId: "zimmer1", surface: "floor", materialId: "shortcut-test",
+      type: "setSurfaceMaterial", roomId: "zimmer1", surface: "floor", materialId: "oak-light",
     }));
 
     await user.keyboard("{Control>}z{/Control}");
     assert.notEqual(store.getState().document.rooms.find((room) => room.id === "zimmer1")?.surfaces.floor, "shortcut-test");
     await user.keyboard("{Control>}y{/Control}");
-    assert.equal(store.getState().document.rooms.find((room) => room.id === "zimmer1")?.surfaces.floor, "shortcut-test");
+    assert.equal(store.getState().document.rooms.find((room) => room.id === "zimmer1")?.surfaces.floor, "oak-light");
   });
 
   test("defines a readable compact layout below 1024 pixels", async () => {

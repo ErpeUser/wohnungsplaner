@@ -322,9 +322,9 @@ const SHOPPING_ITEMS: ShoppingItem[] = [
 export function ShoppingListDrawer({ onClose }: { onClose(): void }) {
   const total = SHOPPING_ITEMS.reduce((sum, item) => sum + (item.price ?? 0) * (item.quantity ?? 1), 0);
   return (
-    <aside id="planner-shopping-list" className="planner-details planner-shopping" aria-label="Einkaufsliste">
+    <aside id="planner-shopping-list" className="planner-details planner-shopping" role="dialog" aria-modal="true" aria-labelledby="planner-shopping-title" tabIndex={-1}>
       <header>
-        <div><span className="planner-kicker">Ausstattung</span><h2>Einkaufsliste</h2></div>
+        <div><span className="planner-kicker">Ausstattung</span><h2 id="planner-shopping-title">Einkaufsliste</h2></div>
         <button type="button" aria-label="Einkaufsliste schließen" onClick={onClose}>×</button>
       </header>
       <p className="planner-shopping__intro">Maßgetreu eingeplante Produkte plus maßlich abgestimmte, herstellerneutrale Deko-Suchliste</p>
@@ -334,7 +334,7 @@ export function ShoppingListDrawer({ onClose }: { onClose(): void }) {
             <div className={`planner-shopping__preview planner-shopping__preview--${item.type}`} aria-hidden="true">
               {/* Product hosts are user-provided/external; next/image cannot safely optimize an open host list. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              {item.imageUrl ? <img src={item.imageUrl} alt="" loading="lazy" /> : null}
+              {item.imageUrl ? <img src={item.imageUrl} alt="" loading="lazy" referrerPolicy="no-referrer" onError={(event) => { event.currentTarget.hidden = true; }} /> : null}
               <i /><i /><i />
             </div>
             <div className="planner-shopping__copy">

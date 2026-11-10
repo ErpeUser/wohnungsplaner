@@ -135,8 +135,35 @@ export function openingSegment(document: PlannerDocumentV3, opening: PlannerOpen
   const wall = document.walls.find((candidate) => candidate.id === opening.wallId);
   if (!wall) throw new Error(`Opening ${opening.id} references unknown wall ${opening.wallId}`);
   const tangent = unitVector(wall.start, wall.end);
-  const start = addScaled(wall.start, tangent, opening.offset);
-  const end = addScaled(start, tangent, opening.width);
+  const chain = document.walls
+    .filter((candidate) => candidate.roomIds.some((roomId) => wall.roomIds.includes(roomId)))
+    .map((candidate) => {
+      const projected = [candidate.start, candidate.end].map((point) => ({
+        point,
+        distance: (point.x - wall.start.x) * tangent.x + (point.z - wall.start.z) * tangent.z,
+        offset: Math.abs((point.x - wall.start.x) * tangent.z - (point.z - wall.start.z) * tangent.x),
+      }));
+      if (projected.some((point) => point.offset > GEOMETRY_EPSILON)) return null;
+      return {
+        start: Math.min(projected[0].distance, projected[1].distance),
+        end: Math.max(projected[0].distance, projected[1].distance),
+      };
+    })
+    .filter((interval): interval is { start: number; end: number } => interval !== null)
+    .sort((left, right) => left.start - right.start);
+  const requiredStart = opening.offset;
+  const requiredEnd = opening.offset + opening.width;
+  let covered = requiredStart;
+  for (const interval of chain) {
+    if (interval.start > covered + GEOMETRY_EPSILON) break;
+    if (interval.end >= covered - GEOMETRY_EPSILON) covered = Math.max(covered, interval.end);
+    if (covered >= requiredEnd - GEOMETRY_EPSILON) break;
+  }
+  if (covered < requiredEnd - GEOMETRY_EPSILON) {
+    throw new Error(`Opening ${opening.id} is not covered by a contiguous wall chain`);
+  }
+  const start = addScaled(wall.start, tangent, requiredStart);
+  const end = addScaled(wall.start, tangent, requiredEnd);
   return { wall, start, end };
 }
 

@@ -1,4 +1,5 @@
 import { inspectPlacement, type CollisionHit } from "./collisions.ts";
+import { isKnownMaterialId } from "./material-registry.ts";
 import type {
   PlannerDocumentV3,
   PlannerPlacement,
@@ -78,6 +79,9 @@ export function applyPlannerCommand(
       if (!command.slot.trim() || !command.materialId.trim()) {
         return reject(document, "invalid", "Material-Slot und Material dürfen nicht leer sein.");
       }
+      if (!isKnownMaterialId(document, command.materialId)) {
+        return reject(document, "invalid", `Das Material ${command.materialId} ist im Katalog nicht vorhanden.`);
+      }
       if (document.builtIns.some((item) => item.id === command.placementId)) {
         return reject(document, "locked", "Fest eingebaute Elemente können nicht verändert werden.");
       }
@@ -141,6 +145,9 @@ export function applyPlannerCommand(
       }
       if (!command.materialId.trim()) {
         return reject(document, "invalid", "Eine Material-ID darf nicht leer sein.");
+      }
+      if (!isKnownMaterialId(document, command.materialId)) {
+        return reject(document, "invalid", `Das Material ${command.materialId} ist im Katalog nicht vorhanden.`);
       }
       const rooms = document.rooms.map((room, index) => index === roomIndex
         ? { ...room, surfaces: { ...room.surfaces, [command.surface]: command.materialId } }

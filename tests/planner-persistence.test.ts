@@ -330,7 +330,7 @@ test("hydrates, imports with history reset, and restores a valid backup", () => 
     type: "setSurfaceMaterial",
     roomId: "zimmer1",
     surface: "floor",
-    materialId: "oak-test",
+    materialId: "oak-light",
   });
   assert.equal(store.getState().canUndo, true);
 
@@ -381,13 +381,13 @@ test("keeps the edited store document intact when autosave fails", async () => {
     type: "setSurfaceMaterial",
     roomId: "zimmer1",
     surface: "floor",
-    materialId: "failure-still-visible",
+    materialId: "oak-light",
   });
   await delay(20);
 
   assert.equal(
     store.getState().document.rooms.find((room) => room.id === "zimmer1")?.surfaces.floor,
-    "failure-still-visible",
+    "oak-light",
   );
   assert.equal(store.getState().autosaveStatus, "error");
 });

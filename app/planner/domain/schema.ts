@@ -118,6 +118,7 @@ const placementSchema = z.object({
   rotation: finiteNumber,
   size: sizeSchema,
   wallId: entityId.optional(),
+  floorCovering: z.boolean().optional(),
   materialVariants: z.record(entityId, entityId).optional(),
   metadata: metadataSchema,
 });

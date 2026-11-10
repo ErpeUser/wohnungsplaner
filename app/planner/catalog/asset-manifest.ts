@@ -57,8 +57,14 @@ export function plannerAsset(assetId: string) {
   return PLANNER_ASSET_MANIFEST.assets.find((asset) => asset.id === assetId);
 }
 
-export function verifyPlannerAssetBytes(asset: PlannerAsset, bytes: Uint8Array) {
+export async function verifyPlannerAssetBytes(asset: PlannerAsset, bytes: Uint8Array) {
   if (bytes.byteLength !== asset.byteLength) return false;
+  const digestBuffer = bytes.buffer instanceof ArrayBuffer
+    ? bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength)
+    : Uint8Array.from(bytes).buffer;
+  const digest = await crypto.subtle.digest("SHA-256", digestBuffer);
+  const sha256 = [...new Uint8Array(digest)].map((value) => value.toString(16).padStart(2, "0")).join("");
+  if (sha256 !== asset.sha256) return false;
   if (asset.type === "model") {
     return bytes[0] === 0x67 && bytes[1] === 0x6c && bytes[2] === 0x54 && bytes[3] === 0x46;
   }

@@ -95,5 +95,5 @@ export function inspectPlacement(
 
 /** Rugs are rendered as floor coverings and can intentionally sit below furniture. */
 export function isFloorCovering(item: PlannerPlacement) {
-  return /(^|[-_])(rug|carpet)([-_]|$)/i.test(item.catalogId) || item.size.height <= 0.08;
+  return item.floorCovering === true || /(^|[-_])(rug|carpet)([-_]|$)/i.test(item.catalogId);
 }

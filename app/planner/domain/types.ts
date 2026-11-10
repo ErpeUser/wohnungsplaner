@@ -101,6 +101,8 @@ export type PlannerPlacement = {
   rotation: number;
   size: Size3;
   wallId?: string;
+  /** Explicitly marks rugs and other low-profile floor finishes that may overlap furniture. */
+  floorCovering?: boolean;
   materialVariants?: Record<string, string>;
   metadata?: PlannerMetadata;
 };

@@ -17,7 +17,7 @@ export function InspectorPanel({ document, selectionId, dispatch }: InspectorPan
   const builtIn = document.builtIns.find((item) => item.id === selectionId);
 
   return (
-    <aside id="planner-inspector" className="planner-panel planner-panel--inspector" aria-label="Eigenschaften">
+    <aside id="planner-inspector" className="planner-panel planner-panel--inspector" aria-label="Eigenschaften" role="region">
       <header className="planner-panel__header">
         <span className="planner-kicker">Auswahl</span>
         <h2>Eigenschaften</h2>

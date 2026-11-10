@@ -5,6 +5,7 @@ import {
   doorPassagePolygon,
   doorPose,
   doorSweepPolygon,
+  openingSegment,
   placementPolygon,
   pointInPolygon,
   roomAtPoint,
@@ -60,6 +61,22 @@ test("checks a shared doorway from the room on either side", () => {
   const document = adjacentRoomsDocument();
   const report = inspectPlacement(document, placement({ x: 1.75, z: 2 }, 0.2, 0.2, 0, "left"));
   assert.ok(report.hard.some((hit) => hit.kind === "door-sweep"));
+});
+
+test("resolves an opening across a collinear wall chain without extending past the physical wall", () => {
+  const document = squareRoomDocument();
+  document.walls = [
+    { ...document.walls[0], id: "wall-south-a", end: { x: 2, z: 0 } },
+    { ...document.walls[0], id: "wall-south-b", start: { x: 2, z: 0 }, end: { x: 4, z: 0 } },
+    ...document.walls.slice(1),
+  ];
+  document.rooms[0].boundary[0] = { wallId: "wall-south-a", direction: 1 };
+  document.rooms[0].boundary.splice(1, 0, { wallId: "wall-south-b", direction: 1 });
+  document.openings[0] = { ...document.openings[0], wallId: "wall-south-a", offset: 1.5, width: 2 };
+
+  const segment = openingSegment(document, document.openings[0]);
+  assert.deepEqual(segment.start, { x: 1.5, z: 0 });
+  assert.deepEqual(segment.end, { x: 3.5, z: 0 });
 });
 
 test("adds five centimetres to the 90 degree door sweep", () => {
@@ -127,6 +144,24 @@ test("reports walls, built-ins and door sweeps as hard collisions but fixtures a
   assert.ok(inspectPlacement(document, placement({ x: 1.35, z: 0.35 }, 0.2, 0.2)).hard.some((hit) => hit.kind === "door-sweep"));
   assert.ok(inspectPlacement(document, placement({ x: -0.05, z: 2 }, 0.2, 0.2)).hard.some((hit) => hit.kind === "room-boundary"));
   assert.deepEqual(inspectPlacement(document, placement({ x: 2.5, z: 2 }, 0.2, 0.2)).hard, []);
+});
+
+test("does not treat every thin object as a floor covering", () => {
+  const document = squareRoomDocument();
+  document.placements = [{
+    id: "thin-tabletop",
+    roomId: "room-square",
+    catalogId: "tabletop",
+    position: { x: 3, z: 3 },
+    rotation: 0,
+    size: { width: 0.8, depth: 0.8, height: 0.06 },
+  }];
+  const report = inspectPlacement(document, placement({ x: 3, z: 3 }, 0.4, 0.4));
+  assert.ok(report.hard.some((hit) => hit.kind === "placement" && hit.entityId === "thin-tabletop"));
+
+  document.placements[0] = { ...document.placements[0], floorCovering: true };
+  const rugReport = inspectPlacement(document, placement({ x: 3, z: 3 }, 0.4, 0.4));
+  assert.ok(!rugReport.hard.some((hit) => hit.entityId === "thin-tabletop"));
 });
 
 test("treats the kitchen floor finish as a surface instead of a furniture collision", () => {

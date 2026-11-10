@@ -110,8 +110,12 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
     };
     closeSidePanels(compact.matches);
     const onChange = (event: MediaQueryListEvent) => closeSidePanels(event.matches);
-    compact.addEventListener("change", onChange);
-    return () => compact.removeEventListener("change", onChange);
+    if (typeof compact.addEventListener === "function") compact.addEventListener("change", onChange);
+    else compact.addListener(onChange);
+    return () => {
+      if (typeof compact.removeEventListener === "function") compact.removeEventListener("change", onChange);
+      else compact.removeListener(onChange);
+    };
   }, [store]);
 
   const closeDetails = () => {
@@ -153,6 +157,19 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
       />
 
       <div className="planner-workspace__body" data-catalog-open={state.panels.catalog} data-inspector-open={state.panels.inspector}>
+        {(state.panels.catalog || state.panels.inspector || state.panels.details || shoppingOpen) ? (
+          <button
+            type="button"
+            className="planner-mobile-backdrop"
+            aria-label="Seitenbereich schließen"
+            onClick={() => {
+              state.setPanel("catalog", false);
+              state.setPanel("inspector", false);
+              state.setPanel("details", false);
+              setShoppingOpen(false);
+            }}
+          />
+        ) : null}
         {state.panels.catalog ? (
           <CatalogPanel activeRoomId={state.activeRoomId} onAdd={interactions.addCatalogItem} />
         ) : null}

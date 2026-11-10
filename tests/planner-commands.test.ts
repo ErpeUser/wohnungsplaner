@@ -54,13 +54,24 @@ test("changes only a placement material without revalidating its unchanged geome
     type: "setPlacementMaterial",
     placementId: "chair",
     slot: "main",
-    materialId: "rug-new-color",
+    materialId: "fabric-sand",
   });
 
   assert.equal(result.error, undefined);
   assert.deepEqual(result.document.placements[0].position, { x: 3.4, z: 3.4 });
   assert.deepEqual(result.document.placements[0].size, original.placements[0].size);
-  assert.equal(result.document.placements[0].materialVariants?.main, "rug-new-color");
+  assert.equal(result.document.placements[0].materialVariants?.main, "fabric-sand");
+});
+
+test("rejects material ids that are not in the planner material registry", () => {
+  const result = applyPlannerCommand(commandDocument(), {
+    type: "setPlacementMaterial",
+    placementId: "chair",
+    slot: "main",
+    materialId: "not-a-planner-material",
+  });
+
+  assert.equal(result.error?.code, "invalid");
 });
 
 test("moves every member of a linked furniture group by the same delta", () => {
@@ -174,9 +185,9 @@ test("keeps built-ins locked while changing doors and room materials", () => {
     type: "setSurfaceMaterial",
     roomId: "room-a",
     surface: "floor",
-    materialId: "terrazzo-warm",
+    materialId: "porcelain-light",
   });
-  assert.equal(surfaced.document.rooms[0].surfaces.floor, "terrazzo-warm");
+  assert.equal(surfaced.document.rooms[0].surfaces.floor, "porcelain-light");
 });
 
 test("supports undo, redo, and drops redo after a new document", () => {
