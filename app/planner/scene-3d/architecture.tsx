@@ -1462,11 +1462,83 @@ function BathShowerSet({ item }: { item: SceneObject<PlannerBuiltIn> }) {
 
 function WcPaperHolder({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   const [width, height, depth] = item.size;
+  // User photo: two offset solid-wood ledges (photo annotates the lower one
+  // as 17 × 14 cm), an approximately 15-cm horizontal iron roll arm and a
+  // 9-cm vertical connector. Overall envelope / mounting remain estimates.
+  const wood = getPlannerMaterial("wc-holder-solid-oak");
+  const woodEdge = getPlannerMaterial("wc-holder-oak-edge");
+  const iron = getPlannerMaterial("wc-holder-black-iron");
+  const paper = getPlannerMaterial("wc-paper-white");
+  const core = getPlannerMaterial("wc-paper-core");
+  const ledgeWidth = 0.17;
+  const ledgeDepth = Math.min(depth * 0.94, 0.14);
+  const ledgeThickness = 0.023;
+  const topX = width / 2 - ledgeWidth / 2 - 0.008;
+  const bottomX = -width / 2 + ledgeWidth / 2 + 0.008;
+  const topY = height / 2 - 0.023;
+  const bottomY = -height / 2 + 0.023;
+  const bracketX = 0;
+  const frontZ = depth / 2 - 0.009;
   return (
-    <group>
-      <mesh position={[0, 0, -depth * 0.3]} scale={[width * 0.18, height * 0.9, depth * 0.18]} geometry={SHARED_CYLINDER} castShadow><primitive object={getPlannerMaterial("metal-satin")} attach="material" /></mesh>
-      <mesh rotation={[0, 0, Math.PI / 2]} scale={[width * 0.9, height * 0.25, depth * 0.48]} geometry={SHARED_CYLINDER} castShadow><primitive object={getPlannerMaterial("white-matte")} attach="material" /></mesh>
-      <mesh position={[0, height * 0.52, 0]} scale={[width, height * 0.12, depth]} geometry={SHARED_BOX} castShadow><primitive object={getPlannerMaterial("metal-satin")} attach="material" /></mesh>
+    <group name="temu-wc-oak-iron-paper-shelf">
+      {[{ x: topX, y: topY }, { x: bottomX, y: bottomY }].map(({ x, y }, index) => (
+        <group key={`wood-ledge-${index}`} position={[x, y, 0]}>
+          <RoundedBox args={[ledgeWidth, ledgeThickness, ledgeDepth]} radius={0.006} smoothness={4} castShadow receiveShadow>
+            <primitive object={woodEdge} attach="material" />
+          </RoundedBox>
+          <mesh position={[0, ledgeThickness / 2 + 0.0008, 0]} rotation={[-Math.PI / 2, 0, 0]}
+            scale={[ledgeWidth * 0.94, ledgeDepth * 0.92, 1]} geometry={SHARED_PLANE} receiveShadow>
+            <primitive object={wood} attach="material" side={DoubleSide} />
+          </mesh>
+          {[-1, 1].map((side) => (
+            <mesh key={`edge-grain-${side}`} position={[0, -ledgeThickness * 0.2, side * (ledgeDepth / 2 + 0.0008)]}
+              scale={[ledgeWidth * 0.93, 0.002, 0.001]} geometry={SHARED_BOX}>
+              <primitive object={wood} attach="material" />
+            </mesh>
+          ))}
+        </group>
+      ))}
+      {/* Continuous bracket between the two offset wooden shelves. */}
+      <RoundedBox args={[0.022, height * 0.75, 0.024]} radius={0.004} smoothness={3}
+        position={[bracketX, 0, frontZ - 0.025]} castShadow>
+        <primitive object={iron} attach="material" />
+      </RoundedBox>
+      <mesh position={[bracketX, 0.01, frontZ - 0.026]} scale={[0.035, 0.003, 0.033]} geometry={SHARED_BOX} castShadow>
+        <primitive object={iron} attach="material" />
+      </mesh>
+      {/* Horizontal 15-cm paper arm and small open end stop. */}
+      <mesh position={[0.076, -0.014, frontZ]} rotation={[0, 0, Math.PI / 2]}
+        scale={[0.014, 0.15, 0.014]} geometry={SHARED_CYLINDER} castShadow>
+        <primitive object={iron} attach="material" />
+      </mesh>
+      <mesh position={[0.149, -0.003, frontZ]} scale={[0.01, 0.025, 0.01]} geometry={SHARED_CYLINDER} castShadow>
+        <primitive object={iron} attach="material" />
+      </mesh>
+      {/* Visible replaceable paper roll, not a solid blank cylinder. */}
+      <mesh position={[0.078, -0.014, frontZ]} rotation={[0, 0, Math.PI / 2]}
+        scale={[0.098, 0.105, 0.098]} geometry={SHARED_CYLINDER} castShadow receiveShadow>
+        <primitive object={paper} attach="material" />
+      </mesh>
+      {[-1, 1].map((side) => (
+        <group key={`paper-core-${side}`} position={[0.078 + side * 0.053, -0.014, frontZ]}>
+          <mesh rotation={[0, Math.PI / 2, 0]} scale={[0.031, 0.031, 0.031]} geometry={SHARED_TORUS}>
+            <primitive object={core} attach="material" />
+          </mesh>
+          <mesh rotation={[0, Math.PI / 2, 0]} scale={[0.013, 0.013, 0.013]} geometry={SHARED_TORUS}>
+            <primitive object={iron} attach="material" />
+          </mesh>
+        </group>
+      ))}
+      <mesh position={[0.078, -0.085, frontZ + 0.046]} scale={[0.086, 0.118, 0.002]} geometry={SHARED_BOX} castShadow>
+        <primitive object={paper} attach="material" />
+      </mesh>
+      {/* Wall mounting tabs under the shelves. */}
+      {[topY - 0.035, bottomY + 0.032].map((y, index) => (
+        <mesh key={`wall-mount-${index}`} position={[bracketX, y, -depth / 2 + 0.005]}
+          scale={[0.038, 0.038, 0.008]} geometry={SHARED_BOX} castShadow>
+          <primitive object={iron} attach="material" />
+        </mesh>
+      ))}
     </group>
   );
 }

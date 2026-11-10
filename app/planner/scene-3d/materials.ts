@@ -72,6 +72,11 @@ const RECIPES: Record<string, MaterialRecipe> = {
   "cabinet-black": { color: "#171919", roughness: 0.3, clearcoat: 0.35, clearcoatRoughness: 0.28 },
   "door-oak": { color: "#a66f43", roughness: 0.58, clearcoat: 0.08, clearcoatRoughness: 0.75 },
   "oak-natural": { color: "#b98a5e", roughness: 0.64 },
+  "wc-holder-solid-oak": { color: "#e6c497", roughness: 0.72 },
+  "wc-holder-oak-edge": { color: "#bb8857", roughness: 0.8 },
+  "wc-holder-black-iron": { color: "#20211f", roughness: 0.46, metalness: 0.78 },
+  "wc-paper-white": { color: "#f5f2e9", roughness: 0.98 },
+  "wc-paper-core": { color: "#ad9981", roughness: 0.95 },
   "oak-artisan": { color: "#b78352", roughness: 0.58, clearcoat: 0.08, clearcoatRoughness: 0.68 },
   "oak-artisan-edge": { color: "#8d603c", roughness: 0.66 },
   "oak-bozan-directional": { color: "#b78352", roughness: 0.62, clearcoat: 0.08, clearcoatRoughness: 0.7 },
@@ -261,6 +266,13 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
     material.bumpMap = grain;
     material.bumpScale = 0.012;
     material.needsUpdate = true;
+  } else if (materialId === "wc-holder-solid-oak" || materialId === "wc-holder-oak-edge") {
+    const oak = loadWcShelfOakTexture(materialId === "wc-holder-oak-edge");
+    material.map = oak;
+    material.bumpMap = oak;
+    material.bumpScale = 0.009;
+    material.color.set("#ffffff");
+    material.needsUpdate = true;
   } else if (materialId === "oak-bozan-directional" || materialId === "oak-bozan-edge") {
     const oak = loadProductWoodTexture(materialId);
     material.map = oak;
@@ -430,6 +442,17 @@ function loadProductGrainTexture(materialId: string, base: [number, number, numb
   return createProductDataTexture(`generated:${materialId}`, 128, (x, y) => {
     const grain = Math.sin((x * direction + y * scale) * 2.2) * 4.8 + Math.sin((x * 0.14 + y * 0.024) * 3.1) * 2.1;
     return [base[0] + grain, base[1] + grain * 0.95, base[2] + grain * 0.82];
+  });
+}
+
+function loadWcShelfOakTexture(edge: boolean) {
+  return createProductDataTexture(`generated:wc-shelf-oak-${edge ? "edge" : "face"}`, 256, (x, y) => {
+    // Directional honey-oak grain, narrow pores and warm latewood lines.
+    const wave = Math.sin(x * 0.09 + Math.sin(y * 0.17) * 2.1) * 8;
+    const knots = Math.sin(x * 0.023 + y * 0.068) * 4.8;
+    const pores = ((x * 41 + y * 17 + x * y) % 23 - 11) * 0.45;
+    const base = edge ? [180, 127, 77] : [224, 186, 139];
+    return [base[0] + wave + knots + pores, base[1] + wave * 0.84 + knots + pores, base[2] + wave * 0.68 + knots + pores];
   });
 }
 

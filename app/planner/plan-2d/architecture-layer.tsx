@@ -305,6 +305,21 @@ function BuiltInDetail({ item }: { item: PlanObjectDescriptor }) {
       })}
     </Group>;
   }
+  if (id === "wc-paper-holder") {
+    // Two displaced oak ledges and the exposed iron roll arm in the WC plan.
+    return <Group listening={false}>
+      <Line points={[box.minX + width * 0.02, box.minZ + depth * 0.08, box.minX + width * 0.52, box.minZ + depth * 0.08,
+        box.minX + width * 0.52, box.maxZ - depth * 0.12, box.minX + width * 0.02, box.maxZ - depth * 0.12]}
+        closed fill="#dcb889" stroke="#a8784e" strokeWidth={0.016} />
+      <Line points={[box.minX + width * 0.48, box.minZ + depth * 0.12, box.maxX - width * 0.02, box.minZ + depth * 0.12,
+        box.maxX - width * 0.02, box.maxZ - depth * 0.08, box.minX + width * 0.48, box.maxZ - depth * 0.08]}
+        closed fill="#dcb889" stroke="#a8784e" strokeWidth={0.016} />
+      <Line points={[box.minX + width * 0.45, box.minZ + depth * 0.5, box.maxX - width * 0.09, box.minZ + depth * 0.5]}
+        stroke="#222220" strokeWidth={0.02} lineCap="round" />
+      <Circle x={box.maxX - width * 0.17} y={box.minZ + depth * 0.51}
+        radius={depth * 0.16} stroke="#faf8f3" strokeWidth={0.02} fill="#efeae1" />
+    </Group>;
+  }
   if (id === "sanitary-wall-wc") {
     return <Circle x={(box.minX + box.maxX) / 2} y={(box.minZ + box.maxZ) / 2} radius={Math.min(width, depth) * 0.3} stroke="#7f9699" strokeWidth={0.025} listening={false} />;
   }
@@ -362,6 +377,7 @@ function planObjectColor(catalogId: string | undefined, kind: string) {
   if (catalogId === "living-moss-panel") return "#405539";
   if (catalogId === "bath-basin-cabinet-scout" || catalogId === "bath-washer-cabinet-scout") return "#cfc3b2";
   if (catalogId === "zimmer1-desk-mirror") return "#cbdadd";
+  if (catalogId === "wc-paper-holder") return "#d7b68b";
   if (catalogId === "zimmer1-wall-art-pair") return "#c99d68";
   if (catalogId === "zimmer1-entry-slim-art") return "#c99d68";
   if (catalogId === "zimmer1-headboard-led") return "#f2bd78";

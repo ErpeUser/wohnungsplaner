@@ -68,4 +68,18 @@ describe("Zimmer 1 wardrobe vinyl", () => {
     assert.match(curtain.querySelector("a")?.getAttribute("href") ?? "", /goods_id=601100062257123&sku_id=17594540656721/);
   });
 
+  test("lists the supplied Temu WC oak-and-iron shelf with correct source and single price", () => {
+    render(<ShoppingListDrawer onClose={() => undefined} />);
+    const product = screen.getByRole("heading", { name: /Wandablage aus Naturholz und schwarzem Eisen mit Toilettenpapierhalter/ }).closest("article");
+    assert.ok(product);
+    assert.match(product.textContent ?? "", /17 × 14 cm/);
+    assert.match(product.textContent ?? "", /15-cm-Papierhalter/);
+    assert.match(product.textContent ?? "", /9-cm-Verbindungssteg/);
+    assert.match(product.textContent ?? "", /9,75\s*€/);
+    assert.match(product.textContent ?? "", /SKU 17595354506975/);
+    assert.match(product.querySelector("img")?.getAttribute("src") ?? "", /temu-wc-paper-holder-601100249492431\.svg$/);
+    assert.match(product.querySelector("a")?.getAttribute("href") ?? "", /goods_id=601100249492431&sku_id=17595354506975/);
+    assert.match(product.querySelector("a")?.getAttribute("href") ?? "", /0aac879c-84e0-4e9a-9220-87e2e075ce21\.jpg/);
+  });
+
 });
