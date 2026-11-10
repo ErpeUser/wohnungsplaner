@@ -26,10 +26,10 @@ async function snapshotWorkingTree(before) {
   }
   await writeFile(
     path.join(localDir, "codex-uncommitted.patch"),
-    `${patch.stdout}${copied.length ? `\\n# Untracked file contents copied to .local/codex-untracked/:\\n${copied.join("\\n")}\\n` : ""}`,
+    `${patch.stdout}${copied.length ? `\n# Untracked file contents copied to .local/codex-untracked/:\n${copied.join("\n")}\n` : ""}`,
     "utf8",
   );
-  await writeFile(path.join(localDir, "codex-untracked.json"), `${JSON.stringify({ files: copied }, null, 2)}\\n`, "utf8");
+  await writeFile(path.join(localDir, "codex-untracked.json"), `${JSON.stringify({ files: copied }, null, 2)}\n`, "utf8");
   return { patch: ".local/codex-uncommitted.patch", untracked: copied, manifest: ".local/codex-untracked.json" };
 }
 
