@@ -1,8 +1,8 @@
 $ErrorActionPreference = "Stop"
 
 $projectDirectory = Split-Path -Parent $MyInvocation.MyCommand.Path
-$plannerUrl = "http://127.0.0.1:5173/"
-$port = 5173
+$plannerUrl = "http://127.0.0.1:3000/"
+$port = 3000
 $nodeCandidates = @(
   (Join-Path ${env:ProgramFiles} "nodejs\node.exe"),
   (Join-Path ${env:ProgramFiles(x86)} "nodejs\node.exe")
