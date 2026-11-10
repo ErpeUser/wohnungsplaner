@@ -1,5 +1,5 @@
 import { git, repositorySnapshot, saveState, parseArgs, ensureLocalDir, localDir, repoRoot } from "./codex-utils.mjs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 async function snapshotWorkingTree() {
@@ -14,7 +14,9 @@ async function snapshotWorkingTree() {
     if (!source.startsWith(root)) continue;
     const destination = path.join(localDir, "codex-untracked", relative);
     await mkdir(path.dirname(destination), { recursive: true });
-    await writeFile(destination, await readFile(source));
+    const info = await stat(source);
+    if (info.isDirectory()) await cp(source, destination, { recursive: true, force: true });
+    else await writeFile(destination, await readFile(source));
     copied.push(relative);
   }
   await writeFile(
