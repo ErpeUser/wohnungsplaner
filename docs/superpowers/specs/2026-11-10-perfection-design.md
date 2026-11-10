@@ -9,6 +9,7 @@ Die vorhandene Wohnungserfassung bleibt die maßgebende Quelle für Raumgeometri
 - 2D- und 3D-Ansicht müssen dieselben Objekte, Grenzen und Produktidentitäten verwenden.
 - Produktmodelle müssen ihre Originalmaterialien behalten; parametriche Modelle dienen nur als expliziter Fallback.
 - Der KI-/Asset-Import erhält eine prüfbare Metadaten- und Hash-Pipeline.
+- Deko-Empfehlungen werden zunächst maßbezogen und reproduzierbar als Platzhalter erzeugt; konkrete Produkte können danach über Suchabfragen und geprüfte Asset-Imports ersetzt werden.
 - Walkthrough, Kollisionsprüfung und Zugänglichkeit sollen realistische, nachvollziehbare Regeln verwenden.
 
 ## Bewerte Ansätze
@@ -27,7 +28,8 @@ Die vorhandene Wohnungserfassung bleibt die maßgebende Quelle für Raumgeometri
 4. Produktdarstellung verbessern: originale GLB-Materialien bewahren, parametrische Darstellung über explizites `renderMode` wählen und Rundungen im lokalen Generator korrekt erzeugen.
 5. Walkthrough und Kollisionsregeln realistisch machen: Teppiche und dekorative Wandobjekte sind keine Blocker; Türöffnungen werden um den Avatar-Radius erweitert.
 6. Asset-Pipeline und lokale Bereitstellung härten: Sidecar-Metadaten, SHA-256-Prüfung, Dateityp-/Größenlimit, sichere lokale HTTP-Responses und optionale Worker-Bindings.
-7. Validierung und Dokumentation: TypeScript, ESLint, Planner-Tests, UI-Tests, Cutover-Checks, Asset-Manifest und Build ausführen.
+7. Deko-Empfehlung ergänzen: Raumflächen, Boden-/Wandmaterial, Belegung und vorhandene Kategorien analysieren; freie Plätze mit messbaren Platzhaltern, Farbpalette, Begründung und Produktsuchkontext ausgeben.
+8. Validierung und Dokumentation: TypeScript, ESLint, Planner-Tests, UI-Tests, Cutover-Checks, Asset-Manifest und Build ausführen.
 
 ## Nicht automatisierte Annahmen
 

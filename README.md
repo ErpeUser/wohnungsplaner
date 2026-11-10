@@ -45,6 +45,12 @@ npm run assets:check
 
 `renderMode: "gltf"` nutzt das geprüfte Originalmodell, `renderMode: "parametric"` die gezielt modellierte Produktform und `renderMode: "auto"` entscheidet anhand der lokalen Verfügbarkeit. Produktbilder bleiben Referenzmaterial; die metrischen Außenmaße im Sidecar und im Katalog sind die Geometriequelle.
 
+## Deko-Empfehlungen und Produktsuche
+
+`recommendDecor(document, roomId)` in `app/planner/recommendations/decor-recommendation.ts` analysiert Raumfläche, Boden-/Wandmaterial, Belegung, Einbauten und vorhandene Fixtures. Die Funktion erzeugt reproduzierbare Platzhalter für Bild, Licht, Teppich, Pflanze, Textil und Ablage nur dann, wenn ihre gemessenen Außenmaße innerhalb der Raumgeometrie liegen. Jede Empfehlung enthält eine Farbpalette, Begründung, Platzierungshinweis und eine konkrete Produktsuchanfrage.
+
+Die Empfehlungen bleiben mit `status: "placeholder"` und `sourceConfidence: "estimated"` gekennzeichnet. Ein nachgeschalteter Produkt- oder Firecrawl-Schritt kann die Suchanfrage mit einem geprüften Produkt beantworten; dessen Bild/GLB wird anschließend über die Sidecar- und Manifest-Pipeline importiert, während Position und Maße vor der Übernahme erneut gegen den Grundriss validiert werden.
+
 ## Technische Struktur
 
 - `app/planner/domain`: kanonisches V3-Dokument und Schema
