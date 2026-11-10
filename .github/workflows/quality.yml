@@ -1,0 +1,58 @@
+name: Quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.0
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Production build
+        run: npm run build
+
+      - name: Planner tests
+        run: npm run test:planner
+
+      - name: UI tests
+        run: npm run test:ui -- --maxWorkers=1
+
+      - name: Cutover and server smoke tests
+        run: npm run test:cutover
+
+      - name: Asset manifest validation
+        run: npm run assets:check
+
+      - name: Dependency audit
+        run: npm audit --audit-level=high --json
