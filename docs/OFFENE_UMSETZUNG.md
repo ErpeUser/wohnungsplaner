@@ -10,7 +10,7 @@ Dateien, Routen und APIs werden ausdrücklich als unbekannt behandelt.
 ## Ausgeführt und lokal verifiziert
 
 - Der GitHub-Standardbranch wurde über die autorisierte GitHub-Schnittstelle
-  als `main` mit Head `ab8132df44cdc92e6fc7caa322c42bef1f6ce528` bestätigt.
+  als `main` mit Ausgangs-Head `ab8132df44cdc92e6fc7caa322c42bef1f6ce528` bestätigt.
   Die Abfrage offener Pull Requests ergab keine Einträge; die Branchabfrage
   enthielt nur `main`. Es gab daher keinen integrierbaren Nebenbranch und
   keinen Branch, der nach nachgewiesener Übernahme gelöscht werden konnte.
@@ -227,9 +227,10 @@ begrenzen, Fehlerstatus/Retry-After standardisieren.
 ## Nicht ausgeführte Befehle
 
 Der Shell-Push war wegen fehlender Git-Credentials nicht möglich. Der
-verifizierte Push auf den autorisierten GitHub-`main`-Ref muss deshalb über
-die GitHub-Schnittstelle oder mit eingerichteten Credentials erfolgen. Vor dem
-Push erneut ausführen:
+verifizierte Push wurde deshalb über die autorisierte GitHub-Schnittstelle als
+Commit `0a8a4416243aece82a02190e635f8fc7053b4525` auf `main` ausgeführt. Die
+folgenden Shell-Kommandos wurden in dieser Umgebung nicht ausgeführt und sind
+für eine spätere lokale Checkout-Synchronisierung vorgesehen:
 
 ```bash
 git status --short
@@ -239,6 +240,6 @@ git fetch origin --prune
 git ls-remote --heads origin
 ```
 
-Erwartung: Arbeitsbranch `main`; nach erfolgreichem API-Push zeigt der
-Remote-`main` auf den neuen Commit, offene PRs bleiben leer und es existieren
-keine zusätzlich zu löschenden integrierten Branches.
+Erwartung bei der Nachprüfung: Arbeitsbranch `main`; der Remote-`main` zeigt
+auf `0a8a4416243aece82a02190e635f8fc7053b4525`, offene PRs bleiben leer und es
+existieren keine zusätzlich zu löschenden integrierten Branches.
