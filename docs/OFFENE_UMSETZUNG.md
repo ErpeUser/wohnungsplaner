@@ -7,8 +7,8 @@ Stand: 2026-11-10
 Die folgenden Angaben sind der aktuelle, nach dieser Runde verifizierte Stand
 und ersetzen ältere Zwischenstände weiter unten im Dokument:
 
-- Remote-HEAD auf `main`: `8eff5009476c516844c00366b41682c6f2b67e6e`.
-- `main` ist vier Commits vor `0a8a4416243aece82a02190e635f8fc7053b4525`,
+- Remote-HEAD auf `main`: `1f10176dabced5d2512929b57d54f7be950feb6e`.
+- `main` ist fünf Commits vor `0a8a4416243aece82a02190e635f8fc7053b4525`,
   ohne Rückstand; es gibt keine offenen oder geschlossenen PRs und nur den
   Branch `main`.
 - Direkt implementiert: 5-MB-/MIME-/Magic-Byte-Importschutz inklusive WebP,
