@@ -1,5 +1,6 @@
 import http from "node:http";
 import fs from "node:fs/promises";
+import { rmSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -7,6 +8,8 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 const serverRoot = path.join(root, "dist", "server");
 const clientRoot = path.join(root, "dist", "client");
 const publicRoot = path.join(root, "public");
+const localRoot = path.join(root, ".local");
+const pidFile = path.join(localRoot, "codex-server.pid");
 const port = Number(process.env.PORT || 3000);
 const MAX_STATIC_BYTES = 12 * 1024 * 1024;
 const RATE_WINDOW_MS = 60_000;
@@ -14,6 +17,7 @@ const RATE_LIMIT = 240;
 const requestBuckets = new Map();
 let runtimeHandler;
 let runtimeError;
+let shuttingDown = false;
 
 async function loadRuntimeHandler() {
   try {
@@ -128,6 +132,33 @@ function fail(res, statusCode, message, extraHeaders = {}) {
   return res.end(message);
 }
 
+async function writePidFile() {
+  await fs.mkdir(localRoot, { recursive: true });
+  await fs.writeFile(pidFile, `${process.pid}\n`, "utf8");
+}
+
+async function removePidFile() {
+  await fs.rm(pidFile, { force: true }).catch(() => undefined);
+}
+
+function removePidFileSync() {
+  try { rmSync(pidFile, { force: true }); } catch { /* cleanup is best effort during process exit */ }
+}
+
+async function shutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  clearInterval(cleanupBuckets);
+  await removePidFile();
+  console.log(`Lokaler Raumplaner wird wegen ${signal} beendet.`);
+  try {
+    server.close(() => process.exit(0));
+  } catch {
+    process.exit(0);
+  }
+  setTimeout(() => process.exit(0), 2_000).unref();
+}
+
 const server = http.createServer(async (req, res) => {
   try {
     if (!consumeRateLimit(req)) {
@@ -138,6 +169,19 @@ const server = http.createServer(async (req, res) => {
     }
     if ((req.url || "").length > 4096) return fail(res, 414, "Request-URI too long");
     const url = new URL(req.url || "/", `http://${req.headers.host || "127.0.0.1"}`);
+    if (url.pathname === "/__codex/health") {
+      const healthPayload = JSON.stringify({
+        status: "ok",
+        sourceCommit: process.env.CODEX_SOURCE_COMMIT || null,
+        pid: process.pid,
+      });
+      return res.writeHead(200, {
+        ...securityHeaders,
+        "Content-Type": "application/json; charset=utf-8",
+        "Cache-Control": "no-store",
+        "Content-Length": Buffer.byteLength(healthPayload),
+      }).end(req.method === "HEAD" ? undefined : healthPayload);
+    }
     if (url.pathname.startsWith("/assets/") || url.pathname.startsWith("/_next/")) {
       const file = safeClientPath(url.pathname);
       if (!file) return fail(res, 400, "Bad asset path");
@@ -166,5 +210,14 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(port, "127.0.0.1", () => {
-  console.log(`Lokaler Raumplaner läuft auf http://127.0.0.1:${port}`);
+  void writePidFile().then(() => {
+    console.log(`Lokaler Raumplaner läuft auf http://127.0.0.1:${port}`);
+  }).catch(async (error) => {
+    console.error("PID-Datei konnte nicht geschrieben werden.", error);
+    await shutdown("startup-error");
+  });
 });
+
+process.once("SIGINT", () => { void shutdown("SIGINT"); });
+process.once("SIGTERM", () => { void shutdown("SIGTERM"); });
+process.once("exit", removePidFileSync);

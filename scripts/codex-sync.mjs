@@ -1,6 +1,32 @@
-import { git, repositorySnapshot, saveState, parseArgs, ensureLocalDir, localDir } from "./codex-utils.mjs";
-import { writeFile } from "node:fs/promises";
+import { git, repositorySnapshot, saveState, parseArgs, ensureLocalDir, localDir, repoRoot } from "./codex-utils.mjs";
+import { cp, mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
+
+async function snapshotWorkingTree() {
+  await ensureLocalDir();
+  const patch = await git(["diff", "HEAD", "--binary"], { allowFailure: true });
+  const untracked = await git(["ls-files", "--others", "--exclude-standard", "-z"], { allowFailure: true });
+  const files = untracked.stdout.split("\0").filter(Boolean);
+  const copied = [];
+  for (const relative of files) {
+    const source = path.resolve(repoRoot, relative);
+    const root = path.resolve(repoRoot) + path.sep;
+    if (!source.startsWith(root)) continue;
+    const destination = path.join(localDir, "codex-untracked", relative);
+    await mkdir(path.dirname(destination), { recursive: true });
+    const info = await stat(source);
+    if (info.isDirectory()) await cp(source, destination, { recursive: true, force: true });
+    else await writeFile(destination, await readFile(source));
+    copied.push(relative);
+  }
+  await writeFile(
+    path.join(localDir, "codex-uncommitted.patch"),
+    `${patch.stdout}${copied.length ? `\n# Untracked file contents copied to .local/codex-untracked/:\n${copied.join("\n")}\n` : ""}`,
+    "utf8",
+  );
+  await writeFile(path.join(localDir, "codex-untracked.json"), `${JSON.stringify({ files: copied }, null, 2)}\n`, "utf8");
+  return { patch: ".local/codex-uncommitted.patch", untracked: copied, manifest: ".local/codex-untracked.json" };
+}
 
 export async function synchronize({ dryRun = false, push = false } = {}) {
   const fetchResult = dryRun ? { code: 0, stderr: "" } : await git(["fetch", "origin", "--prune"], { allowFailure: true });
@@ -16,14 +42,12 @@ export async function synchronize({ dryRun = false, push = false } = {}) {
   if (before.dirty) {
     actions.push({ action: "preserve-uncommitted", status: before.status });
     if (!dryRun) {
-      await ensureLocalDir();
-      const patch = await git(["diff", "--binary"], { allowFailure: true });
-      const untracked = before.status.split(/\r?\n/).filter((line) => line.startsWith("?? ")).join("\n");
-      await writeFile(path.join(localDir, "codex-uncommitted.patch"), `${patch.stdout}${untracked ? `\n# Untracked files (copy separately):\n${untracked}\n` : ""}`, "utf8");
-      actions.push({ action: "snapshot-written", file: ".local/codex-uncommitted.patch" });
+      actions.push({ action: "snapshot-written", ...await snapshotWorkingTree() });
     }
     if (before.behind > 0 || (before.ahead > 0 && before.behind > 0)) {
-      return { ok: false, blocked: "Arbeitsbaum enthält uncommittete Änderungen und Remote ist nicht identisch", before, actions };
+      const result = { ok: false, blocked: "Arbeitsbaum enthält uncommittete Änderungen und Remote ist nicht identisch", before, actions };
+      if (!dryRun) await saveState("codex-sync-report.json", { ...result, completedAt: new Date().toISOString() });
+      return result;
     }
   }
   if (before.ahead === 0 && before.behind === 0) actions.push({ action: "none" });
@@ -34,7 +58,9 @@ export async function synchronize({ dryRun = false, push = false } = {}) {
     actions.push({ action: "publish", branch: before.defaultBranch });
     if (push && !dryRun) await git(["push", "origin", before.defaultBranch]);
   } else {
-    return { ok: false, blocked: "Lokaler und Remote-Stand sind divergiert; kein automatischer Merge", before, actions };
+    const result = { ok: false, blocked: "Lokaler und Remote-Stand sind divergiert; kein automatischer Merge", before, actions };
+    if (!dryRun) await saveState("codex-sync-report.json", { ...result, completedAt: new Date().toISOString() });
+    return result;
   }
   const after = await repositorySnapshot();
   const result = { ok: true, before, after, actions, currentCommit: after.head };

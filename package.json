@@ -27,7 +27,9 @@
     "codex:agent:uninstall": "node scripts/codex-agent.mjs uninstall",
     "codex:postflight": "node scripts/codex-postflight.mjs",
     "codex:pipeline": "node scripts/codex-pipeline.mjs",
-    "validate": "npm run typecheck && npm run lint && npm run assets:check && npm run test:planner && npm run test:ui && npm run test:cutover"
+    "validate": "npm run typecheck && npm run lint && npm run assets:check && npm run test:planner && npm run test:ui && npm run test:cutover",
+    "codex:update": "node scripts/codex-update.mjs",
+    "codex:release": "node scripts/codex-release.mjs"
   },
   "dependencies": {
     "@react-three/drei": "10.7.9",

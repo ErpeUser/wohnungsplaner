@@ -8,10 +8,11 @@ export async function listPullRequests() {
 
 export function canAutoMerge(pr, defaultBranch) {
   if (!pr || pr.baseRefName !== defaultBranch || pr.isDraft) return false;
-  if (pr.mergeable && pr.mergeable !== "MERGEABLE") return false;
-  if (pr.reviewDecision && !["APPROVED", "APPROVE"].includes(pr.reviewDecision)) return false;
-  const checks = pr.statusCheckRollup || [];
-  return checks.every((check) => !check.conclusion || ["SUCCESS", "SKIPPED", "NEUTRAL"].includes(check.conclusion));
+  if (pr.mergeable !== "MERGEABLE") return false;
+  if (pr.reviewDecision !== "APPROVED") return false;
+  const checks = Array.isArray(pr.statusCheckRollup) ? pr.statusCheckRollup : [];
+  if (checks.length === 0) return false;
+  return checks.every((check) => ["SUCCESS", "SKIPPED", "NEUTRAL"].includes(String(check?.conclusion ?? check?.state ?? "").toUpperCase()));
 }
 
 export async function reconcile({ merge = false, dryRun = false } = {}) {
