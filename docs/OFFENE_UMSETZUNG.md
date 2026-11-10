@@ -39,10 +39,11 @@ Dateien, Routen und APIs werden ausdrücklich als unbekannt behandelt.
 ## Ausgeführt und lokal verifiziert
 
 - Der GitHub-Standardbranch wurde über die autorisierte GitHub-Schnittstelle
-  als `main` mit Ausgangs-Head `ab8132df44cdc92e6fc7caa322c42bef1f6ce528` bestätigt.
-  Die Abfrage offener Pull Requests ergab keine Einträge; die Branchabfrage
-  enthielt nur `main`. Es gab daher keinen integrierbaren Nebenbranch und
-  keinen Branch, der nach nachgewiesener Übernahme gelöscht werden konnte.
+  als `main` bestätigt. Der geprüfte Ausgangs-Head war `8eff500...`; der
+  frühere Referenzstand `0a8a4416243aece82a02190e635f8fc7053b4525` blieb
+  Vorfahr. Die abschließende Prüfung zeigt `main` auf
+  `14926e84b72c0be93dfd284a20e3e230b7483788`, neun Commits voraus und ohne
+  Rückstand. Die PR-Abfrage blieb leer; es gibt nur `main`.
 - Ein direkter Shell-Klon war in dieser Umgebung nicht ausführbar:
   `fatal: could not read Username for 'https://github.com': No such device or address`.
   Die Arbeitskopie wurde deshalb aus der autorisierten GitHub-Dateiansicht
@@ -60,8 +61,10 @@ Dateien, Routen und APIs werden ausdrücklich als unbekannt behandelt.
   `commands.ts` weist unbekannte IDs mit einem stabilen `invalid`-Fehler zurück.
 - `verifyPlannerAssetBytes` prüft SHA-256 vor Magic-Byte-Prüfungen. Der
   Dateiimport prüft zusätzlich GLB, PNG, JPEG, SVG und WEBP-Signaturen.
-- Der Asset-Manifest-Stand wurde gegen die tatsächlich vorhandenen lokalen
-  Bytes synchronisiert; `npm run assets:check` ist erfolgreich.
+- Der Asset-Manifest-Stand ist im Remote unverändert. Der aktuelle lokale
+  `npm run assets:check`-Lauf scheitert ausschließlich an der rekonstruierten
+  Sofa-Binärdatei (`model-sofa`, erwartete und lokale Länge/SHA unterscheiden
+  sich); die Remote-Binärdateien wurden nicht verändert.
 - Der 2D-Canvas verhindert Form-Submit-Navigation. Detail- und Einkaufsdrawer
   besitzen Dialog-Semantik, mobile Bereiche erhalten einen schließbaren Backdrop,
   und externe Produktbilder verwenden `referrerPolicy="no-referrer"` sowie einen
@@ -82,11 +85,15 @@ npm run test:planner
 npm run test:ui -- --maxWorkers=1
 ```
 
-Ergebnis: Typecheck, ESLint, Asset-Prüfung und 96 Planner-Tests bestanden;
-die UI-Suite bestand mit 80 Tests. Die UI-Suite benötigt in dieser Umgebung
-wegen sechs isolierter jsdom-Umgebungen rund 71 Sekunden im seriellen Lauf.
-Es bleibt die bekannte, harmlose Warnung aus Three.js (`THREE_CJS_DEPRECATED`)
-und die npm-Warnung zur unbekannten `http-proxy`-Konfiguration.
+Ergebnis der Finalrunde: Typecheck und ESLint endeten mit Exit-Code 0; der
+Produktionsbuild endete mit Exit-Code 0; `test:ui -- --maxWorkers=1` bestand
+mit 6 Dateien und 80/80 Tests; `test:cutover` bestand mit 4/4 Tests und
+bestätigte den Client-Bundle-Vertrag. Der vollständige Planner-Lauf bestand
+100/101 Tests; der einzige Fehler ist die lokale Binärmanifest-Prüfung von
+`tests/planner-assets.test.ts`. Ohne diesen binären Test bestanden 92/92
+Planner-Tests. `npm run assets:check` reproduziert denselben Sofa-Längen-/SHA-
+Fehler. Build und Tests melden nur Vinext-/Chunk-Größen-, Three-CJS- und die
+Umgebungswarnung zur unbekannten npm-`http-proxy`-Konfiguration.
 
 ## Offene Übergabeaufträge
 
@@ -95,9 +102,11 @@ und die npm-Warnung zur unbekannten `http-proxy`-Konfiguration.
 **Priorität:** P1.
 
 **Vorarbeit:** `app/planner/catalog/asset-import.ts` validiert Metadaten,
-Medientyp, Binärsignatur, SHA-256, normierte Maße, Pivot und Floor-Offset.
-`PreparedAsset` wird aber noch nicht von einem Upload-UI in den Planner-Store
-übernommen. Es gibt keine verifizierte KI-/Vision-API, keinen API-Schlüssel und
+Medientyp, Binärsignatur, SHA-256, normierte Maße, Pivot und Floor-Offset;
+`PlannerDocumentV3` besitzt ein Asset-Register mit Register-/Remove-Commands
+und Reload-Persistenz. Es fehlt weiterhin das Upload-UI mit Fortschritt, die
+Verknüpfung zu einer freigegebenen Storage-URL und die 3D-Platzierung importierter
+Assets. Es gibt keine verifizierte KI-/Vision-API, keinen API-Schlüssel und
 keine verbindliche Produktquelle für automatische Maßextraktion.
 
 **Betroffene echte Pfade:**
@@ -135,8 +144,9 @@ und ein E2E-Fall für manuelles Verschieben/Drehen.
 
 **Priorität:** P1.
 
-**Vorarbeit:** Drawer-Dialogrollen, Backdrop, Escape-Schließen und Focus-Return
-sind umgesetzt. Ein vollständiger Fokus-Trap, inert-Untergrund und ein
+**Vorarbeit:** Für Detail- und Einkaufsdrawer sind Dialogrollen, initialer
+Fokus, Tab-/Shift-Tab-Trap, `inert`-Untergrund, Backdrop, Escape und Focus-Return
+umgesetzt. Vollständige Abdeckung für Catalog-/Inspector-Panels sowie ein
 durchgängig tastatur-/touchfähiger Transformationsmodus fehlen weiterhin.
 
 **Betroffene Pfade:** `app/planner/workspace/planner-workspace.tsx`,
@@ -166,8 +176,8 @@ große Raster-/Freiplatzierungen fehlen weiterhin ein Spatial Index und
 diagonale Snap-Guides in `app/planner/domain/snapping.ts`.
 
 **Implementierung:** Gemeinsame PlanScene-Deskriptoren auch für SVG-Handles
-verwenden; Quellen-/Confidence-Badge in 2D/3D ergänzen; Pointer-Lock auf die
-Canvas-Instanz statt globalem Selector begrenzen; Snap-Suche mit Sweep/Index
+verwenden; Quellen-/Confidence-Badge in 2D/3D ergänzen; die bereits auf die
+Canvas-Instanz begrenzte Pointer-Lock-Logik beibehalten; Snap-Suche mit Sweep/Index
 beschleunigen und diagonale Achsen nur bei nachgewiesener Geometrie anbieten.
 
 **Tests:** Pixel-/DOM-Snapshot der Fallback-Ansicht, Quelle/Confidence für
@@ -191,13 +201,12 @@ Produktionsansicht brechen.
 auflisten, CSP ohne unnötige Quellen testen, Worker- und Bild-Requests
 begrenzen, Fehlerstatus/Retry-After standardisieren.
 
-## Nicht ausgeführte Befehle
+## Shell-/Remote-Nachweis
 
-Der Shell-Push war wegen fehlender Git-Credentials nicht möglich. Der
-verifizierte Push wurde deshalb über die autorisierte GitHub-Schnittstelle als
-Commit `0a8a4416243aece82a02190e635f8fc7053b4525` auf `main` ausgeführt. Die
-folgenden Shell-Kommandos wurden in dieser Umgebung nicht ausgeführt und sind
-für eine spätere lokale Checkout-Synchronisierung vorgesehen:
+Ein direkter Shell-Klon und eine lokale Git-Synchronisierung waren wegen
+fehlender Credentials bzw. fehlendem `.git` im rekonstruierten Arbeitsbaum
+nicht möglich. Die folgenden verlangten Shell-Kommandos wurden dennoch
+ausgeführt und scheiterten mit „not a git repository“ bzw. ohne `origin`:
 
 ```bash
 git status --short
@@ -207,6 +216,7 @@ git fetch origin --prune
 git ls-remote --heads origin
 ```
 
-Erwartung bei der Nachprüfung: Arbeitsbranch `main`; der Remote-`main` zeigt
-auf `0a8a4416243aece82a02190e635f8fc7053b4525`, offene PRs bleiben leer und es
-existieren keine zusätzlich zu löschenden integrierten Branches.
+Die autorisierte GitHub-Schnittstelle führte die Fast-Forward-Commits aus und
+bestätigte abschließend `main` auf
+`14926e84b72c0be93dfd284a20e3e230b7483788`, ohne offene PRs und ohne weitere
+Branches. Es gab deshalb nichts zu mergen, zu schließen oder zu löschen.
