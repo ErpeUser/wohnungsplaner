@@ -194,7 +194,7 @@ export function ImportPreview({
       <h4>Importvorschau</h4>
       <div className="planner-import-preview__facts">
         <span>Version V{preview.document.schemaVersion}</span>
-        <span>{preview.document.rooms.length} Räume</span>
+        <span>{preview.document.rooms.length} Bereiche</span>
         <span>{preview.document.placements.length} Möbel</span>
       </div>
       {preview.warnings.length ? (

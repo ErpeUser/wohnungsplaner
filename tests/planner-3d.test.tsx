@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
+import { DataTexture, Texture, TextureLoader } from "three";
 import { describe, expect, test, vi } from "vitest";
 
 vi.mock("@react-three/fiber", () => ({
@@ -21,14 +22,76 @@ vi.mock("../app/planner/scene-3d/lighting.tsx", () => ({
 }));
 
 import { DEFAULT_APARTMENT_DOCUMENT } from "../app/planner/domain/apartment-v3.ts";
+import { doorPose } from "../app/planner/domain/geometry.ts";
+import { createOrbitPose, orbitFovForRoom } from "../app/planner/scene-3d/camera-controller.tsx";
 import { Planner3D } from "../app/planner/scene-3d/planner-3d.tsx";
+import { getPlannerMaterial, PLANNER_TEXTURE_READY_EVENT } from "../app/planner/scene-3d/materials.ts";
 import { qualitySettings, detectThreeSupport } from "../app/planner/scene-3d/quality.ts";
 import { createSceneModel } from "../app/planner/scene-3d/scene-model.ts";
+import * as sceneModelModule from "../app/planner/scene-3d/scene-model.ts";
 
 describe("createSceneModel", () => {
-  test("derives floors and unique wall sources for all nine rooms", () => {
+  test("uses deterministic data textures for light bathroom tiles", () => {
+    const square = getPlannerMaterial("tile-white-square");
+    const rectangular = getPlannerMaterial("tile-white-rect");
+    const taupe = getPlannerMaterial("porcelain-light-taupe");
+
+    expect(square.map).toBeInstanceOf(DataTexture);
+    expect(rectangular.map).toBeInstanceOf(DataTexture);
+    expect(taupe.map).toBeInstanceOf(DataTexture);
+    expect(square.color.getHexString()).toBe("ffffff");
+  });
+  test("redraws demand-rendered 3D after a newly selected rug texture finishes loading", async () => {
+    const texture = new Texture(document.createElement("img"));
+    const load = vi.spyOn(TextureLoader.prototype, "load").mockImplementation((_url, onLoad) => {
+      queueMicrotask(() => onLoad?.(texture));
+      return texture;
+    });
+    const ready = new Promise<Event>((resolve) => {
+      window.addEventListener(PLANNER_TEXTURE_READY_EVENT, resolve, { once: true });
+    });
+
+    const material = getPlannerMaterial("rug-hall-overlap-taupe");
+    await ready;
+
+    expect(material.map).toBe(texture);
+    expect(load).toHaveBeenCalledOnce();
+    load.mockRestore();
+  });
+  test("keeps the WC door in a WC-only 3D scene", () => {
+    const scene = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, "wc");
+    expect(scene.doors.some((door) => door.id === "hall-wc-door")).toBe(true);
+  });
+  test("does not render adjacent parallel wall faces in a room-only 3D scene", () => {
+    const scene = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, "vorraum");
+
+    expect(scene.walls.every((wall) => wall.roomIds.includes("vorraum"))).toBe(true);
+    expect(scene.walls.map((wall) => wall.id)).not.toContain("wall-wohnkueche-12-1");
+    expect(scene.walls.map((wall) => wall.id)).not.toContain("wall-abstellraum-3-1");
+    expect(scene.walls.map((wall) => wall.id)).not.toContain("wall-wc-3-1");
+  });
+  test("does not leak endpoint-touching Zimmer 2 geometry into the Loggia scene", () => {
+    const scene = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, "balkon");
+
+    expect(scene.doors.some((door) => door.id === "living-zimmer2-door")).toBe(false);
+    expect(scene.walls.some((wall) => wall.id === "wall-wohnkueche-11-1")).toBe(false);
+    expect(scene.doors.some((door) => door.id === "living-loggia-door")).toBe(true);
+  });
+  test("keeps different finishes on the two sides of a shared wall", () => {
     const scene = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, null);
-    assert.equal(scene.floors.length, 9);
+    const shared = scene.walls.find((wall) => wall.roomIds.includes("vorraum") && wall.roomIds.includes("bad"));
+
+    expect(shared?.sideMaterialIds.toSorted()).toEqual(["paint-warm-white", "tile-white-square"]);
+  });
+  test("marks the wall-hung WC for a dedicated sanitary 3D model", () => {
+    const scene = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, "wc");
+    const wc = scene.builtIns.find((item) => item.catalogId === "sanitary-wall-wc");
+
+    expect(wc?.renderProfile).toBe("wall-wc");
+  });
+  test("derives floors and unique wall sources for all eight selectable areas", () => {
+    const scene = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, null);
+    assert.equal(scene.floors.length, 8);
     assert.equal(scene.walls.length, DEFAULT_APARTMENT_DOCUMENT.walls.length);
     assert.equal(new Set(scene.walls.map((wall) => wall.id)).size, scene.walls.length);
     assert.ok(scene.walls.some((wall) => Math.abs(wall.angle) > 0.01 && Math.abs(wall.angle - Math.PI / 2) > 0.01));
@@ -53,7 +116,9 @@ describe("createSceneModel", () => {
       const supportingWalls = scene.walls.filter((wall) => wall.openingIds.includes(openingId));
       const source = DEFAULT_APARTMENT_DOCUMENT.openings.find((opening) => opening.id === openingId)!;
       assert.ok(supportingWalls.length >= 1, `${openingId} should cut a supporting atomic wall`);
-      assert.ok(supportingWalls.some((wall) => wall.id !== source.wallId), `${openingId} should continue beyond its anchor wall`);
+      if (openingId === "zimmer1-door") {
+        assert.ok(supportingWalls.some((wall) => wall.id !== source.wallId), `${openingId} should continue beyond its anchor wall`);
+      }
       const openWidth = supportingWalls.reduce((sum, wall) => sum + wall.length - wall.segments
         .filter((segment) => Math.abs(segment.size[1] - wall.height) <= 0.001)
         .reduce((wallSum, segment) => wallSum + segment.size[0], 0), 0);
@@ -61,11 +126,156 @@ describe("createSceneModel", () => {
     }
   });
 
+  test("renders only the photographed hall-to-living door as clear glass", () => {
+    const scene = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, null);
+
+    expect(scene.doors.find((door) => door.id === "hall-living-door")?.visualStyle).toBe("glass-clear");
+    expect(scene.doors.find((door) => door.id === "zimmer1-door")?.visualStyle).toBe("solid-white");
+  });
+
+  test("assigns the photographed hall door details to the correct leaves", () => {
+    const scene = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, "vorraum");
+
+    expect(scene.doors.every((door) => door.handleSides === "both")).toBe(true);
+    expect(scene.doors.find((door) => door.id === "apartment-entry-door")?.detailProfile).toBe("entry-security");
+    expect(scene.doors.find((door) => door.id === "hall-wc-door")?.detailProfile).toBe("vented");
+    expect(scene.doors.find((door) => door.id === "hall-bath-door")?.detailProfile).toBe("standard");
+    expect(scene.fixtures.find((fixture) => fixture.id === "fixture-hall-panel")?.detailProfile).toBe("hall-distribution");
+    expect(scene.fixtures.find((fixture) => fixture.id === "fixture-hall-floor-heating-panel")?.detailProfile).toBe("hall-revision");
+    expect(scene.fixtures.find((fixture) => fixture.id === "fixture-hall-panel")?.mountingDepth).toBeLessThanOrEqual(0.006);
+    expect(scene.fixtures.find((fixture) => fixture.id === "fixture-hall-floor-heating-panel")?.mountingDepth).toBeLessThanOrEqual(0.006);
+    expect(scene.fixtures.find((fixture) => fixture.id === "fixture-hall-panel")?.surfaceOffset).toBeGreaterThanOrEqual(0.03);
+    expect(scene.fixtures.find((fixture) => fixture.id === "fixture-hall-floor-heating-panel")?.surfaceOffset).toBeGreaterThanOrEqual(0.03);
+    expect(scene.doors.every((door) => door.leafOutlineSides === "both")).toBe(true);
+  });
+
+  test("keeps the compact hall overview elevated while using a wider perspective", () => {
+    const scene = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, "vorraum");
+    const pose = createOrbitPose(scene, "vorraum");
+
+    expect(pose.position[1]).toBeGreaterThanOrEqual(4.2);
+    expect(pose.position[1]).toBeGreaterThan(scene.doors[0]!.height * 2);
+    expect(orbitFovForRoom("vorraum")).toBeGreaterThan(orbitFovForRoom("wohnkueche"));
+  });
+
+  test("shows the hall bathroom door half open without changing its full 90 degree swing", () => {
+    const scene = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, "vorraum");
+    const door = scene.doors.find((candidate) => candidate.id === "hall-bath-door");
+
+    expect(DEFAULT_APARTMENT_DOCUMENT.doorStates["hall-bath-door"]).toBe("open");
+    expect(door?.state).toBe("open");
+    const displayDelta = (door?.displayOpenAngle ?? 0) - (door?.baseAngle ?? 0);
+    const fullDelta = (door?.openAngle ?? 0) - (door?.baseAngle ?? 0);
+    expect(Math.abs(Math.atan2(Math.sin(displayDelta), Math.cos(displayDelta)))).toBeCloseTo(Math.PI / 4, 5);
+    expect(Math.abs(Math.atan2(Math.sin(fullDelta), Math.cos(fullDelta)))).toBeCloseTo(Math.PI / 2, 5);
+  });
+
+  test("keeps the photographed clock wall visible through the hall glass door", () => {
+    const hall = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, "vorraum");
+    const visibleIds = new Set(hall.builtIns.map((item) => item.source.id));
+
+    expect(visibleIds.has("builtin-living-slats")).toBe(true);
+    expect(visibleIds.has("builtin-living-moss")).toBe(true);
+    expect(visibleIds.has("builtin-living-clock")).toBe(true);
+  });
+
+  test("switches the dollhouse cutaway to the camera side and removes tall foreground blockers", () => {
+    const derivePerspectiveCutaway = (sceneModelModule as unknown as {
+      derivePerspectiveCutaway?: (
+        scene: ReturnType<typeof createSceneModel>,
+        camera: { x: number; z: number },
+      ) => { hiddenWallIds: string[]; hiddenOpeningIds: string[]; hiddenObjectIds: string[] };
+    }).derivePerspectiveCutaway;
+
+    expect(derivePerspectiveCutaway).toBeTypeOf("function");
+    if (!derivePerspectiveCutaway) return;
+
+    const scene = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, "zimmer1");
+    const [centerX, , centerZ] = scene.center;
+    const fromSouth = derivePerspectiveCutaway(scene, { x: centerX, z: centerZ + 6 });
+    const fromNorth = derivePerspectiveCutaway(scene, { x: centerX, z: centerZ - 6 });
+
+    expect(fromSouth.hiddenWallIds).toContain("wall-zimmer1-3-1");
+    expect(fromSouth.hiddenWallIds).not.toContain("wall-zimmer1-1-1");
+    expect(fromSouth.hiddenOpeningIds).toContain("zimmer1-door");
+    expect(fromSouth.hiddenObjectIds).toContain("zimmer1-wardrobe");
+
+    expect(fromNorth.hiddenWallIds).toContain("wall-zimmer1-1-1");
+    expect(fromNorth.hiddenWallIds).not.toContain("wall-zimmer1-3-1");
+    expect(fromNorth.hiddenObjectIds).not.toContain("zimmer1-wardrobe");
+  });
+
+  test("keeps an opened door leaf visible when its wall is cut away", () => {
+    const document = {
+      ...DEFAULT_APARTMENT_DOCUMENT,
+      doorStates: { ...DEFAULT_APARTMENT_DOCUMENT.doorStates, "hall-living-door": "open" as const },
+    };
+    const scene = createSceneModel(document, "vorraum");
+    const [centerX, , centerZ] = scene.center;
+    const cutaway = sceneModelModule.derivePerspectiveCutaway(scene, { x: centerX + 6, z: centerZ });
+
+    expect(cutaway.hiddenWallIds).toContain("wall-vorraum-2-1");
+    expect(cutaway.hiddenOpeningIds).not.toContain("hall-living-door");
+  });
+
+  test("hides a foreground open door but keeps the hall wardrobe visible", () => {
+    const document = {
+      ...DEFAULT_APARTMENT_DOCUMENT,
+      doorStates: { ...DEFAULT_APARTMENT_DOCUMENT.doorStates, "hall-bath-door": "open" as const },
+    };
+    const scene = createSceneModel(document, "vorraum");
+    const [centerX, , centerZ] = scene.center;
+    const cutaway = sceneModelModule.derivePerspectiveCutaway(scene, {
+      x: centerX + 6,
+      z: centerZ + 6,
+    });
+
+    expect(cutaway.hiddenOpeningIds).toContain("hall-bath-door");
+    expect(cutaway.hiddenObjectIds).not.toContain("hall-tejo-wardrobe");
+  });
+
+  test("cuts each interior door through every nearby parallel wall face", () => {
+    const scene = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, null);
+    const expectedWallFaces: Record<string, string[]> = {
+      "zimmer1-door": ["wall-wohnkueche-3-1", "wall-zimmer1-3-1"],
+      "hall-living-door": ["wall-vorraum-2-1", "wall-wohnkueche-12-1"],
+      "hall-wc-door": ["wall-vorraum-1-1", "wall-wc-3-1"],
+      "hall-store-door": ["wall-vorraum-1-1", "wall-abstellraum-3-1"],
+    };
+
+    for (const [openingId, wallIds] of Object.entries(expectedWallFaces)) {
+      for (const wallId of wallIds) {
+        const wall = scene.walls.find((candidate) => candidate.id === wallId);
+        assert.ok(wall, `${wallId} should be present in the complete scene`);
+        assert.ok(wall.openingIds.includes(openingId), `${wallId} still blocks ${openingId}`);
+      }
+    }
+  });
+
+  test("omits the removed Zimmer 1 wall pad and WC paper holder from rendered rooms", () => {
+    const zimmer1 = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, "zimmer1");
+    const wc = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, "wc");
+
+    expect(zimmer1.builtIns.some((item) => item.catalogId === "zimmer1-wall-panel")).toBe(false);
+    expect(wc.builtIns.some((item) => item.catalogId === "wc-paper-holder")).toBe(false);
+  });
+
   test("includes built-ins and movable furniture without a second document model", () => {
     const scene = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, null);
     assert.equal(scene.builtIns.length, DEFAULT_APARTMENT_DOCUMENT.builtIns.length);
     assert.equal(scene.placements.length, DEFAULT_APARTMENT_DOCUMENT.placements.length);
     assert.equal(scene.placements[0].source, DEFAULT_APARTMENT_DOCUMENT.placements[0]);
+    assert.equal(scene.fixtures.length, DEFAULT_APARTMENT_DOCUMENT.fixtures.length);
+  });
+
+  test("uses the same explicit door pose as collision and 2D geometry", () => {
+    const scene = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, null);
+    for (const sceneDoor of scene.doors) {
+      const pose = doorPose(DEFAULT_APARTMENT_DOCUMENT, sceneDoor.id);
+      assert.deepEqual(sceneDoor.hinge, pose.hinge);
+      assert.ok(Math.abs(Math.cos(sceneDoor.openAngle) * sceneDoor.width + pose.hinge.x - pose.openEnd.x) < 0.002);
+      assert.ok(Math.abs(Math.sin(sceneDoor.openAngle) * sceneDoor.width + pose.hinge.z - pose.openEnd.z) < 0.002);
+    }
   });
 });
 
@@ -145,4 +355,76 @@ describe("3D quality and resilience", () => {
     assert.ok(screen.getByRole("button", { name: "Start" }));
     assert.equal(JSON.stringify(DEFAULT_APARTMENT_DOCUMENT), before);
   });
+
+  test("offers visible orbit zoom and reset controls", async () => {
+    const user = userEvent.setup();
+    const commands: string[] = [];
+    const listener = (event: Event) => commands.push((event as CustomEvent<string>).detail);
+    window.addEventListener("planner:walk-command", listener);
+    render(
+      <Planner3D
+        document={DEFAULT_APARTMENT_DOCUMENT}
+        activeRoomId={null}
+        selectionId={null}
+        cameraMode="orbit"
+        onSelect={vi.fn()}
+        onReturn2D={vi.fn()}
+        quality="low"
+        supportOverride={{ supported: true, webgl2: true }}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "3D vergrößern" }));
+    await user.click(screen.getByRole("button", { name: "3D verkleinern" }));
+    await user.click(screen.getByRole("button", { name: "3D-Ansicht zurücksetzen" }));
+    assert.deepEqual(commands, ["zoom-in", "zoom-out", "reset"]);
+    window.removeEventListener("planner:walk-command", listener);
+  });
+
+  test("offers the same plus and minus zoom controls while walking", async () => {
+    const user = userEvent.setup();
+    const commands: string[] = [];
+    const listener = (event: Event) => commands.push((event as CustomEvent<string>).detail);
+    window.addEventListener("planner:walk-command", listener);
+    render(
+      <Planner3D
+        document={DEFAULT_APARTMENT_DOCUMENT}
+        activeRoomId="wohnkueche"
+        selectionId={null}
+        cameraMode="walk"
+        onSelect={vi.fn()}
+        onReturn2D={vi.fn()}
+        quality="low"
+        supportOverride={{ supported: true, webgl2: true }}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "3D vergrößern" }));
+    await user.click(screen.getByRole("button", { name: "3D verkleinern" }));
+    assert.deepEqual(commands, ["zoom-in", "zoom-out"]);
+    assert.match(screen.getByLabelText("Rundgangsteuerung").textContent ?? "", /[+].*Zoomen|Zoomen.*[+]/);
+    window.removeEventListener("planner:walk-command", listener);
+  });
+
+  test("lets the user temporarily show every wall instead of the automatic perspective cutaway", async () => {
+    const user = userEvent.setup();
+    render(
+      <Planner3D
+        document={DEFAULT_APARTMENT_DOCUMENT}
+        activeRoomId="zimmer1"
+        selectionId={null}
+        cameraMode="orbit"
+        onSelect={vi.fn()}
+        onReturn2D={vi.fn()}
+        quality="low"
+        supportOverride={{ supported: true, webgl2: true }}
+      />,
+    );
+
+    const disable = screen.getByRole("button", { name: "Automatischen Wandschnitt ausschalten" });
+    expect(disable.getAttribute("aria-pressed")).toBe("true");
+    await user.click(disable);
+    expect(screen.getByRole("button", { name: "Automatischen Wandschnitt einschalten" }).getAttribute("aria-pressed")).toBe("false");
+  });
+
 });

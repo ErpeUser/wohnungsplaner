@@ -22,6 +22,7 @@ export type CollisionReport = {
 export function inspectPlacement(
   document: PlannerDocumentV3,
   placement: PlannerPlacement,
+  options: { ignorePlacementIds?: ReadonlySet<string> } = {},
 ): CollisionReport {
   const footprint = placementPolygon(placement);
   const hard: CollisionHit[] = [];
@@ -35,7 +36,11 @@ export function inspectPlacement(
     });
   }
 
-  for (const builtIn of document.builtIns.filter((item) => item.roomId === placement.roomId)) {
+  for (const builtIn of document.builtIns.filter((item) => (
+    item.roomId === placement.roomId
+    && item.catalogId !== "floor-zone-kitchen"
+    && item.size.height > 0.03
+  ))) {
     if (polygonsIntersect(footprint, placementPolygon(builtIn))) {
       hard.push({
         kind: "built-in",
@@ -46,7 +51,9 @@ export function inspectPlacement(
   }
 
   for (const other of document.placements.filter(
-    (item) => item.roomId === placement.roomId && item.id !== placement.id,
+    (item) => item.roomId === placement.roomId
+      && item.id !== placement.id
+      && !options.ignorePlacementIds?.has(item.id),
   )) {
     if (polygonsIntersect(footprint, placementPolygon(other))) {
       hard.push({

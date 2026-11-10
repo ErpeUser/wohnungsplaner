@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   doorPassagePolygon,
+  doorPose,
   doorSweepPolygon,
   placementPolygon,
   pointInPolygon,
@@ -21,7 +22,7 @@ test("builds the footprint of a rotated rectangular placement", () => {
 });
 
 test("locates points against diagonal room facades", () => {
-  assert.equal(roomAtPoint(DEFAULT_APARTMENT_DOCUMENT, { x: 5.3, z: 9.5 }), "loggia");
+  assert.equal(roomAtPoint(DEFAULT_APARTMENT_DOCUMENT, { x: 5.3, z: 9.5 }), "balkon");
   assert.equal(roomAtPoint(DEFAULT_APARTMENT_DOCUMENT, { x: 5.8, z: 9 }), null);
   assert.equal(pointInPolygon({ x: 0, z: 0 }, [
     { x: 0, z: 0 }, { x: 2, z: 0 }, { x: 1, z: 2 },
@@ -71,6 +72,49 @@ test("adds five centimetres to the 90 degree door sweep", () => {
   assert.ok(sweep.some((point) => point.z > 0.8));
 });
 
+test("leaves a wall return between the opened bath door and the east hall wall", () => {
+  const opening = DEFAULT_APARTMENT_DOCUMENT.openings.find((candidate) => candidate.id === "hall-bath-door");
+  const pose = doorPose(DEFAULT_APARTMENT_DOCUMENT, "hall-bath-door");
+
+  assert.ok(opening);
+  assert.equal(opening.swingDegrees, 90);
+  assert.ok(Math.abs(opening.width - 0.85) < 0.002, "the door opening should be 85 cm wide");
+  assert.deepEqual(pose.hinge, { x: -0.28, z: 8.2 });
+  assert.ok(Math.abs(pose.openEnd.z - 7.35) < 0.002);
+});
+
+test("keeps a 24 centimetre wall return on the non-intercom side of the apartment entrance", () => {
+  const opening = DEFAULT_APARTMENT_DOCUMENT.openings.find((candidate) => candidate.id === "apartment-entry-door");
+  const pose = doorPose(DEFAULT_APARTMENT_DOCUMENT, "apartment-entry-door");
+
+  assert.ok(opening);
+  assert.equal(opening.swingDegrees, 90);
+  assert.ok(Math.abs(opening.width - 1.11) < 0.002, "the entrance opening should be 111 cm wide");
+  assert.deepEqual(pose.hinge, { x: -2.42, z: 6.11 });
+  assert.deepEqual(pose.closedEnd, { x: -2.42, z: 7.22 });
+  assert.ok(Math.abs(pose.openEnd.x - -1.31) < 0.002);
+});
+
+test("uses explicit hinges and swing directions for every apartment door", () => {
+  const expected = {
+    "zimmer1-door": { hinge: { x: 3.3, z: 3.97 }, openEnd: { x: 3.3, z: 3.17 } },
+    "hall-living-door": { hinge: { x: -0.16, z: 6.125 }, openEnd: { x: -1.01, z: 6.125 } },
+    "apartment-entry-door": { hinge: { x: -2.42, z: 6.11 }, openEnd: { x: -1.31, z: 6.11 } },
+    "hall-bath-door": { hinge: { x: -0.28, z: 8.2 }, openEnd: { x: -0.28, z: 7.35 } },
+    "hall-wc-door": { hinge: { x: -1.48, z: 5.87 }, openEnd: { x: -1.48, z: 6.73 } },
+    "hall-store-door": { hinge: { x: -1.1, z: 5.87 }, openEnd: { x: -1.1, z: 6.73 } },
+    "living-zimmer2-door": { hinge: { x: 3.58, z: 8.95 }, openEnd: { x: 3.58, z: 9.75 } },
+    "living-loggia-door": { hinge: { x: 4.557959, z: 8.892847 }, openEnd: { x: 4.511326, z: 8.094908 } },
+  } as const;
+
+  for (const [openingId, value] of Object.entries(expected)) {
+    const pose = doorPose(DEFAULT_APARTMENT_DOCUMENT, openingId);
+    assert.deepEqual(pose.hinge, value.hinge, `${openingId} hinge`);
+    assert.ok(Math.abs(pose.openEnd.x - value.openEnd.x) < 0.002, `${openingId} open x`);
+    assert.ok(Math.abs(pose.openEnd.z - value.openEnd.z) < 0.002, `${openingId} open z`);
+  }
+});
+
 test("creates a 60 centimetre passage warning zone on both door sides", () => {
   const passage = doorPassagePolygon(squareRoomDocument(), "door-main");
   assert.deepEqual(bounds(passage), { minX: 1, minZ: -0.6, maxX: 1.8, maxZ: 0.6 });
@@ -83,6 +127,14 @@ test("reports walls, built-ins and door sweeps as hard collisions but fixtures a
   assert.ok(inspectPlacement(document, placement({ x: 1.35, z: 0.35 }, 0.2, 0.2)).hard.some((hit) => hit.kind === "door-sweep"));
   assert.ok(inspectPlacement(document, placement({ x: -0.05, z: 2 }, 0.2, 0.2)).hard.some((hit) => hit.kind === "room-boundary"));
   assert.deepEqual(inspectPlacement(document, placement({ x: 2.5, z: 2 }, 0.2, 0.2)).hard, []);
+});
+
+test("treats the kitchen floor finish as a surface instead of a furniture collision", () => {
+  const report = inspectPlacement(
+    DEFAULT_APARTMENT_DOCUMENT,
+    placement({ x: 2.68, z: 3.72 }, 0.08, 0.08, 0, "wohnkueche"),
+  );
+  assert.ok(!report.hard.some((hit) => hit.entityId === "builtin-kitchen-tile-north"));
 });
 
 test("keeps passage clearance as a warning without blocking placement", () => {
@@ -177,6 +229,7 @@ function squareRoomDocument(): PlannerDocumentV3 {
       sill: 0,
       kind: "door",
       hinge: "start",
+      swingDirection: 1,
       swingDegrees: 90,
     }],
     builtIns: [{
@@ -236,7 +289,7 @@ function adjacentRoomsDocument(): PlannerDocumentV3 {
     ...squareRoomDocument(),
     walls: graph.walls,
     rooms: graph.rooms,
-    openings: [{ id: "shared-door", label: "Shared", wallId: shared.id, offset: 1.6, width: 0.8, height: 2.05, sill: 0, kind: "door", hinge: "start", swingDegrees: 90 }],
+    openings: [{ id: "shared-door", label: "Shared", wallId: shared.id, offset: 1.6, width: 0.8, height: 2.05, sill: 0, kind: "door", hinge: "start", swingDirection: 1, swingDegrees: 90 }],
     builtIns: [], fixtures: [], doorStates: { "shared-door": "closed" },
     viewPreferences: { ...squareRoomDocument().viewPreferences, activeRoomId: "right" },
   };

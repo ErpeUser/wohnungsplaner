@@ -73,24 +73,37 @@ export function roomContainsPlacement(
 }
 
 export function doorSweepPolygon(document: PlannerDocumentV3, openingId: string): Point2[] {
-  const { opening, start, end } = resolveOpening(document, openingId);
+  const { opening } = resolveOpening(document, openingId);
   if (opening.kind !== "door") return [];
-  const hinge = opening.hinge === "end" ? end : start;
-  const leafEnd = opening.hinge === "end" ? start : end;
-  const leafDirection = unitVector(hinge, leafEnd);
+  const { hinge, closedEnd, swingDirection } = doorPose(document, openingId);
+  const leafDirection = unitVector(hinge, closedEnd);
   const radius = opening.width + DOOR_SAFETY_MARGIN;
-  const direction = opening.hinge === "end" ? -1 : 1;
   const steps = Math.max(8, Math.ceil(opening.swingDegrees / 6));
   const points = [hinge];
 
   for (let index = 0; index <= steps; index += 1) {
-    const angle = direction * opening.swingDegrees * (index / steps) * Math.PI / 180;
+    const angle = swingDirection * opening.swingDegrees * (index / steps) * Math.PI / 180;
     points.push({
       x: normalize(hinge.x + (leafDirection.x * Math.cos(angle) - leafDirection.z * Math.sin(angle)) * radius),
       z: normalize(hinge.z + (leafDirection.x * Math.sin(angle) + leafDirection.z * Math.cos(angle)) * radius),
     });
   }
   return points;
+}
+
+export function doorPose(document: PlannerDocumentV3, openingId: string) {
+  const { opening, start, end } = resolveOpening(document, openingId);
+  if (opening.kind !== "door") throw new Error(`Opening ${openingId} is not a door`);
+  const hinge = opening.hinge === "end" ? end : start;
+  const closedEnd = opening.hinge === "end" ? start : end;
+  const swingDirection = opening.swingDirection ?? (opening.hinge === "end" ? -1 : 1);
+  const radians = swingDirection * opening.swingDegrees * Math.PI / 180;
+  const relative = { x: closedEnd.x - hinge.x, z: closedEnd.z - hinge.z };
+  const openEnd = {
+    x: normalize(hinge.x + relative.x * Math.cos(radians) - relative.z * Math.sin(radians)),
+    z: normalize(hinge.z + relative.x * Math.sin(radians) + relative.z * Math.cos(radians)),
+  };
+  return { hinge, closedEnd, openEnd, swingDirection };
 }
 
 export function doorPassagePolygon(document: PlannerDocumentV3, openingId: string): Point2[] {

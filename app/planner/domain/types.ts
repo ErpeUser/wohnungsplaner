@@ -35,6 +35,7 @@ export type PlannerRoom = {
   name: string;
   area: number;
   includedInWnf: boolean;
+  wnfArea?: number;
   boundary: WallRef[];
   surfaces: {
     floor: string;
@@ -47,6 +48,7 @@ export type PlannerRoom = {
 export type PlannerOpening = {
   id: string;
   label: string;
+  roomIds?: string[];
   wallId: string;
   offset: number;
   width: number;
@@ -54,7 +56,10 @@ export type PlannerOpening = {
   sill: number;
   kind: "door" | "window" | "passage";
   hinge: "start" | "end" | "none";
+  swingDirection: 1 | -1;
   swingDegrees: number;
+  visualOpenFraction?: number;
+  visualStyle?: "solid-white" | "solid-oak" | "glass-clear" | "glass-frosted";
   metadata?: PlannerMetadata;
 };
 
@@ -89,6 +94,7 @@ export type PlannerPlacement = {
   id: string;
   roomId: string;
   catalogId: string;
+  groupId?: string;
   position: Point2;
   rotation: number;
   size: Size3;

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#f1e8da"/>
+  <g fill="none" stroke-linecap="round" opacity=".22">
+    <path stroke="#fffaf0" stroke-width="5" d="M0 34c24-12 38 12 62 0s38 12 62 0 38 12 62 0 38 12 62 0 38 12 62 0 38 12 62 0 38 12 62 0"/>
+    <path stroke="#d9c9b5" stroke-width="3" d="M0 72c24-12 38 12 62 0s38 12 62 0 38 12 62 0 38 12 62 0 38 12 62 0 38 12 62 0 38 12 62 0"/>
+    <path stroke="#fffaf0" stroke-width="4" d="M0 164c22 12 40-12 62 0s40-12 62 0 40-12 62 0 40-12 62 0 40-12 62 0 40-12 62 0 40-12 62 0 40-12 62 0"/>
+    <path stroke="#d9c9b5" stroke-width="3" d="M0 204c22 12 40-12 62 0s40-12 62 0 40-12 62 0 40-12 62 0 40-12 62 0 40-12 62 0 40-12 62 0 40-12 62 0"/>
+    <path stroke="#fffaf0" stroke-width="5" d="M0 314c24-12 38 12 62 0s38 12 62 0 38 12 62 0 38 12 62 0 38 12 62 0 38 12 62 0 38 12 62 0"/>
+    <path stroke="#d9c9b5" stroke-width="3" d="M0 354c24-12 38 12 62 0s38 12 62 0 38 12 62 0 38 12 62 0 38 12 62 0 38 12 62 0 38 12 62 0"/>
+    <path stroke="#fffaf0" stroke-width="4" d="M0 444c22 12 40-12 62 0s40-12 62 0 40-12 62 0 40-12 62 0 40-12 62 0 40-12 62 0 40-12 62 0 40-12 62 0"/>
+  </g>
+</svg>

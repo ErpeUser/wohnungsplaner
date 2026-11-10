@@ -7,6 +7,8 @@ type RoomSelectorProps = {
 };
 
 export function RoomSelector({ rooms, activeRoomId, onChange }: RoomSelectorProps) {
+  const interiorRooms = rooms.filter((room) => room.id !== "balkon");
+  const outdoorRooms = rooms.filter((room) => room.id === "balkon");
   return (
     <label className="planner-room-selector">
       <span>Raum</span>
@@ -16,12 +18,21 @@ export function RoomSelector({ rooms, activeRoomId, onChange }: RoomSelectorProp
         onChange={(event) => onChange(event.target.value || null)}
       >
         <option value="">Gesamtwohnung</option>
-        {rooms.map((room) => (
-          <option key={room.id} value={room.id}>
-            {room.name} · {room.area.toLocaleString("de-AT", { maximumFractionDigits: 2 })} m²
-          </option>
-        ))}
+        <optgroup label="Innenräume">
+          {interiorRooms.map((room) => <RoomOption key={room.id} room={room} />)}
+        </optgroup>
+        <optgroup label="Außenbereich">
+          {outdoorRooms.map((room) => <RoomOption key={room.id} room={room} />)}
+        </optgroup>
       </select>
     </label>
+  );
+}
+
+function RoomOption({ room }: { room: PlannerRoom }) {
+  return (
+    <option value={room.id}>
+      {room.name} · {room.area.toLocaleString("de-AT", { maximumFractionDigits: 2 })} m²
+    </option>
   );
 }

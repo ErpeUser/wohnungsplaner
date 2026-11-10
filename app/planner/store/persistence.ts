@@ -11,9 +11,177 @@ export const PLANNER_BACKUP_KEY = "wohnung-planner-v3-backup";
 export const PLANNER_MIGRATION_BACKUP_KEY = "wohnung-planner-v3-migration-backup";
 export const PLANNER_IMPORT_SOURCE_BACKUP_KEY = "wohnung-planner-v3-import-source-backup";
 
+const BASELINE_VISUAL_REFRESH_IDS = new Set([
+  "builtin-kitchen-tile-north",
+  "builtin-kitchen-tile-west",
+  "builtin-kitchen-base-north",
+  "builtin-kitchen-base-west",
+  "builtin-kitchen-corner-base",
+  "builtin-kitchen-worktop-north",
+  "builtin-kitchen-worktop-west",
+  "builtin-kitchen-worktop-corner",
+  "builtin-kitchen-upper-north",
+  "builtin-kitchen-upper-west",
+  "builtin-kitchen-upper-west-end",
+  "builtin-kitchen-corner-shelf",
+  "builtin-kitchen-backsplash",
+  "builtin-kitchen-backsplash-west",
+  "builtin-kitchen-sink",
+  "builtin-kitchen-hob",
+  "builtin-kitchen-oven",
+  "builtin-kitchen-hood",
+  "builtin-kitchen-microwave",
+  "builtin-kitchen-fridge",
+  "builtin-living-tv-slats",
+  "builtin-living-tv",
+  "builtin-living-floating-cabinet",
+  "builtin-bath-washer",
+  "builtin-bath-basin-cabinet-scout",
+  "builtin-bath-washer-cabinet-scout",
+  "builtin-bath-shower-set",
+  "builtin-bath-tub-apron",
+  "builtin-bath-tub-end-ledge",
+  "builtin-bath-tub-side-apron",
+  "builtin-bath-round-mirror",
+  "builtin-bath-mat",
+  "builtin-bath-shower-rod",
+  "builtin-bath-shower-curtain",
+  "builtin-z1-bed-accent-wall",
+  "builtin-z1-entry-wallpaper-return",
+  "builtin-z1-entry-wallpaper-door-strip",
+  "builtin-z1-entry-slim-art",
+  "builtin-z1-wall-art-pair",
+  "builtin-z1-headboard-led",
+  "builtin-z1-headboard-sconces",
+  "builtin-z1-layered-curtain",
+  "builtin-z1-vanity-shelf-main",
+  "builtin-z1-vanity-shelf-side-upper",
+  "builtin-z1-vanity-shelf-side-lower",
+  "builtin-z1-entry-niche",
+  "builtin-z1-wardrobe-top-decor",
+  "builtin-z1-nightstand-decor",
+  "builtin-hall-wall-decor",
+]);
+
+const RETIRED_BASELINE_BUILT_IN_IDS = new Set([
+  "builtin-z1-entry-mirror-console",
+  "builtin-z1-desk-mirror",
+  "builtin-z1-desk-shelf",
+  "builtin-z1-desk-accessories",
+  "builtin-z1-curtain-north",
+  "builtin-z1-curtain-south",
+  "builtin-z1-wall-panel",
+  "builtin-wc-paper-holder",
+  "builtin-wc-brush",
+]);
+
+const RETIRED_BASELINE_OPENING_IDS = new Set([
+  "hall-living-inner-passage",
+]);
+
+const RETIRED_BASELINE_PLACEMENT_IDS = new Set([
+  "zimmer1-bed",
+  "zimmer1-cloudy-bed",
+  "zimmer1-soft-rug",
+  "living-sectional",
+  "living-kylly-sofa",
+  "living-amber-chair-west",
+  "living-amber-chair-east",
+  "living-kaleo-chair-north",
+]);
+
+const RETIRED_DINING_PLACEMENT_IDS = new Set([
+  "living-amber-chair-west",
+  "living-amber-chair-east",
+  "living-kaleo-chair-north",
+]);
+
+const CURRENT_DINING_GROUP_IDS = new Set([
+  "living-bozan-table",
+  "living-kaleo-chair-west",
+  "living-kaleo-chair-east",
+  "living-kaleo-chair-south",
+]);
+
+const LEGACY_DINING_GROUP_POSITION_SETS = [
+  new Map([
+    ["living-bozan-table", { x: 2.5, z: 5.47 }],
+    ["living-kaleo-chair-west", { x: 1.8, z: 5.47 }],
+    ["living-kaleo-chair-east", { x: 3.2, z: 5.47 }],
+    ["living-kaleo-chair-south", { x: 2.5, z: 6.17 }],
+  ]),
+  new Map([
+    ["living-bozan-table", { x: 2.35, z: 5.47 }],
+    ["living-kaleo-chair-west", { x: 1.65, z: 5.47 }],
+    ["living-kaleo-chair-east", { x: 3.05, z: 5.47 }],
+    ["living-kaleo-chair-south", { x: 2.35, z: 6.17 }],
+  ]),
+  new Map([
+    ["living-bozan-table", { x: 2.35, z: 5.42 }],
+    ["living-kaleo-chair-west", { x: 1.65, z: 5.42 }],
+    ["living-kaleo-chair-east", { x: 3.05, z: 5.42 }],
+    ["living-kaleo-chair-south", { x: 2.35, z: 6.12 }],
+  ]),
+];
+
+const BASELINE_VISUAL_PLACEMENT_REFRESH_IDS = new Set([
+  "zimmer1-bliss-bed",
+  "zimmer1-wardrobe",
+  "zimmer1-temu-shaggy-rug",
+  "living-rug-concept",
+  "zimmer1-desk",
+  "zimmer1-chair",
+  "zimmer1-led-nightstand",
+  "zimmer1-olive-plant",
+  "living-chicago-sofa",
+  "living-bozan-table",
+  "living-kaleo-chair-west",
+  "living-kaleo-chair-east",
+  "living-kaleo-chair-south",
+  "vorraum-temu-rabbit-rug",
+  "hall-tejo-wardrobe",
+]);
+
+const BASELINE_VISUAL_FIXTURE_REFRESH_IDS = new Set([
+  "fixture-z1-switch",
+  "fixture-z1-blind",
+  "fixture-z1-outlet-west",
+  "fixture-hall-intercom",
+  "fixture-hall-switch",
+  "fixture-hall-outlet",
+  "fixture-hall-panel",
+  "fixture-living-outlet-west",
+  "fixture-wc-switch",
+  "fixture-store-switch",
+  "fixture-balcony-outlet",
+]);
+
 export type PlannerImportPreview = MigrationResult & {
   canCommit: boolean;
 };
+
+export function upgradeRetiredDiningGroup(document: PlannerDocumentV3): PlannerDocumentV3 {
+  const containsRetiredChair = document.placements.some((item) => RETIRED_DINING_PLACEMENT_IDS.has(item.id));
+  const hasLegacyPosition = LEGACY_DINING_GROUP_POSITION_SETS.some((positions) => (
+    [...positions].every(([id, position]) => {
+      const item = document.placements.find((candidate) => candidate.id === id);
+      return item
+        && Math.abs(item.position.x - position.x) < 0.001
+        && Math.abs(item.position.z - position.z) < 0.001;
+    })
+  ));
+  if (!containsRetiredChair && !hasLegacyPosition) return document;
+  const currentGroup = DEFAULT_APARTMENT_DOCUMENT.placements.filter((item) => CURRENT_DINING_GROUP_IDS.has(item.id));
+  return parsePlannerDocument({
+    ...document,
+    placements: [
+      ...document.placements.filter((item) => (
+        !RETIRED_DINING_PLACEMENT_IDS.has(item.id) && !CURRENT_DINING_GROUP_IDS.has(item.id)
+      )),
+      ...currentGroup,
+    ],
+  });
+}
 
 export type PlannerRepository = {
   load(): MigrationResult;
@@ -111,8 +279,17 @@ function readStoredValue(raw: string): MigrationResult {
   }
   if (value && typeof value === "object" && (value as { schemaVersion?: unknown }).schemaVersion === 3) {
     try {
+      const parsed = parsePlannerDocument(value);
+      if (isOlderBaselineModel(parsed)) {
+        return {
+          document: rebaseBaselineModel(parsed),
+          warnings: ["Das gespeicherte Möbel-Layout wurde auf den korrigierten Plan- und Ausstattungsstand aktualisiert."],
+          legacyBackupJson: raw,
+          unmapped: [],
+        };
+      }
       return {
-        document: parsePlannerDocument(value),
+        document: parsed,
         warnings: [],
         legacyBackupJson: null,
         unmapped: [],
@@ -127,6 +304,128 @@ function readStoredValue(raw: string): MigrationResult {
     }
   }
   return migrateStoredPlannerData(value, DEFAULT_APARTMENT_DOCUMENT);
+}
+
+function isOlderBaselineModel(document: PlannerDocumentV3) {
+  if (document.id !== DEFAULT_APARTMENT_DOCUMENT.id) return false;
+  for (const roomId of ["zimmer1", "wohnkueche", "balkon"]) {
+    const currentFloor = document.rooms.find((room) => room.id === roomId)?.surfaces.floor;
+    const confirmedFloor = DEFAULT_APARTMENT_DOCUMENT.rooms.find((room) => room.id === roomId)?.surfaces.floor;
+    if (currentFloor !== confirmedFloor) return true;
+  }
+  if (document.openings.some((opening) => RETIRED_BASELINE_OPENING_IDS.has(opening.id))) return true;
+  const storedOpenings = new Map(document.openings.map((opening) => [opening.id, opening]));
+  if (DEFAULT_APARTMENT_DOCUMENT.openings.some((opening) => {
+    const storedOpening = storedOpenings.get(opening.id);
+    return !storedOpening
+      || storedOpening.wallId !== opening.wallId
+      || storedOpening.offset !== opening.offset
+      || storedOpening.width !== opening.width
+      || storedOpening.hinge !== opening.hinge
+      || storedOpening.swingDirection !== opening.swingDirection
+      || storedOpening.visualOpenFraction !== opening.visualOpenFraction
+      || storedOpening.visualStyle !== opening.visualStyle;
+  })) return true;
+  if (document.builtIns.some((item) => RETIRED_BASELINE_BUILT_IN_IDS.has(item.id))) return true;
+  if (document.placements.some((item) => RETIRED_BASELINE_PLACEMENT_IDS.has(item.id))) return true;
+  const stored = new Map(document.builtIns.map((item) => [item.id, item]));
+  const builtInsNeedRefresh = DEFAULT_APARTMENT_DOCUMENT.builtIns.some((item) => {
+    if (!BASELINE_VISUAL_REFRESH_IDS.has(item.id)) return false;
+    const previous = stored.get(item.id);
+    return !previous
+      || previous.rotation !== item.rotation
+      || previous.position.x !== item.position.x
+      || previous.position.z !== item.position.z
+      || (previous.elevation ?? 0) !== (item.elevation ?? 0)
+      || previous.size.width !== item.size.width
+      || previous.size.depth !== item.size.depth
+      || previous.size.height !== item.size.height;
+  });
+  if (builtInsNeedRefresh) return true;
+  const storedFixtures = new Map(document.fixtures.map((item) => [item.id, item]));
+  const fixturesNeedRefresh = DEFAULT_APARTMENT_DOCUMENT.fixtures.some((item) => {
+    if (!BASELINE_VISUAL_FIXTURE_REFRESH_IDS.has(item.id)) return false;
+    const previous = storedFixtures.get(item.id);
+    return !previous
+      || previous.rotation !== item.rotation
+      || previous.position.x !== item.position.x
+      || previous.position.z !== item.position.z
+      || previous.height !== item.height;
+  });
+  if (fixturesNeedRefresh) return true;
+  const storedPlacements = new Map(document.placements.map((item) => [item.id, item]));
+  return DEFAULT_APARTMENT_DOCUMENT.placements.some((item) => {
+    if (!BASELINE_VISUAL_PLACEMENT_REFRESH_IDS.has(item.id)) return false;
+    const previous = storedPlacements.get(item.id);
+    return !previous
+      || previous.rotation !== item.rotation
+      || previous.position.x !== item.position.x
+      || previous.position.z !== item.position.z
+      || previous.size.width !== item.size.width
+      || previous.size.depth !== item.size.depth
+      || previous.size.height !== item.size.height
+      || previous.groupId !== item.groupId;
+  });
+}
+
+function rebaseBaselineModel(stored: PlannerDocumentV3): PlannerDocumentV3 {
+  const legacyDefaultFloors = new Set(["parquet-oak", "porcelain-light", "epoxy-grey", "outdoor-concrete"]);
+  const storedRooms = new Map(stored.rooms.map((room) => [room.id, room]));
+  const storedBuiltIns = new Map(stored.builtIns.map((item) => [item.id, item]));
+  const storedPlacements = new Map(stored.placements.map((item) => [item.id, item]));
+  const validStoredDoorStates = Object.fromEntries(
+    Object.entries(stored.doorStates).filter(([openingId]) => openingId in DEFAULT_APARTMENT_DOCUMENT.doorStates),
+  );
+  const baselineBuiltInIds = new Set(DEFAULT_APARTMENT_DOCUMENT.builtIns.map((item) => item.id));
+  const baselinePlacementIds = new Set(DEFAULT_APARTMENT_DOCUMENT.placements.map((item) => item.id));
+  return parsePlannerDocument({
+    ...DEFAULT_APARTMENT_DOCUMENT,
+    name: stored.name,
+    updatedAt: stored.updatedAt,
+    rooms: DEFAULT_APARTMENT_DOCUMENT.rooms.map((room) => {
+      const previous = storedRooms.get(room.id);
+      if (!previous) return room;
+      return {
+        ...room,
+        surfaces: {
+          floor: room.id === "zimmer1" || room.id === "wohnkueche" || legacyDefaultFloors.has(previous.surfaces.floor)
+            ? room.surfaces.floor
+            : previous.surfaces.floor,
+          walls: previous.surfaces.walls === "paint-warm-white" ? room.surfaces.walls : previous.surfaces.walls,
+          ceiling: previous.surfaces.ceiling === "paint-white" ? room.surfaces.ceiling : previous.surfaces.ceiling,
+        },
+      };
+    }),
+    builtIns: [
+      ...DEFAULT_APARTMENT_DOCUMENT.builtIns.map((item) => (
+        BASELINE_VISUAL_REFRESH_IDS.has(item.id) ? item : storedBuiltIns.get(item.id) ?? item
+      )),
+      ...stored.builtIns.filter((item) => !baselineBuiltInIds.has(item.id) && !RETIRED_BASELINE_BUILT_IN_IDS.has(item.id)),
+    ],
+    placements: [
+      ...DEFAULT_APARTMENT_DOCUMENT.placements.map((item) => (
+        BASELINE_VISUAL_PLACEMENT_REFRESH_IDS.has(item.id) ? item : storedPlacements.get(item.id) ?? item
+      )),
+      ...stored.placements.filter((item) => !baselinePlacementIds.has(item.id) && !RETIRED_BASELINE_PLACEMENT_IDS.has(item.id)),
+    ],
+    doorStates: {
+      ...DEFAULT_APARTMENT_DOCUMENT.doorStates,
+      ...validStoredDoorStates,
+      "hall-living-door": DEFAULT_APARTMENT_DOCUMENT.doorStates["hall-living-door"],
+      "zimmer1-door": DEFAULT_APARTMENT_DOCUMENT.doorStates["zimmer1-door"],
+      "hall-bath-door": DEFAULT_APARTMENT_DOCUMENT.doorStates["hall-bath-door"],
+    },
+    viewPreferences: {
+      ...stored.viewPreferences,
+      overlays: {
+        ...stored.viewPreferences.overlays,
+        dimensions: true,
+      },
+      activeRoomId: stored.viewPreferences.activeRoomId === "loggia"
+        ? "balkon"
+        : stored.viewPreferences.activeRoomId,
+    },
+  });
 }
 
 function emptyResult(): MigrationResult {

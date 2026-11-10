@@ -10,37 +10,34 @@ import type {
 import { buildWallGraph, deriveWallLength, type RoomOutlineInput } from "./wall-graph.ts";
 
 const roomOutlines: RoomOutlineInput[] = [
-  room("wohnkueche", "Wohnküche", 21.82, true, "parquet-oak", [
+  room("wohnkueche", "Wohnküche", 21.82, true, "parquet-oak-narrow", [
     point(0, 3.47), point(2.5, 3.47), point(2.5, 4.08), point(3.56, 4.08),
     point(3.56, 3.17), point(3.74, 3.17), point(3.74, 3.97), point(3.82, 4.6),
     point(4.48, 6.67), point(5.12, 8.86), point(3.58, 8.95), point(0, 8.95),
   ]),
-  room("zimmer1", "Zimmer 1", 12.36, true, "parquet-oak", [
+  room("zimmer1", "Zimmer 1", 12.36, true, "parquet-oak-narrow", [
     point(0, 0), point(3.56, 0), point(3.56, 3.97), point(2.5, 3.97),
     point(2.5, 3.33), point(0, 3.33),
   ]),
-  room("zimmer2", "Zimmer 2", 10.15, true, "parquet-oak", [
+  room("zimmer2", "Zimmer 2", 10.15, true, "parquet-oak-narrow", [
     point(0, 8.95), point(3.58, 8.95), point(3.58, 11.78), point(0, 11.78),
   ]),
-  room("vorraum", "Vorraum", 5.2, true, "porcelain-light", [
+  room("vorraum", "Vorraum", 5.2, true, "porcelain-light-taupe", [
     point(-2.42, 5.87), point(-0.16, 5.87), point(-0.16, 8.2), point(-2.42, 8.2),
   ]),
-  room("abstellraum", "Abstellraum", 2, true, "porcelain-light", [
+  room("abstellraum", "Abstellraum", 2, true, "porcelain-light-taupe", [
     point(-1.33, 4.1), point(-0.16, 4.1), point(-0.16, 5.81), point(-1.33, 5.81),
   ]),
-  room("bad", "Bad", 4.31, true, "porcelain-light", [
+  room("bad", "Bad", 4.31, true, "porcelain-light-taupe", [
     point(-2.42, 8.2), point(-0.09, 8.2), point(-0.09, 10.05), point(-2.42, 10.05),
   ]),
-  room("wc", "WC", 1.42, true, "porcelain-light", [
+  room("wc", "WC", 1.42, true, "porcelain-light-taupe", [
     point(-2.42, 4.1), point(-1.52, 4.1), point(-1.52, 5.68), point(-2.42, 5.68),
   ]),
-  room("loggia", "Loggia", 2.23, true, "epoxy-grey", [
-    point(5.12, 8.86), point(5.2, 8.6), point(5.643, 10.07), point(3.58, 10.07),
-    point(3.58, 8.95),
-  ]),
-  room("balkon", "Balkon", 3.8, false, "outdoor-concrete", [
-    point(3.58, 10.07), point(5.643, 10.07), point(6.12, 11.65), point(3.58, 11.78),
-  ]),
+  room("balkon", "Balkon / Loggia", 6.03, true, "balcony-floor-beige", [
+    point(5.12, 8.86), point(5.2, 8.6), point(5.643, 10.07),
+    point(6.12, 11.65), point(3.58, 11.78), point(3.58, 8.95),
+  ], 2.23),
 ];
 
 const wallGraph = buildWallGraph(roomOutlines);
@@ -55,91 +52,541 @@ type LegacyOpening = {
   headHeight: number;
   sillHeight?: number;
   hinge?: "start" | "end";
+  swingDirection?: 1 | -1;
+  visualStyle?: PlannerOpening["visualStyle"];
   confidence: "confirmed" | "plan-scaled";
 };
 
 const sourceOpenings: LegacyOpening[] = [
   opening("zimmer1-window", "Fenster Zimmer 1", ["zimmer1"], "window", 3.56, 1.29, 3.56, 2.6, 2.42, 0.62, undefined, "confirmed"),
-  opening("zimmer1-door", "Zimmer 1", ["zimmer1", "wohnkueche"], "door", 3.56, 3.17, 3.56, 3.97, 2.04, 0, "end", "confirmed"),
-  opening("hall-living-door", "Wohnküche", ["vorraum", "wohnkueche"], "door", -0.16, 5.89, -0.16, 6.69, 2, 0, "start", "confirmed"),
-  opening("apartment-entry-door", "Wohnungseingang", ["vorraum"], "door", -2.42, 5.97, -2.42, 6.77, 2, 0, "start", "plan-scaled"),
-  opening("hall-bath-door", "Bad", ["vorraum", "bad"], "door", -1.14, 8.2, -0.34, 8.2, 2, 0, "end", "confirmed"),
-  opening("hall-wc-door", "WC", ["vorraum", "wc"], "door", -2.34, 5.87, -1.54, 5.87, 2, 0, "end", "confirmed"),
-  opening("hall-store-door", "Abstellraum", ["vorraum", "abstellraum"], "door", -1.04, 5.87, -0.24, 5.87, 2, 0, "start", "confirmed"),
-  opening("living-zimmer2-door", "Zimmer 2", ["wohnkueche", "zimmer2"], "door", 2.78, 8.95, 3.58, 8.95, 2, 0, "end", "confirmed"),
+  opening("zimmer1-door", "Zimmer 1", ["zimmer1", "wohnkueche"], "door", 2.5, 3.97, 3.3, 3.97, 2, 0, "end", "confirmed", 1),
+  opening("hall-living-door", "Wohnküche", ["vorraum", "wohnkueche"], "door", -0.16, 6.125, -0.16, 6.975, 2, 0, "start", "confirmed", 1, "glass-clear"),
+  opening("apartment-entry-door", "Wohnungseingang", ["vorraum"], "door", -2.42, 6.11, -2.42, 7.22, 2, 0, "start", "confirmed", -1),
+  opening("hall-bath-door", "Bad", ["vorraum", "bad"], "door", -1.13, 8.2, -0.28, 8.2, 2, 0, "end", "confirmed", 1),
+  // Planmaß: je 80 cm lichte Türbreite, 38 cm Abstand zwischen den
+  // gegenüberliegenden Türrahmen im Vorraum.
+  opening("hall-wc-door", "WC", ["vorraum", "wc"], "door", -2.34, 5.87, -1.54, 5.87, 2, 0, "end", "confirmed", -1),
+  opening("hall-store-door", "Abstellraum", ["vorraum", "abstellraum"], "door", -1.06, 5.87, -0.26, 5.87, 2, 0, "start", "confirmed", 1),
+  opening("living-zimmer2-door", "Zimmer 2", ["wohnkueche", "zimmer2"], "door", 2.78, 8.95, 3.58, 8.95, 2, 0, "end", "confirmed", -1),
   opening("living-east-window", "Fenster links der Dekowand", ["wohnkueche"], "window", 3.94, 4.98, 4.27, 6.02, 2.42, 0.62, undefined, "plan-scaled"),
   opening("living-feature-window", "Fenster rechts der Dekowand", ["wohnkueche"], "window", 4.6, 7.05, 4.899, 8.091, 2.35, 0.68, undefined, "plan-scaled"),
-  opening("living-loggia-door", "Loggia / Balkon", ["wohnkueche", "loggia"], "door", 3.76, 8.939, 4.558, 8.893, 2.35, 0, "end", "plan-scaled"),
-  opening("zimmer2-balcony-door", "Balkon", ["zimmer2", "balkon"], "door", 3.58, 10.02, 3.58, 10.82, 2.42, 0, "end", "plan-scaled"),
+  opening("living-loggia-door", "Balkon / Loggia", ["wohnkueche", "balkon"], "door", 3.76, 8.939, 4.558, 8.893, 2.35, 0, "end", "plan-scaled", 1),
+  opening("zimmer2-balcony-door", "Fenster Zimmer 2 zum Balkon", ["zimmer2", "balkon"], "window", 3.58, 10.02, 3.58, 10.82, 2.42, 0.62, undefined, "plan-scaled"),
 ];
 
-const openings: PlannerOpening[] = [
-  ...sourceOpenings.map((source) => toPlannerOpening(source)),
-  toPlannerOpening({
-    id: "loggia-balcony-open-transition",
-    label: "Offener Übergang Loggia / Balkon",
-    rooms: ["loggia", "balkon"],
-    kind: "door",
-    start: point(3.58, 10.07),
-    end: point(5.643, 10.07),
-    headHeight: 2.6,
-    sillHeight: 0,
-    confidence: "plan-scaled",
-  }, "passage"),
-];
+const openings: PlannerOpening[] = sourceOpenings.map((source) => {
+  const result = toPlannerOpening(source);
+  return result.id === "hall-bath-door" ? { ...result, visualOpenFraction: 0.5 } : result;
+});
+
+const defaultOpenDoorIds = new Set<string>(["hall-bath-door"]);
 
 const builtIns: PlannerBuiltIn[] = [
-  builtIn("kitchen-base-north", "Küchenzeile Nord", "wohnkueche", "kitchen", "kitchen-base", 1.53, 3.77, 1.86, 0.6, 0.92, 0, "#f4f3ef"),
-  builtIn("kitchen-base-west", "Küchenzeile West", "wohnkueche", "kitchen", "kitchen-base", 0.3, 4.945, 1.75, 0.6, 0.92, 90, "#f4f3ef"),
-  builtIn("kitchen-fridge", "Schwarzer Standkühlschrank", "wohnkueche", "kitchen", "kitchen-fridge", 2.17, 3.8, 0.62, 0.68, 2.04, 0, "#141718"),
-  builtIn("kitchen-sink", "Einbauspüle", "wohnkueche", "kitchen", "kitchen-sink", 0.96, 3.77, 0.52, 0.42, 0.2, 0, "#aeb4b4", 0.83),
-  builtIn("kitchen-hob", "Elektrokochfeld", "wohnkueche", "kitchen", "kitchen-hob", 0.3, 5.02, 0.58, 0.52, 0.04, 90, "#17191a", 0.89),
-  builtIn("kitchen-oven", "Einbaubackofen", "wohnkueche", "kitchen", "kitchen-oven", 0.3, 5.02, 0.56, 0.55, 0.59, 90, "#202324", 0.18),
+  builtIn("kitchen-tile-north", "L-förmige lichtgraue Fliesenzone vor Spüle und Kühlschrank", "wohnkueche", "other", "floor-zone-kitchen", 1.225, 4.185, 2.45, 1.43, 0.018, 0, "tile-kitchen-grey-square", 0.012),
+  builtIn("kitchen-tile-west", "Fortsetzung der Fliesenzone vor der 256,2-cm-Gerätezeile", "wohnkueche", "other", "floor-zone-kitchen", 0.725, 5.466, 1.45, 1.132, 0.018, 0, "tile-kitchen-grey-square", 0.012),
+  builtIn("kitchen-base-north", "111,8-cm-Spülenzeile bis zum Kühlschrank", "wohnkueche", "kitchen", "kitchen-base", 1.209, 3.77, 1.118, 0.6, 0.92, 0, "kitchen-white-gloss"),
+  builtIn("kitchen-base-west", "191,2-cm-Gerätezeile plus 65-cm-Ecke gemäß Küchenplan", "wohnkueche", "kitchen", "kitchen-base", 0.3, 5.076, 1.912, 0.6, 0.92, -90, "kitchen-white-gloss"),
+  builtIn("kitchen-corner-base", "65-cm-Kücheneckschrank gemäß Küchenplan", "wohnkueche", "kitchen", "kitchen-corner-base", 0.325, 3.795, 0.65, 0.65, 0.92, 0, "kitchen-white-gloss"),
+  builtIn("kitchen-worktop-north", "Mattschwarze Arbeitsplatte der Spülenzeile", "wohnkueche", "kitchen", "kitchen-worktop", 1.209, 3.77, 1.158, 0.62, 0.045, 0, "kitchen-worktop-black", 0.92),
+  builtIn("kitchen-worktop-west", "Mattschwarze Arbeitsplatte der Gerätezeile", "wohnkueche", "kitchen", "kitchen-worktop", 0.3, 5.076, 1.952, 0.62, 0.045, 90, "kitchen-worktop-black", 0.92),
+  builtIn("kitchen-worktop-corner", "Durchgehende mattschwarze Eckarbeitsplatte", "wohnkueche", "kitchen", "kitchen-worktop", 0.325, 3.795, 0.67, 0.67, 0.045, 0, "kitchen-worktop-black", 0.92),
+  builtIn("kitchen-upper-north", "Hochglanz-Hängeschränke mit Mikrowellennische über der Spüle", "wohnkueche", "kitchen", "kitchen-upper", 1.209, 3.54, 1.118, 0.36, 0.7, 0, "kitchen-white-gloss", 1.58),
+  builtIn("kitchen-upper-west", "Hochglanz-Hängeschränke zwischen Ecke und Dunstabzug", "wohnkueche", "kitchen", "kitchen-upper", 0.08, 4.476, 0.712, 0.36, 0.7, -90, "kitchen-white-gloss", 1.58),
+  builtIn("kitchen-upper-west-end", "45-cm-Hängeschrank am Ende der Gerätezeile", "wohnkueche", "kitchen", "kitchen-upper", 0.08, 5.807, 0.45, 0.36, 0.7, -90, "kitchen-white-gloss", 1.58),
+  builtIn("kitchen-corner-shelf", "Geschlossener Hochglanz-Eckhängeschrank", "wohnkueche", "kitchen", "kitchen-corner-upper", 0.31, 3.72, 0.62, 0.44, 0.7, 0, "kitchen-white-gloss", 1.58),
+  // The wall axes run through the centre of each 12-cm wall. Keep the panels
+  // just in front of the room-side faces; the old values placed them inside
+  // the wall, which made the photographed walnut backsplash vanish in 3D.
+  builtIn("kitchen-backsplash", "Warme Holzrückwand bis zum Kühlschrank", "wohnkueche", "other", "kitchen-backsplash-oak", 1.035, 3.545, 1.47, 0.014, 0.61, 0, "oak-backsplash", 0.965),
+  builtIn("kitchen-backsplash-west", "Durchgehende warme Holzrückwand der Gerätezeile", "wohnkueche", "other", "kitchen-backsplash-oak", 0.135, 4.91, 2.24, 0.014, 0.61, -90, "oak-backsplash", 0.965),
+  builtIn("kitchen-backsplash-corner", "Nahtlose Holzrückwand in der Küchenecke", "wohnkueche", "other", "kitchen-backsplash-oak", 0.35, 3.80, 0.72, 0.014, 0.61, 0, "oak-backsplash", 0.965),
+  builtIn("kitchen-sink", "Edelstahlspüle im 60-cm-Spülenschrank unter der Mikrowelle", "wohnkueche", "kitchen", "kitchen-sink", 1.468, 3.77, 0.52, 0.42, 0.16, 0, "metal-satin", 0.89),
+  builtIn("kitchen-hob", "60-cm-Induktionskochfeld über dem Backofen", "wohnkueche", "kitchen", "kitchen-hob", 0.3, 5.132, 0.58, 0.52, 0.04, 90, "screen-black", 0.89),
+  builtIn("kitchen-oven", "Gorenje 60-cm-Einbaubackofen gemäß Küchenplan", "wohnkueche", "kitchen", "kitchen-oven", 0.3, 5.132, 0.56, 0.55, 0.59, -90, "#202324", 0.18),
+  builtIn("kitchen-hood", "Schwarzer 60-cm-Schräghauben-Dunstabzug gemäß Küchenplan", "wohnkueche", "kitchen", "kitchen-hood", 0.25, 5.132, 0.58, 0.34, 0.66, -90, "cabinet-black", 1.43),
+  builtIn("kitchen-microwave", "Integrierte Mikrowelle über der Spüle", "wohnkueche", "kitchen", "kitchen-microwave", 1.468, 3.73, 0.5, 0.08, 0.32, 0, "metal-satin", 1.73),
+  builtIn("kitchen-fridge", "Schwarzer 60-cm-Kühlschrank in der 65,9-cm-Nische", "wohnkueche", "kitchen", "kitchen-fridge", 2.068, 3.795, 0.6, 0.65, 2.04, 0, "cabinet-black"),
   builtIn("bath-tub", "Badewanne", "bad", "sanitary", "sanitary-bathtub", -2.06, 9.19, 0.72, 1.6, 0.56, 0, "#f3f2ee"),
+  builtIn("bath-tub-apron", "Geflieste Wannenverkleidung", "bad", "sanitary", "bath-tub-apron", -1.685, 9.19, 1.6, 0.035, 0.53, 90, "tile-white-square", 0.015),
+  builtIn("bath-tub-end-ledge", "Gefliester Wannenkopf mit Ablage", "bad", "sanitary", "bath-tub-end-ledge", -2.06, 9.99, 0.74, 0.14, 0.54, 0, "tile-white-square", 0.01),
+  builtIn("bath-tub-side-apron", "Vollständig gefliester Wandabschluss neben der Badewanne", "bad", "sanitary", "bath-tub-side-apron", -2.06, 8.295, 0.74, 0.19, 0.55, 0, "tile-white-square", 0.01),
   builtIn("bath-basin", "Wandwaschbecken", "bad", "sanitary", "sanitary-washbasin", -1.22, 9.79, 0.6, 0.42, 0.18, 0, "#f5f4f0", 0.77),
-  builtIn("bath-washer", "Waschmaschine", "bad", "sanitary", "appliance-washer", -0.42, 9.72, 0.6, 0.6, 0.86, 0, "#f4f4f1"),
+  builtIn("bath-basin-cabinet-scout", "Scout Waschbeckenunterschrank · 60 × 56 × 34 cm", "bad", "storage", "bath-basin-cabinet-scout", -1.22, 9.88, 0.6, 0.34, 0.56, 180, "cashmere-matte", 0.02),
+  builtIn("bath-washer", "Waschmaschine", "bad", "sanitary", "appliance-washer", -0.42, 9.72, 0.6, 0.6, 0.86, 180, "#f4f4f1"),
+  builtIn("bath-washer-cabinet-scout", "Scout Waschmaschinenschrank · 63 × 191 × 24 cm", "bad", "storage", "bath-washer-cabinet-scout", -0.42, 9.92, 0.63, 0.24, 1.91, 180, "cashmere-matte"),
+  builtIn("bath-shower-set", "Chrom-Wannenarmatur und Handbrause links an der langen Fliesenwand", "bad", "sanitary", "bath-shower-set", -2.34, 9.62, 0.12, 0.12, 1.18, 90, "metal-satin", 0.82),
+  // Neutrale, maßstäbliche Bad-Dekoplatzhalter; später direkt durch Nutzerdateien ersetzbar.
+  builtIn("bath-round-mirror", "Runder Spiegel über dem Waschtisch · Ø 60 cm", "bad", "other", "bath-round-mirror", -1.22, 9.91, 0.6, 0.045, 0.6, 0, "mirror-glass", 1.34, {
+    source: "Bad-Inspirationsbild und vorhandene 60-cm-Waschtischposition",
+    confidence: "estimated",
+    notes: ["Festgelegt: Ø 60 cm, mittig über dem 60-cm-Waschtisch; rundum ausreichend Wandabstand für Beleuchtung und Reinigung."],
+  }),
+  builtIn("bath-mat", "Badteppich-Platzhalter · 80 × 120 cm", "bad", "other", "bath-mat", -1.3, 8.9, 0.8, 1.2, 0.018, 0, "fabric-sand", 0.012, {
+    source: "Bad-Inspirationsbild und freie Bewegungsfläche vor Wanne/Waschtisch",
+    confidence: "estimated",
+    notes: ["Festgelegt: 80 × 120 cm, flach und rutschhemmend; auf die gegenüberliegende freie Seite neben der Wanne verschoben, mit freiem Türschwenk und Abstand zu Waschtisch/Waschmaschine."],
+  }),
+  builtIn("bath-shower-rod", "Duschvorhangstange · Brilliant Silber · 171–210 cm", "bad", "other", "bath-shower-rod", -1.64, 9.19, 2.05, 0.03, 0.03, -90, "chrome-polished", 2.18, {
+    source: "Badewannenmaß und Inspirationsbild",
+    confidence: "estimated",
+    notes: ["Temu-Variante Brilliant Silber, verstellbar 171–210 cm; im Bad auf 205 cm eingestellt und über die vollständige Wannenbreite geführt."],
+  }),
+  builtIn("bath-shower-curtain", "Duschvorhang Nordic Leinenoptik · Beige · 180 × 200 cm", "bad", "other", "bath-shower-curtain", -1.64, 9.19, 1.8, 0.018, 2.0, -90, "shower-curtain-linen-beige", 0.54, {
+    source: "Badewannenmaß und Inspirationsbild",
+    confidence: "estimated",
+    notes: ["Temu-Variante Beige, Leinenoptik mit 12 Haken und Quasten; 180 × 200 cm, mit natürlicher Faltenstaffelung unter der 205-cm-Stange."],
+  }),
   builtIn("wc-pan", "Wand-WC", "wc", "sanitary", "sanitary-wall-wc", -1.97, 4.4, 0.38, 0.58, 0.42, 0, "#f5f4f0", 0.18),
+  builtIn("wc-flush", "WC-Betätigungsplatte", "wc", "sanitary", "wc-flush-plate", -1.97, 4.115, 0.24, 0.035, 0.16, 0, "metal-satin", 1.02),
+  builtIn("wc-revision", "WC-Revisionsfeld", "wc", "sanitary", "wc-revision-panel", -1.97, 4.11, 0.42, 0.03, 0.3, 0, "tile-white-rect", 1.68),
+  builtIn("living-slats", "Holzlamellen auf dunklem Träger", "wohnkueche", "other", "living-slat-wall", 4.3636, 6.5579, 1.052, 0.035, 2.54, 72.23, "slat-oak-dark", 0),
+  builtIn("living-moss", "Moosfeld an Lamellenwand", "wohnkueche", "other", "living-moss-panel", 4.3208, 6.5716, 1.01, 0.055, 0.78, 72.23, "moss-green", 0.99),
+  builtIn("living-clock", "Silberne Wanduhr", "wohnkueche", "other", "living-clock", 4.2827, 6.5838, 0.52, 0.065, 0.52, 72.23, "metal-satin", 1.17),
+  builtIn("living-panel-light", "Wandleuchte über Moosfeld", "wohnkueche", "other", "living-wall-light", 4.316, 6.573, 0.23, 0.12, 0.24, 72.23, "white-matte", 2.13),
+  builtIn("living-tv-slats", "Holzlamellenwand auf dem exakt 195 cm breiten Wandfeld", "wohnkueche", "other", "living-slat-wall", 0.2, 7.975, 1.95, 0.06, 2.54, 270, "slat-oak-dark", 0, {
+    source: "Nutzermessung der Wand zwischen Vorraumtür und Zimmer-2-Wand · 02.11.2026",
+    confidence: "confirmed",
+    notes: ["Das Wandfeld beginnt bei z = 7,00 m direkt nach der 4-cm-Türzarge und endet bei z = 8,95 m; Breite exakt 195 cm."],
+  }),
+  builtIn("living-tv", "Fernseher · Wunschplanung", "wohnkueche", "other", "living-tv", 0.25, 7.975, 1.28, 0.07, 0.74, 270, "screen-black", 1.12, assumptionMetadata("TV mit 128 cm Breite mittig auf dem exakt 195 cm breiten Lamellenfeld; seitlich jeweils 33,5 cm Luft.")),
+  builtIn("living-floating-cabinet", "Schwarzer Hängeschrank · Wunschplanung", "wohnkueche", "storage", "living-floating-cabinet", 0.29, 7.975, 1.72, 0.36, 0.31, 270, "cabinet-black", 0.5, assumptionMetadata("Hängeschrank mit 172 cm Breite mittig unter dem TV; seitlich jeweils 11,5 cm Abstand zum Rand des 195-cm-Lamellenfelds.")),
+  builtIn("z1-bed-accent-wall", "Tapetenwand hinter dem Bett · warmbeige Stoffstruktur", "zimmer1", "other", "wall-finish-vintage-fabric-wallpaper", 0.068, 1.665, 3.33, 0.008, 2.54, 90, "wallpaper-vintage-beige-fabric", 0, {
+    source: "Nutzerwahl und Temu-Produktbild · Art. 601099526356869 · 31.10.2026",
+    confidence: "confirmed",
+    notes: ["Die gesamte 333 × 254 cm große Wandfläche unmittelbar hinter dem Bett wird mit der gewählten warmbeigen, textilartig strukturierten selbstklebenden Tapete belegt."],
+  }),
+  builtIn("z1-entry-wallpaper-return", "Tapetenwand direkt neben der Zimmer-1-Tür", "zimmer1", "other", "wall-finish-vintage-fabric-wallpaper", 2.565, 3.65, 0.64, 0.008, 2.54, 270, "wallpaper-vintage-beige-fabric", 0, {
+    source: "Nutzerwunsch · Fortsetzung der gewählten Bettwand-Tapete · 31.10.2026",
+    confidence: "confirmed",
+    notes: ["Die 64 cm breite Rücksprungwand direkt rechts neben der Zimmer-1-Tür erhält durchgehend dieselbe warmbeige Stofftapete wie die Wand hinter dem Bett; die Tapete läuft über die Ecke bis an die Türzarge weiter."],
+  }),
+  builtIn("z1-entry-wallpaper-door-strip", "Tapetenstreifen rechts an der Zimmer-1-Tür", "zimmer1", "other", "wall-finish-vintage-fabric-wallpaper", 3.43, 3.962, 0.26, 0.008, 2.54, 0, "wallpaper-vintage-beige-fabric", 0, {
+    source: "Nutzerwunsch · markierte Wandfläche rechts neben der Zimmer-1-Tür · 01.11.2026",
+    confidence: "confirmed",
+    notes: ["Die Tapete wird um die Ecke auf dem 26 cm breiten Wandstreifen zwischen Türzarge und Außenwand fortgeführt, sodass sie aus der frontalen Türperspektive sichtbar bleibt."],
+  }),
+  builtIn("z1-entry-slim-art", "Neutrales Bild direkt neben der Zimmer-1-Tür · ca. 40 × 60 cm", "zimmer1", "other", "zimmer1-entry-slim-art", 2.592, 3.65, 0.4, 0.04, 0.6, 270, "oak-light", 1.36, assumptionMetadata("Herstellerneutrale Größen- und Stilplanung: Hochformat 40 × 60 cm, mittig auf der 64 cm breiten Tapetenfläche direkt neben der Tür; ruhige creme-, taupe- und sandfarbene abstrakte Komposition ohne festgelegtes Motiv.")),
+  builtIn("z1-wall-art-pair", "Zwei botanisch-abstrakte Bilder über dem Kopfteil · je 60 × 80 cm", "zimmer1", "other", "zimmer1-wall-art-pair", 0.052, 0.735, 1.3, 0.045, 0.8, 270, "oak-light", 1.32, assumptionMetadata("Zwei ruhige Hochformat-Motive mit jeweils 60 × 80 cm und 10 cm Abstand; Gesamtgruppe 130 × 80 cm. Mittig über dem 147 cm breiten Kopfteil ausgerichtet, Unterkante 132 cm, Oberkante 212 cm und 44 cm Abstand zur 256 cm hohen Decke.")),
+  builtIn("z1-headboard-led", "Indirektes warmweißes Licht hinter dem Kopfteil", "zimmer1", "other", "zimmer1-headboard-led", 0.045, 0.735, 1.28, 0.025, 0.025, 270, "led-warm", 1.13, assumptionMetadata("Dimmbares Niedervolt-/USB-Licht mit 2700–3000 K; nur als indirekte Kontur hinter dem Kopfteil.")),
+  builtIn("z1-headboard-sconces", "Zwei kompakte warme Wandleuchten am Bett", "zimmer1", "other", "zimmer1-headboard-sconces", 0.043, 0.735, 1.72, 0.12, 0.24, 270, "metal-satin", 1.18, assumptionMetadata("Zwei kleine warmweiße Wandleuchten rahmen Bilder und Kopfteil symmetrisch; geringe Tiefe, damit die Bettseite frei bleibt.")),
+  builtIn("z1-layered-curtain", "Deckenhoher Vorhang · Ecru transparent + Taupe", "zimmer1", "other", "zimmer1-layered-curtain", 3.49, 1.945, 2.06, 0.16, 2.38, 90, "fabric-ecru-sheer", 0.09, assumptionMetadata("Vorhangschiene deckennah; breiter transparenter Ecru-Layer und vollere seitliche taupefarbene Dekoschals wie in den Referenzen, Saum ca. 1 cm über Boden.")),
+  builtIn("z1-vanity-shelf-main", "Haupt-Wandregal Natur-Eiche · ca. 112 × 19 × 4,5 cm", "zimmer1", "storage", "zimmer1-desk-shelf-main", 2.96, 0.095, 1.12, 0.19, 0.045, 0, "oak-light", 1.65, assumptionMetadata("Herstellerneutrale Wunschplanung: mittig über dem 110-cm-LED-Spiegel; Unterkante bei 165 cm und damit rund 10 cm Luft zur 155 cm hohen Spiegeloberkante. Helle Natur-Eiche mit warmem Honigton verbindet Parkett, Beigetöne und goldene Schminktischdetails.")),
+  builtIn("z1-vanity-shelf-side-upper", "Eck-Wandregal Natur-Eiche · ca. 36 × 16 × 4 cm", "zimmer1", "storage", "zimmer1-desk-shelf-side-upper", 3.475, 0.49, 0.36, 0.16, 0.04, 90, "oak-light", 1.54, assumptionMetadata("Herstellerneutrale Wunschplanung: kurzes, versetztes Regal an der Fensterwand; endet deutlich vor Vorhang und Fensterlaibung.")),
+  builtIn("z1-vanity-shelf-side-lower", "Eck-Wandregal Natur-Eiche · ca. 32 × 16 × 4 cm", "zimmer1", "storage", "zimmer1-desk-shelf-side-lower", 3.475, 0.84, 0.32, 0.16, 0.04, 90, "oak-light", 1.17, assumptionMetadata("Herstellerneutrale Wunschplanung: bewusst etwas kürzer und tiefer versetzt, damit die Ecke locker und nicht wie ein starres Regalsystem wirkt.")),
+  builtIn("z1-entry-niche", "Schmale beleuchtete Eiche-Nische neben dem Schrank", "zimmer1", "storage", "zimmer1-entry-niche", 2.37, 3.255, 0.22, 0.13, 1.88, 180, "oak-light", 0.08, assumptionMetadata("Nur 22 cm breit und 13 cm tief, damit der Zugang frei bleibt; drei flache Ablagen und verdeckte warmweiße LED-Linie.")),
+  builtIn("z1-wardrobe-top-decor", "Geflochtene Aufbewahrungsboxen auf dem Schrank", "zimmer1", "storage", "zimmer1-wardrobe-top-decor", 1.125, 3.02, 1.46, 0.42, 0.25, 180, "fabric-taupe", 2.2, assumptionMetadata("Drei niedrige, helle Flechtboxen nutzen die sichtbare Zone über dem Schrank; Gesamthöhe bleibt unter der 2,56-m-Decke.")),
+  builtIn("z1-nightstand-decor", "Kompakte Deko auf dem Nachttisch", "zimmer1", "other", "zimmer1-nightstand-decor", 0.22, 1.69, 0.3, 0.18, 0.22, 270, "ceramic-beige", 0.61, assumptionMetadata("Kleine warme Kugelleuchte und schmales Tablett; keine weiteren Objekte, damit Ladestation und Steckdosen nutzbar bleiben.")),
+  builtIn(
+    "hall-wall-decor",
+    "Vorraum-Deko: größeres Bild und rundes Wandpflanzgefäß",
+    "vorraum",
+    "other",
+    "vorraum-wall-decor",
+    // Wall inner face is about x=-2.33 m; keep the decorative group 5 cm
+    // into the room so the frame never z-fights with the wall.
+    -2.31,
+    7.78,
+    0.72,
+    0.045,
+    0.86,
+    -90,
+    "oak-light",
+    1.125,
+    assumptionMetadata("Auf dem freien 99-cm-Wandfeld oberhalb der Eingangstür: gerahmtes Bild ca. 36 × 50 cm links, drei runde Wandteller mit 18/14/11 cm Durchmesser rechts. Unterkante der Gruppe ca. 122 cm, Oberkante ca. 204 cm; Gegensprechanlage, Türgriff und Türschwenk bleiben frei."),
+  ),
 ];
+
+// Keep the bath mat on the opposite free walking side of the bathroom.
+// The 60 x 90 cm footprint uses the free area while clearing the door swing and sanitary units.
+const finalBuiltIns = builtIns.map((item) => item.id === "builtin-bath-mat"
+  ? { ...item, label: "Badteppich - flauschige Creme-Textur - 120 x 80 cm", position: { x: -1.25, z: 8.8 }, rotation: 90, size: { ...item.size, width: 1.2, depth: 0.8 }, materialVariants: { ...item.materialVariants, main: "bath-mat-shaggy-cream" } }
+  : item.id === "builtin-bath-basin-cabinet-scout"
+    ? { ...item, position: { ...item.position, z: 9.8 } }
+    : item.id === "builtin-bath-washer-cabinet-scout"
+      ? { ...item, position: { ...item.position, x: -0.5, z: 9.84 } }
+      : item.id === "builtin-bath-washer"
+        ? { ...item, position: { ...item.position, x: -0.5, z: 9.68 }, size: { ...item.size, width: 0.6, depth: 0.6, height: 0.85 } }
+        : item.id === "builtin-bath-shower-rod"
+          ? { ...item, label: "Duschvorhangstange · Brilliant Silber · 171–210 cm", position: { ...item.position, z: 9.15 }, size: { ...item.size, width: 2.05 }, materialVariants: { ...item.materialVariants, main: "chrome-polished" } }
+          : item.id === "builtin-bath-shower-curtain"
+            ? { ...item, label: "Duschvorhang Nordic Leinenoptik · Beige · 180 × 200 cm", position: { ...item.position, z: 9.15 }, size: { ...item.size, width: 1.8, height: 2.0 }, materialVariants: { ...item.materialVariants, main: "shower-curtain-linen-beige" } }
+  : item);
 
 const fixtures: PlannerFixture[] = [
   fixture("z1-light", "Lichtauslass Decke", "zimmer1", "ceiling-light", 1.78, 1.7, 2.56),
-  fixture("z1-outlets", "Anschlussgruppe", "zimmer1", "multi-outlet", 1.74, 3.28, 0.3),
+  fixture("z1-smoke", "Rauchwarnmelder", "zimmer1", "smoke-detector", 1.15, 1.12, 2.52),
+  fixture("z1-switch", "Lichtschalter Eingang", "zimmer1", "switch", 3.52, 3.42, 1.05, 90),
+  fixture("z1-blind", "Beschattungssteuerung", "zimmer1", "blind-control", 3.52, 1.08, 1.1, 90),
+  fixture("z1-outlet-west", "Steckdose Westwand", "zimmer1", "outlet", 0.04, 1.72, 0.3, -90),
+  fixture("z1-outlet-north", "Dreifachsteckdose Nordwand", "zimmer1", "outlet", 1.78, 0.04, 0.3),
+  fixture("z1-outlets", "Medien-Anschlussgruppe Südwand", "zimmer1", "outlet", 1.74, 3.28, 0.3),
   fixture("hall-light", "Deckenanschluss", "vorraum", "ceiling-light", -1.27, 7, 2.56),
-  fixture("hall-intercom", "Gegensprechanlage", "vorraum", "intercom", -2.39, 7.42, 1.45),
+  fixture("hall-smoke", "Rauchwarnmelder", "vorraum", "smoke-detector", -0.74, 7.34, 2.52),
+  // Exakte Nutzermaße: Unterkante 133 cm, 16,5 cm hoch, 12,5 cm breit;
+  // 8 cm Abstand vom Türrahmen entlang der 99-cm-Wand.
+  fixture("hall-intercom", "Gegensprechanlage neben der Eingangstür", "vorraum", "intercom", -2.39, 7.30, 1.4125, -90),
+  fixture("hall-switch", "Lichtschalter Wohnungseingang", "vorraum", "switch", -2.39, 7.5, 1.05, -90),
+  fixture("hall-outlet", "Steckdose Eingangswand", "vorraum", "outlet", -2.39, 7.78, 0.3, -90),
+  fixture("hall-panel", "Elektroverteiler mit zwei Abdeckfeldern", "vorraum", "distribution-panel", -0.19, 7.45, 1.56, 90),
+  fixture("hall-floor-heating-panel", "Fußbodenheizungsverteiler / untere Revisionsklappe", "vorraum", "floor-heating-panel", -0.19, 7.45, 0.43, 90),
   fixture("living-light-north", "Lichtauslass Decke", "wohnkueche", "ceiling-light", 2.25, 5.35, 2.56),
   fixture("living-light-south", "Lichtauslass Decke", "wohnkueche", "ceiling-light", 2.25, 7.85, 2.56),
+  fixture("living-light-kitchen", "Lichtauslass Küche", "wohnkueche", "ceiling-light", 1.15, 4.35, 2.56),
+  fixture("living-smoke", "Rauchwarnmelder", "wohnkueche", "smoke-detector", 1.72, 6.52, 2.52),
+  fixture("living-outlet-west", "Steckdose TV-Wand", "wohnkueche", "outlet", 0.06, 7.55, 0.3, -90),
   fixture("z2-light", "Lichtauslass Decke", "zimmer2", "ceiling-light", 1.8, 10.45, 2.56),
+  fixture("z2-smoke", "Rauchwarnmelder", "zimmer2", "smoke-detector", 1.12, 10.46, 2.52),
+  fixture("z2-outlet", "Steckdose Südwand", "zimmer2", "outlet", 1.8, 11.74, 0.3),
   fixture("bath-light", "Lichtauslass Decke", "bad", "ceiling-light", -1.32, 8.92, 2.56),
+  fixture("bath-outlet", "Feuchtraum-Steckdose Waschtisch", "bad", "outlet", -1.22, 9.98, 1.12),
   fixture("wc-light", "Lichtauslass Decke", "wc", "ceiling-light", -1.97, 5.08, 2.56),
+  fixture("wc-switch", "Lichtschalter WC", "wc", "switch", -1.56, 5.62, 1.05, 90),
   fixture("store-light", "Lichtauslass Decke", "abstellraum", "ceiling-light", -0.76, 5.08, 2.56),
-  fixture("loggia-outlet", "Außensteckdose", "loggia", "outlet", 5.18, 8.08, 0.3),
-  fixture("balcony-outlet", "Außensteckdose", "balkon", "outlet", 4.24, 10.95, 0.3),
+  fixture("store-switch", "Lichtschalter Abstellraum", "abstellraum", "switch", -0.22, 5.62, 1.05, 90),
+  fixture("balcony-outlet", "Außensteckdose an der Fassadenwand", "balkon", "outlet", 3.64, 11.15, 0.3, -90),
 ];
 
 const placements: PlannerPlacement[] = [
-  placement("zimmer1-bed", "zimmer1", "bed-120", 1.1, 1.12, 2.2, 1.42, 1.3, 270),
-  placement("zimmer1-wardrobe", "zimmer1", "wardrobe-225", 1.125, 3.02, 2.25, 0.62, 2.2, 0),
-  placement("zimmer1-desk", "zimmer1", "desk-standard", 2.915, 0.315, 1.29, 0.55, 0.75, 0),
-  placement("zimmer1-chair", "zimmer1", "chair-office", 2.7, 0.94, 0.55, 0.55, 0.82, 90),
+  placement(
+    "zimmer1-bliss-bed",
+    "zimmer1",
+    "bed-bliss-120",
+    1.11,
+    0.75,
+    1.47,
+    2.22,
+    1.08,
+    270,
+    "fabric-bliss-beige",
+    {
+      source: "XXXLutz Produktseite · Art. 800001233737",
+      confidence: "confirmed",
+      notes: [
+        "Gesamtmaß laut Maßzeichnung 147 × 222 × 108 cm; Liegefläche 120 × 200 cm",
+        "Mit rund 1,5–2 cm Wandluft positioniert; kein Polsterteil überschreitet mehr die bestätigte Außenbreite.",
+        "Fußteil 30 cm hoch; Füße 4,5 cm hoch",
+        "Beiger Polsterstoff, vierteilig gepolstertes Kopfteil und Bettkasten laut Produktabbildung",
+        "Lattenrost enthalten; Matratze nicht enthalten",
+        "Anbieterhinweis: Produktbilder sind KI-generiert oder bearbeitet",
+      ],
+    },
+  ),
+  placement("zimmer1-wardrobe", "zimmer1", "wardrobe-225", 1.125, 3.02, 2.25, 0.62, 2.2, 180, "white-matte"),
+  placement(
+    "zimmer1-temu-shaggy-rug",
+    "zimmer1",
+    "rug-temu-rabbit-ivory-100x180",
+    1.125,
+    2.0975,
+    1,
+    1.8,
+    0.04,
+    90,
+    "rug-temu-rabbit-ivory",
+    {
+      source: "Temu Produktseite und Originalabbildung · Art. 601099532250952 · SKU 17592283638116 · 02.11.2026",
+      confidence: "confirmed",
+      notes: [
+        "Nutzerwahl: einfarbiger Kunstkaninchen-Plüschteppich in Elfenbein.",
+        "Gewählte Variante: 100 × 180 cm; die 180-cm-Seite liegt parallel zum Bett.",
+        "Zentriert im freien Streifen zwischen Bett und Kleiderschrank platziert.",
+        "Maßlich bleiben rund 11 cm Luft zum Bettfuß und zur Schrankfront sowie rund 22 cm seitlicher Rand.",
+      ],
+    },
+  ),
+  placement(
+    "zimmer1-desk",
+    "zimmer1",
+    "vanity-vicco-sherry-120",
+    2.96,
+    0.315,
+    1.2,
+    0.55,
+    1.55,
+    0,
+    "white-matte",
+    {
+      source: "XXXLutz Produktseite · Vicco Sherry · Art. 800000829847",
+      confidence: "confirmed",
+      notes: [
+        "Vorhandener Schminktisch; bewusst nicht in der Einkaufsliste geführt.",
+        "Produktmaße 120 × 55 cm; Tischhöhe 75 cm; LED-Spiegel 110 × 70 cm.",
+        "Ergonomisch montiert: 10 cm Abstand zwischen Tischplatte und Spiegel; Spiegelunterkante 85 cm, Oberkante 155 cm.",
+        "Mattweißer 16-mm-Holzwerkstoff, goldfarbene Akzente und fünf Schubladen gemäß Produktseite.",
+        "Der frühere separate Spiegel wurde vollständig durch den integrierten Sherry-LED-Spiegel ersetzt.",
+      ],
+    },
+  ),
+  placement(
+    "zimmer1-chair",
+    "zimmer1",
+    "chair-temu-executive-ivory",
+    2.96,
+    0.92,
+    0.64,
+    0.51,
+    1.14,
+    180,
+    "leather-ivory",
+    {
+      source: "Temu Kurzlink und Produktbild · goods_id 606296522765554 · SKU 96703067758954",
+      confidence: "confirmed",
+      notes: [
+        "Cremefarbenes, fein genarbtes Kunstleder mit stark gepolstertem Hochlehner, Kopf- und Seitenpolstern, gepolsterten Armlehnen, einziehbarer Fußstütze und verchromtem Fünfsternfuß gemäß Produktbild.",
+        "Nutzerbelegtes Maßbild: 64 cm Gesamtbreite, 51 cm Tiefe, 105–114 cm Gesamthöhe und 47–56 cm Sitzhöhe; Sitzbreite 52 cm, Rückenbreite 51 cm, Fußstütze 20 cm.",
+        "Höhenverstellbar und laut Maßbild bis 200 kg belastbar.",
+        "Mittig vor dem 120-cm-Schminktisch ausgerichtet; die eingezogene Fußstütze und abgesenkte Sitzposition erhalten den freien Hauptweg.",
+      ],
+    },
+  ),
+  placement(
+    "zimmer1-led-nightstand",
+    "zimmer1",
+    "nightstand-led-2drawer-white",
+    0.22,
+    1.69,
+    0.396,
+    0.3,
+    0.604,
+    270,
+    "white-matte",
+    {
+      source: "Temu Produktseite und Produktbild · Art. 601100375290552",
+      confidence: "estimated",
+      notes: [
+        "Erste der zwei Nutzeroptionen gewählt: Zwei Schubladen und beleuchtetes offenes Ablagefach wirken leichter und benötigen weniger Tiefe als die Dreischubladen-Variante.",
+        "Temu zeigte das Produktbild, blockierte jedoch die Maßansicht; 39,6 × 30 × 60,4 cm aus einer bildgleichen Produktbauform abgeleitet und deshalb ausdrücklich als Schätzung geführt.",
+        "An die Wand hinter dem Kopfteil geschoben und nach Nutzerkorrektur um 180° gewendet.",
+      ],
+    },
+  ),
+  placement(
+    "zimmer1-olive-plant",
+    "zimmer1",
+    "plant-zimmer1-olive",
+    3.28,
+    2.82,
+    0.42,
+    0.42,
+    1.1,
+    0,
+    "leaf-olive",
+    {
+      source: "Deko-Wunschplanung nach Nutzerreferenzen vom 30.10.2026",
+      confidence: "estimated",
+      notes: [
+        "Nur eine größere Pflanze in der Fensterecke, damit der Raum ruhig bleibt.",
+        "42-cm-Stellfläche und 110 cm Höhe; außerhalb von Türschwenkbereich und direktem Durchgang.",
+      ],
+    },
+  ),
+  placement(
+    "living-rug-concept",
+    "wohnkueche",
+    "rug-living-concept-240x240",
+    1.55,
+    7.75,
+    2.4,
+    2.4,
+    0.02,
+    0,
+    "rug-living-ivory-greige",
+    {
+      source: "Unverbindliche Teppich-Wunschplanung · 02.11.2026",
+      confidence: "estimated",
+      notes: [
+        "Entwurfsgröße 240 × 240 cm zur visuellen Beurteilung; noch kein konkretes Produkt.",
+        "Quadratische Wohninsel vom TV-Bereich bis vollständig unter das Sofa.",
+        "Rund 15 cm Abstand zur TV-Wand, vollständige Auflage aller Sofafüße und etwa 50 cm freier Boden zum Essplatz.",
+        "Niedriger bis mittlerer Flor mit rund 20 mm Gesamtaufbau, damit die elektrische Relaxmechanik frei bleibt.",
+        "Farbentwurf: warmes Elfenbein-Greige mit ruhiger Hoch-Tief-Struktur.",
+      ],
+    },
+  ),
+  placement(
+    "living-chicago-sofa",
+    "wohnkueche",
+    "sofa-chicago-206",
+    2.2,
+    7.82,
+    2.06,
+    1.07,
+    0.78,
+    90,
+    "fabric-chicago-beige",
+    {
+      source: "Möbelix Produktseite · Art. 2424010201",
+      confidence: "confirmed",
+      notes: [
+        "Gesamtmaß 206 × 78 × 107 cm; Sitzhöhe 50 cm und Sitztiefe 56 cm",
+        "Beiger Chenillebezug, Taschenfederkern und zwei elektrische Relaxsitze",
+        "Rückenlehnen, Kopf- und Fußteile elektrisch verstellbar; schwarze Metallfüße",
+        "2D-Stellfläche geschlossen maßgetreu; 3D in Relaxstellung gemäß Produktbild",
+        "Die ausgefahrene Gesamttiefe ist auf der Produktseite nicht angegeben",
+      ],
+    },
+  ),
+  placement(
+    "living-bozan-table",
+    "wohnkueche",
+    "dining-table-bozan-110",
+    2.2,
+    5.7,
+    1.1,
+    1.1,
+    0.76,
+    180,
+    "oak-artisan",
+    {
+      source: "Möbelix Produktseite · Art. 2858001801",
+      confidence: "confirmed",
+      notes: [
+        "Geschlossen rund Ø 110 cm und 76 cm hoch; 150 × 110 cm ausgezogen",
+        "25-mm-MDF-Platte mit Melaminoberfläche in Artisan-Eiche",
+        "Schwarzes pulverbeschichtetes Metall-Sterngestell gemäß Produktabbildung",
+        "Gerade statt schräg positioniert: Die 150-cm-Auszugslänge bleibt in Ost-West-Richtung, damit ihre Hüllfläche Küche und Sofa nicht unnötig einengt",
+        "Aktuelle Nutzerposition dauerhaft gespeichert: Tischmittelpunkt X 220 cm / Z 570 cm, Drehung 180°.",
+        "Drei Kaleo-Armlehnstühle stehen mit 70 cm Mittelpunktabstand auf Nord-, Ost- und Westseite; die Südseite zur Couch bleibt vollständig frei.",
+      ],
+    },
+    "living-dining-group",
+  ),
+  placement(
+    "living-kaleo-chair-west",
+    "wohnkueche",
+    "chair-kaleo-chenille-beige",
+    2.2,
+    5.0,
+    0.63,
+    0.64,
+    0.87,
+    0,
+    "fabric-kaleo-beige",
+    {
+      source: "Möbelix Produktseite · Art. 1634004202",
+      confidence: "confirmed",
+      notes: [
+        "Produktmaß 63 × 87 × 64 cm; Sitz 46 × 46 cm auf 50 cm Höhe",
+        "Armlehnenoberkante 66 cm; unter der ca. 73,5 cm hohen Tischplattenunterkante bleiben rund 7,5 cm Einschubreserve",
+        "Schwarzer pulverbeschichteter 50-cm-Rundfuß bei der Stell- und Bewegungsreserve berücksichtigt",
+        "Beiger Chenillebezug in Leinenoptik, drehbare Sitzfläche und schwarzer Säulenfuß",
+        "Oberer/Nord-Stuhl bei X 220 cm / Z 500 cm mit 0° ausgerichtet; die Rückenlehne zeigt vom Tisch weg.",
+      ],
+    },
+    "living-dining-group",
+  ),
+  placement(
+    "living-kaleo-chair-east",
+    "wohnkueche",
+    "chair-kaleo-chenille-beige",
+    2.9,
+    5.7,
+    0.63,
+    0.64,
+    0.87,
+    90,
+    "fabric-kaleo-beige",
+    {
+      source: "Möbelix Produktseite · Art. 1634004202",
+      confidence: "confirmed",
+      notes: [
+        "Produktmaß 63 × 87 × 64 cm; Sitz 46 × 46 cm auf 50 cm Höhe",
+        "Armlehnenoberkante 66 cm; unter der ca. 73,5 cm hohen Tischplattenunterkante bleiben rund 7,5 cm Einschubreserve",
+        "Schwarzer pulverbeschichteter 50-cm-Rundfuß bei der Stell- und Bewegungsreserve berücksichtigt",
+        "Beiger Chenillebezug in Leinenoptik, drehbare Sitzfläche und schwarzer Säulenfuß",
+        "Rechter/Ost-Stuhl bei X 290 cm / Z 570 cm mit 90° zum Tisch ausgerichtet.",
+      ],
+    },
+    "living-dining-group",
+  ),
+  placement(
+    "living-kaleo-chair-south",
+    "wohnkueche",
+    "chair-kaleo-chenille-beige",
+    1.5,
+    5.7,
+    0.63,
+    0.64,
+    0.87,
+    270,
+    "fabric-kaleo-beige",
+    {
+      source: "Möbelix Produktseite · Art. 1634004202",
+      confidence: "confirmed",
+      notes: [
+        "Produktmaß 63 × 87 × 64 cm; Sitz 46 × 46 cm auf 50 cm Höhe",
+        "Armlehnenoberkante 66 cm; unter der ca. 73,5 cm hohen Tischplattenunterkante bleiben rund 7,5 cm Einschubreserve",
+        "Schwarzer pulverbeschichteter 50-cm-Rundfuß bei der Stell- und Bewegungsreserve berücksichtigt",
+        "Linker/West-Stuhl bleibt an seiner gespeicherten Position und ist mit 270° ausgerichtet; die Rückenlehne zeigt vom Tisch weg.",
+      ],
+    },
+    "living-dining-group",
+  ),
+  placement(
+    "vorraum-temu-rabbit-rug",
+    "vorraum",
+    "rug-temu-easy-line-120x180",
+    -1.29,
+    7.04,
+    1.2,
+    1.8,
+    0.025,
+    90,
+    "rug-hall-overlap-taupe",
+    {
+      source: "Temu Produktseite und Originalabbildung · Art. 607246280935328 · SKU 105780749538479 · 09.11.2026",
+      confidence: "confirmed",
+      notes: [
+        "Nutzerwahl: 120 × 180 cm; die 140 × 200 cm-Variante bleibt im Katalog verfügbar.",
+        "Originalmuster: abstrakte Easy-Line-Color-Blocks in Creme, hellem Salbei, dunklem Grün und warmem Beige mit feinen weißen Konturlinien.",
+        "Um 90° gedreht und mittig im Vorraum platziert; die Türbereiche bleiben frei.",
+      ],
+    },
+  ),
+  placement(
+    "hall-tejo-wardrobe",
+    "vorraum",
+    "hallway-tejo-115",
+    -1.78,
+    7.93,
+    1.15,
+    0.375,
+    2.319,
+    180,
+    "tejo-cashmere",
+    {
+      source: "Möbelix Produktseite · Art. 2778003504",
+      confidence: "confirmed",
+      notes: [
+        "Gesamtmaß 115 × 231,9 × 37,5 cm; Spiegel ca. 35 × 140 cm",
+        "Beige/Kaschmir, fünf Einlegeböden, Sitzbank, Hakenleiste und Kleiderstange",
+        "Seitenverkehrt montiert: Hochschrank zur Außenecke, offene Garderobenseite zur Badezimmertür",
+        "Auf der 128-cm-Wand bleiben planmäßig 6,5 cm seitliche Reserve je Seite",
+        "Zur 256-cm-Raumhöhe verbleiben planmäßig 24,1 cm",
+      ],
+    },
+  ),
 ];
 
 export const DEFAULT_APARTMENT_DOCUMENT = parsePlannerDocument({
   schemaVersion: 3,
   id: "wohnung-v3",
   name: "Wohnungsplanung",
-  updatedAt: "2026-10-24T08:00:00.000Z",
+  updatedAt: "2026-10-30T18:30:00.000Z",
   walls: wallGraph.walls,
   rooms: wallGraph.rooms,
   openings,
-  builtIns,
+  builtIns: finalBuiltIns,
   fixtures,
   placements,
   doorStates: Object.fromEntries(
-    openings.filter((candidate) => candidate.kind === "door").map((candidate) => [candidate.id, "closed"]),
+    openings
+      .filter((candidate) => candidate.kind === "door")
+      .map((candidate) => [candidate.id, defaultOpenDoorIds.has(candidate.id) ? "open" : "closed"]),
   ),
   viewPreferences: {
     activeRoomId: null,
-    overlays: { dimensions: false, fixtures: false, evidence: false },
+    overlays: { dimensions: true, fixtures: false, evidence: false },
   },
 });
 
@@ -154,15 +601,34 @@ function room(
   includedInWnf: boolean,
   floor: string,
   outline: Point2[],
+  wnfArea?: number,
 ): RoomOutlineInput {
   return {
     id,
     name,
     area,
     includedInWnf,
+    wnfArea,
     outline,
-    surfaces: { floor, walls: "paint-warm-white", ceiling: "paint-white" },
-    metadata: { source: "Vermietungsplan M 1:50", confidence: "confirmed" },
+    surfaces: {
+      floor,
+      walls: id === "wc"
+        ? "tile-white-rect"
+        : id === "bad"
+          ? "tile-white-square"
+          : id === "balkon"
+            ? "balcony-facade-grey"
+            : "paint-warm-white",
+      ceiling: "paint-white",
+    },
+    metadata: {
+      source: "Vermietungsplan M 1:50",
+      confidence: "estimated",
+      notes: [
+        `Planfläche ${area.toLocaleString("de-AT", { minimumFractionDigits: 2 })} m² bestätigt`,
+        "Kontur planmaßstäblich abgeleitet; keine vollständige Maßkette im Vermietungsplan",
+      ],
+    },
   };
 }
 
@@ -179,8 +645,10 @@ function opening(
   sillHeight: number,
   hinge: "start" | "end" | undefined,
   confidence: "confirmed" | "plan-scaled",
+  swingDirection?: 1 | -1,
+  visualStyle?: PlannerOpening["visualStyle"],
 ): LegacyOpening {
-  return { id, label, rooms, kind, start: point(x1, z1), end: point(x2, z2), headHeight, sillHeight, hinge, confidence };
+  return { id, label, rooms, kind, start: point(x1, z1), end: point(x2, z2), headHeight, sillHeight, hinge, confidence, swingDirection, visualStyle };
 }
 
 function toPlannerOpening(source: LegacyOpening, forcedKind?: "passage"): PlannerOpening {
@@ -189,20 +657,30 @@ function toPlannerOpening(source: LegacyOpening, forcedKind?: "passage"): Planne
   const startDistance = distance(wall.start, source.start);
   const endDistance = distance(wall.start, source.end);
   const hingePoint = source.hinge === "end" ? source.end : source.start;
+  const tangent = {
+    x: (wall.end.x - wall.start.x) / deriveWallLength(wall),
+    z: (wall.end.z - wall.start.z) / deriveWallLength(wall),
+  };
+  const offset = Math.min(startDistance, endDistance);
+  const segmentStart = point(wall.start.x + tangent.x * offset, wall.start.z + tangent.z * offset);
+  const segmentEnd = point(segmentStart.x + tangent.x * width, segmentStart.z + tangent.z * width);
 
   return {
     id: source.id,
     label: source.label,
+    roomIds: source.rooms,
     wallId: wall.id,
-    offset: Number(Math.min(startDistance, endDistance).toFixed(4)),
+    offset: Number(offset.toFixed(4)),
     width: Number(width.toFixed(4)),
     height: source.headHeight - (source.sillHeight ?? 0),
     sill: source.sillHeight ?? 0,
     kind: forcedKind ?? source.kind,
     hinge: source.kind === "door" && !forcedKind
-      ? distance(wall.start, hingePoint) <= distance(wall.end, hingePoint) ? "start" : "end"
+      ? distance(segmentStart, hingePoint) <= distance(segmentEnd, hingePoint) ? "start" : "end"
       : "none",
+    swingDirection: source.swingDirection ?? 1,
     swingDegrees: source.kind === "door" && !forcedKind ? 90 : 0,
+    visualStyle: source.visualStyle,
     metadata: {
       source: "Bestätigtes Wohnungsmodell",
       confidence: source.confidence === "confirmed" ? "confirmed" : "estimated",
@@ -260,7 +738,7 @@ function builtIn(
   id: string,
   label: string,
   roomId: string,
-  kind: "kitchen" | "sanitary",
+  kind: "kitchen" | "sanitary" | "storage" | "other",
   catalogId: string,
   x: number,
   z: number,
@@ -270,6 +748,11 @@ function builtIn(
   rotation: number,
   color: string,
   elevation = 0,
+  metadata: PlannerBuiltIn["metadata"] = {
+    source: "Lokaler Plan und Bildabgleich",
+    confidence: "estimated",
+    notes: ["Position plan- bzw. bildgerecht; Detailmaße aus Planmaßstab oder Bildproportion geschätzt"],
+  },
 ): PlannerBuiltIn {
   return {
     id: `builtin-${id}`,
@@ -282,12 +765,20 @@ function builtIn(
     rotation,
     size: { width, depth, height },
     locked: true,
-    materialVariants: { color },
-    metadata: { source: "Lokaler Plan und Bildabgleich", confidence: "confirmed" },
+    materialVariants: { main: color },
+    metadata,
   };
 }
 
-function fixture(id: string, label: string, roomId: string, kind: string, x: number, z: number, height: number): PlannerFixture {
+function assumptionMetadata(note: string): NonNullable<PlannerBuiltIn["metadata"]> {
+  return {
+    source: "Nutzerwunsch und lokales Rendering",
+    confidence: "estimated",
+    notes: [`Annahme/Wunschplanung: ${note}`],
+  };
+}
+
+function fixture(id: string, label: string, roomId: string, kind: string, x: number, z: number, height: number, rotation = 0): PlannerFixture {
   return {
     id: `fixture-${id}`,
     label,
@@ -295,7 +786,12 @@ function fixture(id: string, label: string, roomId: string, kind: string, x: num
     kind,
     position: point(x, z),
     height,
-    metadata: { source: "Lokaler Plan und Bildabgleich", confidence: "confirmed" },
+    rotation,
+    metadata: {
+      source: "Lokaler Plan, Elektroplan und Bildabgleich",
+      confidence: "estimated",
+      notes: ["Element belegt; genaue Achse/Höhe teilweise planmaßstäblich geschätzt"],
+    },
   };
 }
 
@@ -309,14 +805,23 @@ function placement(
   depth: number,
   height: number,
   rotation: number,
+  materialId?: string,
+  metadata: PlannerPlacement["metadata"] = {
+    source: "Lokale Bestandsfotos und Handmaßskizze",
+    confidence: "estimated",
+    notes: ["Möbel und Material fotografisch belegt; genaue Position aus Handmaßskizze nur ca."],
+  },
+  groupId?: string,
 ): PlannerPlacement {
   return {
     id,
     roomId,
     catalogId,
+    groupId,
     position: point(x, z),
     rotation,
     size: { width, depth, height },
-    metadata: { source: "Gesicherter Vorzustand", confidence: "confirmed" },
+    materialVariants: materialId ? { main: materialId } : undefined,
+    metadata,
   };
 }

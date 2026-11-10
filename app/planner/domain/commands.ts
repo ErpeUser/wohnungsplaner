@@ -54,10 +54,7 @@ export function applyPlannerCommand(
     }
 
     case "movePlacement":
-      return updatePlacement(document, command.placementId, (placement) => ({
-        ...placement,
-        position: { ...command.position },
-      }));
+      return movePlacement(document, command.placementId, command.position);
 
     case "resizePlacement":
       return updatePlacement(document, command.placementId, (placement) => ({
@@ -75,10 +72,22 @@ export function applyPlannerCommand(
       if (!command.slot.trim() || !command.materialId.trim()) {
         return reject(document, "invalid", "Material-Slot und Material dürfen nicht leer sein.");
       }
-      return updatePlacement(document, command.placementId, (placement) => ({
-        ...placement,
-        materialVariants: { ...placement.materialVariants, [command.slot]: command.materialId },
-      }));
+      if (document.builtIns.some((item) => item.id === command.placementId)) {
+        return reject(document, "locked", "Fest eingebaute Elemente können nicht verändert werden.");
+      }
+      if (!document.placements.some((item) => item.id === command.placementId)) {
+        return reject(document, "not-found", `Das Objekt ${command.placementId} wurde nicht gefunden.`);
+      }
+      return accept({
+        ...document,
+        updatedAt: timestamp(),
+        placements: document.placements.map((placement) => placement.id === command.placementId
+          ? {
+              ...placement,
+              materialVariants: { ...placement.materialVariants, [command.slot]: command.materialId },
+            }
+          : placement),
+      });
 
     case "transferPlacement":
       if (!document.rooms.some((room) => room.id === command.roomId)) {
@@ -133,6 +142,65 @@ export function applyPlannerCommand(
       return accept({ ...document, updatedAt: timestamp(), rooms });
     }
   }
+}
+
+function movePlacement(
+  document: PlannerDocumentV3,
+  placementId: string,
+  position: Point2,
+): CommandResult {
+  if (document.builtIns.some((item) => item.id === placementId)) {
+    return reject(document, "locked", "Fest eingebaute Elemente können nicht verändert werden.");
+  }
+  const selected = document.placements.find((item) => item.id === placementId);
+  if (!selected) return reject(document, "not-found", `Das Objekt ${placementId} wurde nicht gefunden.`);
+  if (!selected.groupId) {
+    return updatePlacement(document, placementId, (placement) => ({
+      ...placement,
+      position: { ...position },
+    }));
+  }
+
+  const delta = {
+    x: position.x - selected.position.x,
+    z: position.z - selected.position.z,
+  };
+  const members = document.placements.filter((item) => item.groupId === selected.groupId);
+  const memberIds = new Set(members.map((item) => item.id));
+  const candidates = members.map((item) => ({
+    ...item,
+    position: {
+      x: Number((item.position.x + delta.x).toFixed(6)),
+      z: Number((item.position.z + delta.z).toFixed(6)),
+    },
+  }));
+  if (candidates.some((candidate) => !validPlacement(candidate))) {
+    return reject(document, "invalid", "Die Möbelgruppe enthält ungültige Maße oder Koordinaten.");
+  }
+
+  const reports = candidates.map((candidate) => inspectPlacement(document, candidate, {
+    ignorePlacementIds: memberIds,
+  }));
+  const hard = reports.flatMap((report) => report.hard);
+  const warnings = reports.flatMap((report) => report.warnings);
+  if (hard.length > 0) {
+    return {
+      document,
+      warnings,
+      error: {
+        code: "collision",
+        message: hard[0].message,
+        collisions: hard,
+      },
+    };
+  }
+
+  const candidateById = new Map(candidates.map((candidate) => [candidate.id, candidate]));
+  return accept({
+    ...document,
+    updatedAt: timestamp(),
+    placements: document.placements.map((item) => candidateById.get(item.id) ?? item),
+  }, warnings);
 }
 
 function updatePlacement(

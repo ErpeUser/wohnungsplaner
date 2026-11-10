@@ -50,6 +50,7 @@ const roomSchema = z.object({
   name: z.string().trim().min(1),
   area: positiveNumber,
   includedInWnf: z.boolean(),
+  wnfArea: nonNegativeNumber.optional(),
   boundary: z.array(wallRefSchema).min(3),
   surfaces: z.object({
     floor: entityId,
@@ -62,6 +63,7 @@ const roomSchema = z.object({
 const openingSchema = z.object({
   id: entityId,
   label: z.string().trim().min(1),
+  roomIds: z.array(entityId).optional(),
   wallId: entityId,
   offset: nonNegativeNumber,
   width: positiveNumber,
@@ -69,9 +71,15 @@ const openingSchema = z.object({
   sill: nonNegativeNumber,
   kind: z.enum(["door", "window", "passage"]),
   hinge: z.enum(["start", "end", "none"]),
+  swingDirection: z.union([z.literal(1), z.literal(-1)]).optional(),
   swingDegrees: nonNegativeNumber.max(180),
+  visualOpenFraction: z.number().min(0).max(1).optional(),
+  visualStyle: z.enum(["solid-white", "solid-oak", "glass-clear", "glass-frosted"]).optional(),
   metadata: metadataSchema,
-});
+}).transform((opening) => ({
+  ...opening,
+  swingDirection: opening.swingDirection ?? (opening.hinge === "end" ? -1 as const : 1 as const),
+}));
 
 const builtInSchema = z.object({
   id: entityId,
@@ -104,6 +112,7 @@ const placementSchema = z.object({
   id: entityId,
   roomId: entityId,
   catalogId: entityId,
+  groupId: entityId.optional(),
   position: pointSchema,
   rotation: finiteNumber,
   size: sizeSchema,

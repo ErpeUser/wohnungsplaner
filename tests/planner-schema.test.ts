@@ -63,7 +63,16 @@ const validDocument = {
 };
 
 test("accepts a closed wall graph with one room and placement", () => {
-  assert.equal(parsePlannerDocument(validDocument).schemaVersion, 3);
+  const parsed = parsePlannerDocument(validDocument);
+  assert.equal(parsed.schemaVersion, 3);
+  assert.equal(parsed.openings[0].swingDirection, 1);
+});
+
+test("preserves an explicit door swing direction", () => {
+  const explicitDirection = structuredClone(validDocument);
+  Object.assign(explicitDirection.openings[0], { swingDirection: -1 });
+
+  assert.equal(parsePlannerDocument(explicitDirection).openings[0].swingDirection, -1);
 });
 
 test("rejects openings outside their referenced wall", () => {

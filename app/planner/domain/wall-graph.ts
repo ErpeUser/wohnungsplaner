@@ -10,7 +10,7 @@ const POINT_EPSILON = 0.001;
 
 export type RoomOutlineInput = Pick<
   PlannerRoom,
-  "id" | "name" | "area" | "includedInWnf" | "surfaces" | "metadata"
+  "id" | "name" | "area" | "includedInWnf" | "wnfArea" | "surfaces" | "metadata"
 > & {
   outline: Point2[];
 };
@@ -85,6 +85,7 @@ export function buildWallGraph(roomOutlines: RoomOutlineInput[]): {
       name: room.name,
       area: room.area,
       includedInWnf: room.includedInWnf,
+      wnfArea: room.wnfArea,
       surfaces: room.surfaces,
       metadata: room.metadata,
       boundary: boundaries.get(room.id) ?? [],

@@ -39,6 +39,28 @@ import { CatalogPanel } from "../app/planner/workspace/catalog-panel.tsx";
 import { InspectorPanel } from "../app/planner/workspace/inspector-panel.tsx";
 
 describe("furniture catalog", () => {
+  test("offers the Cloudy bed only in its verified product dimensions and cream chenille", () => {
+    const bed = FURNITURE_CATALOG.find((item) => item.id === "bed-cloudy-120");
+
+    assert.ok(bed);
+    assert.deepEqual(bed.defaultSize, { width: 1.54, depth: 2.29, height: 1.06 });
+    assert.equal(bed.resize, "fixed");
+    assert.deepEqual(bed.materials.map((material) => material.id), ["fabric-chenille-cream"]);
+  });
+
+  test("builds the photographed five-axis wardrobe with the full mirror exactly centred", async () => {
+    const furniture3d = await import("../app/planner/scene-3d/furniture.tsx") as typeof import("../app/planner/scene-3d/furniture.tsx") & {
+      getWardrobeFrontLayout?: () => Array<{ kind: string; center: number; width: number }>;
+    };
+    assert.equal(typeof furniture3d.getWardrobeFrontLayout, "function");
+
+    const modules = furniture3d.getWardrobeFrontLayout!();
+    assert.deepEqual(modules.map((module) => module.kind), ["door", "drawers", "mirror", "drawers", "door"]);
+    assert.equal(Number(modules.reduce((sum, module) => sum + module.width, 0).toFixed(3)), 1);
+    assert.deepEqual(modules.map((module) => module.width), [0.2, 0.2, 0.2, 0.2, 0.2]);
+    assert.equal(modules[2].center, 0, "the reference photo shows the mirror on the centre axis");
+  });
+
   test("contains realistic parametric objects across all planned categories", () => {
     assert.ok(FURNITURE_CATALOG.length >= 13);
     assert.deepEqual(
@@ -186,7 +208,7 @@ describe("furniture inspector", () => {
   });
 
   test("explains that built-ins are locked", () => {
-    render(<InspectorPanel document={DEFAULT_APARTMENT_DOCUMENT} selectionId="builtin-kitchen-fridge" dispatch={vi.fn()} />);
+    render(<InspectorPanel document={DEFAULT_APARTMENT_DOCUMENT} selectionId="builtin-kitchen-upper-west-end" dispatch={vi.fn()} />);
     expect(screen.getByText(/gegen Verschieben und Entfernen geschützt/)).toBeTruthy();
   });
 });

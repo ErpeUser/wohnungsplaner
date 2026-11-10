@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="960" viewBox="0 0 100 160">
+  <defs>
+    <filter id="pile" x="-8%" y="-8%" width="116%" height="116%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.48" numOctaves="2" seed="27" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="0.55" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="soft" x="-8%" y="-8%" width="116%" height="116%">
+      <feGaussianBlur stdDeviation="0.22"/>
+    </filter>
+  </defs>
+  <rect width="100" height="160" rx="1.8" fill="#ded0bd"/>
+  <g filter="url(#pile)">
+    <path d="M0 4C18 0 30 5 34 19c5 17-8 29-21 37C5 61 1 70 0 82Z" fill="#827d55"/>
+    <path d="M100 0H70c-1 13 5 24 12 34 8 12 11 25 6 40-3 10-1 21 12 30Z" fill="#77784f"/>
+    <path d="M0 77c15-6 26-18 34-32 8-15 14-30 7-45h22c8 19 3 39-11 56-14 18-20 32-10 48 11 18 34 30 58 25v31H70c-20-4-35-15-45-31C15 113 7 109 0 111Z" fill="#b69b83"/>
+    <path d="M44 0c9 18 5 34-9 51-15 18-18 37-7 55 11 19 31 28 49 25 9-1 17-5 23-10v23c-11 8-25 12-41 10-22-3-39-15-49-34C3 106 1 94 6 81c5-14 16-24 24-36C39 32 42 17 34 0Z" fill="#eee8dc"/>
+    <path d="M0 112c13-3 24 1 32 13 9 14 22 25 38 29 9 3 20 4 30 2v4H0Z" fill="#8a825b"/>
+    <path d="M62 0c3 13 1 26-6 38-4 7-9 13-14 20" fill="none" stroke="#7d6959" stroke-width="0.75" opacity=".55"/>
+    <path d="M0 77c15-6 26-18 34-32" fill="none" stroke="#5e6040" stroke-width="0.65" opacity=".55"/>
+    <path d="M42 104c11 18 34 30 58 25" fill="none" stroke="#806b59" stroke-width="0.75" opacity=".5"/>
+    <path d="M28 106c11 19 31 28 49 25 9-1 17-5 23-10" fill="none" stroke="#c8bca9" stroke-width="0.55" opacity=".8"/>
+  </g>
+  <rect x="0.7" y="0.7" width="98.6" height="158.6" rx="1.4" fill="none" stroke="#c5b6a2" stroke-width="1.2" opacity=".75"/>
+  <g opacity=".12" filter="url(#soft)">
+    <path d="M3 8h94M3 16h94M3 24h94M3 32h94M3 40h94M3 48h94M3 56h94M3 64h94M3 72h94M3 80h94M3 88h94M3 96h94M3 104h94M3 112h94M3 120h94M3 128h94M3 136h94M3 144h94M3 152h94" stroke="#fff8ed" stroke-width=".3"/>
+  </g>
+</svg>

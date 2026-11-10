@@ -16,6 +16,8 @@ import {
   createWalkStartPose,
   isWalkPositionValid,
   moveWalkPosition,
+  nextWalkFov,
+  walkZoomCommandForKey,
 } from "../app/planner/scene-3d/camera-controller.tsx";
 import { createSceneModel } from "../app/planner/scene-3d/scene-model.ts";
 
@@ -92,6 +94,32 @@ test("walk camera starts inside the chosen scope and rejects walls, built-ins an
   assert.equal(isWalkPositionValid(DEFAULT_APARTMENT_DOCUMENT, blocked, 0.22), true);
 });
 
+test("walk collision allows crossing a low rug placement", () => {
+  const rug = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.catalogId === "rug-zimmer1-160x230")!;
+  const rugOnlyDocument = {
+    ...DEFAULT_APARTMENT_DOCUMENT,
+    builtIns: [],
+    placements: [rug],
+  };
+
+  assert.equal(isWalkPositionValid(rugOnlyDocument, rug.position, 0.05), true);
+});
+
+test("walk collision crosses floor finishes and the full thickness of interior doorways", () => {
+  assert.equal(isWalkPositionValid(DEFAULT_APARTMENT_DOCUMENT, { x: 1.5, z: 4.55 }, 0.22), true);
+  assert.equal(isWalkPositionValid(DEFAULT_APARTMENT_DOCUMENT, { x: 1, z: 5.5 }, 0.22), true);
+  assert.equal(isWalkPositionValid(DEFAULT_APARTMENT_DOCUMENT, { x: -0.08, z: 6.29 }, 0.22), true);
+
+  const acrossHallDoor = moveWalkPosition(
+    DEFAULT_APARTMENT_DOCUMENT,
+    { x: -0.5, z: 6.29 },
+    { x: 0.5, z: 6.29 },
+    0.22,
+  );
+  assert.ok(Math.hypot(acrossHallDoor.x - 0.5, acrossHallDoor.z - 6.29) < 0.03);
+  assert.equal(isWalkPositionValid(DEFAULT_APARTMENT_DOCUMENT, { x: 2.17, z: 3.8 }, 0.22), false);
+});
+
 test("camera policy keeps selection external and disables decorative motion when requested", () => {
   assert.equal(cameraTransitionDuration(true), 0);
   assert.ok(cameraTransitionDuration(false) > 0);
@@ -99,4 +127,16 @@ test("camera policy keeps selection external and disables decorative motion when
   const before = JSON.stringify(DEFAULT_APARTMENT_DOCUMENT);
   createWalkStartPose(DEFAULT_APARTMENT_DOCUMENT, scene, null);
   assert.equal(JSON.stringify(DEFAULT_APARTMENT_DOCUMENT), before);
+});
+
+test("walk zoom uses plus and minus keys and keeps a usable field of view", () => {
+  assert.equal(walkZoomCommandForKey({ code: "Equal", key: "+" }), "zoom-in");
+  assert.equal(walkZoomCommandForKey({ code: "NumpadAdd", key: "+" }), "zoom-in");
+  assert.equal(walkZoomCommandForKey({ code: "Minus", key: "-" }), "zoom-out");
+  assert.equal(walkZoomCommandForKey({ code: "NumpadSubtract", key: "-" }), "zoom-out");
+  assert.equal(walkZoomCommandForKey({ code: "KeyW", key: "w" }), null);
+  assert.equal(nextWalkFov(42, "zoom-in"), 37);
+  assert.equal(nextWalkFov(42, "zoom-out"), 47);
+  assert.equal(nextWalkFov(24, "zoom-in"), 24);
+  assert.equal(nextWalkFov(72, "zoom-out"), 72);
 });

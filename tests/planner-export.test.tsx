@@ -23,7 +23,7 @@ test("serializes a validated V3 backup without private source paths", () => {
   const backup = serializePlannerBackup(DEFAULT_APARTMENT_DOCUMENT);
   const parsed = JSON.parse(backup);
   assert.equal(parsed.schemaVersion, 3);
-  assert.equal(parsed.rooms.length, 9);
+  assert.equal(parsed.rooms.length, 8);
   assert.doesNotMatch(backup, /(?:[A-Z]:\\|\/Users\/|sourcePath|imageStudies)/i);
 });
 
@@ -36,7 +36,7 @@ test("creates a high-resolution PNG from the current Konva stage", () => {
 test("creates a compact print model from the same scene and document", () => {
   const model = createPrintModel(DEFAULT_APARTMENT_DOCUMENT, scene);
   assert.equal(model.schemaVersion, 3);
-  assert.equal(model.rooms.length, 9);
+  assert.equal(model.rooms.length, 8);
   assert.equal(model.plan.rooms, scene.rooms);
   assert.equal(model.furniture.length, DEFAULT_APARTMENT_DOCUMENT.placements.length);
   assert.match(model.summary, /59,49 m²/);
@@ -121,7 +121,7 @@ describe("ExportDialog", () => {
     await user.upload(screen.getByLabelText("JSON-Sicherung auswählen"), file);
     await screen.findByText("Importvorschau");
     expect(screen.getByText("Version V3")).toBeTruthy();
-    expect(screen.getByText("9 Räume")).toBeTruthy();
+    expect(screen.getByText("8 Bereiche")).toBeTruthy();
     expect(screen.getByText("Ein alter Eintrag wurde übersprungen.")).toBeTruthy();
     expect(onImport).not.toHaveBeenCalled();
     await user.click(screen.getByRole("button", { name: "Plan ersetzen" }));

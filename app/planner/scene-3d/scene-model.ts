@@ -1,7 +1,8 @@
-import { openingSegment, pointInPolygon } from "../domain/geometry.ts";
+import { doorPose, openingSegment } from "../domain/geometry.ts";
 import type {
   PlannerBuiltIn,
   PlannerDocumentV3,
+  PlannerFixture,
   PlannerOpening,
   PlannerPlacement,
   PlannerWall,
@@ -33,6 +34,8 @@ export type SceneWall = {
   height: number;
   roomIds: string[];
   openingIds: string[];
+  materialId: string;
+  sideMaterialIds: [positiveZ: string, negativeZ: string];
   segments: SceneWallSegment[];
 };
 
@@ -45,7 +48,25 @@ export type SceneDoor = {
   height: number;
   baseAngle: number;
   openAngle: number;
+  displayOpenAngle: number;
   materialId: string;
+  frameCenter: Point2;
+  frameAngle: number;
+  visualStyle: "solid-white" | "solid-oak" | "glass-clear" | "glass-frosted";
+  detailProfile: "standard" | "entry-security" | "vented";
+  handleSides: "both";
+  leafOutlineSides: "both";
+};
+
+export type SceneWindow = {
+  id: string;
+  label: string;
+  position: [number, number, number];
+  width: number;
+  height: number;
+  sill: number;
+  rotationY: number;
+  mullions: number;
 };
 
 export type SceneObject<T extends PlannerBuiltIn | PlannerPlacement> = {
@@ -56,7 +77,21 @@ export type SceneObject<T extends PlannerBuiltIn | PlannerPlacement> = {
   size: [number, number, number];
   rotationY: number;
   materialId: string;
+  renderProfile: "box" | "bathtub" | "washer" | "wall-wc";
   source: T;
+};
+
+export type SceneFixture = {
+  id: string;
+  roomId: string;
+  kind: string;
+  label: string;
+  position: [number, number, number];
+  rotationY: number;
+  detailProfile: "standard" | "hall-distribution" | "hall-revision";
+  mountingDepth: number;
+  surfaceOffset: number;
+  source: PlannerFixture;
 };
 
 export type SceneBounds = {
@@ -70,11 +105,34 @@ export type SceneModel = {
   floors: SceneFloor[];
   walls: SceneWall[];
   doors: SceneDoor[];
+  windows: SceneWindow[];
   builtIns: Array<SceneObject<PlannerBuiltIn>>;
   placements: Array<SceneObject<PlannerPlacement>>;
+  fixtures: SceneFixture[];
   bounds: SceneBounds;
   center: [number, number, number];
 };
+
+export type PerspectiveCutaway = {
+  hiddenWallIds: string[];
+  hiddenOpeningIds: string[];
+  hiddenObjectIds: string[];
+  hiddenFixtureIds: string[];
+};
+
+const EMPTY_PERSPECTIVE_CUTAWAY: PerspectiveCutaway = {
+  hiddenWallIds: [],
+  hiddenOpeningIds: [],
+  hiddenObjectIds: [],
+  hiddenFixtureIds: [],
+};
+
+const HALL_GLASS_DOOR_SIGHTLINE_IDS = new Set([
+  "builtin-living-slats",
+  "builtin-living-moss",
+  "builtin-living-clock",
+  "builtin-living-panel-light",
+]);
 
 export function createSceneModel(
   document: PlannerDocumentV3,
@@ -82,22 +140,17 @@ export function createSceneModel(
 ): SceneModel {
   const rooms = document.rooms.filter((room) => !activeRoomId || room.id === activeRoomId);
   const roomIds = new Set(rooms.map((room) => room.id));
-  const roomPolygons = rooms.map((room) => deriveRoomPolygon(document, room.id));
-  const touchingOpeningWallIds = new Set(document.openings
-    .filter((opening) => {
-      if (!activeRoomId) return true;
-      const { start, end } = openingSegment(document, opening);
-      const midpoint = { x: (start.x + end.x) / 2, z: (start.z + end.z) / 2 };
-      return roomPolygons.some((polygon) => (
-        pointInPolygon(start, polygon) || pointInPolygon(end, polygon) || pointInPolygon(midpoint, polygon)
-      ));
-    })
-    .map((opening) => opening.wallId));
+  const scopedOpenings = document.openings.filter((opening) => {
+    if (!activeRoomId) return true;
+    if (opening.roomIds?.length) return opening.roomIds.includes(activeRoomId);
+    return document.walls.find((wall) => wall.id === opening.wallId)?.roomIds.includes(activeRoomId) ?? false;
+  });
   const sourceWalls = document.walls.filter((wall) => (
-    wall.roomIds.some((roomId) => roomIds.has(roomId)) || touchingOpeningWallIds.has(wall.id)
+    wall.roomIds.some((roomId) => roomIds.has(roomId))
   ));
-  const openings = document.openings.filter((opening) => (
+  const openings = scopedOpenings.filter((opening) => (
     sourceWalls.some((wall) => openingSliceOnWall(document, opening, wall) !== null)
+    || Boolean(activeRoomId && opening.roomIds?.includes(activeRoomId))
   ));
   const floors = rooms.map((room) => ({
     id: `floor-${room.id}`,
@@ -110,6 +163,7 @@ export function createSceneModel(
       const slice = openingSliceOnWall(document, opening, wall);
       return slice ? [slice] : [];
     });
+    const sideMaterialIds = wallSideMaterialIds(document, wall);
     return {
       id: wall.id,
       start: wall.start,
@@ -120,32 +174,170 @@ export function createSceneModel(
       height: wall.height,
       roomIds: wall.roomIds.filter((roomId) => roomIds.has(roomId)),
       openingIds: wallOpenings.map((opening) => opening.id),
+      materialId: sideMaterialIds[0],
+      sideMaterialIds,
       segments: createWallSegments(wall, wallOpenings),
     };
   });
   const doors = openings
     .filter((opening) => opening.kind === "door")
     .map((opening) => createDoor(document, opening));
+  const windows = openings
+    .filter((opening) => opening.kind === "window")
+    .map((opening) => createWindow(document, opening));
   const builtIns = document.builtIns
-    .filter((item) => roomIds.has(item.roomId))
+    .filter((item) => roomIds.has(item.roomId)
+      || (activeRoomId === "vorraum" && HALL_GLASS_DOOR_SIGHTLINE_IDS.has(item.id)))
     .map((item) => objectDescriptor(item, item.catalogId ?? `builtin-${item.kind}`));
   const placements = document.placements
     .filter((item) => roomIds.has(item.roomId))
     .map((item) => objectDescriptor(item, item.catalogId));
+  const fixtures = document.fixtures
+    .filter((item) => roomIds.has(item.roomId))
+    .map((item) => ({
+      id: item.id,
+      roomId: item.roomId,
+      kind: item.kind,
+      label: item.label,
+      position: [item.position.x, item.height ?? 0.3, item.position.z] as [number, number, number],
+      rotationY: -(item.rotation ?? 0) * Math.PI / 180,
+      detailProfile: item.id === "fixture-hall-panel"
+        ? "hall-distribution" as const
+        : item.id === "fixture-hall-floor-heating-panel"
+          ? "hall-revision" as const
+          : "standard" as const,
+      mountingDepth: item.id === "fixture-hall-panel" || item.id === "fixture-hall-floor-heating-panel"
+        ? 0.004
+        : 0.025,
+      surfaceOffset: item.id === "fixture-hall-panel" || item.id === "fixture-hall-floor-heating-panel"
+        ? 0.034
+        : 0,
+      source: item,
+    }));
   const bounds = boundsFromFloors(floors);
 
   return {
     floors,
     walls,
     doors,
+    windows,
     builtIns,
     placements,
+    fixtures,
     bounds,
     center: [(bounds.minX + bounds.maxX) / 2, 0, (bounds.minZ + bounds.maxZ) / 2],
   };
 }
 
-function openingSliceOnWall(
+export function derivePerspectiveCutaway(
+  scene: SceneModel,
+  camera: Point2,
+  selectedId: string | null = null,
+): PerspectiveCutaway {
+  const roomId = scene.floors.length === 1 ? scene.floors[0]?.roomId : null;
+  if (!roomId) return EMPTY_PERSPECTIVE_CUTAWAY;
+
+  const center = { x: scene.center[0], z: scene.center[2] };
+  const cameraOffset = { x: camera.x - center.x, z: camera.z - center.z };
+  const cameraDistance = Math.hypot(cameraOffset.x, cameraOffset.z);
+  if (cameraDistance <= 0.01) return EMPTY_PERSPECTIVE_CUTAWAY;
+
+  const view = { x: cameraOffset.x / cameraDistance, z: cameraOffset.z / cameraDistance };
+  const span = Math.max(scene.bounds.maxX - scene.bounds.minX, scene.bounds.maxZ - scene.bounds.minZ);
+  const nearThreshold = Math.max(0.035, span * 0.018);
+  const roomWalls = scene.walls.filter((wall) => wall.roomIds.includes(roomId));
+  const hiddenWalls = roomWalls.filter((wall) => {
+    const midpoint = {
+      x: (wall.start.x + wall.end.x) / 2 - center.x,
+      z: (wall.start.z + wall.end.z) / 2 - center.z,
+    };
+    return midpoint.x * view.x + midpoint.z * view.z > nearThreshold;
+  });
+  const hiddenWallIds = hiddenWalls.map((wall) => wall.id).sort();
+  const openDoorIds = new Set(scene.doors
+    .filter((door) => door.state === "open")
+    .map((door) => door.id));
+  const foregroundOpenDoorIds = new Set(scene.doors
+    .filter((door) => door.state === "open")
+    .filter((door) => {
+      const leafMidpoint = {
+        x: door.hinge.x + Math.cos(door.openAngle) * door.width / 2,
+        z: door.hinge.z + Math.sin(door.openAngle) * door.width / 2,
+      };
+      const relative = {
+        x: leafMidpoint.x - center.x,
+        z: leafMidpoint.z - center.z,
+      };
+      const forwardDistance = relative.x * view.x + relative.z * view.z;
+      if (forwardDistance <= nearThreshold || forwardDistance >= cameraDistance) return false;
+
+      const sightlineDistance = Math.abs(relative.x * view.z - relative.z * view.x);
+      return sightlineDistance <= door.width / 2 + 0.08;
+    })
+    .map((door) => door.id));
+  const hiddenOpeningIds = [...new Set([
+    ...hiddenWalls
+      .flatMap((wall) => wall.openingIds)
+      .filter((openingId) => !openDoorIds.has(openingId)),
+    ...foregroundOpenDoorIds,
+  ])].sort();
+
+  const objects = [...scene.builtIns, ...scene.placements];
+  const hiddenObjectIds = objects
+    .filter((item) => item.id !== selectedId)
+    .filter((item) => !(
+      roomId === "vorraum"
+      && item.id === "hall-tejo-wardrobe"
+      && foregroundOpenDoorIds.size > 0
+    ))
+    .filter((item) => {
+      const relative = {
+        x: item.position[0] - center.x,
+        z: item.position[2] - center.z,
+      };
+      const forwardDistance = relative.x * view.x + relative.z * view.z;
+      if (forwardDistance <= nearThreshold || forwardDistance >= cameraDistance) return false;
+
+      const footprintRadius = Math.hypot(item.size[0], item.size[2]) / 2;
+      const sightlineDistance = Math.abs(relative.x * view.z - relative.z * view.x);
+      const blocksRoomCenter = item.size[1] >= 1.2 && sightlineDistance <= footprintRadius + 0.14;
+      const hugsHiddenWall = hiddenWalls.some((wall) => (
+        pointToSegmentDistance(
+          { x: item.position[0], z: item.position[2] },
+          wall.start,
+          wall.end,
+        ) <= footprintRadius + wall.thickness / 2 + 0.08
+      ));
+      const wallMounted = Math.min(item.size[0], item.size[2]) <= 0.24;
+      return blocksRoomCenter || (hugsHiddenWall && (item.size[1] >= 1.2 || wallMounted));
+    })
+    .map((item) => item.id)
+    .sort();
+
+  const hiddenFixtureIds = scene.fixtures
+    .filter((fixture) => hiddenWalls.some((wall) => (
+      pointToSegmentDistance(
+        { x: fixture.position[0], z: fixture.position[2] },
+        wall.start,
+        wall.end,
+      ) <= wall.thickness / 2 + 0.12
+    )))
+    .map((fixture) => fixture.id)
+    .sort();
+
+  return { hiddenWallIds, hiddenOpeningIds, hiddenObjectIds, hiddenFixtureIds };
+}
+
+function wallSideMaterialIds(document: PlannerDocumentV3, wall: PlannerWall): [string, string] {
+  const positiveRoom = document.rooms.find((room) => room.boundary.some((ref) => ref.wallId === wall.id && ref.direction === 1));
+  const negativeRoom = document.rooms.find((room) => room.boundary.some((ref) => ref.wallId === wall.id && ref.direction === -1));
+  const fallback = positiveRoom?.surfaces.walls ?? negativeRoom?.surfaces.walls ?? "paint-warm-white";
+  return [positiveRoom?.surfaces.walls ?? fallback, negativeRoom?.surfaces.walls ?? fallback];
+}
+
+const MAX_PARALLEL_DOOR_FACE_DISTANCE = 0.22;
+
+export function openingSliceOnWall(
   document: PlannerDocumentV3,
   opening: PlannerOpening,
   wall: PlannerWall,
@@ -154,10 +346,22 @@ function openingSliceOnWall(
   const length = distance(wall.start, wall.end);
   if (length <= 0.001) return null;
   const tangent = { x: (wall.end.x - wall.start.x) / length, z: (wall.end.z - wall.start.z) / length };
-  const collinear = [openingLine.start, openingLine.end].every((point) => Math.abs(
+  const openingLength = distance(openingLine.start, openingLine.end);
+  if (openingLength <= 0.001) return null;
+  const openingTangent = {
+    x: (openingLine.end.x - openingLine.start.x) / openingLength,
+    z: (openingLine.end.z - openingLine.start.z) / openingLength,
+  };
+  const parallel = Math.abs(tangent.x * openingTangent.z - tangent.z * openingTangent.x) <= 0.012;
+  if (!parallel) return null;
+  const faceDistance = Math.max(...[openingLine.start, openingLine.end].map((point) => Math.abs(
     (point.x - wall.start.x) * tangent.z - (point.z - wall.start.z) * tangent.x
-  ) <= 0.012);
-  if (!collinear) return null;
+  )));
+  const directlyOnWall = faceDistance <= 0.012;
+  const relatedDoorFace = (opening.kind === "door" || opening.kind === "passage")
+    && wall.roomIds.some((roomId) => opening.roomIds?.includes(roomId))
+    && faceDistance <= MAX_PARALLEL_DOOR_FACE_DISTANCE;
+  if (!directlyOnWall && !relatedDoorFace) return null;
   const projected = [openingLine.start, openingLine.end].map((point) => (
     (point.x - wall.start.x) * tangent.x + (point.z - wall.start.z) * tangent.z
   ));
@@ -229,11 +433,11 @@ function segment(
 }
 
 function createDoor(document: PlannerDocumentV3, opening: PlannerOpening): SceneDoor {
-  const { start, end } = openingSegment(document, opening);
-  const hinge = opening.hinge === "end" ? end : start;
-  const leafEnd = opening.hinge === "end" ? start : end;
-  const baseAngle = Math.atan2(leafEnd.z - hinge.z, leafEnd.x - hinge.x);
-  const direction = opening.hinge === "end" ? -1 : 1;
+  const { hinge, closedEnd, openEnd } = doorPose(document, opening.id);
+  const line = openingSegment(document, opening);
+  const baseAngle = Math.atan2(closedEnd.z - hinge.z, closedEnd.x - hinge.x);
+  const openAngle = Math.atan2(openEnd.z - hinge.z, openEnd.x - hinge.x);
+  const openDelta = Math.atan2(Math.sin(openAngle - baseAngle), Math.cos(openAngle - baseAngle));
   return {
     id: opening.id,
     label: opening.label,
@@ -242,20 +446,63 @@ function createDoor(document: PlannerDocumentV3, opening: PlannerOpening): Scene
     width: opening.width,
     height: opening.height,
     baseAngle,
-    openAngle: baseAngle + direction * opening.swingDegrees * Math.PI / 180,
-    materialId: "door-oak",
+    openAngle,
+    displayOpenAngle: baseAngle + openDelta * (opening.visualOpenFraction ?? 1),
+    materialId: "white-matte",
+    frameCenter: {
+      x: (line.start.x + line.end.x) / 2,
+      z: (line.start.z + line.end.z) / 2,
+    },
+    frameAngle: Math.atan2(line.end.z - line.start.z, line.end.x - line.start.x),
+    visualStyle: opening.visualStyle
+      ?? (opening.id.includes("loggia") || opening.id.includes("balcony") ? "glass-clear" : "solid-white"),
+    detailProfile: opening.id === "apartment-entry-door"
+      ? "entry-security"
+      : opening.id === "hall-wc-door"
+        ? "vented"
+        : "standard",
+    handleSides: "both",
+    leafOutlineSides: "both",
+  };
+}
+
+function createWindow(document: PlannerDocumentV3, opening: PlannerOpening): SceneWindow {
+  const line = openingSegment(document, opening);
+  const width = distance(line.start, line.end);
+  return {
+    id: opening.id,
+    label: opening.label,
+    position: [
+      (line.start.x + line.end.x) / 2,
+      opening.sill + opening.height / 2,
+      (line.start.z + line.end.z) / 2,
+    ],
+    width,
+    height: opening.height,
+    sill: opening.sill,
+    rotationY: -Math.atan2(line.end.z - line.start.z, line.end.x - line.start.x),
+    mullions: width > 1.15 ? 2 : 1,
   };
 }
 
 function objectDescriptor<T extends PlannerBuiltIn | PlannerPlacement>(item: T, catalogId: string): SceneObject<T> {
+  // Lift the plush Zimmer-1 rug slightly so its pile does not clip into the floor.
+  const visualLift = catalogId === "rug-temu-rabbit-ivory-100x180" ? 0.012 : 0;
   return {
     id: item.id,
     roomId: item.roomId,
     catalogId,
-    position: [item.position.x, ("elevation" in item ? item.elevation ?? 0 : 0) + item.size.height / 2, item.position.z],
+    position: [item.position.x, ("elevation" in item ? item.elevation ?? 0 : 0) + visualLift + item.size.height / 2, item.position.z],
     size: [item.size.width, item.size.height, item.size.depth],
     rotationY: -item.rotation * Math.PI / 180,
     materialId: item.materialVariants?.main ?? item.materialVariants?.color ?? "object-neutral",
+    renderProfile: catalogId === "sanitary-bathtub"
+      ? "bathtub"
+      : catalogId === "appliance-washer"
+        ? "washer"
+        : catalogId === "sanitary-wall-wc"
+          ? "wall-wc"
+          : "box",
     source: item,
   };
 }
@@ -277,6 +524,22 @@ function uniqueSorted(values: number[]) {
 
 function distance(left: Point2, right: Point2) {
   return Math.hypot(right.x - left.x, right.z - left.z);
+}
+
+function pointToSegmentDistance(point: Point2, start: Point2, end: Point2) {
+  const dx = end.x - start.x;
+  const dz = end.z - start.z;
+  const lengthSquared = dx * dx + dz * dz;
+  if (lengthSquared <= 0.000001) return distance(point, start);
+  const projection = clamp(
+    ((point.x - start.x) * dx + (point.z - start.z) * dz) / lengthSquared,
+    0,
+    1,
+  );
+  return Math.hypot(
+    point.x - (start.x + dx * projection),
+    point.z - (start.z + dz * projection),
+  );
 }
 
 function clamp(value: number, minimum: number, maximum: number) {

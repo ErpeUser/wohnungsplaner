@@ -1,5 +1,6 @@
 import type { AutosaveStatus } from "../store/planner-store.ts";
 import type { PlannerDocumentV3 } from "../domain/types.ts";
+import { getDocumentWnfArea } from "../domain/apartment-evidence.ts";
 
 const SAVE_LABELS: Record<AutosaveStatus, string> = {
   idle: "Bereit",
@@ -21,9 +22,7 @@ export function PlannerStatus({
   warningCount?: number;
   hasError?: boolean;
 }) {
-  const wnf = document.rooms
-    .filter((room) => room.includedInWnf)
-    .reduce((sum, room) => sum + room.area, 0);
+  const wnf = getDocumentWnfArea(document);
   return (
     <footer className="planner-status" role="status" aria-live="polite">
       <span className={`planner-status__dot planner-status__dot--${autosaveStatus}`} aria-hidden="true" />

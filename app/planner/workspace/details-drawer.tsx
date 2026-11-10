@@ -1,4 +1,5 @@
 import type { PlannerDocumentV3 } from "../domain/types.ts";
+import { OUTDOOR_ROOM_IDS, getDocumentWnfArea } from "../domain/apartment-evidence.ts";
 
 type DetailsDrawerProps = {
   document: PlannerDocumentV3;
@@ -6,9 +7,10 @@ type DetailsDrawerProps = {
 };
 
 export function DetailsDrawer({ document, onClose }: DetailsDrawerProps) {
-  const wnf = document.rooms
-    .filter((room) => room.includedInWnf)
-    .reduce((sum, room) => sum + room.area, 0);
+  const outdoorIds = new Set<string>(OUTDOOR_ROOM_IDS);
+  const interiorRooms = document.rooms.filter((room) => !outdoorIds.has(room.id));
+  const outdoorRooms = document.rooms.filter((room) => outdoorIds.has(room.id));
+  const wnf = getDocumentWnfArea(document);
 
   return (
     <aside id="planner-details" className="planner-details" aria-label="Plandetails">
@@ -18,14 +20,21 @@ export function DetailsDrawer({ document, onClose }: DetailsDrawerProps) {
       </header>
       <dl>
         <div><dt>Wohnnutzfläche</dt><dd>{wnf.toLocaleString("de-AT", { minimumFractionDigits: 2 })} m²</dd></div>
-        <div><dt>Räume</dt><dd>{document.rooms.length}</dd></div>
+        <div><dt>Innenräume</dt><dd>{interiorRooms.length}</dd></div>
+        <div><dt>Außenbereiche</dt><dd>{outdoorRooms.length}</dd></div>
         <div><dt>Öffnungen</dt><dd>{document.openings.length}</dd></div>
         <div><dt>Bewegliche Objekte</dt><dd>{document.placements.length}</dd></div>
         <div><dt>Datenmodell</dt><dd>Version {document.schemaVersion}</dd></div>
       </dl>
       <section>
         <h3>Planstatus</h3>
-        <p>Maße, Räume, Türen und feste Einbauten stammen aus dem gemeinsamen V3-Wohnungsmodell.</p>
+        <p>Der offizielle Vermietungsplan ist für Flächen, Raumanzahl und Türen maßgeblich. Die Wohnküche ist vollständig in den 21,82 m² enthalten.</p>
+        <ul>
+          {document.rooms.map((room) => (
+            <li key={room.id}>{room.name} · {room.area.toLocaleString("de-AT", { minimumFractionDigits: 2 })} m²</li>
+          ))}
+        </ul>
+        <p>Balkon und Loggia werden entsprechend dem realen Zustand als ein zusammenhängender Außenbereich gezeigt. Für die WNF bleiben davon die offiziell ausgewiesenen 2,23 m² berücksichtigt.</p>
       </section>
     </aside>
   );

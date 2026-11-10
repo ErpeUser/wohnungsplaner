@@ -20,16 +20,49 @@ vi.mock("react-konva", () => ({
 vi.mock("konva", () => ({ default: { pixelRatio: 1 } }));
 
 vi.mock("../app/planner/scene-3d/planner-3d.tsx", () => ({
-  Planner3D: ({ onReturn2D, cameraMode }: { onReturn2D(): void; cameraMode: string }) => (
-    <div data-testid="mock-planner-3d" data-camera-mode={cameraMode}><button type="button" onClick={onReturn2D}>Zu 2D</button></div>
+  Planner3D: ({ onReturn2D, onToggleDoor, cameraMode }: { onReturn2D(): void; onToggleDoor(id: string): void; cameraMode: string }) => (
+    <div data-testid="mock-planner-3d" data-camera-mode={cameraMode}>
+      <button type="button" onClick={onReturn2D}>Zu 2D</button>
+      <button type="button" aria-label="3D-Türgriff Zimmer 1" onClick={() => onToggleDoor("zimmer1-door")}>Griff</button>
+    </div>
   ),
 }));
 
 import { DEFAULT_APARTMENT_DOCUMENT } from "../app/planner/domain/apartment-v3.ts";
 import { createPlannerStore } from "../app/planner/store/planner-store.ts";
 import { PlannerWorkspace } from "../app/planner/workspace/planner-workspace.tsx";
+import { ShoppingListDrawer } from "../app/planner/workspace/shopping-list-drawer.tsx";
 
 describe("PlannerWorkspace", () => {
+  test("lists three Kaleo chairs with their verified product dimensions", () => {
+    render(<ShoppingListDrawer onClose={() => undefined} />);
+
+    const heading = screen.getByRole("heading", { name: "Armlehnstuhl Kaleo Chenille Beige" });
+    const product = heading.closest("article");
+    assert.ok(product);
+    assert.match(product.textContent ?? "", /Wohnküche.*1634004202/);
+    assert.match(product.textContent ?? "", /63.*87.*64 cm.*Sitzhöhe 50 cm/);
+    assert.match(product.textContent ?? "", /3 Stück/);
+    assert.equal(
+      product.querySelector("a")?.getAttribute("href"),
+      "https://www.moebelix.at/p/livetastic-armlehnstuhl-kaleo-chenille-beige-b-63-cm-001634004202",
+    );
+  });
+
+  test("lists the Cloudy bed with product dimensions, room, and planning price", () => {
+    render(<ShoppingListDrawer onClose={() => undefined} />);
+
+    const heading = screen.getByRole("heading", { name: "Polsterbett Cloudy" });
+    const product = heading.closest("article");
+    assert.ok(product);
+    assert.match(product.textContent ?? "", /Zimmer 1.*1523001620/);
+    assert.match(product.textContent ?? "", /154.*229.*106 cm.*120.*200 cm/);
+    assert.equal(
+      product.querySelector("a")?.getAttribute("href"),
+      "https://www.moebelix.at/p/luca-bessoni-polsterbett-cloudy-creme-lf-120x200-cm-001523001620",
+    );
+  });
+
   test("offers compact room and 2D/3D controls", async () => {
     const user = userEvent.setup();
     const store = createPlannerStore({ initialDocument: DEFAULT_APARTMENT_DOCUMENT });
@@ -47,6 +80,15 @@ describe("PlannerWorkspace", () => {
     await user.click(screen.getByRole("button", { name: "Begehen" }));
     assert.equal(store.getState().cameraMode, "walk");
     assert.equal(screen.getByTestId("mock-planner-3d").getAttribute("data-camera-mode"), "walk");
+  });
+
+  test("groups seven interior rooms and one connected outdoor area", () => {
+    const store = createPlannerStore({ initialDocument: DEFAULT_APARTMENT_DOCUMENT });
+    render(<PlannerWorkspace store={store} />);
+
+    assert.equal(screen.getByRole("group", { name: "Innenräume" }).querySelectorAll("option").length, 7);
+    assert.equal(screen.getByRole("group", { name: "Außenbereich" }).querySelectorAll("option").length, 1);
+    expect(screen.getByRole("option", { name: /Balkon \/ Loggia.*6,03 m²/ })).toBeTruthy();
   });
 
   test("collapses panels and exposes truthful undo and redo states", async () => {
@@ -94,7 +136,10 @@ describe("PlannerWorkspace", () => {
 
     const trigger = screen.getByRole("button", { name: "Details öffnen" });
     await user.click(trigger);
-    assert.ok(screen.getByRole("complementary", { name: "Plandetails" }));
+    const details = screen.getByRole("complementary", { name: "Plandetails" });
+    assert.match(details.textContent ?? "", /Innenräume7/);
+    assert.match(details.textContent ?? "", /Außenbereiche1/);
+    assert.match(details.textContent ?? "", /Wohnküche.*21,82 m²/);
     await user.click(screen.getByRole("button", { name: "Details schließen" }));
     assert.equal(screen.queryByRole("complementary", { name: "Plandetails" }), null);
     assert.equal(document.activeElement, trigger);
@@ -142,6 +187,10 @@ describe("PlannerWorkspace", () => {
     await user.click(screen.getByRole("button", { name: `${door.label} öffnen` }));
     assert.equal(store.getState().document.doorStates[door.id], "open");
     assert.ok(screen.getByRole("button", { name: `${door.label} schließen` }));
+
+    await user.click(screen.getByRole("button", { name: "3D-Ansicht" }));
+    await user.click(await screen.findByRole("button", { name: "3D-Türgriff Zimmer 1" }));
+    assert.equal(store.getState().document.doorStates[door.id], "closed");
   });
 
   test("supports standard undo and redo keyboard shortcuts", async () => {

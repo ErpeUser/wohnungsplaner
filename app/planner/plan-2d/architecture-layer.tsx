@@ -1,6 +1,6 @@
-import { Arc, Group, Layer, Line, Rect, Text } from "react-konva";
+import { Arc, Circle, Group, Layer, Line, Text } from "react-konva";
 
-import type { PlanOpeningDescriptor, PlanScene } from "./plan-scene.ts";
+import type { PlanObjectDescriptor, PlanOpeningDescriptor, PlanScene } from "./plan-scene.ts";
 
 const FLOOR_COLORS: Record<string, string> = {
   "floor-oak-herringbone": "#c99a69",
@@ -8,9 +8,12 @@ const FLOOR_COLORS: Record<string, string> = {
   "floor-tile-light": "#dedbd2",
   "floor-tile-grey": "#c9cac5",
   "floor-balcony": "#b9b6a9",
+  "parquet-oak-narrow": "#c79769",
+  "porcelain-light-taupe": "#c8c1b5",
+  "balcony-floor-beige": "#c6b386",
 };
 
-export function ArchitectureLayer({ scene }: { scene: PlanScene }) {
+export function ArchitectureLayer({ scene, onToggleDoor }: { scene: PlanScene; onToggleDoor?(openingId: string): void }) {
   return (
     <Layer listening>
       {scene.rooms.map((room) => (
@@ -46,31 +49,38 @@ export function ArchitectureLayer({ scene }: { scene: PlanScene }) {
           lineJoin="miter"
         />
       ))}
-      {scene.openings.map((opening) => <OpeningShape key={opening.id} opening={opening} />)}
+      {scene.openings.map((opening) => <OpeningShape key={opening.id} opening={opening} onToggleDoor={onToggleDoor} />)}
       {scene.builtIns.map((item) => {
         const box = polygonBounds(item.points);
+        const showLabel = !item.catalogId?.startsWith("floor-zone-")
+          && !item.catalogId?.startsWith("zimmer1-")
+          && item.catalogId !== "wall-finish-taupe"
+          && item.catalogId !== "wall-finish-vintage-fabric-wallpaper"
+          && !item.catalogId?.includes("backsplash")
+          && item.catalogId !== "appliance-washer"
+          && item.catalogId !== "sanitary-washbasin"
+          && (box.maxX - box.minX) * (box.maxZ - box.minZ) > 0.08;
         return (
           <Group key={item.id}>
-            <Rect
-              x={box.minX}
-              y={box.minZ}
-              width={box.maxX - box.minX}
-              height={box.maxZ - box.minZ}
-              fill={item.kind === "kitchen" ? "#ebe7de" : "#d8e1df"}
+            <Line
+              points={flatten(item.points)}
+              closed
+              fill={planObjectColor(item.catalogId, item.kind)}
               stroke="#506366"
               strokeWidth={0.025}
-              dash={[0.08, 0.04]}
+              dash={item.catalogId?.startsWith("floor-zone-") ? undefined : [0.08, 0.04]}
             />
-            <Text
+            <BuiltInDetail item={item} />
+            {showLabel ? <Text
               x={box.minX + 0.03}
               y={box.minZ + 0.03}
               width={Math.max(0.2, box.maxX - box.minX - 0.06)}
-              text={item.label}
+              text={planObjectLabel(item)}
               fontFamily="Arial"
               fontSize={0.08}
               fill="#405255"
               listening={false}
-            />
+            /> : null}
           </Group>
         );
       })}
@@ -78,13 +88,18 @@ export function ArchitectureLayer({ scene }: { scene: PlanScene }) {
   );
 }
 
-function OpeningShape({ opening }: { opening: PlanOpeningDescriptor }) {
+function OpeningShape({ opening, onToggleDoor }: { opening: PlanOpeningDescriptor; onToggleDoor?(openingId: string): void }) {
   const common = [opening.start.x, opening.start.z, opening.end.x, opening.end.z];
   if (opening.kind === "window") {
+    const normal = segmentNormal(opening.start, opening.end, 0.038);
     return (
       <Group>
-        <Line points={common} stroke="#f7f5ef" strokeWidth={0.16} />
-        <Line points={common} stroke="#5f858c" strokeWidth={0.055} />
+        <Line points={common} stroke="#f7f5ef" strokeWidth={0.18} />
+        <Line points={common} stroke="#9fd0dc" strokeWidth={0.085} opacity={0.92} />
+        <Line points={[opening.start.x + normal.x, opening.start.z + normal.z, opening.end.x + normal.x, opening.end.z + normal.z]} stroke="#f8faf8" strokeWidth={0.028} />
+        <Line points={[opening.start.x - normal.x, opening.start.z - normal.z, opening.end.x - normal.x, opening.end.z - normal.z]} stroke="#f8faf8" strokeWidth={0.028} />
+        <Circle x={opening.start.x} y={opening.start.z} radius={0.055} fill="#f8faf8" stroke="#5f858c" strokeWidth={0.014} />
+        <Circle x={opening.end.x} y={opening.end.z} radius={0.055} fill="#f8faf8" stroke="#5f858c" strokeWidth={0.014} />
       </Group>
     );
   }
@@ -95,14 +110,26 @@ function OpeningShape({ opening }: { opening: PlanOpeningDescriptor }) {
   const hinge = opening.hinge === "end" ? opening.end : opening.start;
   const leafEnd = opening.hinge === "end" ? opening.start : opening.end;
   const displayedLeafEnd = opening.state === "open"
-    ? rotateAround(leafEnd, hinge, (opening.hinge === "end" ? -1 : 1) * opening.swingDegrees)
+    ? rotateAround(leafEnd, hinge, opening.swingDirection * opening.swingDegrees)
     : leafEnd;
   const baseAngle = Math.atan2(leafEnd.z - hinge.z, leafEnd.x - hinge.x) * 180 / Math.PI;
-  const arcRotation = opening.hinge === "end" ? baseAngle - opening.swingDegrees : baseAngle;
+  const arcRotation = opening.swingDirection === 1 ? baseAngle : baseAngle - opening.swingDegrees;
+  const handle = {
+    x: hinge.x + (displayedLeafEnd.x - hinge.x) * 0.84,
+    z: hinge.z + (displayedLeafEnd.z - hinge.z) * 0.84,
+  };
+  const glassDoor = opening.visualStyle === "glass-clear"
+    || opening.visualStyle === "glass-frosted"
+    || opening.id.includes("loggia")
+    || opening.id.includes("balcony");
   return (
-    <Group>
-      <Line points={common} stroke="#f7f5ef" strokeWidth={0.17} />
-      <Line points={[hinge.x, hinge.z, displayedLeafEnd.x, displayedLeafEnd.z]} stroke="#536568" strokeWidth={0.035} />
+    <Group
+      onClick={() => onToggleDoor?.(opening.id)}
+      onTap={() => onToggleDoor?.(opening.id)}
+    >
+      <Line points={common} stroke="#f7f5ef" strokeWidth={0.2} />
+      <Line points={[hinge.x, hinge.z, displayedLeafEnd.x, displayedLeafEnd.z]} stroke={glassDoor ? "#8ac2cf" : "#26383b"} strokeWidth={glassDoor ? 0.085 : 0.055} />
+      {glassDoor ? <Line points={[hinge.x, hinge.z, displayedLeafEnd.x, displayedLeafEnd.z]} stroke="#f8faf8" strokeWidth={0.025} /> : null}
       <Arc
         x={hinge.x}
         y={hinge.z}
@@ -114,8 +141,108 @@ function OpeningShape({ opening }: { opening: PlanOpeningDescriptor }) {
         opacity={0.7}
         listening={false}
       />
+      <Circle
+        x={handle.x}
+        y={handle.z}
+        radius={0.07}
+        fill="#d8aa62"
+        stroke="#26383b"
+        strokeWidth={0.018}
+        hitStrokeWidth={0.16}
+        aria-label={`Türgriff ${opening.label} ${opening.state === "open" ? "schließen" : "öffnen"}`}
+      />
     </Group>
   );
+}
+
+function BuiltInDetail({ item }: { item: PlanObjectDescriptor }) {
+  const id = item.catalogId ?? "";
+  const box = polygonBounds(item.points);
+  const width = box.maxX - box.minX;
+  const depth = box.maxZ - box.minZ;
+  if (id === "floor-zone-kitchen") {
+    const tileSize = 0.12;
+    const verticalLines = Math.floor(width / tileSize);
+    const horizontalLines = Math.floor(depth / tileSize);
+    return (
+      <Group listening={false} opacity={0.6}>
+        {Array.from({ length: verticalLines }, (_, index) => {
+          const x = box.minX + tileSize * (index + 1);
+          return <Line key={`v-${index}`} points={[x, box.minZ, x, box.maxZ]} stroke="#c8c7c1" strokeWidth={0.008} />;
+        })}
+        {Array.from({ length: horizontalLines }, (_, index) => {
+          const z = box.minZ + tileSize * (index + 1);
+          return <Line key={`h-${index}`} points={[box.minX, z, box.maxX, z]} stroke="#c8c7c1" strokeWidth={0.008} />;
+        })}
+      </Group>
+    );
+  }
+  if (id === "kitchen-base" || id === "kitchen-upper" || id === "kitchen-corner-base") {
+    const longX = width >= depth;
+    const length = longX ? width : depth;
+    const count = Math.max(1, Math.round(length / 0.55));
+    return (
+      <Group listening={false}>
+        {Array.from({ length: count - 1 }, (_, index) => {
+          const ratio = (index + 1) / count;
+          return longX
+            ? <Line key={index} points={[box.minX + width * ratio, box.minZ, box.minX + width * ratio, box.maxZ]} stroke="#a9a39a" strokeWidth={0.018} />
+            : <Line key={index} points={[box.minX, box.minZ + depth * ratio, box.maxX, box.minZ + depth * ratio]} stroke="#a9a39a" strokeWidth={0.018} />;
+        })}
+      </Group>
+    );
+  }
+  if (id === "kitchen-hob") {
+    return <Group listening={false}>{[[-0.2, -0.2], [0.2, -0.2], [-0.2, 0.2], [0.2, 0.2]].map(([x, z], index) => <Circle key={index} x={(box.minX + box.maxX) / 2 + x * width} y={(box.minZ + box.maxZ) / 2 + z * depth} radius={Math.min(width, depth) * 0.12} stroke="#d4d8d5" strokeWidth={0.018} />)}</Group>;
+  }
+  if (id === "kitchen-sink") {
+    return <Line points={[box.minX + width * 0.14, box.minZ + depth * 0.16, box.maxX - width * 0.14, box.minZ + depth * 0.16, box.maxX - width * 0.14, box.maxZ - depth * 0.16, box.minX + width * 0.14, box.maxZ - depth * 0.16]} closed stroke="#6f8588" strokeWidth={0.025} listening={false} />;
+  }
+  if (id === "kitchen-corner-upper") {
+    return <Group listening={false}>{[0.25, 0.5, 0.75].map((ratio) => <Line key={ratio} points={[box.minX, box.minZ + depth * ratio, box.maxX, box.minZ + depth * ratio]} stroke="#745038" strokeWidth={0.022} />)}</Group>;
+  }
+  if (id === "living-tv") {
+    return <Line points={[box.minX + width * 0.06, box.minZ + depth * 0.15, box.maxX - width * 0.06, box.maxZ - depth * 0.15]} stroke="#9fa9a9" strokeWidth={0.025} listening={false} />;
+  }
+  if (id === "appliance-washer") {
+    const radius = Math.min(width, depth) * 0.32;
+    return <Circle x={(box.minX + box.maxX) / 2} y={(box.minZ + box.maxZ) / 2} radius={radius} stroke="#75878a" strokeWidth={0.025} listening={false} />;
+  }
+  if (id === "bath-basin-cabinet-scout") {
+    return <Group listening={false}><Line points={[(box.minX + box.maxX) / 2, box.minZ, (box.minX + box.maxX) / 2, box.maxZ]} stroke="#817568" strokeWidth={0.018} /><Line points={[box.minX + width * 0.18, box.minZ + depth * 0.18, box.maxX - width * 0.18, box.minZ + depth * 0.18]} stroke="#282c2d" strokeWidth={0.025} /></Group>;
+  }
+  if (id === "bath-washer-cabinet-scout") {
+    return <Group listening={false}><Line points={[box.minX + width * 0.12, box.minZ, box.minX + width * 0.12, box.maxZ]} stroke="#817568" strokeWidth={0.025} /><Line points={[box.maxX - width * 0.12, box.minZ, box.maxX - width * 0.12, box.maxZ]} stroke="#817568" strokeWidth={0.025} /></Group>;
+  }
+  if (id === "sanitary-bathtub") {
+    return <Line points={[box.minX + width * 0.1, box.minZ + depth * 0.08, box.maxX - width * 0.1, box.minZ + depth * 0.08, box.maxX - width * 0.1, box.maxZ - depth * 0.08, box.minX + width * 0.1, box.maxZ - depth * 0.08]} closed stroke="#7f9699" strokeWidth={0.025} listening={false} />;
+  }
+  if (id === "bath-round-mirror") {
+    const centerX = (box.minX + box.maxX) / 2;
+    const centerY = (box.minZ + box.maxZ) / 2;
+    return <Group listening={false}>
+      <Circle x={centerX} y={centerY} radius={width * 0.5 + 0.035} stroke="#f2c77f" strokeWidth={0.018} opacity={0.9} />
+      <Circle x={centerX} y={centerY} radius={width * 0.47} stroke="#cfdfe1" strokeWidth={0.018} fill="#dbe5e6" />
+    </Group>;
+  }
+  if (id === "bath-mat") {
+    return <Line points={[box.minX, box.minZ, box.maxX, box.minZ, box.maxX, box.maxZ, box.minX, box.maxZ]} closed stroke="#b79a78" strokeWidth={0.03} dash={[0.06, 0.025]} listening={false} />;
+  }
+  if (id === "bath-shower-rod") {
+    return <Line points={[box.minX, (box.minZ + box.maxZ) / 2, box.maxX, (box.minZ + box.maxZ) / 2]} stroke="#8b8c88" strokeWidth={0.04} listening={false} />;
+  }
+  if (id === "bath-shower-curtain") {
+    return <Group listening={false}><Line points={[box.minX, box.minZ, box.maxX, box.minZ, box.maxX, box.maxZ, box.minX, box.maxZ]} closed stroke="#d8cbb9" strokeWidth={0.025} fill="#eee6d9" opacity={0.78} /></Group>;
+  }
+  if (id === "sanitary-wall-wc") {
+    return <Circle x={(box.minX + box.maxX) / 2} y={(box.minZ + box.maxZ) / 2} radius={Math.min(width, depth) * 0.3} stroke="#7f9699" strokeWidth={0.025} listening={false} />;
+  }
+  return null;
+}
+
+function segmentNormal(start: { x: number; z: number }, end: { x: number; z: number }, amount: number) {
+  const length = Math.hypot(end.x - start.x, end.z - start.z) || 1;
+  return { x: -(end.z - start.z) / length * amount, z: (end.x - start.x) / length * amount };
 }
 
 function rotateAround(point: { x: number; z: number }, origin: { x: number; z: number }, degrees: number) {
@@ -150,4 +277,33 @@ function polygonBounds(points: Array<{ x: number; z: number }>) {
 
 function formatArea(area: number) {
   return `${area.toLocaleString("de-AT", { maximumFractionDigits: 2 })} m²`;
+}
+
+function planObjectLabel(item: PlanObjectDescriptor) {
+  if (item.catalogId === "bath-basin-cabinet-scout") return "Scout 60";
+  if (item.catalogId === "bath-washer-cabinet-scout") return "Scout 63";
+  return item.label;
+}
+
+function planObjectColor(catalogId: string | undefined, kind: string) {
+  if (catalogId === "floor-zone-kitchen") return "#e8e7e2";
+  if (catalogId === "living-slat-wall" || catalogId === "kitchen-backsplash-oak") return "#98613a";
+  if (catalogId === "living-moss-panel") return "#405539";
+  if (catalogId === "bath-basin-cabinet-scout" || catalogId === "bath-washer-cabinet-scout") return "#cfc3b2";
+  if (catalogId === "zimmer1-desk-mirror") return "#cbdadd";
+  if (catalogId === "zimmer1-wall-art-pair") return "#c99d68";
+  if (catalogId === "zimmer1-entry-slim-art") return "#c99d68";
+  if (catalogId === "zimmer1-headboard-led") return "#f2bd78";
+  if (catalogId === "zimmer1-headboard-sconces") return "#c89d62";
+  if (catalogId === "zimmer1-layered-curtain") return "#c9b6a4";
+  if (catalogId.startsWith("zimmer1-desk-shelf-") || catalogId === "zimmer1-entry-niche") return "#c99d68";
+  if (catalogId === "zimmer1-wardrobe-top-decor") return "#c6ae8e";
+  if (catalogId === "zimmer1-desk-accessories" || catalogId === "zimmer1-nightstand-decor") return "#d7c8b4";
+  if (catalogId === "vorraum-wall-decor") return "#c6ae8e";
+  if (catalogId === "wall-finish-taupe") return "#B4A495";
+  if (catalogId === "wall-finish-vintage-fabric-wallpaper") return "#b7a794";
+  if (catalogId === "living-tv" || catalogId === "living-floating-cabinet" || catalogId === "kitchen-worktop") return "#171919";
+  if (kind === "kitchen") return "#ebe7de";
+  if (kind === "sanitary") return "#e7efed";
+  return "#d8e1df";
 }

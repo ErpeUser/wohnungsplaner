@@ -14,6 +14,7 @@ type PlannerToolbarProps = {
   catalogOpen: boolean;
   inspectorOpen: boolean;
   detailsOpen: boolean;
+  shoppingOpen: boolean;
   detailsButtonRef: RefObject<HTMLButtonElement | null>;
   exportButtonRef: RefObject<HTMLButtonElement | null>;
   onRoomChange(roomId: string | null): void;
@@ -24,6 +25,7 @@ type PlannerToolbarProps = {
   onToggleCatalog(): void;
   onToggleInspector(): void;
   onToggleDetails(): void;
+  onToggleShopping(): void;
   onExport(): void;
 };
 
@@ -37,6 +39,7 @@ export function PlannerToolbar({
   catalogOpen,
   inspectorOpen,
   detailsOpen,
+  shoppingOpen,
   detailsButtonRef,
   exportButtonRef,
   onRoomChange,
@@ -47,6 +50,7 @@ export function PlannerToolbar({
   onToggleCatalog,
   onToggleInspector,
   onToggleDetails,
+  onToggleShopping,
   onExport,
 }: PlannerToolbarProps) {
   return (
@@ -140,6 +144,15 @@ export function PlannerToolbar({
           onClick={onToggleDetails}
         >
           Details
+        </button>
+        <button
+          type="button"
+          aria-expanded={shoppingOpen}
+          aria-controls="planner-shopping-list"
+          aria-label="Einkaufsliste öffnen"
+          onClick={onToggleShopping}
+        >
+          Einkaufsliste
         </button>
         <button
           ref={exportButtonRef}

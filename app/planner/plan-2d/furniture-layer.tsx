@@ -2,7 +2,7 @@
 
 import Konva from "konva";
 import { useEffect, useRef } from "react";
-import { Circle, Group, Layer, Line, Rect, Text, Transformer } from "react-konva";
+import { Circle, Group, Layer, Line, Path, Rect, Text, Transformer } from "react-konva";
 
 import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
 import type { CommandResult } from "../domain/commands.ts";
@@ -215,6 +215,7 @@ function FurnitureSymbol({
     stroke: "#5f554b",
     strokeWidth: 0.025,
   };
+  const materialId = placement.materialVariants?.main;
 
   if (symbol === "plant" || symbol === "light") {
     return (
@@ -225,13 +226,421 @@ function FurnitureSymbol({
     );
   }
 
+  if (placement.catalogId === "dining-table-bozan-110") {
+    const radius = Math.min(width, depth) / 2;
+    return (
+      <Group>
+        <Circle radius={radius} fill={fill} stroke="#5f554b" strokeWidth={0.025} />
+        <Line points={[0, -radius * 0.92, 0, radius * 0.92]} stroke="#8d603c" strokeWidth={0.018} />
+        <Line points={[-radius * 0.42, -radius * 0.42, radius * 0.42, radius * 0.42]} stroke="#242728" strokeWidth={0.055} />
+        <Line points={[radius * 0.42, -radius * 0.42, -radius * 0.42, radius * 0.42]} stroke="#242728" strokeWidth={0.055} />
+        <Text
+          x={-radius}
+          y={-0.055}
+          width={radius * 2}
+          align="center"
+          text="Bozan 110"
+          fontFamily="Arial"
+          fontSize={0.095}
+          fill="#30383a"
+          listening={false}
+        />
+      </Group>
+    );
+  }
+
+  if (placement.catalogId === "chair-kaleo-chenille-beige") {
+    const footRadius = 0.25;
+    return (
+      <Group>
+        <Circle radius={footRadius} fill="#171a1a" stroke="#050606" strokeWidth={0.025} />
+        <Rect {...common} fill="#ddd2c2" cornerRadius={0.15} />
+        <Rect x={-width * 0.43} y={-depth * 0.34} width={width * 0.86} height={depth * 0.25} fill="#d1c3b0" cornerRadius={0.08} />
+        <Line points={[-width * 0.28, -depth * 0.3, -width * 0.28, -depth * 0.12]} stroke="#aa9a86" strokeWidth={0.012} />
+        <Line points={[0, -depth * 0.3, 0, -depth * 0.12]} stroke="#aa9a86" strokeWidth={0.012} />
+        <Line points={[width * 0.28, -depth * 0.3, width * 0.28, -depth * 0.12]} stroke="#aa9a86" strokeWidth={0.012} />
+        <Text
+          x={-width / 2}
+          y={-0.045}
+          width={width}
+          align="center"
+          text="Kaleo"
+          fontFamily="Arial"
+          fontSize={0.085}
+          fill="#30383a"
+          listening={false}
+        />
+      </Group>
+    );
+  }
+
+  if (placement.catalogId === "vorraum-wall-decor") {
+    const frameWidth = 0.48;
+    const frameHeight = 0.62;
+    return (
+      <Group>
+        <Rect x={-frameWidth / 2} y={-0.38} width={frameWidth} height={frameHeight} fill="#f2e6d5" stroke="#a7835f" strokeWidth={0.025} cornerRadius={0.018} />
+        <Line points={[-0.14, -0.24, -0.08, -0.31, 0.02, -0.21, 0.11, -0.29]} stroke="#b38a63" strokeWidth={0.025} lineCap="round" lineJoin="round" />
+        <Circle x={0.14} y={0.25} radius={0.125} fill="#ede4d5" stroke="#d0cbc0" strokeWidth={0.025} />
+        <Circle x={0.12} y={0.22} radius={0.045} fill="#7c8f68" />
+        <Circle x={0.17} y={0.27} radius={0.035} fill="#9aaa78" />
+        <Line points={[0.13, 0.27, 0.09, 0.33, 0.16, 0.35, 0.2, 0.3]} stroke="#71845d" strokeWidth={0.018} lineCap="round" lineJoin="round" />
+      </Group>
+    );
+  }
+
+  if (placement.catalogId === "rug-temu-easy-line-120x180" || placement.catalogId === "rug-temu-easy-line-140x200") {
+    const scaleX = width / 100;
+    const scaleY = depth / 150;
+    const variants: Record<string, { base: string; shapes: { data: string; fill: string; stroke?: string }[] }> = {
+      "rug-hall-overlap-taupe": { base: "#c3b3a0", shapes: [
+        { data: "M0 0H56C54 29 47 49 33 64C22 76 10 84 0 91Z", fill: "#9b8975" },
+        { data: "M100 51V150H37C46 124 59 98 77 76C86 65 94 56 100 51Z", fill: "#d8cdbf" },
+        { data: "M0 118C18 88 39 66 67 52C74 49 81 48 88 48C67 66 51 86 43 106C38 120 37 135 39 150H0Z", fill: "#cbbba7" },
+        { data: "M-4 79C16 48 39 43 56 57C71 70 73 88 100 106", fill: "none", stroke: "#f6f0e8" },
+        { data: "M-3 116C18 88 39 66 66 53C78 47 91 47 104 56", fill: "none", stroke: "#f6f0e8" },
+      ]},
+      "rug-temu-easy-line-colorblock": { base: "#eadfc7", shapes: [
+        { data: "M0 0H39C33 12 25 23 12 34C8 38 4 41 0 43Z", fill: "#8ea69a" },
+        { data: "M0 43C15 34 28 23 39 0H78C69 20 53 34 36 47C19 60 8 72 0 88Z", fill: "#e6d5ae" },
+        { data: "M61 49C75 37 88 35 100 37V80C89 77 80 71 73 62Z", fill: "#91a89b" },
+        { data: "M0 89C21 65 45 52 68 48C61 68 46 83 30 96C17 107 8 118 0 133Z", fill: "#f2ead9" },
+        { data: "M51 89C68 78 88 80 100 92V126C82 119 65 115 48 116C40 107 42 97 51 89Z", fill: "#b79b72" },
+        { data: "M68 123C82 116 94 120 100 127V150H63C58 141 59 130 68 123Z", fill: "#587b68" },
+      ]},
+      "rug-hall-soft-abstract": { base: "#e6ddca", shapes: [
+        { data: "M0 22C20 5 39 10 45 31C50 52 37 71 14 79L0 82Z", fill: "#aeb8a5" },
+        { data: "M100 31C77 38 68 55 70 76C73 96 84 110 100 117Z", fill: "#b8754f" },
+        { data: "M0 102C25 83 47 82 65 96C78 107 77 130 62 150H0Z", fill: "#d1c4ab" },
+        { data: "M43 0C58 24 56 48 39 64C28 75 27 91 38 106C51 123 51 137 45 150H74C87 126 86 103 72 86C60 72 59 56 71 39C81 25 83 12 79 0Z", fill: "#f1eadb" },
+      ]},
+      "rug-hall-beige-patchwork": { base: "#c6b8a1", shapes: [
+        { data: "M0 0H36V48H0Z", fill: "#d7c6aa" }, { data: "M36 0H68V48H36Z", fill: "#baa98f" },
+        { data: "M68 0H100V48H68Z", fill: "#d9cfbd" }, { data: "M0 48H50V101H0Z", fill: "#eee3ca" },
+        { data: "M50 48H100V101H50Z", fill: "#b5a58e" }, { data: "M0 101H38V150H0Z", fill: "#cdbb9b" },
+        { data: "M38 101H70V150H38Z", fill: "#e8ddc7" }, { data: "M70 101H100V150H70Z", fill: "#a99c88" },
+        { data: "M8 48A28 28 0 0 1 36 20V48Z", fill: "#f1e6d1" }, { data: "M70 150A30 30 0 0 1 100 120V150Z", fill: "#eadfc8" },
+      ]},
+      "rug-hall-olive-lineart": { base: "#eee4c9", shapes: [
+        { data: "M0 0H100V55C75 66 49 75 0 74Z", fill: "#f3ead3" },
+        { data: "M0 32C30 20 54 30 67 58C49 68 25 75 0 74Z", fill: "#d8c8a8" },
+        { data: "M39 150C49 115 66 89 100 68V150Z", fill: "#748f66" },
+      ]},
+    };
+    const variant = variants[materialId ?? "rug-temu-easy-line-colorblock"] ?? variants["rug-temu-easy-line-colorblock"];
+    const pattern = variant.shapes;
+    return (
+      <Group>
+        <Rect {...common} fill={variant.base} stroke="#625f49" strokeWidth={0.018} cornerRadius={0.025} />
+        <Group x={-width / 2} y={-depth / 2} scaleX={scaleX} scaleY={scaleY} listening={false}>
+          {pattern.map((shape, index) => (
+            <Path
+              key={`temu-easy-line-${index}`}
+              data={shape.data}
+              fill={shape.fill}
+              stroke={shape.stroke ?? (materialId === "rug-hall-olive-lineart" ? "#3f4035" : "#f8f1e5")}
+              strokeWidth={0.65}
+              lineJoin="round"
+              lineCap="round"
+              listening={false}
+            />
+          ))}
+        </Group>
+        <Rect {...common} fill="transparent" stroke="#625f49" strokeWidth={0.018} cornerRadius={0.025} listening={false} />
+        <Text
+          x={-width / 2}
+          y={depth / 2 - 0.105}
+          width={width}
+          align="center"
+          text="Easy Line · 120 × 180 cm"
+          fontFamily="Arial"
+          fontStyle="bold"
+          fontSize={0.061}
+          fill="#474635"
+          opacity={0.9}
+          listening={false}
+        />
+      </Group>
+    );
+  }
+
+  if (placement.catalogId === "rug-temu-rabbit-ivory-100x180") {
+    const columns = 8;
+    const rows = 14;
+    const gap = Math.min(width, depth) * 0.025;
+    const pad = Math.min(width, depth) * 0.045;
+    const cellWidth = (width - pad * 2 - gap * (columns - 1)) / columns;
+    const cellHeight = (depth - pad * 2 - gap * (rows - 1)) / rows;
+    const bubbles = Array.from({ length: columns * rows }, (_, index) => {
+      const column = index % columns;
+      const row = Math.floor(index / columns);
+      return {
+        x: -width / 2 + pad + column * (cellWidth + gap),
+        y: -depth / 2 + pad + row * (cellHeight + gap),
+        light: (column + row) % 3 === 0,
+      };
+    });
+    return (
+      <Group>
+        <Rect
+          {...common}
+          fill="#eee7da"
+          stroke="#c9bdac"
+          strokeWidth={0.018}
+          cornerRadius={0.075}
+          shadowColor="#8f7b65"
+          shadowBlur={0.055}
+          shadowOpacity={0.24}
+          shadowOffsetY={0.025}
+        />
+        {bubbles.map((bubble, index) => (
+          <Rect
+            key={`temu-rabbit-plan-bubble-${index}`}
+            x={bubble.x}
+            y={bubble.y}
+            width={cellWidth}
+            height={cellHeight}
+            cornerRadius={Math.min(cellWidth, cellHeight) * 0.38}
+            fill={bubble.light ? "#fffaf0" : "#e8dfd1"}
+            stroke={bubble.light ? "#fffdf8" : "#d5c9b8"}
+            strokeWidth={0.008}
+            shadowColor="#9b876f"
+            shadowBlur={0.022}
+            shadowOpacity={0.22}
+            shadowOffsetY={0.012}
+            listening={false}
+          />
+        ))}
+        <Text
+          x={-width / 2}
+          y={depth / 2 - 0.105}
+          width={width}
+          align="center"
+          text="Kunstkaninchen-Plüsch · Elfenbein · 100 × 180 cm"
+          fontFamily="Arial"
+          fontStyle="bold"
+          fontSize={0.061}
+          fill="#71614e"
+          opacity={0.9}
+          listening={false}
+        />
+      </Group>
+    );
+  }
+
+  if (placement.catalogId === "rug-living-concept-240x240") {
+    const bands = [-0.4, -0.2, 0, 0.2, 0.4];
+    return (
+      <Group>
+        <Rect
+          {...common}
+          fill="#ded5c7"
+          stroke="#a8937b"
+          strokeWidth={0.022}
+          cornerRadius={0.06}
+          shadowColor="#6d5b49"
+          shadowBlur={0.055}
+          shadowOpacity={0.25}
+          shadowOffsetY={0.022}
+        />
+        <Rect
+          x={-width / 2 + 0.035}
+          y={-depth / 2 + 0.035}
+          width={width - 0.07}
+          height={depth - 0.07}
+          stroke="#f4eee5"
+          strokeWidth={0.018}
+          cornerRadius={0.045}
+          opacity={0.9}
+          listening={false}
+        />
+        {bands.map((ratio, index) => (
+          <Line
+            key={`living-rug-plan-relief-${ratio}`}
+            points={[
+              -width * 0.38,
+              depth * ratio,
+              -width * 0.08,
+              depth * ratio + (index % 2 === 0 ? -0.045 : 0.045),
+              width * 0.36,
+              depth * ratio,
+            ]}
+            stroke="#f0e9df"
+            strokeWidth={0.055}
+            lineCap="round"
+            lineJoin="round"
+            opacity={0.95}
+            listening={false}
+          />
+        ))}
+        <Text
+          x={-width / 2}
+          y={depth / 2 - 0.12}
+          width={width}
+          align="center"
+          text="Wohninsel · Elfenbein-Greige · 240 × 240 cm"
+          fontFamily="Arial"
+          fontStyle="bold"
+          fontSize={0.075}
+          fill="#625749"
+          opacity={0.88}
+          listening={false}
+        />
+      </Group>
+    );
+  }
+
+  if (placement.catalogId === "rug-temu-shaggy-white-120x200") {
+    const pileMarks = Array.from({ length: 14 }, (_, column) =>
+      Array.from({ length: 22 }, (_, row) => {
+        const x = -width / 2 + 0.06 + column * ((width - 0.12) / 13);
+        const y = -depth / 2 + 0.06 + row * ((depth - 0.12) / 21);
+        const sway = ((column * 5 + row * 7) % 5 - 2) * 0.008;
+        return { x, y, sway, warm: (column + row * 3) % 11 === 0 };
+      }),
+    ).flat();
+    return (
+      <Group>
+        <Rect
+          {...common}
+          fill="#f3efe7"
+          stroke="#cfc8bd"
+          strokeWidth={0.018}
+          cornerRadius={0.055}
+          shadowColor="#665d52"
+          shadowBlur={0.045}
+          shadowOpacity={0.2}
+          shadowOffsetY={0.02}
+        />
+        <Rect
+          x={-width / 2 + 0.025}
+          y={-depth / 2 + 0.025}
+          width={width - 0.05}
+          height={depth - 0.05}
+          fill="#f7f4ee"
+          stroke="#fffdf8"
+          strokeWidth={0.018}
+          cornerRadius={0.045}
+          opacity={0.92}
+        />
+        {pileMarks.map((mark, index) => (
+          <Line
+            key={`temu-white-plan-pile-${index}`}
+            points={[
+              mark.x - 0.018,
+              mark.y + 0.012,
+              mark.x + mark.sway,
+              mark.y - 0.014,
+              mark.x + 0.019,
+              mark.y + 0.004,
+            ]}
+            stroke={mark.warm ? "#d9d2c7" : "#e5e0d7"}
+            strokeWidth={0.009}
+            lineCap="round"
+            lineJoin="round"
+            opacity={0.84}
+            listening={false}
+          />
+        ))}
+        <Text
+          x={-width / 2}
+          y={depth / 2 - 0.105}
+          width={width}
+          align="center"
+          text="Fellteppich · Weiß · 120 × 200 cm"
+          fontFamily="Arial"
+          fontStyle="bold"
+          fontSize={0.064}
+          fill="#6b635b"
+          opacity={0.82}
+          listening={false}
+        />
+      </Group>
+    );
+  }
+
+  if (placement.catalogId === "rug-gala-shaggy-2505-100x200") {
+    const stripes = [
+      { x: 0, y: 0.5, width: 0.25, height: 0.5, radius: 0.01 },
+      { x: 0.25, y: 0.12, width: 0.1, height: 0.38, radius: 0.04 },
+      { x: 0.35, y: 0.5, width: 0.3, height: 0.5, radius: 0.01 },
+      { x: 0.65, y: 0, width: 0.3, height: 0.5, radius: 0.01 },
+      { x: 0.95, y: 0.5, width: 0.1, height: 0.37, radius: 0.04 },
+      { x: 1.05, y: 0, width: 0.3, height: 0.5, radius: 0.01 },
+      { x: 1.35, y: 0.5, width: 0.3, height: 0.5, radius: 0.01 },
+      { x: 1.65, y: 0.16, width: 0.1, height: 0.34, radius: 0.04 },
+      { x: 1.75, y: 0.5, width: 0.25, height: 0.5, radius: 0.01 },
+    ];
+    const pileMarks = Array.from({ length: 17 }, (_, column) =>
+      Array.from({ length: 9 }, (_, row) => {
+        const x = -width / 2 + 0.07 + column * ((width - 0.14) / 16);
+        const y = -depth / 2 + 0.07 + row * ((depth - 0.14) / 8);
+        const inTaupe = stripes.some((stripe) => {
+          const left = -width / 2 + stripe.x;
+          const top = -depth / 2 + stripe.y;
+          return x >= left && x <= left + stripe.width && y >= top && y <= top + stripe.height;
+        });
+        return { x, y, inTaupe, direction: (column + row) % 2 === 0 ? 1 : -1 };
+      }),
+    ).flat();
+    return (
+      <Group>
+        <Rect {...common} fill="#eee9df" stroke="#cfc4b6" strokeWidth={0.018} cornerRadius={0.045} opacity={0.98} shadowColor="#5d5044" shadowBlur={0.035} shadowOpacity={0.16} shadowOffsetY={0.018} />
+        <Rect x={-width / 2 + 0.025} y={-depth / 2 + 0.025} width={width - 0.05} height={depth - 0.05} stroke="#f8f4ed" strokeWidth={0.018} cornerRadius={0.035} opacity={0.8} />
+        {stripes.map((stripe, index) => (
+          <Rect
+            key={`gala-plan-stripe-${index}`}
+            x={-width / 2 + stripe.x}
+            y={-depth / 2 + stripe.y}
+            width={stripe.width}
+            height={stripe.height}
+            fill="#aa9b8e"
+            cornerRadius={stripe.radius}
+            opacity={0.92}
+          />
+        ))}
+        {pileMarks.map((mark, index) => (
+          <Line
+            key={`gala-plan-pile-${index}`}
+            points={[mark.x - 0.018, mark.y + 0.01 * mark.direction, mark.x + 0.018, mark.y - 0.01 * mark.direction]}
+            stroke={mark.inTaupe ? "#c5b7aa" : "#ddd5ca"}
+            strokeWidth={0.008}
+            lineCap="round"
+            opacity={0.72}
+            listening={false}
+          />
+        ))}
+        <Text x={-width / 2} y={depth / 2 - 0.11} width={width} align="center" text="Gala · 100 × 200 cm" fontFamily="Arial" fontStyle="bold" fontSize={0.075} fill="#62584e" opacity={0.78} listening={false} />
+      </Group>
+    );
+  }
+
   return (
     <Group>
       <Rect {...common} cornerRadius={symbol === "sofa" ? 0.12 : symbol === "rug" ? 0.04 : 0.025} opacity={symbol === "rug" ? 0.62 : 1} />
       {symbol === "bed" ? <Rect x={-width / 2 + 0.08} y={-depth / 2 + 0.08} width={width - 0.16} height={Math.min(0.42, depth / 3)} fill="#eee7dc" cornerRadius={0.05} /> : null}
       {symbol === "sofa" ? <Line points={[-width / 2 + 0.12, 0, width / 2 - 0.12, 0]} stroke="#f2e9df" strokeWidth={0.035} /> : null}
-      {symbol === "storage" ? <Line points={[0, -depth / 2, 0, depth / 2]} stroke="#eee4d8" strokeWidth={0.018} /> : null}
-      {symbol === "chair" ? <Circle radius={Math.min(width, depth) * 0.26} fill="#efe8df" opacity={0.75} /> : null}
+      {symbol === "storage" && placement.catalogId !== "wardrobe-225" ? <Line points={[0, -depth / 2, 0, depth / 2]} stroke="#eee4d8" strokeWidth={0.018} /> : null}
+      {placement.catalogId === "wardrobe-225" ? (
+        <Group>
+          {[-0.3, -0.1, 0.1, 0.3].map((ratio) => <Line key={ratio} points={[width * ratio, -depth / 2, width * ratio, depth / 2]} stroke="#9aa1a0" strokeWidth={0.018} />)}
+          <Rect x={width * 0.1} y={-depth / 2 + 0.025} width={width * 0.19} height={depth - 0.05} fill="#b9cacc" opacity={0.76} stroke="#708083" strokeWidth={0.014} />
+          {[[-0.09, 0.09], [0.31, 0.49]].flatMap(([start, end]) => [0.08, 0.2].map((offset) => <Line key={`${start}-${offset}`} points={[width * start, depth / 2 - offset, width * end, depth / 2 - offset]} stroke="#343b3b" strokeWidth={0.022} />))}
+        </Group>
+      ) : null}
+      {placement.catalogId === "desk-standard" ? (
+        <Group>
+          <Rect x={-width / 2 + 0.035} y={-depth / 2 + 0.035} width={width * 0.23} height={depth - 0.07} fill="#eeece6" stroke="#9ba3a1" strokeWidth={0.018} />
+          <Rect x={width / 2 - width * 0.23 - 0.035} y={-depth / 2 + 0.035} width={width * 0.23} height={depth - 0.07} fill="#eeece6" stroke="#9ba3a1" strokeWidth={0.018} />
+        </Group>
+      ) : null}
+      {symbol === "chair" && placement.catalogId !== "chair-office" ? <Circle radius={Math.min(width, depth) * 0.26} fill="#efe8df" opacity={0.75} /> : null}
+      {placement.catalogId === "chair-office" ? (
+        <Group>
+          <Circle radius={Math.min(width, depth) * 0.29} fill="#d99ca8" stroke="#8b626b" strokeWidth={0.018} />
+          {[0, 72, 144, 216, 288].map((angle) => <Line key={angle} points={[0, 0, Math.cos(angle * Math.PI / 180) * width * 0.43, Math.sin(angle * Math.PI / 180) * depth * 0.43]} stroke="#eef0ec" strokeWidth={0.035} />)}
+        </Group>
+      ) : null}
       <Text
         x={-width / 2}
         y={-0.055}

@@ -2,6 +2,13 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { DEFAULT_APARTMENT_DOCUMENT } from "../app/planner/domain/apartment-v3.ts";
+import {
+  OFFICIAL_ROOM_AREAS,
+  OFFICIAL_WNF_AREA,
+  OUTDOOR_ROOM_IDS,
+  getDocumentWnfArea,
+  getRoomAreaAudit,
+} from "../app/planner/domain/apartment-evidence.ts";
 import { migrateStoredPlannerData } from "../app/planner/domain/migration.ts";
 import { deriveRoomPolygon, deriveWallLength } from "../app/planner/domain/wall-graph.ts";
 
@@ -18,24 +25,41 @@ const expectedOpeningIds = [
   "living-feature-window",
   "living-loggia-door",
   "zimmer2-balcony-door",
-  "loggia-balcony-open-transition",
 ];
 
-test("publishes the confirmed nine-room apartment and 59.49 square metres", () => {
-  assert.equal(DEFAULT_APARTMENT_DOCUMENT.rooms.length, 9);
-  assert.equal(
-    Number(
-      DEFAULT_APARTMENT_DOCUMENT.rooms
-        .filter((room) => room.includedInWnf)
-        .reduce((sum, room) => sum + room.area, 0)
-        .toFixed(2),
-    ),
-    59.49,
-  );
+test("publishes eight selectable areas while preserving the official 59.49 square metres", () => {
+  assert.equal(DEFAULT_APARTMENT_DOCUMENT.rooms.length, 8);
+  assert.equal(getDocumentWnfArea(DEFAULT_APARTMENT_DOCUMENT), OFFICIAL_WNF_AREA);
 
   const zimmer1 = deriveRoomPolygon(DEFAULT_APARTMENT_DOCUMENT, "zimmer1");
   assert.equal(Math.max(...zimmer1.map((point) => point.x)) - Math.min(...zimmer1.map((point) => point.x)), 3.56);
   assert.equal(Math.max(...zimmer1.map((point) => point.z)) - Math.min(...zimmer1.map((point) => point.z)), 3.97);
+});
+
+test("presents the real balcony and loggia as one connected outdoor room", () => {
+  assert.deepEqual(
+    Object.fromEntries(DEFAULT_APARTMENT_DOCUMENT.rooms.map((room) => [room.id, room.area])),
+    OFFICIAL_ROOM_AREAS,
+  );
+  assert.deepEqual([...OUTDOOR_ROOM_IDS], ["balkon"]);
+  assert.equal(DEFAULT_APARTMENT_DOCUMENT.rooms.some((room) => room.id === "loggia"), false);
+  assert.equal(DEFAULT_APARTMENT_DOCUMENT.rooms.find((room) => room.id === "balkon")?.name, "Balkon / Loggia");
+  assert.equal(DEFAULT_APARTMENT_DOCUMENT.rooms.find((room) => room.id === "balkon")?.area, 6.03);
+  assert.equal(DEFAULT_APARTMENT_DOCUMENT.rooms.find((room) => room.id === "balkon")?.wnfArea, 2.23);
+  assert.deepEqual(DEFAULT_APARTMENT_DOCUMENT.openings.find((opening) => opening.id === "living-loggia-door")?.roomIds, ["wohnkueche", "balkon"]);
+});
+
+test("does not present scale-derived outlines as confirmed centimetre geometry", () => {
+  for (const room of DEFAULT_APARTMENT_DOCUMENT.rooms) {
+    assert.equal(room.metadata?.confidence, "estimated");
+    assert.ok(room.metadata?.notes?.some((note) => /Planfläche.*bestätigt/i.test(note)));
+    assert.ok(room.metadata?.notes?.some((note) => /Kontur.*planmaßstäblich/i.test(note)));
+  }
+
+  const audit = getRoomAreaAudit(DEFAULT_APARTMENT_DOCUMENT);
+  assert.equal(audit.length, 8);
+  assert.equal(audit.find((entry) => entry.roomId === "wohnkueche")?.declaredArea, 21.82);
+  assert.ok(audit.every((entry) => Number.isFinite(entry.polygonArea)));
 });
 
 test("keeps every opening, diagonal facades, and one shared wall record", () => {
@@ -61,11 +85,108 @@ test("keeps every opening, diagonal facades, and one shared wall record", () => 
 
 test("stores the fixed kitchen and sanitary inventory separately from movable furniture", () => {
   const builtInKinds = new Set(DEFAULT_APARTMENT_DOCUMENT.builtIns.map((item) => item.kind));
-  assert.deepEqual([...builtInKinds].sort(), ["kitchen", "sanitary"]);
+  assert.deepEqual([...builtInKinds].sort(), ["kitchen", "other", "sanitary", "storage"]);
   assert.ok(DEFAULT_APARTMENT_DOCUMENT.builtIns.some((item) => item.catalogId === "kitchen-sink"));
   assert.ok(DEFAULT_APARTMENT_DOCUMENT.builtIns.some((item) => item.catalogId === "sanitary-bathtub"));
+  assert.ok(DEFAULT_APARTMENT_DOCUMENT.builtIns.some((item) => item.catalogId === "bath-tub-apron"));
+  assert.ok(DEFAULT_APARTMENT_DOCUMENT.builtIns.some((item) => item.catalogId === "kitchen-fridge"));
   assert.ok(DEFAULT_APARTMENT_DOCUMENT.builtIns.every((item) => item.locked));
   assert.ok(DEFAULT_APARTMENT_DOCUMENT.placements.every((item) => item.roomId === "zimmer1"));
+});
+
+test("places the exact Cloudy 120 upholstered bed in the free Zimmer 1 corner", () => {
+  const bed = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "zimmer1-cloudy-bed");
+
+  assert.ok(bed);
+  assert.equal(bed.catalogId, "bed-cloudy-120");
+  assert.deepEqual(bed.position, { x: 0.78, z: 1.15 });
+  assert.deepEqual(bed.size, { width: 1.54, depth: 2.29, height: 1.06 });
+  assert.equal(bed.rotation, 0);
+  assert.equal(bed.materialVariants?.main, "fabric-chenille-cream");
+  assert.equal(bed.metadata?.confidence, "confirmed");
+});
+
+test("keeps the photographed black fridge beside rather than inside the sink run", () => {
+  const fridge = DEFAULT_APARTMENT_DOCUMENT.builtIns.find((item) => item.catalogId === "kitchen-fridge");
+  const sinkRun = DEFAULT_APARTMENT_DOCUMENT.builtIns.find((item) => item.id === "builtin-kitchen-base-north");
+
+  assert.ok(fridge);
+  assert.ok(sinkRun);
+  assert.equal(fridge.materialVariants?.main, "cabinet-black");
+  assert.ok(
+    sinkRun.position.x + sinkRun.size.width / 2 <= fridge.position.x - fridge.size.width / 2,
+    "the sink cabinets must stop before the fridge begins",
+  );
+});
+
+test("closes the photographed tub end with a tiled ledge", () => {
+  const ledge = DEFAULT_APARTMENT_DOCUMENT.builtIns.find((item) => item.catalogId === "bath-tub-end-ledge");
+  assert.ok(ledge);
+  assert.equal(ledge.materialVariants?.main, "tile-white-square");
+  assert.ok(ledge.size.depth >= 0.12);
+  assert.ok(ledge.size.width >= 0.7);
+});
+
+test("aligns the hall intercom above the entry-side switch", () => {
+  const intercom = DEFAULT_APARTMENT_DOCUMENT.fixtures.find((item) => item.id === "fixture-hall-intercom");
+  const entrySwitch = DEFAULT_APARTMENT_DOCUMENT.fixtures.find((item) => item.id === "fixture-hall-switch");
+  assert.ok(intercom);
+  assert.ok(entrySwitch);
+  assert.ok(Math.abs(intercom.position.z - entrySwitch.position.z) <= 0.08);
+});
+
+test("keeps the Zimmer 1 plan door visible by default and the photographed shower on the tub wall", () => {
+  assert.equal(DEFAULT_APARTMENT_DOCUMENT.doorStates["zimmer1-door"], "closed");
+  const shower = DEFAULT_APARTMENT_DOCUMENT.builtIns.find((item) => item.catalogId === "bath-shower-set");
+  assert.deepEqual(shower?.position, { x: -2.34, z: 8.58 });
+  assert.equal(shower?.rotation, 90);
+});
+
+test("includes the photographed finishes and requested fixed living-room composition", () => {
+  assert.equal(DEFAULT_APARTMENT_DOCUMENT.rooms.find((room) => room.id === "zimmer1")?.surfaces.floor, "parquet-oak-narrow");
+  assert.equal(DEFAULT_APARTMENT_DOCUMENT.rooms.find((room) => room.id === "wohnkueche")?.surfaces.floor, "parquet-oak-narrow");
+  assert.equal(DEFAULT_APARTMENT_DOCUMENT.rooms.find((room) => room.id === "wc")?.surfaces.walls, "tile-white-rect");
+  assert.equal(DEFAULT_APARTMENT_DOCUMENT.rooms.find((room) => room.id === "bad")?.surfaces.walls, "tile-white-square");
+
+  const catalogIds = new Set(DEFAULT_APARTMENT_DOCUMENT.builtIns.map((item) => item.catalogId));
+  for (const expected of [
+    "floor-zone-kitchen",
+    "kitchen-backsplash-oak",
+    "living-slat-wall",
+    "living-moss-panel",
+    "living-clock",
+    "living-tv",
+    "living-floating-cabinet",
+    "wc-flush-plate",
+  ]) assert.ok(catalogIds.has(expected), expected);
+
+  for (const expected of ["ceiling-light", "smoke-detector", "switch", "outlet", "intercom", "blind-control"]) {
+    assert.ok(DEFAULT_APARTMENT_DOCUMENT.fixtures.some((fixture) => fixture.kind === expected), expected);
+  }
+
+  const tv = DEFAULT_APARTMENT_DOCUMENT.builtIns.find((item) => item.catalogId === "living-tv");
+  assert.equal(tv?.metadata?.confidence, "estimated");
+  assert.ok(tv?.metadata?.notes?.some((note) => /Annahme|Wunschplanung/i.test(note)));
+});
+
+test("uses the measured hall-to-living door chain and keeps the TV composition inside the 195 cm wall", () => {
+  const door = DEFAULT_APARTMENT_DOCUMENT.openings.find((item) => item.id === "hall-living-door");
+  const slats = DEFAULT_APARTMENT_DOCUMENT.builtIns.find((item) => item.id === "builtin-living-tv-slats");
+  const tv = DEFAULT_APARTMENT_DOCUMENT.builtIns.find((item) => item.id === "builtin-living-tv");
+  const cabinet = DEFAULT_APARTMENT_DOCUMENT.builtIns.find((item) => item.id === "builtin-living-floating-cabinet");
+
+  assert.ok(door);
+  assert.ok(slats);
+  assert.ok(tv);
+  assert.ok(cabinet);
+  assert.equal(door.width, 0.85, "the visible hall-side door leaf must be 85 cm wide");
+  assert.equal(door.offset, 0.255, "the leaf starts 20 cm from the hall corner plus the wall-graph offset");
+  assert.equal(slats.size.width, 1.95);
+  assert.deepEqual(slats.position, { x: 0.2, z: 7.975 });
+  assert.equal(tv.position.z, slats.position.z);
+  assert.equal(cabinet.position.z, slats.position.z);
+  assert.ok(tv.size.width <= slats.size.width);
+  assert.ok(cabinet.size.width <= slats.size.width);
 });
 
 test("migrates a raw v2 room record through an explicit furniture map", () => {

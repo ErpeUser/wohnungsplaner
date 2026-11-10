@@ -9,13 +9,14 @@ import { ExportDialog } from "../export/export-dialog.tsx";
 import { PlanCanvas } from "../plan-2d/plan-canvas.tsx";
 import { createPlanScene } from "../plan-2d/plan-scene.ts";
 import { usePlanInteractions } from "../plan-2d/use-plan-interactions.ts";
-import { createLocalStoragePlannerRepository } from "../store/persistence.ts";
+import { createLocalStoragePlannerRepository, upgradeRetiredDiningGroup } from "../store/persistence.ts";
 import { createPlannerStore, type PlannerStore } from "../store/planner-store.ts";
 import { CatalogPanel } from "./catalog-panel.tsx";
 import { DetailsDrawer } from "./details-drawer.tsx";
 import { InspectorPanel } from "./inspector-panel.tsx";
 import { PlannerStatus } from "./planner-status.tsx";
 import { PlannerToolbar } from "./planner-toolbar.tsx";
+import { ShoppingListDrawer } from "./shopping-list-drawer.tsx";
 import "./planner-workspace.css";
 
 const LazyPlanner3D = lazy(() => import("../scene-3d/planner-3d.tsx").then((module) => ({
@@ -34,6 +35,7 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
   const exportButtonRef = useRef<HTMLButtonElement>(null);
   const [planStage, setPlanStage] = useState<Konva.Stage | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
+  const [shoppingOpen, setShoppingOpen] = useState(false);
   const openExport = useCallback(() => setExportOpen(true), []);
   const closeExport = useCallback(() => setExportOpen(false), []);
   const detailsOpen = state.panels.details;
@@ -60,6 +62,15 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
   }, [providedStore, store]);
 
   useEffect(() => {
+    if (providedStore) return;
+    const current = store.getState().document;
+    const upgraded = upgradeRetiredDiningGroup(current);
+    if (upgraded === current) return;
+    store.getState().replaceDocument(upgraded);
+    store.getState().scheduleSave();
+  }, [providedStore, state.document, store]);
+
+  useEffect(() => {
     const onHistoryShortcut = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
       if (target?.closest("input, select, textarea, [contenteditable='true']")) return;
@@ -78,15 +89,16 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
   }, [store]);
 
   useEffect(() => {
-    if (!detailsOpen) return;
+    if (!detailsOpen && !shoppingOpen) return;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
       setPanel("details", false);
+      setShoppingOpen(false);
       detailsButtonRef.current?.focus();
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [detailsOpen, setPanel]);
+  }, [detailsOpen, setPanel, shoppingOpen]);
 
   useEffect(() => {
     if (typeof window.matchMedia !== "function") return;
@@ -119,6 +131,7 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
         catalogOpen={state.panels.catalog}
         inspectorOpen={state.panels.inspector}
         detailsOpen={state.panels.details}
+        shoppingOpen={shoppingOpen}
         detailsButtonRef={detailsButtonRef}
         exportButtonRef={exportButtonRef}
         onRoomChange={state.setActiveRoom}
@@ -128,7 +141,14 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
         onRedo={state.redo}
         onToggleCatalog={() => state.setPanel("catalog", !state.panels.catalog)}
         onToggleInspector={() => state.setPanel("inspector", !state.panels.inspector)}
-        onToggleDetails={() => state.setPanel("details", !state.panels.details)}
+        onToggleDetails={() => {
+          setShoppingOpen(false);
+          state.setPanel("details", !state.panels.details);
+        }}
+        onToggleShopping={() => {
+          state.setPanel("details", false);
+          setShoppingOpen((open) => !open);
+        }}
         onExport={openExport}
       />
 
@@ -167,6 +187,7 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
                     selectionId={state.selectionId}
                     cameraMode={state.cameraMode}
                     onSelect={state.select}
+                    onToggleDoor={(openingId) => state.dispatch({ type: "toggleDoor", openingId })}
                     onReturn2D={() => state.setViewMode("2d")}
                   />
                 </Suspense>
@@ -182,6 +203,7 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
       </div>
 
       {state.panels.details ? <DetailsDrawer document={state.document} onClose={closeDetails} /> : null}
+      {shoppingOpen ? <ShoppingListDrawer onClose={() => setShoppingOpen(false)} /> : null}
       {repository ? (
         <ExportDialog
           open={exportOpen}

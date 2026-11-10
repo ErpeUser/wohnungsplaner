@@ -2,6 +2,7 @@ import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
 import { parsePlannerDocument } from "../domain/schema.ts";
 import type { PlannerDocumentV3 } from "../domain/types.ts";
 import type { PlanScene } from "../plan-2d/plan-scene.ts";
+import { getDocumentWnfArea } from "../domain/apartment-evidence.ts";
 
 export type PlanStageExporter = {
   toDataURL(config: { mimeType: "image/png"; pixelRatio: number }): string;
@@ -53,9 +54,7 @@ export function createPrintModel(
 ): PlannerPrintModel {
   const validated = parsePlannerDocument(document);
   const roomById = new Map(validated.rooms.map((room) => [room.id, room.name]));
-  const totalWnf = validated.rooms
-    .filter((room) => room.includedInWnf)
-    .reduce((sum, room) => sum + room.area, 0);
+  const totalWnf = getDocumentWnfArea(validated);
   return {
     schemaVersion: 3,
     title: `${validated.name} · Raumplan`,

@@ -1,4 +1,4 @@
-import { Circle, Group, Layer, Line, Text } from "react-konva";
+import { Circle, Group, Layer, Line, Rect, Text } from "react-konva";
 
 import type { PlanScene } from "./plan-scene.ts";
 
@@ -43,22 +43,36 @@ export function OverlayLayer({ scene }: { scene: PlanScene }) {
         return (
           <Group key={dimension.id}>
             <Line
+              points={[dimension.wallStart.x, dimension.wallStart.z, dimension.start.x, dimension.start.z]}
+              stroke="#305d62"
+              strokeWidth={0.012}
+            />
+            <Line
+              points={[dimension.wallEnd.x, dimension.wallEnd.z, dimension.end.x, dimension.end.z]}
+              stroke="#305d62"
+              strokeWidth={0.012}
+            />
+            <Line
               points={[dimension.start.x, dimension.start.z, dimension.end.x, dimension.end.z]}
-              stroke="#94502f"
-              strokeWidth={0.016}
-              dash={[0.07, 0.04]}
+              stroke="#244b50"
+              strokeWidth={0.018}
             />
-            <Text
-              x={middle.x - 0.22}
-              y={middle.z - 0.1}
-              width={0.44}
-              align="center"
-              text={dimension.label}
-              fontFamily="Arial"
-              fontStyle="bold"
-              fontSize={0.075}
-              fill="#7c4227"
-            />
+            <Group x={middle.x} y={middle.z} rotation={dimension.rotation}>
+              <Line points={[0, -0.055, 0, 0.055]} stroke="#244b50" strokeWidth={0.018} x={-Math.hypot(dimension.end.x - dimension.start.x, dimension.end.z - dimension.start.z) / 2} />
+              <Line points={[0, -0.055, 0, 0.055]} stroke="#244b50" strokeWidth={0.018} x={Math.hypot(dimension.end.x - dimension.start.x, dimension.end.z - dimension.start.z) / 2} />
+              <Rect x={-0.285} y={-0.095} width={0.57} height={0.19} cornerRadius={0.045} fill="#fffdf8" stroke="#305d62" strokeWidth={0.01} opacity={0.96} />
+              <Text
+                x={-0.285}
+                y={-0.057}
+                width={0.57}
+                align="center"
+                text={dimension.label}
+                fontFamily="Arial"
+                fontStyle="bold"
+                fontSize={0.09}
+                fill="#183e43"
+              />
+            </Group>
           </Group>
         );
       })}

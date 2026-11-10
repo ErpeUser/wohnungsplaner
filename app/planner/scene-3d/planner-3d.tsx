@@ -1,14 +1,15 @@
 "use client";
 
-import { Canvas, type RootState } from "@react-three/fiber";
-import { Component, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Canvas, useThree, type RootState } from "@react-three/fiber";
+import { Component, Suspense, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 
-import type { PlannerDocumentV3 } from "../domain/types.ts";
+import type { PlannerDocumentV3, Point2 } from "../domain/types.ts";
 import { PlannerArchitecture } from "./architecture.tsx";
-import { CameraController, dispatchWalkCommand, type CameraMode } from "./camera-controller.tsx";
+import { CameraController, createOrbitPose, dispatchWalkCommand, orbitFovForRoom, type CameraMode } from "./camera-controller.tsx";
 import { Furniture3D } from "./furniture.tsx";
 import { PlannerLighting } from "./lighting.tsx";
+import { PLANNER_TEXTURE_READY_EVENT } from "./materials.ts";
 import {
   chooseQualityTier,
   detectThreeSupport,
@@ -16,7 +17,14 @@ import {
   type QualityTier,
   type ThreeSupport,
 } from "./quality.ts";
-import { createSceneModel } from "./scene-model.ts";
+import { createSceneModel, derivePerspectiveCutaway, type PerspectiveCutaway } from "./scene-model.ts";
+
+const EMPTY_CUTAWAY: PerspectiveCutaway = {
+  hiddenWallIds: [],
+  hiddenOpeningIds: [],
+  hiddenObjectIds: [],
+  hiddenFixtureIds: [],
+};
 
 export type Planner3DProps = {
   document: PlannerDocumentV3;
@@ -24,6 +32,7 @@ export type Planner3DProps = {
   selectionId: string | null;
   onSelect(id: string | null): void;
   onReturn2D(): void;
+  onToggleDoor?(openingId: string): void;
   cameraMode?: CameraMode;
   quality?: QualityTier;
   supportOverride?: ThreeSupport;
@@ -35,6 +44,7 @@ export function Planner3D({
   selectionId,
   onSelect,
   onReturn2D,
+  onToggleDoor,
   cameraMode = "orbit",
   quality: qualityOverride,
   supportOverride,
@@ -46,7 +56,30 @@ export function Planner3D({
   const tier = useMemo(() => qualityOverride ?? chooseQualityTier(), [qualityOverride]);
   const quality = useMemo(() => qualitySettings(tier), [tier]);
   const scene = useMemo(() => createSceneModel(document, activeRoomId), [activeRoomId, document]);
-  const span = Math.max(scene.bounds.maxX - scene.bounds.minX, scene.bounds.maxZ - scene.bounds.minZ);
+  const orbitPose = useMemo(() => createOrbitPose(scene, activeRoomId), [activeRoomId, scene]);
+  const initialOrbitCamera = useMemo<Point2>(() => {
+    return {
+      x: orbitPose.position[0],
+      z: orbitPose.position[2],
+    };
+  }, [orbitPose]);
+  const [orbitCamera, setOrbitCamera] = useState<Point2>(initialOrbitCamera);
+  const [automaticCutaway, setAutomaticCutaway] = useState(true);
+  const cutawayAvailable = Boolean(activeRoomId) && activeRoomId !== "balkon" && cameraMode === "orbit";
+  const cutawayEnabled = cutawayAvailable && automaticCutaway;
+  const cutaway = useMemo(
+    () => cutawayEnabled ? derivePerspectiveCutaway(scene, orbitCamera, selectionId) : EMPTY_CUTAWAY,
+    [cutawayEnabled, orbitCamera, scene, selectionId],
+  );
+  const updateOrbitCamera = useCallback((next: Point2) => {
+    setOrbitCamera((previous) => (
+      Math.hypot(next.x - previous.x, next.z - previous.z) < 0.015 ? previous : next
+    ));
+  }, []);
+
+  useEffect(() => {
+    setOrbitCamera(initialOrbitCamera);
+  }, [initialOrbitCamera]);
 
   useEffect(() => {
     const canvas = hostRef.current?.querySelector("canvas");
@@ -76,19 +109,36 @@ export function Planner3D({
         dpr={quality.dpr}
         shadows={quality.shadows ? "soft" : false}
         camera={{
-          position: [scene.center[0] + span * 0.72, Math.max(4.8, span * 0.72), scene.center[2] + span * 0.9],
-          fov: 42,
+          position: orbitPose.position,
+          fov: orbitFovForRoom(activeRoomId),
           near: 0.05,
           far: 80,
         }}
         gl={{ antialias: tier !== "low", alpha: false, powerPreference: "high-performance" }}
         onCreated={configureRenderer}
       >
-        <color attach="background" args={["#d9d7d0"]} />
+        <PlannerTextureInvalidator />
+        <color attach="background" args={[activeRoomId === "balkon" ? "#dbe9ed" : "#e4e2dc"]} />
         <Suspense fallback={null}>
           <PlannerLighting quality={quality} scene={scene} />
-          <PlannerArchitecture scene={scene} selectionId={selectionId} onSelect={onSelect} />
-          <Furniture3D scene={scene} selectionId={selectionId} onSelect={onSelect} />
+          <PlannerArchitecture
+            scene={scene}
+            selectionId={selectionId}
+            onSelect={onSelect}
+            onToggleDoor={onToggleDoor}
+            cutaway={cutawayEnabled}
+            walkthrough={cameraMode === "walk"}
+            hiddenWallIds={cutaway.hiddenWallIds}
+            hiddenOpeningIds={cutaway.hiddenOpeningIds}
+            hiddenObjectIds={cutaway.hiddenObjectIds}
+            hiddenFixtureIds={cutaway.hiddenFixtureIds}
+          />
+          <Furniture3D
+            scene={scene}
+            selectionId={selectionId}
+            onSelect={onSelect}
+            hiddenObjectIds={cutaway.hiddenObjectIds}
+          />
         </Suspense>
         <CameraController
           document={document}
@@ -96,30 +146,72 @@ export function Planner3D({
           mode={cameraMode}
           activeRoomId={activeRoomId}
           reducedMotion={reducedMotion}
+          onOrbitCameraChange={updateOrbitCamera}
         />
       </Canvas>
-      <CameraOverlay mode={cameraMode} />
+      <CameraOverlay
+        mode={cameraMode}
+        cutawayAvailable={cutawayAvailable}
+        cutawayEnabled={cutawayEnabled}
+        onToggleCutaway={() => setAutomaticCutaway((current) => !current)}
+      />
       <div className="planner-3d__quality" aria-hidden="true">3D · {tier === "high" ? "Hoch" : tier === "balanced" ? "Ausgewogen" : "Effizient"}</div>
     </div>
   );
 }
 
-function CameraOverlay({ mode }: { mode: CameraMode }) {
+function PlannerTextureInvalidator() {
+  const invalidate = useThree((state) => state.invalidate);
+
+  useEffect(() => {
+    const redraw = () => invalidate();
+    window.addEventListener(PLANNER_TEXTURE_READY_EVENT, redraw);
+    return () => window.removeEventListener(PLANNER_TEXTURE_READY_EVENT, redraw);
+  }, [invalidate]);
+
+  return null;
+}
+
+function CameraOverlay({
+  mode,
+  cutawayAvailable,
+  cutawayEnabled,
+  onToggleCutaway,
+}: {
+  mode: CameraMode;
+  cutawayAvailable: boolean;
+  cutawayEnabled: boolean;
+  onToggleCutaway(): void;
+}) {
   if (mode === "orbit") {
     return (
-      <div className="planner-3d__camera planner-3d__camera--orbit">
-        <button type="button" onClick={() => dispatchWalkCommand("reset")}>Ansicht zurücksetzen</button>
+      <div className="planner-3d__camera planner-3d__camera--orbit" aria-label="3D-Ansicht steuern">
+        <button type="button" aria-label="3D verkleinern" onClick={() => dispatchWalkCommand("zoom-out")}>−</button>
+        <button type="button" aria-label="3D vergrößern" onClick={() => dispatchWalkCommand("zoom-in")}>+</button>
+        <button type="button" aria-label="3D-Ansicht zurücksetzen" onClick={() => dispatchWalkCommand("reset")}>Ansicht zurücksetzen</button>
+        {cutawayAvailable ? (
+          <button
+            type="button"
+            aria-label={cutawayEnabled ? "Automatischen Wandschnitt ausschalten" : "Automatischen Wandschnitt einschalten"}
+            aria-pressed={cutawayEnabled}
+            onClick={onToggleCutaway}
+          >
+            {cutawayEnabled ? "Schnitt · Auto" : "Alle Wände"}
+          </button>
+        ) : null}
       </div>
     );
   }
   return (
     <div className="planner-3d__camera" aria-label="Rundgangsteuerung">
-      <span>Klicken zum Umsehen · WASD zum Gehen</span>
+      <span>Klicken zum Umsehen · WASD zum Gehen · +/− zum Zoomen</span>
       <div>
         <button type="button" aria-label="Vorwärts" onClick={() => dispatchWalkCommand("forward")}>↑</button>
         <button type="button" aria-label="Links" onClick={() => dispatchWalkCommand("left")}>←</button>
         <button type="button" aria-label="Zurück" onClick={() => dispatchWalkCommand("back")}>↓</button>
         <button type="button" aria-label="Rechts" onClick={() => dispatchWalkCommand("right")}>→</button>
+        <button type="button" aria-label="3D verkleinern" onClick={() => dispatchWalkCommand("zoom-out")}>−</button>
+        <button type="button" aria-label="3D vergrößern" onClick={() => dispatchWalkCommand("zoom-in")}>+</button>
         <button type="button" onClick={() => dispatchWalkCommand("reset")}>Start</button>
       </div>
     </div>
@@ -142,9 +234,8 @@ function useReducedMotion() {
 function configureRenderer({ gl }: RootState) {
   gl.outputColorSpace = SRGBColorSpace;
   gl.toneMapping = ACESFilmicToneMapping;
-  gl.toneMappingExposure = 1.05;
-  gl.shadowMap.autoUpdate = false;
-  gl.shadowMap.needsUpdate = true;
+  gl.toneMappingExposure = 1.16;
+  gl.shadowMap.autoUpdate = true;
 }
 
 function ThreeFallback({ message, onReturn2D }: { message: string; onReturn2D(): void }) {

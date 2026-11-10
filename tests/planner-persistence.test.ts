@@ -8,6 +8,7 @@ import {
   PLANNER_IMPORT_SOURCE_BACKUP_KEY,
   PLANNER_STORAGE_KEY,
   createLocalStoragePlannerRepository,
+  upgradeRetiredDiningGroup,
   type PlannerRepository,
 } from "../app/planner/store/persistence.ts";
 import { createPlannerStore } from "../app/planner/store/planner-store.ts";
@@ -23,6 +24,188 @@ test("loads the default from empty storage and accepts a valid V3 document", () 
   const result = repository.load();
   assert.equal(result.document.name, "Mein Entwurf");
   assert.deepEqual(result.warnings, []);
+});
+
+test("replaces the two retired Amber placeholders in a live document with three Kaleo chairs", () => {
+  const stale = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
+  stale.placements = stale.placements.filter((item) => item.catalogId !== "chair-kaleo-chenille-beige");
+  stale.placements.push(
+    {
+      id: "living-amber-chair-west",
+      roomId: "wohnkueche",
+      catalogId: "chair-amber-chenille-beige",
+      position: { x: 1.72, z: 5.47 },
+      rotation: 270,
+      size: { width: 0.57, depth: 0.63, height: 0.85 },
+      groupId: "living-dining-group",
+    },
+    {
+      id: "living-amber-chair-east",
+      roomId: "wohnkueche",
+      catalogId: "chair-amber-chenille-beige",
+      position: { x: 3.28, z: 5.47 },
+      rotation: 90,
+      size: { width: 0.57, depth: 0.63, height: 0.85 },
+      groupId: "living-dining-group",
+    },
+  );
+
+  const upgraded = upgradeRetiredDiningGroup(stale);
+  const chairs = upgraded.placements.filter((item) => item.catalogId === "chair-kaleo-chenille-beige");
+
+  assert.notEqual(upgraded, stale);
+  assert.equal(upgraded.placements.some((item) => item.catalogId === "chair-amber-chenille-beige"), false);
+  assert.equal(chairs.length, 3);
+  assert.deepEqual(
+    chairs.map((item) => item.id).toSorted(),
+    [
+      "living-kaleo-chair-east",
+      "living-kaleo-chair-south",
+      "living-kaleo-chair-west",
+    ],
+  );
+  assert.equal(upgradeRetiredDiningGroup(upgraded), upgraded);
+});
+
+test("removes the refrigerator-side Kaleo chair from an already open four-chair layout", () => {
+  const stale = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
+  stale.placements.push({
+    id: "living-kaleo-chair-north",
+    roomId: "wohnkueche",
+    catalogId: "chair-kaleo-chenille-beige",
+    position: { x: 2.5, z: 4.77 },
+    rotation: 0,
+    size: { width: 0.63, depth: 0.64, height: 0.87 },
+    groupId: "living-dining-group",
+  });
+
+  const upgraded = upgradeRetiredDiningGroup(stale);
+
+  assert.notEqual(upgraded, stale);
+  assert.equal(upgraded.placements.some((item) => item.id === "living-kaleo-chair-north"), false);
+  assert.equal(upgraded.placements.filter((item) => item.catalogId === "chair-kaleo-chenille-beige").length, 3);
+});
+
+test("moves an already open three-chair dining group to the balanced aisle position once", () => {
+  const stale = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
+  const oldPositions = new Map([
+    ["living-bozan-table", { x: 2.5, z: 5.47 }],
+    ["living-kaleo-chair-west", { x: 1.8, z: 5.47 }],
+    ["living-kaleo-chair-east", { x: 3.2, z: 5.47 }],
+    ["living-kaleo-chair-south", { x: 2.5, z: 6.17 }],
+  ]);
+  for (const item of stale.placements) {
+    const old = oldPositions.get(item.id);
+    if (old) item.position = old;
+  }
+
+  const upgraded = upgradeRetiredDiningGroup(stale);
+
+  assert.notEqual(upgraded, stale);
+  assert.deepEqual(upgraded.placements.find((item) => item.id === "living-bozan-table")?.position, { x: 2.4, z: 5.39 });
+  assert.deepEqual(upgraded.placements.find((item) => item.id === "living-kaleo-chair-east")?.position, { x: 3.1, z: 5.39 });
+  assert.equal(upgradeRetiredDiningGroup(upgraded), upgraded);
+});
+
+test("moves the current dining group toward the refrigerator and kitchen once", () => {
+  const stale = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
+  const previousPositions = new Map([
+    ["living-bozan-table", { x: 2.35, z: 5.42 }],
+    ["living-kaleo-chair-west", { x: 1.65, z: 5.42 }],
+    ["living-kaleo-chair-east", { x: 3.05, z: 5.42 }],
+    ["living-kaleo-chair-south", { x: 2.35, z: 6.12 }],
+  ]);
+  for (const item of stale.placements) {
+    const previous = previousPositions.get(item.id);
+    if (previous) item.position = previous;
+  }
+
+  const upgraded = upgradeRetiredDiningGroup(stale);
+
+  assert.notEqual(upgraded, stale);
+  assert.deepEqual(upgraded.placements.find((item) => item.id === "living-bozan-table")?.position, { x: 2.4, z: 5.39 });
+  assert.deepEqual(upgraded.placements.find((item) => item.id === "living-kaleo-chair-south")?.position, { x: 2.4, z: 6.09 });
+  assert.equal(upgradeRetiredDiningGroup(upgraded), upgraded);
+});
+
+test("rebases an older Wohnung save onto corrected architecture without losing user furniture", () => {
+  const old = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
+  old.builtIns = old.builtIns.filter((item) => item.catalogId !== "living-tv" && item.catalogId !== "living-floating-cabinet");
+  old.fixtures = old.fixtures.filter((item) => item.kind !== "blind-control");
+  old.rooms.find((room) => room.id === "zimmer1")!.surfaces.floor = "screen-black";
+  old.placements.push({
+    id: "user-living-sofa",
+    roomId: "wohnkueche",
+    catalogId: "sofa-3seat",
+    position: { x: 2.2, z: 6.8 },
+    rotation: 0,
+    size: { width: 1.8, depth: 0.8, height: 0.82 },
+  });
+  const storage = new MemoryStorage({ [PLANNER_STORAGE_KEY]: JSON.stringify(old) });
+  const result = createLocalStoragePlannerRepository(storage, fixedClock).load();
+
+  assert.ok(result.document.builtIns.some((item) => item.catalogId === "living-tv"));
+  assert.ok(result.document.fixtures.some((item) => item.kind === "blind-control"));
+  assert.ok(result.document.placements.some((item) => item.id === "user-living-sofa"));
+  assert.equal(result.document.rooms.find((room) => room.id === "zimmer1")?.surfaces.floor, "parquet-oak-narrow");
+  assert.ok(result.warnings.some((warning) => /aktualisiert/i.test(warning)));
+});
+
+test("moves an old active Loggia view to the merged balcony room", () => {
+  const old = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
+  const balcony = old.rooms.find((room) => room.id === "balkon")!;
+  old.rooms.push({ ...structuredClone(balcony), id: "loggia", name: "Loggia", area: 2.23 });
+  old.builtIns = old.builtIns.filter((item) => item.id !== "builtin-kitchen-fridge");
+  old.viewPreferences.activeRoomId = "loggia";
+  const storage = new MemoryStorage({ [PLANNER_STORAGE_KEY]: JSON.stringify(old) });
+
+  const result = createLocalStoragePlannerRepository(storage, fixedClock).load();
+
+  assert.equal(result.document.viewPreferences.activeRoomId, "balkon");
+  assert.equal(result.document.rooms.some((room) => room.id === "loggia"), false);
+});
+
+test("refreshes a moved hall intercom from the corrected photo-based position", () => {
+  const old = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
+  const intercom = old.fixtures.find((item) => item.id === "fixture-hall-intercom")!;
+  intercom.position.z = 7.8;
+  const storage = new MemoryStorage({ [PLANNER_STORAGE_KEY]: JSON.stringify(old) });
+
+  const result = createLocalStoragePlannerRepository(storage, fixedClock).load();
+
+  assert.equal(
+    result.document.fixtures.find((item) => item.id === "fixture-hall-intercom")?.position.z,
+    DEFAULT_APARTMENT_DOCUMENT.fixtures.find((item) => item.id === "fixture-hall-intercom")?.position.z,
+  );
+  assert.ok(result.warnings.some((warning) => /aktualisiert/i.test(warning)));
+});
+
+test("refreshes an older solid hall-to-living door to the photographed glass door", () => {
+  const old = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
+  const door = old.openings.find((item) => item.id === "hall-living-door")! as typeof old.openings[number] & { visualStyle?: string };
+  delete door.visualStyle;
+  const storage = new MemoryStorage({ [PLANNER_STORAGE_KEY]: JSON.stringify(old) });
+
+  const result = createLocalStoragePlannerRepository(storage, fixedClock).load();
+  const refreshed = result.document.openings.find((item) => item.id === "hall-living-door") as typeof door;
+
+  assert.equal(refreshed.visualStyle, "glass-clear");
+  assert.ok(result.warnings.some((warning) => /aktualisiert/i.test(warning)));
+});
+
+test("refreshes an older bathroom door to the requested half-open presentation once", () => {
+  const old = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
+  const door = old.openings.find((item) => item.id === "hall-bath-door")! as typeof old.openings[number] & { visualOpenFraction?: number };
+  delete door.visualOpenFraction;
+  old.doorStates["hall-bath-door"] = "closed";
+  const storage = new MemoryStorage({ [PLANNER_STORAGE_KEY]: JSON.stringify(old) });
+
+  const result = createLocalStoragePlannerRepository(storage, fixedClock).load();
+  const refreshed = result.document.openings.find((item) => item.id === "hall-bath-door") as typeof door;
+
+  assert.equal(refreshed.visualOpenFraction, 0.5);
+  assert.equal(result.document.doorStates["hall-bath-door"], "open");
+  assert.ok(result.warnings.some((warning) => /aktualisiert/i.test(warning)));
 });
 
 test("migrates raw v2 data and reports corrupted or schema-invalid data", () => {

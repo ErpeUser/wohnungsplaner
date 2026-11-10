@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <rect width="256" height="256" fill="#eee7da"/>
+  <filter id="soft"><feGaussianBlur stdDeviation="1.1"/></filter>
+  <g fill="none" stroke-linecap="round" filter="url(#soft)">
+    <path d="M-8 18 Q26 4 58 19 T124 17 T194 19 T264 14" stroke="#fffaf0" stroke-width="8"/>
+    <path d="M-12 44 Q23 29 60 46 T129 42 T199 45 T268 40" stroke="#d8cdbd" stroke-width="7"/>
+    <path d="M-9 70 Q28 55 61 72 T128 68 T197 71 T265 66" stroke="#fbf5e9" stroke-width="9"/>
+    <path d="M-11 98 Q27 82 63 99 T130 95 T199 99 T267 93" stroke="#d6cab9" stroke-width="7"/>
+    <path d="M-10 126 Q25 110 60 128 T128 123 T198 127 T266 120" stroke="#fff9ed" stroke-width="8"/>
+    <path d="M-8 154 Q27 138 63 155 T131 151 T201 154 T267 148" stroke="#d9cebe" stroke-width="7"/>
+    <path d="M-10 182 Q24 166 60 184 T129 179 T199 183 T266 176" stroke="#faf3e7" stroke-width="9"/>
+    <path d="M-12 210 Q26 194 62 212 T130 207 T200 211 T269 204" stroke="#d4c8b7" stroke-width="7"/>
+    <path d="M-10 238 Q25 222 61 240 T129 235 T198 239 T266 232" stroke="#fffaf0" stroke-width="8"/>
+  </g>
+  <g stroke="#f7f0e5" stroke-width="1.5" opacity=".8">
+    <path d="M18 0l10 256M52 0l-7 256M91 0l9 256M131 0l-5 256M170 0l8 256M214 0l-9 256M244 0l7 256"/>
+  </g>
+</svg>

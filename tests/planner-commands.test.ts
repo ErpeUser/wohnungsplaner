@@ -42,6 +42,52 @@ test("accepts passage warnings without blocking the command", () => {
   assert.ok(result.warnings.some((hit) => hit.kind === "door-passage"));
 });
 
+test("changes only a placement material without revalidating its unchanged geometry", () => {
+  const original = commandDocument();
+  original.placements[0] = {
+    ...original.placements[0],
+    position: { x: 3.4, z: 3.4 },
+    materialVariants: { main: "rug-old-pattern" },
+  };
+
+  const result = applyPlannerCommand(original, {
+    type: "setPlacementMaterial",
+    placementId: "chair",
+    slot: "main",
+    materialId: "rug-new-color",
+  });
+
+  assert.equal(result.error, undefined);
+  assert.deepEqual(result.document.placements[0].position, { x: 3.4, z: 3.4 });
+  assert.deepEqual(result.document.placements[0].size, original.placements[0].size);
+  assert.equal(result.document.placements[0].materialVariants?.main, "rug-new-color");
+});
+
+test("moves every member of a linked furniture group by the same delta", () => {
+  const original = commandDocument();
+  original.placements = [
+    { ...placement("table", "room-a", { x: 1.5, z: 2 }, 0.8, 0.8), groupId: "dining-group" },
+    { ...placement("chair-left", "room-a", { x: 0.95, z: 2 }, 0.4, 0.4), groupId: "dining-group" },
+    { ...placement("chair-right", "room-a", { x: 2.05, z: 2 }, 0.4, 0.4), groupId: "dining-group" },
+    placement("lamp", "room-a", { x: 3.4, z: 1 }, 0.2, 0.2),
+  ];
+
+  const moved = applyPlannerCommand(original, {
+    type: "movePlacement",
+    placementId: "chair-left",
+    position: { x: 1.15, z: 2.3 },
+  });
+
+  assert.equal(moved.error, undefined);
+  assert.deepEqual(moved.document.placements.map((item) => item.position), [
+    { x: 1.7, z: 2.3 },
+    { x: 1.15, z: 2.3 },
+    { x: 2.25, z: 2.3 },
+    { x: 3.4, z: 1 },
+  ]);
+  assert.deepEqual(original.placements[0].position, { x: 1.5, z: 2 });
+});
+
 test("adds, resizes, rotates, and removes movable placements", () => {
   const original = commandDocument();
   const addedItem = placement("table", "room-a", { x: 2.5, z: 2.8 }, 0.6, 0.6);
@@ -233,6 +279,7 @@ function commandDocument(): PlannerDocumentV3 {
       sill: 0,
       kind: "door",
       hinge: "start",
+      swingDirection: 1,
       swingDegrees: 90,
     }],
     builtIns: [{

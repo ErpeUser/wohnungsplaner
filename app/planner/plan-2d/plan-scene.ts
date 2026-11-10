@@ -30,7 +30,9 @@ export type PlanOpeningDescriptor = {
   wallId: string;
   kind: PlannerOpening["kind"];
   hinge: PlannerOpening["hinge"];
+  swingDirection: PlannerOpening["swingDirection"];
   swingDegrees: number;
+  visualStyle?: PlannerOpening["visualStyle"];
   width: number;
   start: Point2;
   end: Point2;
@@ -42,6 +44,8 @@ export type PlanObjectDescriptor = {
   label: string;
   roomId: string;
   kind: string;
+  catalogId?: string;
+  materialId?: string;
   points: Point2[];
   locked: boolean;
 };
@@ -56,9 +60,12 @@ export type PlanFixtureDescriptor = {
 
 export type PlanDimensionDescriptor = {
   id: string;
+  wallStart: Point2;
+  wallEnd: Point2;
   start: Point2;
   end: Point2;
   label: string;
+  rotation: number;
 };
 
 export type PlanGuideDescriptor = {
@@ -128,7 +135,10 @@ export function createPlanScene(
     }));
   const wallIds = new Set(walls.map((wall) => wall.id));
   const openings = document.openings
-    .filter((opening) => wallIds.has(opening.wallId))
+    .filter((opening) => (
+      wallIds.has(opening.wallId)
+      || Boolean(options.activeRoomId && opening.roomIds?.includes(options.activeRoomId))
+    ))
     .map((opening) => {
       const segment = openingSegment(document, opening);
       return {
@@ -137,7 +147,9 @@ export function createPlanScene(
         wallId: opening.wallId,
         kind: opening.kind,
         hinge: opening.hinge,
+        swingDirection: opening.swingDirection,
         swingDegrees: opening.swingDegrees,
+        visualStyle: opening.visualStyle,
         width: opening.width,
         start: segment.start,
         end: segment.end,
@@ -151,6 +163,8 @@ export function createPlanScene(
       label: item.label,
       roomId: item.roomId,
       kind: item.kind,
+      catalogId: item.catalogId,
+      materialId: item.materialVariants?.main ?? item.materialVariants?.color,
       points: placementPolygon(item),
       locked: true,
     }));
@@ -166,12 +180,7 @@ export function createPlanScene(
       }))
     : [];
   const dimensions = options.overlays.dimensions
-    ? walls.map((wall) => ({
-      id: `dimension-${wall.id}`,
-      start: wall.start,
-      end: wall.end,
-      label: `${Math.round(deriveWallLength(wall) * 100)} cm`,
-    }))
+    ? rooms.flatMap((room) => createRoomDimensions(room))
     : [];
 
   return {
@@ -184,26 +193,28 @@ export function createPlanScene(
     fixtures,
     dimensions,
     guides: options.guides ?? [],
-    bounds: boundsFromRooms(rooms),
+    bounds: boundsFromScene(rooms, openings, dimensions),
   };
 }
 
 export function fitPlanViewport(
   scene: Pick<PlanScene, "bounds">,
-  viewport: { width: number; height: number; padding?: number },
+  viewport: { width: number; height: number; padding?: number; topInset?: number; bottomInset?: number },
 ): PlanViewport {
   const padding = viewport.padding ?? 44;
+  const topInset = Math.max(0, viewport.topInset ?? 0);
+  const bottomInset = Math.max(0, viewport.bottomInset ?? 0);
   const worldWidth = Math.max(0.1, scene.bounds.maxX - scene.bounds.minX);
   const worldHeight = Math.max(0.1, scene.bounds.maxZ - scene.bounds.minZ);
   const availableWidth = Math.max(1, viewport.width - padding * 2);
-  const availableHeight = Math.max(1, viewport.height - padding * 2);
+  const availableHeight = Math.max(1, viewport.height - topInset - bottomInset - padding * 2);
   const scale = Math.min(availableWidth / worldWidth, availableHeight / worldHeight);
   const renderedWidth = worldWidth * scale;
   const renderedHeight = worldHeight * scale;
 
   return {
     x: (viewport.width - renderedWidth) / 2 - scene.bounds.minX * scale,
-    y: (viewport.height - renderedHeight) / 2 - scene.bounds.minZ * scale,
+    y: topInset + padding + (availableHeight - renderedHeight) / 2 - scene.bounds.minZ * scale,
     scale,
     minScale: scale * 0.35,
     maxScale: scale * 6,
@@ -228,6 +239,56 @@ export function zoomPlanViewportAtPoint(
   };
 }
 
+export function zoomPlanViewportAtCenter(
+  viewport: PlanViewport,
+  size: { width: number; height: number },
+  factor: number,
+): PlanViewport {
+  return zoomPlanViewportAtPoint(
+    viewport,
+    { x: size.width / 2, z: size.height / 2 },
+    factor,
+  );
+}
+
+export function planViewportZoomPercent(viewport: PlanViewport) {
+  const fitScale = viewport.minScale / 0.35;
+  return Math.round(viewport.scale / fitScale * 100);
+}
+
+export function resizePlanViewport(
+  viewport: PlanViewport,
+  previousSize: { width: number; height: number },
+  nextSize: { width: number; height: number },
+  scene: Pick<PlanScene, "bounds">,
+  insets: { topInset?: number; bottomInset?: number; padding?: number } = {},
+): PlanViewport {
+  const topInset = Math.max(0, insets.topInset ?? 0);
+  const bottomInset = Math.max(0, insets.bottomInset ?? 0);
+  const previousCenterY = topInset + (previousSize.height - topInset - bottomInset) / 2;
+  const nextCenterY = topInset + (nextSize.height - topInset - bottomInset) / 2;
+  const worldCenter = {
+    x: (previousSize.width / 2 - viewport.x) / viewport.scale,
+    z: (previousCenterY - viewport.y) / viewport.scale,
+  };
+  const previousFitScale = viewport.minScale / 0.35;
+  const zoomRatio = viewport.scale / previousFitScale;
+  const nextFit = fitPlanViewport(scene, { ...nextSize, ...insets });
+  const scale = clamp(nextFit.scale * zoomRatio, nextFit.minScale, nextFit.maxScale);
+  return {
+    ...nextFit,
+    scale,
+    x: nextSize.width / 2 - worldCenter.x * scale,
+    y: nextCenterY - worldCenter.z * scale,
+  };
+}
+
+export function wheelZoomFactor(deltaY: number, deltaMode = 0) {
+  const unit = deltaMode === 1 ? 16 : deltaMode === 2 ? 800 : 1;
+  const normalizedDelta = clamp(deltaY * unit, -240, 240);
+  return Math.exp(-normalizedDelta * 0.002);
+}
+
 export function worldToScreen(point: Point2, viewport: PlanViewport): Point2 {
   return {
     x: viewport.x + point.x * viewport.scale,
@@ -235,8 +296,16 @@ export function worldToScreen(point: Point2, viewport: PlanViewport): Point2 {
   };
 }
 
-function boundsFromRooms(rooms: PlanRoomDescriptor[]): PlanBounds {
-  const points = rooms.flatMap((room) => room.points);
+function boundsFromScene(
+  rooms: PlanRoomDescriptor[],
+  openings: PlanOpeningDescriptor[],
+  dimensions: PlanDimensionDescriptor[],
+): PlanBounds {
+  const points = [
+    ...rooms.flatMap((room) => room.points),
+    ...openings.flatMap((opening) => [opening.start, opening.end]),
+    ...dimensions.flatMap((dimension) => [dimension.start, dimension.end]),
+  ];
   if (points.length === 0) return { minX: 0, minZ: 0, maxX: 1, maxZ: 1 };
   return {
     minX: Math.min(...points.map((point) => point.x)),
@@ -244,6 +313,42 @@ function boundsFromRooms(rooms: PlanRoomDescriptor[]): PlanBounds {
     maxX: Math.max(...points.map((point) => point.x)),
     maxZ: Math.max(...points.map((point) => point.z)),
   };
+}
+
+function createRoomDimensions(room: PlanRoomDescriptor): PlanDimensionDescriptor[] {
+  if (room.points.length < 2) return [];
+  const center = room.points.reduce(
+    (sum, point) => ({ x: sum.x + point.x / room.points.length, z: sum.z + point.z / room.points.length }),
+    { x: 0, z: 0 },
+  );
+  const offset = 0.22;
+
+  return room.points.map((wallStart, index) => {
+    const wallEnd = room.points[(index + 1) % room.points.length];
+    const dx = wallEnd.x - wallStart.x;
+    const dz = wallEnd.z - wallStart.z;
+    const length = Math.hypot(dx, dz);
+    const midpoint = { x: (wallStart.x + wallEnd.x) / 2, z: (wallStart.z + wallEnd.z) / 2 };
+    const normal = { x: -dz / length, z: dx / length };
+    const positiveCandidate = { x: midpoint.x + normal.x * offset, z: midpoint.z + normal.z * offset };
+    const negativeCandidate = { x: midpoint.x - normal.x * offset, z: midpoint.z - normal.z * offset };
+    const positiveDistance = Math.hypot(positiveCandidate.x - center.x, positiveCandidate.z - center.z);
+    const negativeDistance = Math.hypot(negativeCandidate.x - center.x, negativeCandidate.z - center.z);
+    const outward = positiveDistance >= negativeDistance ? normal : { x: -normal.x, z: -normal.z };
+    let rotation = Math.atan2(dz, dx) * 180 / Math.PI;
+    if (rotation > 90) rotation -= 180;
+    if (rotation <= -90) rotation += 180;
+
+    return {
+      id: `dimension-${room.id}-${index}`,
+      wallStart,
+      wallEnd,
+      start: { x: wallStart.x + outward.x * offset, z: wallStart.z + outward.z * offset },
+      end: { x: wallEnd.x + outward.x * offset, z: wallEnd.z + outward.z * offset },
+      label: `${Math.round(length * 100)} cm`,
+      rotation,
+    };
+  });
 }
 
 function clamp(value: number, minimum: number, maximum: number) {
