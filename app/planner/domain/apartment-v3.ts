@@ -132,7 +132,7 @@ const builtIns: PlannerBuiltIn[] = [
     confidence: "estimated",
     notes: ["Festgelegt: Ø 60 cm, mittig über dem 60-cm-Waschtisch; rundum ausreichend Wandabstand für Beleuchtung und Reinigung."],
   }),
-  builtIn("bath-mat", "Badteppich · Waffelstruktur Beige · 122 × 61 cm", "bad", "other", "bath-mat", -1.3, 8.78, 1.22, 0.61, 0.018, 0, "temu-bath-rug-woven", 0.012, {
+  builtIn("bath-mat", "Badteppich · ruhige Creme-Textur · 122 × 61 cm", "bad", "other", "bath-mat", -1.25, 8.8, 1.22, 0.61, 0.018, 90, "bath-mat-shaggy-cream", 0.012, {
     source: "Vom Nutzer bereitgestelltes Temu-Produktbild · Art. 606121368598635",
     confidence: "confirmed",
     notes: ["Badteppich exakt 122 × 61 cm, Florhöhe 1 cm; vor Wanne und Waschtisch mit freiem Türschwenk platziert."],
@@ -142,15 +142,15 @@ const builtIns: PlannerBuiltIn[] = [
     confidence: "estimated",
     notes: ["Temu-Variante Brilliant Silber, verstellbar 171–210 cm; im Bad auf 205 cm eingestellt und über die vollständige Wannenbreite geführt."],
   }),
-  builtIn("bath-shower-curtain", "Duschvorhang Nordic Leinenoptik · Beige · 180 × 200 cm", "bad", "other", "bath-shower-curtain", -1.64, 9.19, 1.8, 0.018, 2.0, -90, "shower-curtain-linen-beige", 0.54, {
-    source: "Badewannenmaß und Inspirationsbild",
-    confidence: "estimated",
-    notes: ["Temu-Variante Beige, Leinenoptik mit 12 Haken und Quasten; 180 × 200 cm, mit natürlicher Faltenstaffelung unter der 205-cm-Stange."],
+  builtIn("bath-shower-curtain", "Duschvorhang Stoff Beige · 180 × 200 cm", "bad", "other", "bath-shower-curtain", -1.64, 9.19, 1.8, 0.018, 2.0, -90, "temu-shower-curtain-beige", 0.54, {
+    source: "Vom Nutzer bereitgestelltes Temu-Produktbild · Art. 601100062257123",
+    confidence: "confirmed",
+    notes: ["12 Metallhaken · beige Stoffvorhang 180 × 200 cm; unter der vorhandenen 205-cm-Stange mit ruhiger Faltenstaffelung eingeplant."],
   }),
   builtIn("wc-pan", "Wand-WC", "wc", "sanitary", "sanitary-wall-wc", -1.97, 4.4, 0.38, 0.58, 0.42, 0, "#f5f4f0", 0.18),
   builtIn("wc-flush", "WC-Betätigungsplatte", "wc", "sanitary", "wc-flush-plate", -1.97, 4.115, 0.24, 0.035, 0.16, 0, "metal-satin", 1.02),
   builtIn("wc-revision", "WC-Revisionsfeld", "wc", "sanitary", "wc-revision-panel", -1.97, 4.11, 0.42, 0.03, 0.3, 0, "tile-white-rect", 1.68),
-  builtIn("wc-mat", "WC-Teppich · Waffelstruktur Beige · 77 × 46 cm", "wc", "other", "wc-mat", -1.97, 5.27, 0.77, 0.46, 0.018, 0, "temu-bath-rug-woven", 0.012, {
+  builtIn("wc-mat", "WC-Teppich · ruhige Creme-Textur · 77 × 46 cm", "wc", "other", "wc-mat", -1.97, 5.25, 0.77, 0.46, 0.018, 90, "bath-mat-shaggy-cream", 0.012, {
     source: "Vom Nutzer bereitgestelltes Temu-Produktbild · Art. 606121368598635",
     confidence: "confirmed",
     notes: ["WC-Teppich exakt 77 × 46 cm, Florhöhe 1 cm; vor dem Wand-WC auf der freien Bodenfläche platziert."],
@@ -249,9 +249,9 @@ const DECORATIVE_BUILT_IN_IDS = new Set([
 ]);
 
 const finalBuiltIns = builtIns.map((item) => item.id === "builtin-bath-mat"
-  ? { ...item, materialVariants: { ...item.materialVariants, main: "temu-bath-rug-woven" }, collision: "decorative" as const }
+  ? { ...item, position: { x: -1.25, z: 8.8 }, rotation: 90, materialVariants: { ...item.materialVariants, main: "bath-mat-shaggy-cream" }, collision: "decorative" as const }
   : item.id === "builtin-wc-mat"
-    ? { ...item, materialVariants: { ...item.materialVariants, main: "temu-bath-rug-woven" }, collision: "decorative" as const }
+    ? { ...item, position: { x: -1.97, z: 5.25 }, rotation: 90, materialVariants: { ...item.materialVariants, main: "bath-mat-shaggy-cream" }, collision: "decorative" as const }
   : item.id === "builtin-bath-basin-cabinet-scout"
     ? { ...item, position: { ...item.position, z: 9.8 } }
     : item.id === "builtin-bath-washer-cabinet-scout"
@@ -261,7 +261,7 @@ const finalBuiltIns = builtIns.map((item) => item.id === "builtin-bath-mat"
         : item.id === "builtin-bath-shower-rod"
           ? { ...item, label: "Duschvorhangstange · Brilliant Silber · 171–210 cm", position: { ...item.position, z: 9.15 }, size: { ...item.size, width: 2.05 }, materialVariants: { ...item.materialVariants, main: "chrome-polished" } }
           : item.id === "builtin-bath-shower-curtain"
-            ? { ...item, label: "Duschvorhang Nordic Leinenoptik · Beige · 180 × 200 cm", position: { ...item.position, z: 9.15 }, size: { ...item.size, width: 1.8, height: 2.0 }, materialVariants: { ...item.materialVariants, main: "shower-curtain-linen-beige" } }
+            ? { ...item, label: "Duschvorhang Stoff Beige · 180 × 200 cm", position: { ...item.position, z: 9.15 }, size: { ...item.size, width: 1.8, height: 2.0 }, materialVariants: { ...item.materialVariants, main: "temu-shower-curtain-beige" } }
   : { ...item, collision: DECORATIVE_BUILT_IN_IDS.has(item.id) ? "decorative" as const : "blocking" as const });
 
 const fixtures: PlannerFixture[] = [

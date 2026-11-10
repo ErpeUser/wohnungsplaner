@@ -152,7 +152,7 @@ test("keeps the supplied Temu bath dimensions and the selected vintage wallpaper
   assert.deepEqual(rod?.size, { width: 2.05, depth: 0.03, height: 0.03 });
   assert.equal(rod?.materialVariants?.main, "chrome-polished");
   assert.deepEqual(curtain?.size, { width: 1.8, depth: 0.018, height: 2 });
-  assert.equal(curtain?.materialVariants?.main, "shower-curtain-linen-beige");
+  assert.equal(curtain?.materialVariants?.main, "temu-shower-curtain-beige");
   assert.equal(accentWall?.materialVariants?.main, "wallpaper-vintage-brown-fabric");
 });
 
@@ -164,12 +164,28 @@ test("places the supplied woven rugs in the bathroom and WC at measured sizes", 
   assert.ok(wcMat);
   assert.deepEqual(bathMat.size, { width: 1.22, depth: 0.61, height: 0.018 });
   assert.deepEqual(wcMat.size, { width: 0.77, depth: 0.46, height: 0.018 });
-  assert.equal(bathMat.materialVariants?.main, "temu-bath-rug-woven");
-  assert.equal(wcMat.materialVariants?.main, "temu-bath-rug-woven");
+  assert.deepEqual(wcMat.position, { x: -1.97, z: 5.25 });
+  assert.equal(wcMat.rotation, 90);
+  assert.equal(bathMat.materialVariants?.main, "bath-mat-shaggy-cream");
+  assert.equal(wcMat.materialVariants?.main, "bath-mat-shaggy-cream");
   assert.equal(bathMat.collision, "decorative");
   assert.equal(wcMat.collision, "decorative");
   assert.ok(bathMat.metadata?.notes?.some((note) => /122.*61 cm/i.test(note)));
   assert.ok(wcMat.metadata?.notes?.some((note) => /77.*46 cm/i.test(note)));
+});
+
+test("keeps the bathroom rug aligned like the original plan graphic and records the selected shower curtain", () => {
+  const bathMat = DEFAULT_APARTMENT_DOCUMENT.builtIns.find((item) => item.catalogId === "bath-mat");
+  const curtain = DEFAULT_APARTMENT_DOCUMENT.builtIns.find((item) => item.catalogId === "bath-shower-curtain");
+
+  assert.ok(bathMat);
+  assert.ok(curtain);
+  assert.deepEqual(bathMat.position, { x: -1.25, z: 8.8 });
+  assert.equal(bathMat.rotation, 90);
+  assert.equal(bathMat.materialVariants?.main, "bath-mat-shaggy-cream");
+  assert.deepEqual(curtain.size, { width: 1.8, depth: 0.018, height: 2 });
+  assert.equal(curtain.materialVariants?.main, "temu-shower-curtain-beige");
+  assert.ok(curtain.metadata?.notes?.some((note) => /12 Metallhaken.*180.*200 cm/i.test(note)));
 });
 
 test("includes the photographed finishes and requested fixed living-room composition", () => {
