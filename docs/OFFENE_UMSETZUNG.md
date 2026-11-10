@@ -7,10 +7,12 @@ Stand: 2026-11-10
 Die folgenden Angaben sind der aktuelle, nach dieser Runde verifizierte Stand
 und ersetzen ältere Zwischenstände weiter unten im Dokument:
 
-- Remote-HEAD auf `main`: `1f10176dabced5d2512929b57d54f7be950feb6e`.
-- `main` ist fünf Commits vor `0a8a4416243aece82a02190e635f8fc7053b4525`,
-  ohne Rückstand; es gibt keine offenen oder geschlossenen PRs und nur den
-  Branch `main`.
+- Implementierungs-Commit dieser Finalrunde: `1f10176dabced5d2512929b57d54f7be950feb6e`;
+  die danach verifizierte Doku-Synchronisierung steht auf `c3497564344e75e623537c8289e1950b2f47a85e`.
+- Zum Zeitpunkt dieser Verifikation war `main` sechs Commits vor
+  `0a8a4416243aece82a02190e635f8fc7053b4525`, ohne Rückstand; es gab keine
+  offenen oder geschlossenen PRs und nur den Branch `main`. Der abschließende
+  Doku-Commit erhöht diesen Abstand um einen weiteren Commit.
 - Direkt implementiert: 5-MB-/MIME-/Magic-Byte-Importschutz inklusive WebP,
   sichere SVG-Prüfung, korrigierbare Herkunft/Confidence, persistierbares
   Asset-Register in V3, Register-/Remove-Commands, Schema- und Reload-Tests,
