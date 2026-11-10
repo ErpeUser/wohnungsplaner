@@ -155,6 +155,20 @@
       "meterScale": 1
     },
     {
+      "id": "product-rug-temu-shaggy-white",
+      "type": "texture",
+      "path": "/planner-assets/products/temu-shaggy-rug-white-607474249752115.svg",
+      "mediaType": "image/svg+xml",
+      "license": {
+        "spdx": "CC0-1.0",
+        "sourceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "note": "Project-authored procedural product reference texture; no merchant image copied."
+      },
+      "sha256": "cc5861f0b5098c81ab51464bf6486e6f3c966706767431320547cd351ae9eedd",
+      "byteLength": 1378,
+      "meterScale": 1
+    },
+    {
       "id": "environment-studio",
       "type": "environment",
       "path": "/planner-assets/environment/studio-soft.hdr",
