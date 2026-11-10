@@ -245,6 +245,18 @@ function BuiltInDetail({ item }: { item: PlanObjectDescriptor }) {
   if (id === "bath-mat" || id === "wc-mat") {
     return <Line points={[box.minX, box.minZ, box.maxX, box.minZ, box.maxX, box.maxZ, box.minX, box.maxZ]} closed stroke="#b79a78" strokeWidth={0.03} dash={[0.06, 0.025]} listening={false} />;
   }
+  if (id === "bath-towel-hook-rail") {
+    const centerX = (box.minX + box.maxX) / 2;
+    const centerZ = (box.minZ + box.maxZ) / 2;
+    const runsAlongZ = depth > width;
+    const hookSpacing = (runsAlongZ ? depth : width) * 0.34;
+    return <Group listening={false}>
+      {runsAlongZ
+        ? <Line points={[centerX, box.minZ, centerX, box.maxZ]} stroke="#a7aaa6" strokeWidth={0.06} />
+        : <Line points={[box.minX, centerZ, box.maxX, centerZ]} stroke="#a7aaa6" strokeWidth={0.06} />}
+      {[-1, 0, 1].map((index) => <Circle key={index} x={runsAlongZ ? centerX : centerX + index * hookSpacing} y={runsAlongZ ? centerZ + index * hookSpacing : centerZ} radius={0.045} fill="#d6d9d5" stroke="#6f7774" strokeWidth={0.014} />)}
+    </Group>;
+  }
   if (id === "bath-shower-rod") {
     const centerZ = (box.minZ + box.maxZ) / 2;
     return <Group listening={false}>

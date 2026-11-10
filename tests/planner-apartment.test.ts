@@ -188,6 +188,19 @@ test("keeps the bathroom rug aligned like the original plan graphic and records 
   assert.ok(curtain.metadata?.notes?.some((note) => /12 Metallhaken.*180.*200 cm/i.test(note)));
 });
 
+test("places a slightly oversized three-hook towel rail on the free bathroom wall", () => {
+  const rail = DEFAULT_APARTMENT_DOCUMENT.builtIns.find((item) => item.catalogId === "bath-towel-hook-rail");
+
+  assert.ok(rail);
+  assert.equal(rail.roomId, "bad");
+  assert.deepEqual(rail.size, { width: 0.45, depth: 0.08, height: 0.08 });
+  assert.deepEqual(rail.position, { x: -0.16, z: 8.72 });
+  assert.equal(rail.rotation, 90);
+  assert.equal(rail.materialVariants?.main, "chrome-polished");
+  assert.equal(rail.collision, "decorative");
+  assert.ok(rail.metadata?.notes?.some((note) => /3 Haken.*45.*8.*8 cm/i.test(note)));
+});
+
 test("includes the photographed finishes and requested fixed living-room composition", () => {
   assert.equal(DEFAULT_APARTMENT_DOCUMENT.rooms.find((room) => room.id === "zimmer1")?.surfaces.floor, "parquet-oak-narrow");
   assert.equal(DEFAULT_APARTMENT_DOCUMENT.rooms.find((room) => room.id === "wohnkueche")?.surfaces.floor, "parquet-oak-narrow");

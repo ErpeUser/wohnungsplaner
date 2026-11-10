@@ -733,6 +733,7 @@ function ParametricBuiltIn({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   if (item.catalogId === "living-wall-light") return <WallLight item={item} />;
   if (item.catalogId === "sanitary-washbasin") return <Washbasin item={item} />;
   if (item.catalogId === "bath-round-mirror") return <BathRoundMirror item={item} />;
+  if (item.catalogId === "bath-towel-hook-rail") return <BathTowelHookRail item={item} />;
   if (item.catalogId === "bath-mat" || item.catalogId === "wc-mat") return <BathMat item={item} />;
   if (item.catalogId === "bath-shower-rod") return <BathShowerRod item={item} />;
   if (item.catalogId === "bath-shower-curtain") return <BathShowerCurtain item={item} />;
@@ -1259,6 +1260,29 @@ function BathMat({ item }: { item: SceneObject<PlannerBuiltIn> }) {
     <RoundedBox args={[width, height, depth]} radius={0.04} smoothness={8} receiveShadow>
       <primitive object={getPlannerMaterial(item.materialId || "rug-temu-shaggy-white")} attach="material" />
     </RoundedBox>
+  );
+}
+
+function BathTowelHookRail({ item }: { item: SceneObject<PlannerBuiltIn> }) {
+  const [width, height, depth] = item.size;
+  const metal = getPlannerMaterial(item.materialId || "chrome-polished");
+  const hookPositions = [-1, 0, 1].map((index) => index * width * 0.34);
+  return (
+    <group>
+      <RoundedBox args={[width, height, depth * 0.36]} radius={0.012} smoothness={3} castShadow receiveShadow>
+        <primitive object={metal} attach="material" />
+      </RoundedBox>
+      {hookPositions.map((x) => (
+        <group key={x} position={[x, -height * 0.54, depth * 0.48]}>
+          <mesh rotation={[Math.PI / 2, 0, 0]} scale={[0.018, 0.018, 0.018]} geometry={SHARED_TORUS} castShadow>
+            <primitive object={metal} attach="material" />
+          </mesh>
+          <mesh position={[0, -height * 0.26, 0]} scale={[0.012, height * 0.9, 0.012]} geometry={SHARED_CYLINDER} castShadow>
+            <primitive object={metal} attach="material" />
+          </mesh>
+        </group>
+      ))}
+    </group>
   );
 }
 
