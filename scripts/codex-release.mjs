@@ -22,7 +22,7 @@ export async function runCodexRelease({ dryRun = false, force = false, restart =
   return { decision, build, runtime, postflight };
 }
 
-if (process.argv[1]?.replaceAll("\\\\", "/").endsWith("/codex-release.mjs")) {
+if (process.argv[1]?.replaceAll("\\", "/").endsWith("/codex-release.mjs")) {
   runCodexRelease(parseArgs())
     .then((result) => console.log(JSON.stringify(result, null, 2)))
     .catch((error) => {
