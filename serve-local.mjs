@@ -134,7 +134,7 @@ function fail(res, statusCode, message, extraHeaders = {}) {
 
 async function writePidFile() {
   await fs.mkdir(localRoot, { recursive: true });
-  await fs.writeFile(pidFile, `${process.pid}\\n`, "utf8");
+  await fs.writeFile(pidFile, `${process.pid}\n`, "utf8");
 }
 
 async function removePidFile() {
