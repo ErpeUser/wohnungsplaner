@@ -12,7 +12,7 @@ export function canAutoMerge(pr, defaultBranch) {
   if (pr.reviewDecision !== "APPROVED") return false;
   const checks = Array.isArray(pr.statusCheckRollup) ? pr.statusCheckRollup : [];
   if (checks.length === 0) return false;
-  return checks.every((check) => ["SUCCESS", "SKIPPED", "NEUTRAL"].includes(check?.conclusion));
+  return checks.every((check) => ["SUCCESS", "SKIPPED", "NEUTRAL"].includes(String(check?.conclusion ?? check?.state ?? "").toUpperCase()));
 }
 
 export async function reconcile({ merge = false, dryRun = false } = {}) {
