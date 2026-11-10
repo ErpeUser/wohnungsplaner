@@ -2,6 +2,28 @@
 
 Stand: 2026-11-10
 
+## Nachtrag zur Pipeline- und UX-Fertigstellung
+
+Die versionierte Codex-Pipeline ist jetzt unter `scripts/codex-*.mjs` und
+`AGENTS.md` aktiv. Sie prüft `origin/main`, schützt schmutzige Arbeitsbäume,
+klassifiziert auch uncommittete/staged/untracked Änderungen, führt keine
+automatischen Divergenz-Merges oder Force-Pushes aus und schreibt Zustände nur
+nach erfolgreichen Aktionen in den ignorierten Ordner `.local/`. PR-Merges
+bleiben auf explizit freigegebene, konfliktfreie und grüne PRs beschränkt.
+
+Zusätzlich sind die bisher offenen lokalen Punkte für Asset-Resolver,
+SVG-Sicherheit, Tastatur-Resize, Touch-Pointer-Capture und 3D-Asset-Metadaten
+umgesetzt und mit Regressionstests abgedeckt. Externe Storage-, Vision- und
+Produktquellen bleiben weiterhin bewusst als Verträge/Platzhalter offen.
+
+Aktueller Nachweis dieser Runde: Planner 102/102, UI 82/82, Pipeline 26/26,
+Cutover 5/5, Asset-Manifest 10/10, Typecheck, Lint und Produktionsbuild
+erfolgreich. Eine lokale laufende Anwendung war nicht registriert; daher war
+kein Neustart erforderlich. GitHub `main` und der lokale HEAD waren vor der
+Arbeitsrunde beide `790805cbb2be8d67542bec35071ae3dbe3f06adf`; die neuen
+Änderungen liegen noch uncommittet im Arbeitsbaum und wurden nicht ungefragt
+gepusht.
+
 ## Nachlauf dieser Finalrunde
 
 Die folgenden Angaben sind der aktuelle, nach dieser Runde verifizierte Stand

@@ -120,6 +120,28 @@ export function nudgeRotation(rotation: number, key: string, largeStep: boolean)
   return resolvePlacementRotation(rotation + (key === "]" ? amount : -amount), true);
 }
 
+/** Keyboard alternative for transformer handles: resize one footprint axis by
+ * 1 cm, or 10 cm with Shift. Uniform catalog items retain their ratio. */
+export function nudgePlacementResize(
+  item: FurnitureCatalogItem | undefined,
+  current: Size3,
+  key: string,
+  largeStep: boolean,
+): Size3 {
+  if (item?.resize === "fixed") return { ...current };
+  const amount = largeStep ? 0.1 : 0.01;
+  const axis = key === "ArrowLeft" || key === "ArrowRight" ? "width" : key === "ArrowUp" || key === "ArrowDown" ? "depth" : null;
+  if (!axis) return { ...current };
+  const direction = key === "ArrowLeft" || key === "ArrowDown" ? -1 : 1;
+  const target = Math.max(0.1, current[axis] + direction * amount);
+  return resolvePlacementResize(
+    item,
+    current,
+    axis === "width" ? target / current.width : 1,
+    axis === "depth" ? target / current.depth : 1,
+  );
+}
+
 export function resolvePlacementRotation(rotation: number, freeRotation: boolean) {
   const normalized = ((rotation % 360) + 360) % 360;
   return normalize(freeRotation ? normalized : Math.round(normalized / 45) * 45 % 360);
@@ -172,6 +194,16 @@ export function usePlanInteractions({
         return;
       }
       if (!selectedPlacement) return;
+      if ((event.ctrlKey || event.metaKey) && ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
+        event.preventDefault();
+        const item = getFurnitureCatalogItem(selectedPlacement.catalogId);
+        dispatch({
+          type: "resizePlacement",
+          placementId: selectedPlacement.id,
+          size: nudgePlacementResize(item, selectedPlacement.size, event.key, event.shiftKey),
+        });
+        return;
+      }
       if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
         event.preventDefault();
         const position = nudgePlacement(selectedPlacement, event.key, event.shiftKey);

@@ -112,9 +112,15 @@ function mediaTypeForExtension(extension: string) {
 
 function isSafeSvg(bytes: Uint8Array) {
   const text = new TextDecoder().decode(bytes);
-  return /^\s*(?:<\?xml[^>]*>\s*)?<svg(?:\s|>)/i.test(text)
-    && !/<\s*script\b/i.test(text)
-    && !/\bon[a-z]+\s*=|javascript:/i.test(text);
+  if (!/^\s*(?:<\?xml[^>]*>\s*)?<svg(?:\s|>)/i.test(text)) return false;
+  if (/<\s*(?:script|foreignObject|iframe|object|embed|audio|video)\b/i.test(text)) return false;
+  if (/\bon[a-z]+\s*=|javascript\s*:/i.test(text)) return false;
+  if (/<!DOCTYPE\b|<!ENTITY\b/i.test(text)) return false;
+  // SVG resources are only safe when embedded or local. Remote references would
+  // bypass the planner's asset allowlist and can leak user data at render time.
+  if (/(?:href|src|xlink:href)\s*=\s*["']\s*(?!(?:#|data:image\/))[^"']+/i.test(text)) return false;
+  if (/url\(\s*["']?\s*(?:https?:|data:text|javascript:)/i.test(text)) return false;
+  return true;
 }
 
 async function sha256Hex(bytes: Uint8Array) {

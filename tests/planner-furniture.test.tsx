@@ -32,6 +32,7 @@ import { FurnitureLayer } from "../app/planner/plan-2d/furniture-layer.tsx";
 import {
   createCatalogPlacement,
   nudgePlacement,
+  nudgePlacementResize,
   nudgeRotation,
   resolvePlacementMove,
   resolvePlacementResize,
@@ -142,6 +143,14 @@ describe("furniture interactions", () => {
       ...desk.defaultSize,
       width: Number((desk.defaultSize.width * 1.2).toFixed(3)),
       depth: Number((desk.defaultSize.depth * 0.8).toFixed(3)),
+    });
+    assert.deepEqual(nudgePlacementResize(desk, chair.size, "ArrowRight", false), {
+      ...chair.size,
+      width: Number((chair.size.width + 0.01).toFixed(3)),
+    });
+    assert.deepEqual(nudgePlacementResize(desk, chair.size, "ArrowUp", true), {
+      ...chair.size,
+      depth: Number((chair.size.depth + 0.1).toFixed(3)),
     });
   });
 

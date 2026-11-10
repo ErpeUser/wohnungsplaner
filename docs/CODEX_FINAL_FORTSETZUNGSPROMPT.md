@@ -254,3 +254,10 @@ Der Abschlussbericht muss enthalten:
 - jede externe Blockade mit fehlendem Vertrag
 - nächste Datei, Signatur, Test und Akzeptanzkriterium
 
+# Aktueller Einstiegspunkt
+
+Vor einer Fortsetzung zuerst `npm run codex:pipeline -- --mode=check --dry-run`
+ausführen. Die dauerhaften Regeln stehen in `AGENTS.md`; vollständige
+Synchronisation und Verifikation erfolgen über `npm run codex:pipeline --
+--mode=full`. Externe Storage-/Vision-/Produktverträge bleiben offen und
+dürfen nicht erfunden werden.

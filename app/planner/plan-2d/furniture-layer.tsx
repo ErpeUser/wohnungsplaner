@@ -128,6 +128,12 @@ function FurnitureItem({
         y={placement.position.z}
         rotation={placement.rotation}
         draggable
+        onPointerDown={(event) => {
+          event.cancelBubble = true;
+          capturePlannerPointer(event);
+        }}
+        onPointerUp={(event) => releasePlannerPointer(event)}
+        onPointerCancel={(event) => releasePlannerPointer(event)}
         onMouseDown={(event) => {
           event.cancelBubble = true;
           onSelect(placement.id);
@@ -193,6 +199,29 @@ function FurnitureItem({
       ) : null}
     </>
   );
+}
+
+function capturePlannerPointer(event: Konva.KonvaEventObject<Event>) {
+  const pointerId = (event.evt as Event & { pointerId?: number }).pointerId;
+  const canvas = event.target.getStage()?.container();
+  if (pointerId === undefined || !canvas || typeof canvas.setPointerCapture !== "function") return;
+  try {
+    canvas.setPointerCapture(pointerId);
+  } catch {
+    // Pointer capture can race with a cancelled browser gesture; dragging still
+    // proceeds through Konva's own event stream in that case.
+  }
+}
+
+function releasePlannerPointer(event: Konva.KonvaEventObject<Event>) {
+  const pointerId = (event.evt as Event & { pointerId?: number }).pointerId;
+  const canvas = event.target.getStage()?.container();
+  if (pointerId === undefined || !canvas || typeof canvas.releasePointerCapture !== "function") return;
+  try {
+    if (canvas.hasPointerCapture?.(pointerId)) canvas.releasePointerCapture(pointerId);
+  } catch {
+    // The pointer may already have been released by the browser.
+  }
 }
 
 function FurnitureSymbol({

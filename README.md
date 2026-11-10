@@ -61,3 +61,16 @@ Die Empfehlungen bleiben mit `status: "placeholder"` und `sourceConfidence: "est
 - `app/planner/export`: Sicherung, PNG, Druckmodell und Importvorschau
 
 Die Anwendung benötigt keine Datenbank und keine Anmeldung. Hosting-Konfigurationen unter `.openai/` und `worker/` bleiben unabhängig davon bestehen.
+
+## Codex-Entwicklungspipeline
+
+Vor jeder weiteren Codex-Arbeit wird der Repository-Stand mit der versionierten Preflight-Pipeline geprüft. Die wichtigsten Befehle sind:
+
+```bash
+npm run codex:pipeline -- --mode=check --dry-run
+npm run codex:pipeline -- --mode=sync
+npm run codex:pipeline -- --mode=full
+npm run codex:pipeline -- --mode=full --dry-run
+```
+
+Die Pipeline synchronisiert `main` nur per Fast-Forward, schützt uncommittete Änderungen, prüft PRs/Branches, entscheidet anhand der tatsächlich geänderten Dateien über Abhängigkeiten, Tests, Build und Neustart und schreibt Laufzeitnachweise ausschließlich nach erfolgreichen Schritten nach `.local/`. Eine Windows-Task-Scheduler-Überwachung ist optional und wird nur ausdrücklich über `npm run codex:agent:install` eingerichtet; Status und Entfernung erfolgen mit `npm run codex:agent:status` bzw. `npm run codex:agent:uninstall`.

@@ -6,6 +6,7 @@ import { BoxGeometry, CylinderGeometry, Mesh, Object3D, SphereGeometry } from "t
 
 import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
 import { resolveFurnitureAsset } from "../catalog/asset-manifest.ts";
+import { resolvePlannerAsset } from "../catalog/asset-resolver.ts";
 import { getPlannerMaterial } from "./materials.ts";
 import type { SceneModel, SceneObject } from "./scene-model.ts";
 import type { PlannerPlacement } from "../domain/types.ts";
@@ -19,11 +20,13 @@ export function Furniture3D({
   selectionId,
   onSelect,
   hiddenObjectIds = [],
+  assetOrigins = plannerAssetOrigins(),
 }: {
   scene: SceneModel;
   selectionId: string | null;
   onSelect(id: string | null): void;
   hiddenObjectIds?: readonly string[];
+  assetOrigins?: ReadonlySet<string>;
 }) {
   const hiddenObjects = useMemo(() => new Set(hiddenObjectIds), [hiddenObjectIds]);
   return (
@@ -34,6 +37,7 @@ export function Furniture3D({
           item={item}
           selected={selectionId === item.id}
           onSelect={onSelect}
+          assetOrigins={assetOrigins}
         />
       ))}
     </group>
@@ -44,16 +48,28 @@ function FurnitureInstance({
   item,
   selected,
   onSelect,
+  assetOrigins,
 }: {
   item: SceneObject<PlannerPlacement>;
   selected: boolean;
   onSelect(id: string | null): void;
+  assetOrigins: ReadonlySet<string>;
 }) {
   const catalogItem = getFurnitureCatalogItem(item.catalogId);
   const resolution = catalogItem ? resolveFurnitureAsset(catalogItem) : null;
+  const importedResolution = item.asset
+    ? resolvePlannerAsset({ assets: [item.asset] }, item.asset.assetId, assetOrigins)
+    : null;
   const fallback = catalogItem?.fallback3d ?? "cabinet";
   const materialId = item.source.materialVariants?.main ?? item.source.materialVariants?.color ?? item.materialId;
-  const content = resolution?.kind === "gltf" && catalogItem?.renderMode !== "parametric" ? (
+  const importedGlb = importedResolution?.kind === "remote" && importedResolution.asset.mediaType === "model/gltf-binary";
+  const content = importedGlb ? (
+    <FurnitureAssetBoundary fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} />}>
+      <Suspense fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} />}>
+        <GltfFurniture path={importedResolution.url} />
+      </Suspense>
+    </FurnitureAssetBoundary>
+  ) : resolution?.kind === "gltf" && catalogItem?.renderMode !== "parametric" ? (
     <FurnitureAssetBoundary fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} />}>
       <Suspense fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} />}>
         <GltfFurniture path={resolution.asset.path} />
@@ -79,6 +95,11 @@ function FurnitureInstance({
       ) : null}
     </group>
   );
+}
+
+function plannerAssetOrigins(): ReadonlySet<string> {
+  const configured = typeof process !== "undefined" ? process.env.NEXT_PUBLIC_PLANNER_ASSET_ORIGINS : undefined;
+  return new Set((configured ?? "").split(",").map((origin) => origin.trim()).filter(Boolean));
 }
 
 function GltfFurniture({ path }: { path: string }) {

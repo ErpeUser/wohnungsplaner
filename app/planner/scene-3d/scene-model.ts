@@ -1,6 +1,7 @@
 import { doorPose, openingSegment } from "../domain/geometry.ts";
 import type {
   PlannerBuiltIn,
+  PlannerAssetRecord,
   PlannerDocumentV3,
   PlannerFixture,
   PlannerOpening,
@@ -78,6 +79,7 @@ export type SceneObject<T extends PlannerBuiltIn | PlannerPlacement> = {
   rotationY: number;
   materialId: string;
   renderProfile: "box" | "bathtub" | "washer" | "wall-wc";
+  asset?: PlannerAssetRecord;
   source: T;
 };
 
@@ -188,10 +190,10 @@ export function createSceneModel(
   const builtIns = document.builtIns
     .filter((item) => roomIds.has(item.roomId)
       || (activeRoomId === "vorraum" && HALL_GLASS_DOOR_SIGHTLINE_IDS.has(item.id)))
-    .map((item) => objectDescriptor(item, item.catalogId ?? `builtin-${item.kind}`));
+    .map((item) => objectDescriptor(item, item.catalogId ?? `builtin-${item.kind}`, document.assets?.find((asset) => asset.assetId === item.catalogId)));
   const placements = document.placements
     .filter((item) => roomIds.has(item.roomId))
-    .map((item) => objectDescriptor(item, item.catalogId));
+    .map((item) => objectDescriptor(item, item.catalogId, document.assets?.find((asset) => asset.assetId === item.catalogId)));
   const fixtures = document.fixtures
     .filter((item) => roomIds.has(item.roomId))
     .map((item) => ({
@@ -485,14 +487,14 @@ function createWindow(document: PlannerDocumentV3, opening: PlannerOpening): Sce
   };
 }
 
-function objectDescriptor<T extends PlannerBuiltIn | PlannerPlacement>(item: T, catalogId: string): SceneObject<T> {
+function objectDescriptor<T extends PlannerBuiltIn | PlannerPlacement>(item: T, catalogId: string, asset?: PlannerAssetRecord): SceneObject<T> {
   // Lift the plush Zimmer-1 rug slightly so its pile does not clip into the floor.
   const visualLift = catalogId === "rug-temu-rabbit-ivory-100x180" ? 0.012 : 0;
   return {
     id: item.id,
     roomId: item.roomId,
     catalogId,
-    position: [item.position.x, ("elevation" in item ? item.elevation ?? 0 : 0) + visualLift + item.size.height / 2, item.position.z],
+    position: [item.position.x, ("elevation" in item ? item.elevation ?? 0 : 0) + visualLift + (asset?.floorOffset ?? 0) + item.size.height / 2, item.position.z],
     size: [item.size.width, item.size.height, item.size.depth],
     rotationY: -item.rotation * Math.PI / 180,
     materialId: item.materialVariants?.main ?? item.materialVariants?.color ?? "object-neutral",
@@ -503,6 +505,7 @@ function objectDescriptor<T extends PlannerBuiltIn | PlannerPlacement>(item: T, 
         : catalogId === "sanitary-wall-wc"
           ? "wall-wc"
           : "box",
+    asset,
     source: item,
   };
 }

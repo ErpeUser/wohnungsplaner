@@ -268,6 +268,35 @@ describe("createSceneModel", () => {
     assert.equal(scene.fixtures.length, DEFAULT_APARTMENT_DOCUMENT.fixtures.length);
   });
 
+  test("carries imported asset metadata into the shared 3D object descriptor", () => {
+    const source = DEFAULT_APARTMENT_DOCUMENT.placements[0]!;
+    const asset = {
+      assetId: "import-shared-aaaaaaaaaaaa",
+      name: "Imported chair",
+      category: "Sitzen" as const,
+      mediaType: "model/gltf-binary" as const,
+      byteLength: 4,
+      sha256: "a".repeat(64),
+      normalizedSize: source.size,
+      floorOffset: 0.06,
+      pivot: "center" as const,
+      materialId: "object-neutral",
+      license: "CC0-1.0" as const,
+      source: "test",
+      confidence: "confirmed" as const,
+      notes: [],
+      createdAt: "2026-01-01T00:00:00.000Z",
+    };
+    const document = {
+      ...DEFAULT_APARTMENT_DOCUMENT,
+      assets: [asset],
+      placements: [{ ...source, catalogId: asset.assetId }],
+    };
+    const scene = createSceneModel(document, null);
+    expect(scene.placements[0]?.asset).toBe(asset);
+    expect(scene.placements[0]?.position[1]).toBeCloseTo(source.size.height / 2 + asset.floorOffset);
+  });
+
   test("uses the same explicit door pose as collision and 2D geometry", () => {
     const scene = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, null);
     for (const sceneDoor of scene.doors) {

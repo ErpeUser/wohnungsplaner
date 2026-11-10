@@ -17,6 +17,16 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "assets:check": "node scripts/check-planner-assets.mjs",
+    "codex:preflight": "node scripts/codex-preflight.mjs",
+    "codex:sync": "node scripts/codex-sync.mjs --mode=sync",
+    "codex:reconcile": "node scripts/codex-pr-reconcile.mjs",
+    "codex:build": "node scripts/codex-build.mjs",
+    "codex:restart": "node scripts/codex-runtime.mjs --restart",
+    "codex:agent:install": "node scripts/codex-agent.mjs install",
+    "codex:agent:status": "node scripts/codex-agent.mjs status",
+    "codex:agent:uninstall": "node scripts/codex-agent.mjs uninstall",
+    "codex:postflight": "node scripts/codex-postflight.mjs",
+    "codex:pipeline": "node scripts/codex-pipeline.mjs",
     "validate": "npm run typecheck && npm run lint && npm run assets:check && npm run test:planner && npm run test:ui && npm run test:cutover"
   },
   "dependencies": {

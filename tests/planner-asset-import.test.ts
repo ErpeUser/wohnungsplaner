@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { MAX_PLANNER_ASSET_BYTES, parseAssetImportMetadata, preparePlannerAsset } from "../app/planner/catalog/asset-import.ts";
+import { resolvePlannerAsset } from "../app/planner/catalog/asset-resolver.ts";
+import type { PlannerDocumentV3 } from "../app/planner/domain/types.ts";
 
 test("normalizes imported asset metadata into a stable local identity", async () => {
   const prepared = await preparePlannerAsset({
@@ -66,4 +68,38 @@ test("rejects unknown materials and unsafe SVG markup", async () => {
     preparePlannerAsset({ name: "SVG", category: "Licht/Deko", width: 1, depth: 1, height: 0.1 }, new TextEncoder().encode('<svg><script>alert(1)</script></svg>'), { filename: "unsafe.svg" }),
     /Signatur|SVG/i,
   );
+  await assert.rejects(
+    preparePlannerAsset({ name: "Remote SVG", category: "Licht/Deko", width: 1, depth: 1, height: 0.1 }, new TextEncoder().encode('<svg><image href="https://evil.example/track.png" /></svg>'), { filename: "remote.svg" }),
+    /Signatur|SVG/i,
+  );
+});
+
+test("resolves only HTTPS planner assets from the explicit origin allowlist", () => {
+  const asset = {
+    assetId: "import-chair-aaaaaaaaaaaa",
+    name: "Chair",
+    category: "Sitzen" as const,
+    mediaType: "model/gltf-binary" as const,
+    byteLength: 4,
+    sha256: "a".repeat(64),
+    normalizedSize: { width: 1, depth: 1, height: 1 },
+    floorOffset: 0,
+    pivot: "center" as const,
+    materialId: "object-neutral",
+    assetUrl: "https://storage.example/assets/chair.glb",
+    license: "CC0-1.0" as const,
+    source: "test",
+    confidence: "confirmed" as const,
+    notes: [],
+    createdAt: "2026-01-01T00:00:00.000Z",
+  };
+  const document = { assets: [asset] } as unknown as PlannerDocumentV3;
+  assert.deepEqual(resolvePlannerAsset(document, asset.assetId, new Set(["https://storage.example"])), {
+    kind: "remote",
+    asset,
+    url: "https://storage.example/assets/chair.glb",
+  });
+  assert.equal(resolvePlannerAsset(document, asset.assetId, new Set()).kind, "placeholder");
+  assert.equal(resolvePlannerAsset({ assets: [{ ...asset, assetUrl: "http://storage.example/assets/chair.glb" }] } as unknown as PlannerDocumentV3, asset.assetId, new Set(["http://storage.example"])).kind, "placeholder");
+  assert.throws(() => resolvePlannerAsset(document, "missing", new Set()), /Unbekanntes Asset/);
 });
