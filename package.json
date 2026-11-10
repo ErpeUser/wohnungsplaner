@@ -1,5 +1,5 @@
 {
-  "name": "site-creator-vinext-starter",
+  "name": "wohnungsplaner",
   "version": "0.1.0",
   "private": true,
   "engines": {
@@ -10,18 +10,19 @@
     "build": "vinext build && node sync-client-assets.mjs",
     "start": "node serve-local.mjs",
     "start:vinext": "vinext start",
-    "test:planner": "tsx --test tests/planner-*.test.ts",
-    "test:ui": "vitest run --passWithNoTests",
+    "test:planner": "node --import tsx --test tests/planner-*.test.ts",
+    "test:ui": "vitest run",
     "test:cutover": "node --test tests/rendered-html.test.mjs tests/planner-cutover.test.mjs && node scripts/check-client-bundle.mjs",
     "test": "npm run build && npm run test:planner && npm run test:ui && npm run test:cutover",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next"
+    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
+    "assets:check": "node scripts/check-planner-assets.mjs",
+    "validate": "npm run typecheck && npm run lint && npm run assets:check && npm run test:planner && npm run test:ui && npm run test:cutover"
   },
   "dependencies": {
     "@react-three/drei": "10.7.9",
     "@react-three/fiber": "9.8.2",
     "@react-three/postprocessing": "3.2.2",
-    "@types/three": "^0.186.0",
     "konva": "10.9.0",
     "next": "16.4.3",
     "postprocessing": "6.39.5",
@@ -42,6 +43,7 @@
     "@types/node": "22.19.19",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
+    "@types/three": "^0.186.0",
     "@vitejs/plugin-react": "6.0.2",
     "@vitejs/plugin-rsc": "0.5.37",
     "eslint": "9.39.4",

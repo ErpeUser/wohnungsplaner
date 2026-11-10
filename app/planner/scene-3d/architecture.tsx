@@ -738,7 +738,7 @@ function ParametricBuiltIn({ item }: { item: SceneObject<PlannerBuiltIn> }) {
 }
 
 function VorraumWallDecor({ item }: { item: SceneObject<PlannerBuiltIn> }) {
-  const [width, height, depth] = item.size;
+  const [width, , depth] = item.size;
   // A 48 x 62 cm print is legible at the entrance while keeping both door
   // handles and the coat unit visually clear.
   const frameWidth = 0.48;

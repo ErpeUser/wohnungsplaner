@@ -74,6 +74,8 @@ export type PlannerBuiltIn = {
   rotation: number;
   size: Size3;
   locked: true;
+  /** Decorative wall-mounted/floor-covering built-ins do not block furniture or the walk camera. */
+  collision?: "blocking" | "decorative";
   materialVariants?: Record<string, string>;
   metadata?: PlannerMetadata;
 };

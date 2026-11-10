@@ -113,6 +113,27 @@ test("adds, resizes, rotates, and removes movable placements", () => {
   assert.equal(removed.document.placements.some((item) => item.id === "table"), false);
 });
 
+test("rejects an unknown target room before geometry inspection", () => {
+  const original = commandDocument();
+  const result = applyPlannerCommand(original, {
+    type: "addPlacement",
+    placement: placement("unknown-room-item", "missing-room", { x: 1, z: 1 }, 0.4, 0.4),
+  });
+
+  assert.equal(result.document, original);
+  assert.equal(result.error?.code, "not-found");
+});
+
+test("treats the document id as reserved", () => {
+  const original = commandDocument();
+  const result = applyPlannerCommand(original, {
+    type: "addPlacement",
+    placement: placement(original.id, "room-a", { x: 2.5, z: 2.8 }, 0.4, 0.4),
+  });
+
+  assert.equal(result.error?.code, "duplicate-id");
+});
+
 test("transfers placements atomically only when fully inside the target room", () => {
   const original = commandDocument();
   const accepted = applyPlannerCommand(original, {
@@ -207,6 +228,23 @@ test("keeps selection, camera, view, and panels outside document history", () =>
 
   store.getState().redo();
   assert.deepEqual(store.getState().document.placements[0].position, { x: 2.2, z: 2 });
+});
+
+test("persists room and overlay preferences in the document and restores them on replace", () => {
+  const store = createPlannerStore({ initialDocument: commandDocument() });
+  store.getState().setActiveRoom("room-b");
+  store.getState().setOverlay("dimensions", true);
+
+  assert.equal(store.getState().document.viewPreferences.activeRoomId, "room-b");
+  assert.equal(store.getState().document.viewPreferences.overlays.dimensions, true);
+
+  const replacement = structuredClone(store.getState().document);
+  replacement.viewPreferences.activeRoomId = "room-a";
+  replacement.viewPreferences.overlays.dimensions = false;
+  store.getState().replaceDocument(replacement);
+
+  assert.equal(store.getState().activeRoomId, "room-a");
+  assert.equal(store.getState().overlays.dimensions, false);
 });
 
 function placement(

@@ -13,7 +13,7 @@ const FLOOR_COLORS: Record<string, string> = {
   "balcony-floor-beige": "#c6b386",
 };
 
-export function ArchitectureLayer({ scene, onToggleDoor }: { scene: PlanScene; onToggleDoor?(openingId: string): void }) {
+export function ArchitectureLayer({ scene, onToggleDoor, onSelect }: { scene: PlanScene; onToggleDoor?(openingId: string): void; onSelect?(id: string | null): void }) {
   return (
     <Layer listening>
       {scene.rooms.map((room) => (
@@ -68,7 +68,10 @@ export function ArchitectureLayer({ scene, onToggleDoor }: { scene: PlanScene; o
               fill={planObjectColor(item.catalogId, item.kind)}
               stroke="#506366"
               strokeWidth={0.025}
+              hitStrokeWidth={0.12}
               dash={item.catalogId?.startsWith("floor-zone-") ? undefined : [0.08, 0.04]}
+              onClick={(event) => { event.cancelBubble = true; onSelect?.(item.id); }}
+              onTap={(event) => { event.cancelBubble = true; onSelect?.(item.id); }}
             />
             <BuiltInDetail item={item} />
             {showLabel ? <Text
@@ -296,7 +299,7 @@ function planObjectColor(catalogId: string | undefined, kind: string) {
   if (catalogId === "zimmer1-headboard-led") return "#f2bd78";
   if (catalogId === "zimmer1-headboard-sconces") return "#c89d62";
   if (catalogId === "zimmer1-layered-curtain") return "#c9b6a4";
-  if (catalogId.startsWith("zimmer1-desk-shelf-") || catalogId === "zimmer1-entry-niche") return "#c99d68";
+  if (catalogId?.startsWith("zimmer1-desk-shelf-") || catalogId === "zimmer1-entry-niche") return "#c99d68";
   if (catalogId === "zimmer1-wardrobe-top-decor") return "#c6ae8e";
   if (catalogId === "zimmer1-desk-accessories" || catalogId === "zimmer1-nightstand-decor") return "#d7c8b4";
   if (catalogId === "vorraum-wall-decor") return "#c6ae8e";

@@ -92,6 +92,7 @@ const builtInSchema = z.object({
   rotation: finiteNumber,
   size: sizeSchema,
   locked: z.literal(true),
+  collision: z.enum(["blocking", "decorative"]).optional(),
   materialVariants: z.record(entityId, entityId).optional(),
   metadata: metadataSchema,
 });
@@ -168,9 +169,18 @@ const plannerDocumentSchema = z
       }
       if (!isClosedLoop(room.boundary, wallById)) {
         addIssue(context, ["rooms"], `Room ${room.id} boundary must form a closed wall loop`);
+      } else {
+        const polygon = orientedBoundary(room.boundary, wallById);
+        if (polygonArea(polygon) <= EPSILON || hasSelfIntersection(polygon)) {
+          addIssue(context, ["rooms"], `Room ${room.id} boundary must be a simple polygon with positive area`);
+        }
+      }
+      if (room.wnfArea !== undefined && room.wnfArea > room.area + EPSILON) {
+        addIssue(context, ["rooms"], `Room ${room.id} wnfArea cannot exceed area`);
       }
     }
 
+    const openingsByWall = new Map<string, Array<{ offset: number; end: number; id: string }>>();
     for (const opening of document.openings) {
       const wall = wallById.get(opening.wallId);
       if (!wall) {
@@ -180,6 +190,21 @@ const plannerDocumentSchema = z
       if (!wallChainSupportsOpening(document.walls, wall, opening.offset, opening.width)) {
         addIssue(context, ["openings"], `Opening ${opening.id} extends outside its wall`);
       }
+      if (opening.sill + opening.height > wall.height + EPSILON) {
+        addIssue(context, ["openings"], `Opening ${opening.id} exceeds wall height`);
+      }
+      for (const roomId of opening.roomIds ?? []) {
+        if (!roomIds.has(roomId)) {
+          addIssue(context, ["openings"], `Opening ${opening.id} references unknown room ${roomId}`);
+        }
+      }
+      const intervals = openingsByWall.get(opening.wallId) ?? [];
+      const end = opening.offset + opening.width;
+      if (intervals.some((interval) => Math.max(interval.offset, opening.offset) < Math.min(interval.end, end) - EPSILON)) {
+        addIssue(context, ["openings"], `Opening ${opening.id} overlaps another opening on wall ${opening.wallId}`);
+      }
+      intervals.push({ offset: opening.offset, end, id: opening.id });
+      openingsByWall.set(opening.wallId, intervals);
     }
 
     for (const item of [...document.builtIns, ...document.fixtures, ...document.placements]) {
@@ -252,17 +277,44 @@ function validateUniqueIds(
 }
 
 function isClosedLoop(references: WallRef[], wallById: Map<string, PlannerWall>) {
-  const oriented = references.map((reference) => {
+  const oriented = orientedBoundary(references, wallById);
+  return oriented.every((segment, index) => {
+    const next = oriented[(index + 1) % oriented.length];
+    return pointsEqual(segment.end, next.start);
+  });
+}
+
+function orientedBoundary(references: WallRef[], wallById: Map<string, PlannerWall>) {
+  return references.map((reference) => {
     const wall = wallById.get(reference.wallId)!;
     return reference.direction === 1
       ? { start: wall.start, end: wall.end }
       : { start: wall.end, end: wall.start };
   });
+}
 
-  return oriented.every((segment, index) => {
-    const next = oriented[(index + 1) % oriented.length];
-    return pointsEqual(segment.end, next.start);
-  });
+function polygonArea(segments: Array<{ start: Point2; end: Point2 }>) {
+  return Math.abs(segments.reduce((sum, segment) => sum + segment.start.x * segment.end.z - segment.end.x * segment.start.z, 0) / 2);
+}
+
+function hasSelfIntersection(segments: Array<{ start: Point2; end: Point2 }>) {
+  for (let left = 0; left < segments.length; left += 1) {
+    for (let right = left + 1; right < segments.length; right += 1) {
+      if (right === left + 1 || (left === 0 && right === segments.length - 1)) continue;
+      if (segmentsCross(segments[left].start, segments[left].end, segments[right].start, segments[right].end)) return true;
+    }
+  }
+  return false;
+}
+
+function segmentsCross(a: Point2, b: Point2, c: Point2, d: Point2) {
+  const orient = (p: Point2, q: Point2, r: Point2) => (q.x - p.x) * (r.z - p.z) - (q.z - p.z) * (r.x - p.x);
+  const ab = orient(a, b, c);
+  const ab2 = orient(a, b, d);
+  const cd = orient(c, d, a);
+  const cd2 = orient(c, d, b);
+  return ((ab > EPSILON && ab2 < -EPSILON) || (ab < -EPSILON && ab2 > EPSILON))
+    && ((cd > EPSILON && cd2 < -EPSILON) || (cd < -EPSILON && cd2 > EPSILON));
 }
 
 function pointsEqual(left: Point2, right: Point2) {

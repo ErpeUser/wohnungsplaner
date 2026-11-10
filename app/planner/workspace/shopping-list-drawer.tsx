@@ -332,7 +332,9 @@ export function ShoppingListDrawer({ onClose }: { onClose(): void }) {
         {SHOPPING_ITEMS.map((item) => (
           <article key={item.id} className="planner-shopping__item">
             <div className={`planner-shopping__preview planner-shopping__preview--${item.type}`} aria-hidden="true">
-              {item.imageUrl ? <img src={item.imageUrl} alt="" /> : null}
+              {/* Product hosts are user-provided/external; next/image cannot safely optimize an open host list. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              {item.imageUrl ? <img src={item.imageUrl} alt="" loading="lazy" /> : null}
               <i /><i /><i />
             </div>
             <div className="planner-shopping__copy">

@@ -102,8 +102,8 @@ test("moves an already open three-chair dining group to the balanced aisle posit
   const upgraded = upgradeRetiredDiningGroup(stale);
 
   assert.notEqual(upgraded, stale);
-  assert.deepEqual(upgraded.placements.find((item) => item.id === "living-bozan-table")?.position, { x: 2.4, z: 5.39 });
-  assert.deepEqual(upgraded.placements.find((item) => item.id === "living-kaleo-chair-east")?.position, { x: 3.1, z: 5.39 });
+  assert.deepEqual(upgraded.placements.find((item) => item.id === "living-bozan-table")?.position, { x: 2.2, z: 5.7 });
+  assert.deepEqual(upgraded.placements.find((item) => item.id === "living-kaleo-chair-east")?.position, { x: 2.9, z: 5.7 });
   assert.equal(upgradeRetiredDiningGroup(upgraded), upgraded);
 });
 
@@ -123,8 +123,8 @@ test("moves the current dining group toward the refrigerator and kitchen once", 
   const upgraded = upgradeRetiredDiningGroup(stale);
 
   assert.notEqual(upgraded, stale);
-  assert.deepEqual(upgraded.placements.find((item) => item.id === "living-bozan-table")?.position, { x: 2.4, z: 5.39 });
-  assert.deepEqual(upgraded.placements.find((item) => item.id === "living-kaleo-chair-south")?.position, { x: 2.4, z: 6.09 });
+  assert.deepEqual(upgraded.placements.find((item) => item.id === "living-bozan-table")?.position, { x: 2.2, z: 5.7 });
+  assert.deepEqual(upgraded.placements.find((item) => item.id === "living-kaleo-chair-south")?.position, { x: 1.5, z: 5.7 });
   assert.equal(upgradeRetiredDiningGroup(upgraded), upgraded);
 });
 

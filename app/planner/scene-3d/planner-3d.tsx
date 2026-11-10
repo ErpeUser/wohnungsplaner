@@ -78,7 +78,8 @@ export function Planner3D({
   }, []);
 
   useEffect(() => {
-    setOrbitCamera(initialOrbitCamera);
+    const frame = window.requestAnimationFrame(() => setOrbitCamera(initialOrbitCamera));
+    return () => window.cancelAnimationFrame(frame);
   }, [initialOrbitCamera]);
 
   useEffect(() => {

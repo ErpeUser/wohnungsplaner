@@ -10,8 +10,8 @@ test("uses warm taupe only on the wall directly behind the Zimmer 1 bed", () => 
 
   assert.ok(accent);
   assert.equal(accent.roomId, "zimmer1");
-  assert.equal(accent.catalogId, "wall-finish-taupe");
-  assert.equal(accent.materialVariants?.main, "paint-warm-taupe");
+  assert.equal(accent.catalogId, "wall-finish-vintage-fabric-wallpaper");
+  assert.equal(accent.materialVariants?.main, "wallpaper-vintage-beige-fabric");
   assert.deepEqual(accent.position, { x: 0.068, z: 1.665 });
   assert.deepEqual(accent.size, { width: 3.33, depth: 0.008, height: 2.54 });
   assert.equal(accent.rotation, 90);

@@ -46,6 +46,12 @@ export function applyPlannerCommand(
       if (!validPlacement(command.placement)) {
         return reject(document, "invalid", "Das neue Objekt enthält ungültige Maße oder Koordinaten.");
       }
+      if (!document.rooms.some((room) => room.id === command.placement.roomId)) {
+        return reject(document, "not-found", `Der Raum ${command.placement.roomId} wurde nicht gefunden.`);
+      }
+      if (command.placement.wallId && !document.walls.some((wall) => wall.id === command.placement.wallId)) {
+        return reject(document, "not-found", `Die Wand ${command.placement.wallId} wurde nicht gefunden.`);
+      }
       return validatePlacement(document, command.placement, (placement) => ({
         ...document,
         updatedAt: timestamp(),
@@ -259,6 +265,7 @@ function reject(
 
 function hasEntityId(document: PlannerDocumentV3, id: string) {
   return [
+    { id: document.id },
     ...document.walls,
     ...document.rooms,
     ...document.openings,

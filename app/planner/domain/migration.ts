@@ -1,6 +1,7 @@
 import { parsePlannerDocument, PlannerValidationError } from "./schema.ts";
 import type { PlannerDocumentV3, PlannerPlacement } from "./types.ts";
 import { deriveRoomPolygon } from "./wall-graph.ts";
+import { roomContainsPlacement } from "./geometry.ts";
 
 const LEGACY_CATALOG_IDS: Record<string, string> = {
   bed120: "bed-120",
@@ -45,9 +46,9 @@ export function migrateStoredPlannerData(
 ): MigrationResult {
   if (isV3Candidate(value)) {
     try {
-      parsePlannerDocument(value);
+      const document = parsePlannerDocument(value);
       return {
-        document: value,
+        document,
         warnings: [],
         legacyBackupJson: null,
         unmapped: [],
@@ -95,6 +96,11 @@ export function migrateStoredPlannerData(
     items.forEach((item, index) => {
       const result = migrateLegacyPlacement(item, roomId, origin, index, usedIds);
       if (result.ok) {
+        if (!roomContainsPlacement(baseDocument, roomId, result.placement)) {
+          warnings.push(`${roomId}: ${result.placement.catalogId} liegt außerhalb des Raums.`);
+          unmapped.push({ roomId, reason: "outside-room", value: item });
+          return;
+        }
         migrated.push(result.placement);
         return;
       }
@@ -104,10 +110,18 @@ export function migrateStoredPlannerData(
   }
 
   const retained = baseDocument.placements.filter((placement) => !touchedRooms.has(placement.roomId));
-  const document = parsePlannerDocument({
-    ...baseDocument,
-    placements: [...retained, ...migrated],
-  });
+  let document: PlannerDocumentV3;
+  try {
+    document = parsePlannerDocument({
+      ...baseDocument,
+      placements: [...retained, ...migrated],
+    });
+  } catch (error) {
+    if (!(error instanceof PlannerValidationError)) throw error;
+    warnings.push("Ein Teil der migrierten Möbel konnte wegen widersprüchlicher Geometrie nicht übernommen werden.");
+    const safePlacements = retained.filter((placement) => roomContainsPlacement(baseDocument, placement.roomId, placement));
+    document = parsePlannerDocument({ ...baseDocument, placements: safePlacements });
+  }
 
   return { document, warnings, legacyBackupJson: backup, unmapped };
 }

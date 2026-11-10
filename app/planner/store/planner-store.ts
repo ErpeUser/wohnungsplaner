@@ -110,6 +110,8 @@ export function createPlannerStore(options: {
       set({
         document,
         selectionId: validSelection(get().selectionId, document),
+        activeRoomId: document.viewPreferences.activeRoomId,
+        overlays: { ...document.viewPreferences.overlays },
         warnings: [],
         lastError: null,
         canUndo: history.canUndo(),
@@ -123,6 +125,8 @@ export function createPlannerStore(options: {
       set({
         document,
         selectionId: validSelection(get().selectionId, document),
+        activeRoomId: document.viewPreferences.activeRoomId,
+        overlays: { ...document.viewPreferences.overlays },
         warnings: [],
         lastError: null,
         canUndo: history.canUndo(),
@@ -136,6 +140,8 @@ export function createPlannerStore(options: {
       set({
         document,
         selectionId: validSelection(get().selectionId, document),
+        activeRoomId: document.viewPreferences.activeRoomId,
+        overlays: { ...document.viewPreferences.overlays },
         warnings: [],
         lastError: null,
         canUndo: false,
@@ -144,14 +150,36 @@ export function createPlannerStore(options: {
       });
     },
     select(selectionId) { set({ selectionId }); },
-    setActiveRoom(activeRoomId) { set({ activeRoomId }); },
+    setActiveRoom(activeRoomId) {
+      if (activeRoomId !== null && !get().document.rooms.some((room) => room.id === activeRoomId)) return;
+      set((state) => ({
+        activeRoomId,
+        document: {
+          ...state.document,
+          updatedAt: new Date().toISOString(),
+          viewPreferences: { ...state.document.viewPreferences, activeRoomId },
+        },
+      }));
+      get().scheduleSave();
+    },
     setViewMode(viewMode) { set({ viewMode }); },
     setCameraMode(cameraMode) { set({ cameraMode }); },
     setPanel(panel, open) {
       set((state) => ({ panels: { ...state.panels, [panel]: open } }));
     },
     setOverlay(overlay, visible) {
-      set((state) => ({ overlays: { ...state.overlays, [overlay]: visible } }));
+      set((state) => ({
+        overlays: { ...state.overlays, [overlay]: visible },
+        document: {
+          ...state.document,
+          updatedAt: new Date().toISOString(),
+          viewPreferences: {
+            ...state.document.viewPreferences,
+            overlays: { ...state.document.viewPreferences.overlays, [overlay]: visible },
+          },
+        },
+      }));
+      get().scheduleSave();
     },
     setAutosaveStatus(autosaveStatus) { set({ autosaveStatus }); },
     setMigrationResult(migrationResult) { set({ migrationResult }); },

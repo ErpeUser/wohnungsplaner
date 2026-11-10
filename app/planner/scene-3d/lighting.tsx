@@ -14,6 +14,20 @@ export function PlannerLighting({
 }) {
   const width = Math.max(3, scene.bounds.maxX - scene.bounds.minX);
   const depth = Math.max(3, scene.bounds.maxZ - scene.bounds.minZ);
+  const fixtureLights = scene.fixtures.filter((fixture) => /light|ceiling|lamp/i.test(fixture.kind));
+  const lightSources = fixtureLights.length > 0
+    ? fixtureLights.map((fixture) => ({
+      key: fixture.id,
+      position: fixture.position,
+      intensity: 0.78,
+      color: "#ffe4bd",
+    }))
+    : [{
+      key: "fallback-key-light",
+      position: [scene.center[0], 2.42, scene.center[2]] as [number, number, number],
+      intensity: 0.72,
+      color: "#ffe4bd",
+    }];
   return (
     <>
       <ambientLight intensity={0.54} color="#fffaf3" />
@@ -38,18 +52,12 @@ export function PlannerLighting({
         background={false}
         environmentIntensity={0.8}
       />
-      {[
-        [1.25, 2.42, 4.45, 0.78, "#ffd7a6"],
-        [2.25, 2.42, 7.55, 0.7, "#ffe4bd"],
-        [1.78, 2.42, 1.7, 0.62, "#fff0d4"],
-        [-1.32, 2.38, 8.92, 0.58, "#fff3df"],
-        [-1.97, 2.38, 5.08, 0.42, "#fff1d7"],
-      ].map(([x, y, z, intensity, color], index) => (
+      {lightSources.map(({ key, position, intensity, color }) => (
         <pointLight
-          key={index}
-          position={[x as number, y as number, z as number]}
-          intensity={intensity as number}
-          color={color as string}
+          key={key}
+          position={position}
+          intensity={intensity}
+          color={color}
           distance={5.4}
           decay={2}
         />

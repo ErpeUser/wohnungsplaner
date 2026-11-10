@@ -3,9 +3,9 @@ import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } fr
 import handler from "vinext/server/app-router-entry";
 
 interface Env {
-  ASSETS: Fetcher;
-  DB: D1Database;
-  IMAGES: {
+  ASSETS?: Fetcher;
+  DB?: D1Database;
+  IMAGES?: {
     input(stream: ReadableStream): {
       transform(options: Record<string, unknown>): {
         output(options: { format: string; quality: number }): Promise<{ response(): Response }>;
@@ -30,11 +30,18 @@ const worker = {
     const url = new URL(request.url);
 
     if (url.pathname === "/_vinext/image") {
+      if (!env.ASSETS || !env.IMAGES) return new Response("Image optimization is not configured", { status: 501 });
       const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
       return handleImageOptimization(request, {
-        fetchAsset: (path) => env.ASSETS.fetch(new Request(new URL(path, request.url))),
+        fetchAsset: (assetPath) => {
+          if (!assetPath.startsWith("/planner-assets/") && !assetPath.startsWith("/assets/")) {
+            return Promise.resolve(new Response("Asset path not allowed", { status: 400 }));
+          }
+          if (assetPath.includes("..")) return Promise.resolve(new Response("Asset path not allowed", { status: 400 }));
+          return env.ASSETS!.fetch(new Request(new URL(assetPath, request.url)));
+        },
         transformImage: async (body, { width, format, quality }) => {
-          const result = await env.IMAGES.input(body).transform(width > 0 ? { width } : {}).output({ format, quality });
+          const result = await env.IMAGES!.input(body).transform(width > 0 ? { width } : {}).output({ format, quality });
           return result.response();
         },
       }, allowedWidths);

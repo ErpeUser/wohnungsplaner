@@ -198,8 +198,41 @@ const builtIns: PlannerBuiltIn[] = [
 
 // Keep the bath mat on the opposite free walking side of the bathroom.
 // The 60 x 90 cm footprint uses the free area while clearing the door swing and sanitary units.
+const DECORATIVE_BUILT_IN_IDS = new Set([
+  "builtin-kitchen-tile-north",
+  "builtin-kitchen-tile-west",
+  "builtin-kitchen-backsplash",
+  "builtin-kitchen-backsplash-west",
+  "builtin-kitchen-backsplash-corner",
+  "builtin-bath-round-mirror",
+  "builtin-bath-mat",
+  "builtin-bath-shower-rod",
+  "builtin-bath-shower-curtain",
+  "builtin-living-slats",
+  "builtin-living-moss",
+  "builtin-living-clock",
+  "builtin-living-panel-light",
+  "builtin-living-tv-slats",
+  "builtin-living-tv",
+  "builtin-z1-bed-accent-wall",
+  "builtin-z1-entry-wallpaper-return",
+  "builtin-z1-entry-wallpaper-door-strip",
+  "builtin-z1-entry-slim-art",
+  "builtin-z1-wall-art-pair",
+  "builtin-z1-headboard-led",
+  "builtin-z1-headboard-sconces",
+  "builtin-z1-layered-curtain",
+  "builtin-z1-vanity-shelf-main",
+  "builtin-z1-vanity-shelf-side-upper",
+  "builtin-z1-vanity-shelf-side-lower",
+  "builtin-z1-entry-niche",
+  "builtin-z1-wardrobe-top-decor",
+  "builtin-z1-nightstand-decor",
+  "builtin-hall-wall-decor",
+]);
+
 const finalBuiltIns = builtIns.map((item) => item.id === "builtin-bath-mat"
-  ? { ...item, label: "Badteppich - flauschige Creme-Textur - 120 x 80 cm", position: { x: -1.25, z: 8.8 }, rotation: 90, size: { ...item.size, width: 1.2, depth: 0.8 }, materialVariants: { ...item.materialVariants, main: "bath-mat-shaggy-cream" } }
+  ? { ...item, label: "Badteppich - flauschige Creme-Textur - 120 x 80 cm", position: { x: -1.25, z: 8.8 }, rotation: 90, size: { ...item.size, width: 1.2, depth: 0.8 }, materialVariants: { ...item.materialVariants, main: "bath-mat-shaggy-cream" }, collision: "decorative" as const }
   : item.id === "builtin-bath-basin-cabinet-scout"
     ? { ...item, position: { ...item.position, z: 9.8 } }
     : item.id === "builtin-bath-washer-cabinet-scout"
@@ -210,7 +243,7 @@ const finalBuiltIns = builtIns.map((item) => item.id === "builtin-bath-mat"
           ? { ...item, label: "Duschvorhangstange · Brilliant Silber · 171–210 cm", position: { ...item.position, z: 9.15 }, size: { ...item.size, width: 2.05 }, materialVariants: { ...item.materialVariants, main: "chrome-polished" } }
           : item.id === "builtin-bath-shower-curtain"
             ? { ...item, label: "Duschvorhang Nordic Leinenoptik · Beige · 180 × 200 cm", position: { ...item.position, z: 9.15 }, size: { ...item.size, width: 1.8, height: 2.0 }, materialVariants: { ...item.materialVariants, main: "shower-curtain-linen-beige" } }
-  : item);
+  : { ...item, collision: DECORATIVE_BUILT_IN_IDS.has(item.id) ? "decorative" as const : "blocking" as const });
 
 const fixtures: PlannerFixture[] = [
   fixture("z1-light", "Lichtauslass Decke", "zimmer1", "ceiling-light", 1.78, 1.7, 2.56),

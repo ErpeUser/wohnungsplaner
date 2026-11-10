@@ -13,8 +13,8 @@
         "sourceUrl": "https://github.com/mrdoob/three.js/blob/dev/LICENSE",
         "note": "Project-authored normalized geometry generated with Three.js primitives."
       },
-      "sha256": "9c206ee049c720ddb79e35ec42892e75b1c33e3ad395c6e9b7b11436a7879502",
-      "byteLength": 18884,
+      "sha256": "455d90638f304878fe32ff88e13a7e8a5c7e6c8bd6d35c060e8666848d13ba25",
+      "byteLength": 344592,
       "meterScale": 1,
       "catalogIds": [
         "sofa-3seat"
@@ -30,8 +30,8 @@
         "sourceUrl": "https://github.com/mrdoob/three.js/blob/dev/LICENSE",
         "note": "Project-authored normalized geometry generated with Three.js primitives."
       },
-      "sha256": "a32c83e07ca028233cfd167659eb53d65ad0a018a1e0ba399a2cd3d45306f2df",
-      "byteLength": 21728,
+      "sha256": "d98b7de04a3fda832ddedf830818e8394096ea30964e4fd4078e366bfd347040",
+      "byteLength": 130320,
       "meterScale": 1,
       "catalogIds": [
         "chair-dining",
@@ -48,8 +48,8 @@
         "sourceUrl": "https://github.com/mrdoob/three.js/blob/dev/LICENSE",
         "note": "Project-authored normalized geometry generated with Three.js primitives."
       },
-      "sha256": "8866e9d5be6694af1dedf1ecd2b618b6c09bd58d02b0db6017346701e551c56a",
-      "byteLength": 15772,
+      "sha256": "44818d8d0447e5ff9ff9b9f2d16fe7f296768c339bd2a1196d78d34fc92ecc1a",
+      "byteLength": 287200,
       "meterScale": 1,
       "catalogIds": [
         "bed-120",
@@ -66,8 +66,8 @@
         "sourceUrl": "https://github.com/mrdoob/three.js/blob/dev/LICENSE",
         "note": "Project-authored normalized geometry generated with Three.js primitives."
       },
-      "sha256": "c6f2e535f260994e30539f952f97d9f942ca3d2af91d28c89e695b8a1a48e8fd",
-      "byteLength": 11044,
+      "sha256": "b1e8d04251bad9eede72b749c932eeda0fe60e6d0c63879826b61b10b404b052",
+      "byteLength": 65344,
       "meterScale": 1,
       "catalogIds": [
         "desk-standard",
@@ -84,8 +84,8 @@
         "sourceUrl": "https://github.com/mrdoob/three.js/blob/dev/LICENSE",
         "note": "Project-authored normalized geometry generated with Three.js primitives."
       },
-      "sha256": "b15b06890e0ed9efb665f171849d4e7b25c13f9bf51a667eb8e84c4ad94a1ad4",
-      "byteLength": 16908,
+      "sha256": "11b4a1059a38bec74c36b38eaa3e9653ac75da010b4c7eb6dfdc624495111e43",
+      "byteLength": 71220,
       "meterScale": 1,
       "catalogIds": [
         "nightstand",
@@ -122,8 +122,8 @@
         "sourceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
         "note": "Project-authored procedural asset released under CC0-1.0."
       },
-      "sha256": "4ffb48f38ddf0b85f4238cd339ca0967151c5378ecf8c17558759dcb02e5a005",
-      "byteLength": 432,
+      "sha256": "882286c7b2a709b514c4651ab5dce48cda3c6b4de7da42232d5ff7df56eb38c2",
+      "byteLength": 431,
       "meterScale": 1
     },
     {
@@ -136,8 +136,8 @@
         "sourceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
         "note": "Project-authored procedural asset released under CC0-1.0."
       },
-      "sha256": "042a1adda309eb5393902304b2b91da25eae4cd0754f97b53f5647bb04902357",
-      "byteLength": 367,
+      "sha256": "f240fd659412fda98acd3834b752ecc5a49674c3320f966cc260ce86c06ca8b8",
+      "byteLength": 263,
       "meterScale": 1
     },
     {

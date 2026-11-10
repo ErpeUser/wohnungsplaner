@@ -113,3 +113,28 @@ test("rejects placements outside or crossing the room boundary", () => {
 
   assert.throws(() => parsePlannerDocument(outside), /fully inside room/i);
 });
+
+test("rejects an opening whose head exceeds the wall and overlapping openings", () => {
+  const invalid = structuredClone(validDocument);
+  invalid.openings.push({
+    id: "opening-window",
+    label: "Fenster",
+    wallId: "wall-north",
+    offset: 1.1,
+    width: 0.9,
+    height: 2,
+    sill: 1,
+    kind: "window",
+    hinge: "none",
+    swingDegrees: 0,
+  });
+
+  assert.throws(() => parsePlannerDocument(invalid), /exceeds wall height|overlaps another opening/i);
+});
+
+test("rejects wnf areas larger than the declared room area", () => {
+  const invalid = structuredClone(validDocument);
+  Object.assign(invalid.rooms[0], { wnfArea: 13 });
+
+  assert.throws(() => parsePlannerDocument(invalid), /wnfArea.*area/i);
+});

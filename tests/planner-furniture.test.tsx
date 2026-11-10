@@ -16,6 +16,7 @@ vi.mock("react-konva", () => {
     Circle: node("Circle"),
     Group: node("Group"),
     Line: node("Line"),
+    Path: node("Path"),
     Layer: node("Layer"),
     Rect: node("Rect"),
     Text: node("Text"),
@@ -39,13 +40,13 @@ import { CatalogPanel } from "../app/planner/workspace/catalog-panel.tsx";
 import { InspectorPanel } from "../app/planner/workspace/inspector-panel.tsx";
 
 describe("furniture catalog", () => {
-  test("offers the Cloudy bed only in its verified product dimensions and cream chenille", () => {
-    const bed = FURNITURE_CATALOG.find((item) => item.id === "bed-cloudy-120");
+  test("offers the Bliss bed only in its verified product dimensions and beige upholstery", () => {
+    const bed = FURNITURE_CATALOG.find((item) => item.id === "bed-bliss-120");
 
     assert.ok(bed);
-    assert.deepEqual(bed.defaultSize, { width: 1.54, depth: 2.29, height: 1.06 });
+    assert.deepEqual(bed.defaultSize, { width: 1.47, depth: 2.22, height: 1.08 });
     assert.equal(bed.resize, "fixed");
-    assert.deepEqual(bed.materials.map((material) => material.id), ["fabric-chenille-cream"]);
+    assert.deepEqual(bed.materials.map((material) => material.id), ["fabric-bliss-beige"]);
   });
 
   test("builds the photographed five-axis wardrobe with the full mirror exactly centred", async () => {
@@ -100,12 +101,13 @@ describe("furniture interactions", () => {
     const document = { ...DEFAULT_APARTMENT_DOCUMENT, placements: [chair] };
     const snapped = resolvePlacementMove(document, chair, { x: 2.713, z: 0.937 });
     const free = resolvePlacementMove(document, chair, { x: 2.713, z: 0.937 }, { disableGrid: true });
-    assert.deepEqual(snapped.position, { x: 2.7, z: 0.95 });
-    assert.deepEqual(free.position, { x: 2.713, z: 0.937 });
+    assert.deepEqual(snapped.position, { x: 2.72, z: 0.935 });
+    assert.deepEqual(free.position, { x: 2.72, z: 0.935 });
+    assert.ok(snapped.guides.some((guide) => guide.kind === "object"));
   });
 
   test("uses real wall and object guides during production placement moves", () => {
-    const nearWall = resolvePlacementMove(DEFAULT_APARTMENT_DOCUMENT, chair, { x: 0.24, z: 2 }, { disableGrid: true });
+    const nearWall = resolvePlacementMove(DEFAULT_APARTMENT_DOCUMENT, chair, { x: 0.32, z: 2 }, { disableGrid: true });
     assert.ok(nearWall.guides.some((guide) => guide.kind === "wall"));
 
     const other = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id !== chair.id)!;
@@ -126,8 +128,8 @@ describe("furniture interactions", () => {
   });
 
   test("supports 1/10 cm keyboard movement, 45 degree/free rotation and allowed resizing", () => {
-    assert.deepEqual(nudgePlacement(chair, "ArrowRight", false), { x: 2.71, z: 0.94 });
-    assert.deepEqual(nudgePlacement(chair, "ArrowUp", true), { x: 2.7, z: 0.84 });
+    assert.deepEqual(nudgePlacement(chair, "ArrowRight", false), { x: 2.97, z: 0.92 });
+    assert.deepEqual(nudgePlacement(chair, "ArrowUp", true), { x: 2.96, z: 0.82 });
     assert.equal(resolvePlacementRotation(32, false), 45);
     assert.equal(resolvePlacementRotation(32, true), 32);
 
@@ -167,7 +169,7 @@ describe("furniture interactions", () => {
     store.getState().dispatch({ type: "movePlacement", placementId: "zimmer1-chair", position: { x: 3.15, z: 0.94 } });
     assert.equal(store.getState().canUndo, true);
     store.getState().undo();
-    assert.equal(store.getState().document.placements.find((item) => item.id === "zimmer1-chair")?.position.x, 2.7);
+    assert.equal(store.getState().document.placements.find((item) => item.id === "zimmer1-chair")?.position.x, 2.96);
     store.getState().redo();
     assert.equal(store.getState().document.placements.find((item) => item.id === "zimmer1-chair")?.position.x, 3.15);
   });

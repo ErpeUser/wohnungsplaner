@@ -39,7 +39,7 @@ describe("createSceneModel", () => {
     expect(square.map).toBeInstanceOf(DataTexture);
     expect(rectangular.map).toBeInstanceOf(DataTexture);
     expect(taupe.map).toBeInstanceOf(DataTexture);
-    expect(square.color.getHexString()).toBe("ffffff");
+    expect(square.color.getHexString()).toBe("efeeea");
   });
   test("redraws demand-rendered 3D after a newly selected rug texture finishes loading", async () => {
     const texture = new Texture(document.createElement("img"));

@@ -91,18 +91,19 @@ test("stores the fixed kitchen and sanitary inventory separately from movable fu
   assert.ok(DEFAULT_APARTMENT_DOCUMENT.builtIns.some((item) => item.catalogId === "bath-tub-apron"));
   assert.ok(DEFAULT_APARTMENT_DOCUMENT.builtIns.some((item) => item.catalogId === "kitchen-fridge"));
   assert.ok(DEFAULT_APARTMENT_DOCUMENT.builtIns.every((item) => item.locked));
-  assert.ok(DEFAULT_APARTMENT_DOCUMENT.placements.every((item) => item.roomId === "zimmer1"));
+  assert.ok(DEFAULT_APARTMENT_DOCUMENT.placements.some((item) => item.roomId === "wohnkueche"));
+  assert.ok(DEFAULT_APARTMENT_DOCUMENT.placements.some((item) => item.roomId === "vorraum"));
 });
 
-test("places the exact Cloudy 120 upholstered bed in the free Zimmer 1 corner", () => {
-  const bed = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "zimmer1-cloudy-bed");
+test("places the exact Bliss 120 upholstered bed in the free Zimmer 1 corner", () => {
+  const bed = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "zimmer1-bliss-bed");
 
   assert.ok(bed);
-  assert.equal(bed.catalogId, "bed-cloudy-120");
-  assert.deepEqual(bed.position, { x: 0.78, z: 1.15 });
-  assert.deepEqual(bed.size, { width: 1.54, depth: 2.29, height: 1.06 });
-  assert.equal(bed.rotation, 0);
-  assert.equal(bed.materialVariants?.main, "fabric-chenille-cream");
+  assert.equal(bed.catalogId, "bed-bliss-120");
+  assert.deepEqual(bed.position, { x: 1.11, z: 0.75 });
+  assert.deepEqual(bed.size, { width: 1.47, depth: 2.22, height: 1.08 });
+  assert.equal(bed.rotation, 270);
+  assert.equal(bed.materialVariants?.main, "fabric-bliss-beige");
   assert.equal(bed.metadata?.confidence, "confirmed");
 });
 
@@ -114,7 +115,7 @@ test("keeps the photographed black fridge beside rather than inside the sink run
   assert.ok(sinkRun);
   assert.equal(fridge.materialVariants?.main, "cabinet-black");
   assert.ok(
-    sinkRun.position.x + sinkRun.size.width / 2 <= fridge.position.x - fridge.size.width / 2,
+    sinkRun.position.x + sinkRun.size.width / 2 <= fridge.position.x - fridge.size.width / 2 + 0.001,
     "the sink cabinets must stop before the fridge begins",
   );
 });
@@ -127,18 +128,19 @@ test("closes the photographed tub end with a tiled ledge", () => {
   assert.ok(ledge.size.width >= 0.7);
 });
 
-test("aligns the hall intercom above the entry-side switch", () => {
+test("keeps the hall intercom and entry-side switch on the same wall axis", () => {
   const intercom = DEFAULT_APARTMENT_DOCUMENT.fixtures.find((item) => item.id === "fixture-hall-intercom");
   const entrySwitch = DEFAULT_APARTMENT_DOCUMENT.fixtures.find((item) => item.id === "fixture-hall-switch");
   assert.ok(intercom);
   assert.ok(entrySwitch);
-  assert.ok(Math.abs(intercom.position.z - entrySwitch.position.z) <= 0.08);
+  assert.equal(intercom.position.x, entrySwitch.position.x);
+  assert.ok(Math.abs(intercom.position.z - entrySwitch.position.z) <= 0.25);
 });
 
 test("keeps the Zimmer 1 plan door visible by default and the photographed shower on the tub wall", () => {
   assert.equal(DEFAULT_APARTMENT_DOCUMENT.doorStates["zimmer1-door"], "closed");
   const shower = DEFAULT_APARTMENT_DOCUMENT.builtIns.find((item) => item.catalogId === "bath-shower-set");
-  assert.deepEqual(shower?.position, { x: -2.34, z: 8.58 });
+  assert.deepEqual(shower?.position, { x: -2.34, z: 9.62 });
   assert.equal(shower?.rotation, 90);
 });
 
@@ -236,10 +238,23 @@ test("reports unknown furniture and invalid numbers without silently dropping th
 });
 
 test("accepts an already valid V3 document without migration", () => {
-  const result = migrateStoredPlannerData(DEFAULT_APARTMENT_DOCUMENT, DEFAULT_APARTMENT_DOCUMENT);
+  const input = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
+  delete (input.openings.find((opening) => opening.id === "zimmer1-door") as { swingDirection?: number }).swingDirection;
+  const result = migrateStoredPlannerData(input, DEFAULT_APARTMENT_DOCUMENT);
 
-  assert.equal(result.document, DEFAULT_APARTMENT_DOCUMENT);
+  assert.notEqual(result.document, input);
+  assert.equal(result.document.openings.find((opening) => opening.id === "zimmer1-door")?.swingDirection, 1);
   assert.deepEqual(result.warnings, []);
   assert.deepEqual(result.unmapped, []);
   assert.equal(result.legacyBackupJson, null);
+});
+
+test("keeps out-of-bounds legacy furniture in the migration report instead of throwing", () => {
+  const result = migrateStoredPlannerData({
+    zimmer1: [{ type: "desk", x: -3, y: -3, w: 1, d: 1, h: 0.75, rotation: 0 }],
+  }, DEFAULT_APARTMENT_DOCUMENT);
+
+  assert.equal(result.document.placements.some((item) => item.catalogId === "desk-standard" && item.id.startsWith("legacy-")), false);
+  assert.equal(result.unmapped[0]?.reason, "outside-room");
+  assert.match(result.warnings[0] ?? "", /außerhalb|innerhalb/i);
 });

@@ -2,6 +2,7 @@ import type { Size3 } from "../domain/types.ts";
 
 export type FurnitureCategory = "Schlafen" | "Sitzen" | "Arbeiten" | "Aufbewahren" | "Tische" | "Licht/Deko";
 export type FurnitureResizeRule = "fixed" | "uniform" | "free";
+export type FurnitureRenderMode = "auto" | "gltf" | "parametric";
 
 export type FurnitureMaterial = {
   id: string;
@@ -18,6 +19,7 @@ export type FurnitureCatalogItem = {
   resize: FurnitureResizeRule;
   symbol: "bed" | "storage" | "desk" | "chair" | "sofa" | "table" | "rug" | "light" | "plant";
   fallback3d: string;
+  renderMode: FurnitureRenderMode;
   materials: FurnitureMaterial[];
 };
 
@@ -78,6 +80,15 @@ const ZIMMER1_PLANT = [
 const TEMU_EXECUTIVE_IVORY = [
   { id: "leather-ivory", label: "Cremefarbenes Kunstleder / Chrom", color: "#e5ded4" },
 ];
+
+// Product-specific entries have hand-authored parametric geometry until a
+// normalized product GLB with matching dimensions and materials is approved.
+// Generic catalog items stay on the local GLB path automatically.
+const PHOTO_FIRST_IDS = new Set([
+  "bed-bliss-120", "wardrobe-225", "vanity-vicco-sherry-120",
+  "chair-temu-executive-ivory", "chair-kaleo-chenille-beige", "sofa-sectional-photo",
+  "sofa-chicago-206", "dining-table-bozan-110", "nightstand-led-2drawer-white",
+]);
 
 export const FURNITURE_CATALOG: FurnitureCatalogItem[] = [
   item("bed-bliss-120", "Polsterbett Bliss 120", "Schlafen", "Beiges Polsterbett mit vierteilig gepolstertem Kopfteil, Bettkasten und Lattenrost", [1.47, 2.22, 1.08], "fixed", "bed", "bed", BLISS_BEIGE),
@@ -146,6 +157,7 @@ function item(
     resize,
     symbol,
     fallback3d,
+    renderMode: PHOTO_FIRST_IDS.has(id) ? "parametric" : "auto",
     materials,
   };
 }

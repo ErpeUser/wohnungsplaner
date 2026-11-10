@@ -5,7 +5,7 @@ import type {
   PlannerViewPreferences,
   Point2,
 } from "../domain/types.ts";
-import { deriveRoomPolygon, deriveWallLength } from "../domain/wall-graph.ts";
+import { deriveRoomPolygon } from "../domain/wall-graph.ts";
 
 export type PlanRoomDescriptor = {
   id: string;
@@ -193,7 +193,18 @@ export function createPlanScene(
     fixtures,
     dimensions,
     guides: options.guides ?? [],
-    bounds: boundsFromScene(rooms, openings, dimensions),
+    bounds: boundsFromScene(
+      rooms,
+      openings,
+      dimensions,
+      [
+        ...builtIns.flatMap((item) => item.points),
+        ...document.placements
+          .filter((item) => roomIds.has(item.roomId))
+          .flatMap((item) => placementPolygon(item)),
+        ...fixtures.map((fixture) => fixture.position),
+      ],
+    ),
   };
 }
 
@@ -300,11 +311,13 @@ function boundsFromScene(
   rooms: PlanRoomDescriptor[],
   openings: PlanOpeningDescriptor[],
   dimensions: PlanDimensionDescriptor[],
+  extraPoints: Point2[] = [],
 ): PlanBounds {
   const points = [
     ...rooms.flatMap((room) => room.points),
     ...openings.flatMap((opening) => [opening.start, opening.end]),
     ...dimensions.flatMap((dimension) => [dimension.start, dimension.end]),
+    ...extraPoints,
   ];
   if (points.length === 0) return { minX: 0, minZ: 0, maxX: 1, maxZ: 1 };
   return {
@@ -323,12 +336,13 @@ function createRoomDimensions(room: PlanRoomDescriptor): PlanDimensionDescriptor
   );
   const offset = 0.22;
 
-  return room.points.map((wallStart, index) => {
+  return room.points.flatMap((wallStart, index) => {
     const wallEnd = room.points[(index + 1) % room.points.length];
     const dx = wallEnd.x - wallStart.x;
     const dz = wallEnd.z - wallStart.z;
     const length = Math.hypot(dx, dz);
     const midpoint = { x: (wallStart.x + wallEnd.x) / 2, z: (wallStart.z + wallEnd.z) / 2 };
+    if (length <= 0.001) return [];
     const normal = { x: -dz / length, z: dx / length };
     const positiveCandidate = { x: midpoint.x + normal.x * offset, z: midpoint.z + normal.z * offset };
     const negativeCandidate = { x: midpoint.x - normal.x * offset, z: midpoint.z - normal.z * offset };
@@ -339,7 +353,7 @@ function createRoomDimensions(room: PlanRoomDescriptor): PlanDimensionDescriptor
     if (rotation > 90) rotation -= 180;
     if (rotation <= -90) rotation += 180;
 
-    return {
+    return [{
       id: `dimension-${room.id}-${index}`,
       wallStart,
       wallEnd,
@@ -347,7 +361,7 @@ function createRoomDimensions(room: PlanRoomDescriptor): PlanDimensionDescriptor
       end: { x: wallEnd.x + outward.x * offset, z: wallEnd.z + outward.z * offset },
       label: `${Math.round(length * 100)} cm`,
       rotation,
-    };
+    }];
   });
 }
 

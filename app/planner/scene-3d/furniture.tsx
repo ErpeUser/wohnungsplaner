@@ -53,11 +53,10 @@ function FurnitureInstance({
   const resolution = catalogItem ? resolveFurnitureAsset(catalogItem) : null;
   const fallback = catalogItem?.fallback3d ?? "cabinet";
   const materialId = item.source.materialVariants?.main ?? item.source.materialVariants?.color ?? item.materialId;
-  const photoMatched = item.catalogId.startsWith("bed-") || item.catalogId === "wardrobe-225" || item.catalogId === "desk-standard" || item.catalogId === "vanity-vicco-sherry-120" || item.catalogId === "chair-office" || item.catalogId === "chair-temu-executive-ivory" || item.catalogId === "chair-kaleo-chenille-beige" || item.catalogId === "sofa-sectional-photo" || item.catalogId === "dining-table-bozan-110" || item.catalogId === "nightstand-led-2drawer-white";
-  const content = resolution?.kind === "gltf" && !photoMatched ? (
+  const content = resolution?.kind === "gltf" && catalogItem?.renderMode !== "parametric" ? (
     <FurnitureAssetBoundary fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} />}>
       <Suspense fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} />}>
-        <GltfFurniture path={resolution.asset.path} materialId={materialId} />
+        <GltfFurniture path={resolution.asset.path} />
       </Suspense>
     </FurnitureAssetBoundary>
   ) : <ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} />;
@@ -82,7 +81,7 @@ function FurnitureInstance({
   );
 }
 
-function GltfFurniture({ path, materialId }: { path: string; materialId: string }) {
+function GltfFurniture({ path }: { path: string }) {
   const gltf = useGLTF(path);
   const object = useMemo(() => {
     const clone = gltf.scene.clone(true);
@@ -90,10 +89,16 @@ function GltfFurniture({ path, materialId }: { path: string; materialId: string 
       if (!(child instanceof Mesh)) return;
       child.castShadow = true;
       child.receiveShadow = true;
-      child.material = getPlannerMaterial(materialId);
+      // Keep the GLB's authored PBR materials and texture maps. Replacing every
+      // submesh with one planner material made imported products look flat and
+      // destroyed multi-material details. Material variants remain available
+      // for parametric fallbacks; imported assets are authoritative.
+      child.material = Array.isArray(child.material)
+        ? child.material.map((material) => material.clone())
+        : child.material.clone();
     });
     return clone;
-  }, [gltf.scene, materialId]);
+  }, [gltf.scene]);
   return <primitive object={object} />;
 }
 

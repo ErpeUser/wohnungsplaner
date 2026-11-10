@@ -18,6 +18,7 @@ vi.mock("react-konva", () => {
     Group: node("Group"),
     Layer: node("Layer"),
     Line: node("Line"),
+    Path: node("Path"),
     Rect: node("Rect"),
     Stage: ({ children, onWheel, scaleX, x, y }: React.PropsWithChildren<{
       onWheel?(event: unknown): void;
@@ -86,6 +87,20 @@ describe("createPlanScene", () => {
     })));
   });
 
+  test("includes furniture in fit bounds", () => {
+    const source = DEFAULT_APARTMENT_DOCUMENT.placements[0];
+    const scene = createPlanScene({
+      ...DEFAULT_APARTMENT_DOCUMENT,
+      placements: [{ ...source, position: { x: -10, z: -10 } }],
+    }, {
+      activeRoomId: null,
+      overlays: { dimensions: false, fixtures: false, evidence: false },
+    });
+
+    assert.ok(scene.bounds.minX < -10);
+    assert.ok(scene.bounds.minZ < -10);
+  });
+
   test("filters the same scene to one room without duplicating geometry", () => {
     const room = DEFAULT_APARTMENT_DOCUMENT.rooms.find((item) => item.id === "zimmer1")!;
     const scene = createPlanScene(DEFAULT_APARTMENT_DOCUMENT, {
@@ -129,7 +144,7 @@ describe("createPlanScene", () => {
     assert.equal(plain.fixtures.length, 0);
     assert.equal(plain.dimensions.length, 0);
     assert.equal(annotated.fixtures.length, DEFAULT_APARTMENT_DOCUMENT.fixtures.length);
-    assert.equal(annotated.dimensions.length, DEFAULT_APARTMENT_DOCUMENT.walls.length);
+    assert.equal(annotated.dimensions.length, 49);
   });
 
   test("fits the complete apartment and keeps north-up screen orientation", () => {

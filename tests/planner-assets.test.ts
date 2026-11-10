@@ -95,7 +95,7 @@ test("walk camera starts inside the chosen scope and rejects walls, built-ins an
 });
 
 test("walk collision allows crossing a low rug placement", () => {
-  const rug = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.catalogId === "rug-zimmer1-160x230")!;
+  const rug = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.catalogId === "rug-temu-rabbit-ivory-100x180")!;
   const rugOnlyDocument = {
     ...DEFAULT_APARTMENT_DOCUMENT,
     builtIns: [],
@@ -107,7 +107,7 @@ test("walk collision allows crossing a low rug placement", () => {
 
 test("walk collision crosses floor finishes and the full thickness of interior doorways", () => {
   assert.equal(isWalkPositionValid(DEFAULT_APARTMENT_DOCUMENT, { x: 1.5, z: 4.55 }, 0.22), true);
-  assert.equal(isWalkPositionValid(DEFAULT_APARTMENT_DOCUMENT, { x: 1, z: 5.5 }, 0.22), true);
+  assert.equal(isWalkPositionValid(DEFAULT_APARTMENT_DOCUMENT, { x: -0.8, z: 5.5 }, 0.22), true);
   assert.equal(isWalkPositionValid(DEFAULT_APARTMENT_DOCUMENT, { x: -0.08, z: 6.29 }, 0.22), true);
 
   const acrossHallDoor = moveWalkPosition(

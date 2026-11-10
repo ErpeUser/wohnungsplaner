@@ -11,6 +11,7 @@ import {
   Scene,
   SphereGeometry,
 } from "three";
+import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter.js";
 
 class NodeFileReader {
@@ -127,7 +128,9 @@ function authoredLicense() {
 }
 
 function box(group, size, position, color, radius = 0) {
-  const geometry = new BoxGeometry(...size, radius ? 2 : 1, radius ? 2 : 1, radius ? 2 : 1);
+  const geometry = radius > 0
+    ? new RoundedBoxGeometry(size[0], size[1], size[2], 3, Math.min(radius, Math.min(...size) / 2 - 0.001))
+    : new BoxGeometry(...size);
   const material = new MeshStandardMaterial({ color, roughness: 0.72, metalness: 0 });
   const mesh = new Mesh(geometry, material);
   mesh.position.set(...position);

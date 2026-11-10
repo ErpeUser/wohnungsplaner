@@ -1,7 +1,8 @@
 import { access, cp, mkdir } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const root = path.dirname(new URL(import.meta.url).pathname).replace(/^\/(?:[A-Za-z]:)/, (value) => value.slice(1));
+const root = path.dirname(fileURLToPath(import.meta.url));
 const clientRoot = path.join(root, "dist", "client");
 const serverRoot = path.join(root, "dist", "server");
 const assetDirectories = ["assets", "_next"];

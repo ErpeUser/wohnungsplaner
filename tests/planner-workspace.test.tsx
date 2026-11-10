@@ -11,6 +11,7 @@ vi.mock("react-konva", () => ({
   Group: ({ children }: React.PropsWithChildren) => <>{children}</>,
   Layer: ({ children }: React.PropsWithChildren) => <>{children}</>,
   Line: () => null,
+  Path: () => null,
   Rect: () => null,
   Stage: ({ children }: React.PropsWithChildren) => <div data-konva-node="Stage">{children}</div>,
   Text: () => null,
@@ -49,17 +50,17 @@ describe("PlannerWorkspace", () => {
     );
   });
 
-  test("lists the Cloudy bed with product dimensions, room, and planning price", () => {
+  test("lists the Bliss bed with product dimensions, room, and planning price", () => {
     render(<ShoppingListDrawer onClose={() => undefined} />);
 
-    const heading = screen.getByRole("heading", { name: "Polsterbett Cloudy" });
+    const heading = screen.getByRole("heading", { name: "Polsterbett Bliss" });
     const product = heading.closest("article");
     assert.ok(product);
-    assert.match(product.textContent ?? "", /Zimmer 1.*1523001620/);
-    assert.match(product.textContent ?? "", /154.*229.*106 cm.*120.*200 cm/);
+    assert.match(product.textContent ?? "", /Zimmer 1.*800001233737/);
+    assert.match(product.textContent ?? "", /147.*222.*108 cm.*120.*200 cm/);
     assert.equal(
       product.querySelector("a")?.getAttribute("href"),
-      "https://www.moebelix.at/p/luca-bessoni-polsterbett-cloudy-creme-lf-120x200-cm-001523001620",
+      "https://www.xxxlutz.at/p/homesy-polsterbett-bliss-120-x-200-cm-mit-bettkasten-und-lattenrost-ohne-matratze-beige-800001233737",
     );
   });
 

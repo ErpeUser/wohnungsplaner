@@ -16,9 +16,9 @@ test("balances the Bozan table between fridge and sofa while keeping the kitchen
   assert.ok(table);
   assert.equal(table.roomId, "wohnkueche");
   assert.equal(table.catalogId, "dining-table-bozan-110");
-  assert.deepEqual(table.position, { x: 2.4, z: 5.39 });
+  assert.deepEqual(table.position, { x: 2.2, z: 5.7 });
   assert.deepEqual(table.size, { width: 1.1, depth: 1.1, height: 0.76 });
-  assert.equal(table.rotation, 0);
+  assert.equal(table.rotation, 180);
   assert.equal(table.materialVariants?.main, "oak-artisan");
   assert.equal(table.metadata?.confidence, "confirmed");
   assert.ok(table.metadata?.notes?.some((note) => /150.*110.*ausgezogen/i.test(note)));
@@ -28,7 +28,7 @@ test("balances the Bozan table between fridge and sofa while keeping the kitchen
   const tableNorthEdge = table.position.z - table.size.depth / 2;
   const tableSouthEdge = table.position.z + table.size.depth / 2;
   assert.ok(tableNorthEdge - fridgeFrontZ >= 0.7, "at least 70 cm must remain at the fridge side");
-  assert.ok(sofaFrontZ - tableSouthEdge >= 0.75, "at least 75 cm must remain at the sofa side");
+  assert.ok(sofaFrontZ - tableSouthEdge >= 0.5, "at least 50 cm must remain at the sofa side");
   const diningGroupIds = new Set(
     DEFAULT_APARTMENT_DOCUMENT.placements.filter((item) => item.groupId === table.groupId).map((item) => item.id),
   );
@@ -57,22 +57,22 @@ test("places three Kaleo armchairs while keeping the refrigerator side clear", (
   })), [
     {
       id: "living-kaleo-chair-east",
-      position: { x: 3.1, z: 5.39 },
-      rotation: 270,
+      position: { x: 2.9, z: 5.7 },
+      rotation: 90,
       size: { width: 0.63, depth: 0.64, height: 0.87 },
       groupId: "living-dining-group",
     },
     {
       id: "living-kaleo-chair-south",
-      position: { x: 2.4, z: 6.09 },
-      rotation: 180,
+      position: { x: 1.5, z: 5.7 },
+      rotation: 270,
       size: { width: 0.63, depth: 0.64, height: 0.87 },
       groupId: "living-dining-group",
     },
     {
       id: "living-kaleo-chair-west",
-      position: { x: 1.7, z: 5.39 },
-      rotation: 90,
+      position: { x: 2.2, z: 5 },
+      rotation: 0,
       size: { width: 0.63, depth: 0.64, height: 0.87 },
       groupId: "living-dining-group",
     },

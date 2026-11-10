@@ -39,6 +39,7 @@ export function inspectPlacement(
   for (const builtIn of document.builtIns.filter((item) => (
     item.roomId === placement.roomId
     && item.catalogId !== "floor-zone-kitchen"
+    && item.collision !== "decorative"
     && item.size.height > 0.03
   ))) {
     if (polygonsIntersect(footprint, placementPolygon(builtIn))) {
@@ -53,6 +54,7 @@ export function inspectPlacement(
   for (const other of document.placements.filter(
     (item) => item.roomId === placement.roomId
       && item.id !== placement.id
+      && !isFloorCovering(item)
       && !options.ignorePlacementIds?.has(item.id),
   )) {
     if (polygonsIntersect(footprint, placementPolygon(other))) {
@@ -89,4 +91,9 @@ export function inspectPlacement(
   }
 
   return { hard, warnings };
+}
+
+/** Rugs are rendered as floor coverings and can intentionally sit below furniture. */
+export function isFloorCovering(item: PlannerPlacement) {
+  return /(^|[-_])(rug|carpet)([-_]|$)/i.test(item.catalogId) || item.size.height <= 0.08;
 }

@@ -101,8 +101,8 @@ test("uses explicit hinges and swing directions for every apartment door", () =>
     "hall-living-door": { hinge: { x: -0.16, z: 6.125 }, openEnd: { x: -1.01, z: 6.125 } },
     "apartment-entry-door": { hinge: { x: -2.42, z: 6.11 }, openEnd: { x: -1.31, z: 6.11 } },
     "hall-bath-door": { hinge: { x: -0.28, z: 8.2 }, openEnd: { x: -0.28, z: 7.35 } },
-    "hall-wc-door": { hinge: { x: -1.48, z: 5.87 }, openEnd: { x: -1.48, z: 6.73 } },
-    "hall-store-door": { hinge: { x: -1.1, z: 5.87 }, openEnd: { x: -1.1, z: 6.73 } },
+    "hall-wc-door": { hinge: { x: -1.54, z: 5.87 }, openEnd: { x: -1.54, z: 6.67 } },
+    "hall-store-door": { hinge: { x: -1.06, z: 5.87 }, openEnd: { x: -1.06, z: 6.67 } },
     "living-zimmer2-door": { hinge: { x: 3.58, z: 8.95 }, openEnd: { x: 3.58, z: 9.75 } },
     "living-loggia-door": { hinge: { x: 4.557959, z: 8.892847 }, openEnd: { x: 4.511326, z: 8.094908 } },
   } as const;

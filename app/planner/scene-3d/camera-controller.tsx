@@ -1,4 +1,7 @@
 "use client";
+/* React Three Fiber exposes a live camera object by design; camera pose/FOV
+ * mutations are imperative scene synchronization, not React state mutation. */
+/* eslint-disable react-hooks/immutability */
 
 import { OrbitControls, PointerLockControls } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
@@ -9,6 +12,7 @@ import { doorPassagePolygon, pointInPolygon } from "../domain/geometry.ts";
 import type { PlannerDocumentV3, Point2 } from "../domain/types.ts";
 import { deriveRoomPolygon } from "../domain/wall-graph.ts";
 import { openingSliceOnWall, type SceneModel, type SceneWallSegment } from "./scene-model.ts";
+import { isFloorCovering } from "../domain/collisions.ts";
 
 export type CameraMode = "orbit" | "walk";
 export type WalkCommand = "forward" | "back" | "left" | "right" | "zoom-in" | "zoom-out" | "reset";
@@ -129,18 +133,18 @@ export function isWalkPositionValid(document: PlannerDocumentV3, point: Point2, 
   })];
   if (!samples.every((sample) => (
     roomPolygons.some((polygon) => pointInPolygon(sample, polygon))
-    || doorwayPolygons.some((polygon) => pointInPolygon(sample, polygon))
+    || doorwayPolygons.some((polygon) => pointInOrNearPolygon(sample, polygon, radius))
   ))) return false;
 
-  const scene = createCollisionScene(document);
+  const scene = createCollisionScene(document, radius);
   if (scene.wallSegments.some((segment) => circleIntersectsWall(point, radius, segment))) return false;
   if (document.builtIns.some((item) => isWalkBlockingBuiltIn(item) && circleIntersectsPlacement(point, radius, item))) return false;
-  if (document.placements.some((item) => isWalkBlockingPlacement(item) && circleIntersectsPlacement(point, radius, item))) return false;
+  if (document.placements.some((item) => isWalkBlockingPlacement(item) && !isFloorCovering(item) && circleIntersectsPlacement(point, radius, item))) return false;
   return true;
 }
 
 function isWalkBlockingBuiltIn(item: PlannerDocumentV3["builtIns"][number]) {
-  return (item.elevation ?? 0) + item.size.height > 0.08;
+  return item.collision !== "decorative" && (item.elevation ?? 0) + item.size.height > 0.08;
 }
 
 function isWalkBlockingPlacement(item: PlannerDocumentV3["placements"][number]) {
@@ -237,10 +241,6 @@ export function CameraController({
     mode,
     orbitPose,
     reportOrbitCamera,
-    sceneCenterX,
-    sceneCenterY,
-    sceneCenterZ,
-    sceneSpan,
     walkEyeHeight,
     walkLookAtX,
     walkLookAtZ,
@@ -397,33 +397,38 @@ function findValidGridPoint(document: PlannerDocumentV3, polygon: Point2[]) {
   return null;
 }
 
-function createCollisionScene(document: PlannerDocumentV3) {
-  const wallSegments = createSceneWallSegments(document);
+function createCollisionScene(document: PlannerDocumentV3, clearanceRadius = 0) {
+  const wallSegments = createSceneWallSegments(document, clearanceRadius);
   return { wallSegments };
 }
 
-function createSceneWallSegments(document: PlannerDocumentV3) {
+export function createSceneWallSegments(document: PlannerDocumentV3, clearanceRadius = 0) {
   const openingsByWall = new Map<string, Array<{ from: number; to: number; sill: number }>>();
   for (const opening of document.openings) {
     for (const wall of document.walls) {
       const slice = openingSliceOnWall(document, opening, wall);
       if (!slice) continue;
       const list = openingsByWall.get(wall.id) ?? [];
-      list.push({ from: slice.offset, to: slice.offset + slice.width, sill: slice.sill });
+    list.push({ from: slice.offset, to: slice.offset + slice.width, sill: slice.sill });
       openingsByWall.set(wall.id, list);
     }
   }
   return document.walls.flatMap((wall) => {
     const length = Math.hypot(wall.end.x - wall.start.x, wall.end.z - wall.start.z);
     const angle = Math.atan2(wall.end.z - wall.start.z, wall.end.x - wall.start.x);
-    const cuts = [0, length, ...(openingsByWall.get(wall.id) ?? []).flatMap((opening) => [opening.from, opening.to])]
+    const openings = (openingsByWall.get(wall.id) ?? []).map((opening) => (
+      opening.sill <= 0.05
+        ? { ...opening, from: opening.from - clearanceRadius, to: opening.to + clearanceRadius }
+        : opening
+    ));
+    const cuts = [0, length, ...openings.flatMap((opening) => [opening.from, opening.to])]
       .map((value) => Math.min(length, Math.max(0, value)))
       .sort((left, right) => left - right);
     const unique = [...new Set(cuts.map((value) => Number(value.toFixed(6))))];
     return unique.slice(0, -1).flatMap((from, index) => {
       const to = unique[index + 1];
       const midpoint = (from + to) / 2;
-      const lowOpening = (openingsByWall.get(wall.id) ?? []).some((opening) => (
+      const lowOpening = openings.some((opening) => (
         midpoint > opening.from + 0.001 && midpoint < opening.to - 0.001 && opening.sill <= 0.05
       ));
       if (lowOpening) return [];
@@ -473,4 +478,21 @@ function circleIntersectsAxisAlignedRect(point: Point2, radius: number, width: n
   const closestX = Math.max(-width / 2, Math.min(width / 2, point.x));
   const closestZ = Math.max(-depth / 2, Math.min(depth / 2, point.z));
   return Math.hypot(point.x - closestX, point.z - closestZ) < radius;
+}
+
+function pointInOrNearPolygon(point: Point2, polygon: Point2[], radius: number) {
+  if (pointInPolygon(point, polygon)) return true;
+  const radiusSquared = radius * radius;
+  return polygon.some((start, index) => {
+    const end = polygon[(index + 1) % polygon.length];
+    const dx = end.x - start.x;
+    const dz = end.z - start.z;
+    const lengthSquared = dx * dx + dz * dz;
+    const projection = lengthSquared <= 0.000001
+      ? 0
+      : Math.max(0, Math.min(1, ((point.x - start.x) * dx + (point.z - start.z) * dz) / lengthSquared));
+    const nearestX = start.x + projection * dx;
+    const nearestZ = start.z + projection * dz;
+    return (point.x - nearestX) ** 2 + (point.z - nearestZ) ** 2 <= radiusSquared;
+  });
 }

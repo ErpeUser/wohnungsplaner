@@ -179,6 +179,17 @@ export function PlanCanvas({
       <p className="planner-visually-hidden">
         Grundriss mit {scene.rooms.length} {scene.rooms.length === 1 ? "Bereich" : "Bereichen"}, {scene.openings.length} Öffnungen und {scene.builtIns.length} festen Einbauten.
       </p>
+      <div className="planner-visually-hidden" aria-label="Planobjekte als Liste">
+        <ul>
+          {scene.rooms.map((room) => <li key={room.id}>{room.name}, {Math.round(room.area * 100) / 100} m²</li>)}
+          {document.placements.filter((item) => !activeRoomId || item.roomId === activeRoomId).map((item) => (
+            <li key={item.id}><button type="button" onClick={() => onSelect(item.id)}>{getFurnitureCatalogItem(item.catalogId)?.name ?? item.catalogId}</button></li>
+          ))}
+          {scene.builtIns.map((item) => (
+            <li key={item.id}><button type="button" onClick={() => onSelect(item.id)}>{item.label} (fix)</button></li>
+          ))}
+        </ul>
+      </div>
       <InteractivePlanStage
         key={activeRoomId ?? "all"}
         scene={scene}
@@ -230,8 +241,8 @@ function InteractivePlanStage({
   onToggleDoor,
   onStageChange,
 }: InteractivePlanStageProps) {
-  const [clientReady, setClientReady] = useState(false);
-  const [layersReady, setLayersReady] = useState(false);
+  const [clientReady] = useState(() => typeof window !== "undefined");
+  const [layersReady] = useState(() => typeof window !== "undefined");
   const [canvasReady, setCanvasReady] = useState(false);
   const [previewGuides, setPreviewGuides] = useState<SnapGuide[]>([]);
   const [previewMessage, setPreviewMessage] = useState<string | null>(null);
@@ -243,14 +254,6 @@ function InteractivePlanStage({
       .map((guide, index) => ({ id: `drag-guide-${index}`, axis: guide.axis, value: guide.value })),
   }), [previewGuides, scene]);
 
-  useEffect(() => {
-    setClientReady(true);
-  }, []);
-  useEffect(() => {
-    if (!clientReady) return;
-    const frame = window.requestAnimationFrame(() => setLayersReady(true));
-    return () => window.cancelAnimationFrame(frame);
-  }, [clientReady]);
   useEffect(() => {
     if (!layersReady) return;
     let frame = 0;
@@ -315,7 +318,7 @@ function InteractivePlanStage({
       >
         {layersReady ? (
           <>
-            <ArchitectureLayer scene={scene} onToggleDoor={onToggleDoor} />
+            <ArchitectureLayer scene={scene} onToggleDoor={onToggleDoor} onSelect={onSelect} />
             <FurnitureLayer
               document={document}
               activeRoomId={activeRoomId}

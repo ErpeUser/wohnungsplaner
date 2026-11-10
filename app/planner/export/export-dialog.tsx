@@ -90,6 +90,10 @@ export function ExportDialog({
     setPreview(null);
     setImportError(null);
     try {
+      if (file.size > 5 * 1024 * 1024) throw new Error("Die JSON-Sicherung ist zu groß (maximal 5 MB).");
+      if (file.type && file.type !== "application/json" && file.type !== "text/json") {
+        throw new Error("Bitte eine JSON-Sicherung auswählen.");
+      }
       const text = await readTextFile(file);
       setPreview(repository.previewImport(JSON.parse(text)));
     } catch (error) {
@@ -287,7 +291,7 @@ function downloadFile(filename: string, payload: string) {
   link.href = url;
   link.download = filename;
   link.click();
-  if (!isDataUrl) URL.revokeObjectURL(url);
+  if (!isDataUrl) globalThis.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 const FOCUSABLE = "button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex='-1'])";
