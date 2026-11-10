@@ -14,7 +14,7 @@ function blockedResult(mode, payload, reason) {
 export async function runCodexPipeline(options = {}) {
   const mode = options.mode || "check";
   const dryRun = Boolean(options.dryRun);
-  if (!["check", "sync", "full"].includes(mode)) throw new Error(\`Ungültiger Pipeline-Modus: \${mode}\`);
+  if (!["check", "sync", "full"].includes(mode)) throw new Error(`Ungültiger Pipeline-Modus: ${mode}`);
 
   const preflight = await runPreflight({ dryRun });
   if (mode === "check") {
@@ -52,7 +52,7 @@ export async function runCodexPipeline(options = {}) {
     return blockedResult(
       mode,
       { preflight, sync, reconciliation, decision, build, runtime, postflight },
-      failedChecks.length ? \`Postflight fehlgeschlagen: \${failedChecks.join(", ")}\` : "Build fehlgeschlagen",
+      failedChecks.length ? `Postflight fehlgeschlagen: ${failedChecks.join(", ")}` : "Build fehlgeschlagen",
     );
   }
 
