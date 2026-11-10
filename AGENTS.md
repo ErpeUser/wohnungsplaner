@@ -12,5 +12,5 @@ The `.local/` directory is intentionally ignored and stores runtime/build/sync r
 
 Vor jeder neuen Aufgabe im Repository zuerst die Codex-Pipeline ausführen. GitHub synchronisieren, Pull Requests und Branches prüfen, nötige Builds und Neustarts bestimmen, Änderungen implementieren, Tests ausführen und anschließend lokal und remote denselben geprüften Commit herstellen.
 
-Verwende dafür mindestens \`npm run codex:pipeline -- --mode=check --dry-run\`; für einen vollständig autorisierten Lauf \`npm run codex:pipeline -- --mode=full\`. Die Alias-Einstiegspunkte \`npm run codex:update\` und \`npm run codex:release\` verwenden dieselben Guard-Stufen. Wenn keine lokale Git-Authentifizierung vorhanden ist, nutze die autorisierte GitHub-Schnittstelle und dokumentiere die Blockade statt einen unbestätigten Push zu behaupten.
+Verwende dafür mindestens `npm run codex:pipeline -- --mode=check --dry-run`; für einen vollständig autorisierten Lauf `npm run codex:pipeline -- --mode=full`. Die Alias-Einstiegspunkte `npm run codex:update` und `npm run codex:release` verwenden dieselben Guard-Stufen. Wenn keine lokale Git-Authentifizierung vorhanden ist, nutze die autorisierte GitHub-Schnittstelle und dokumentiere die Blockade statt einen unbestätigten Push zu behaupten.
 
