@@ -156,6 +156,22 @@ test("keeps the supplied Temu bath dimensions and the selected vintage wallpaper
   assert.equal(accentWall?.materialVariants?.main, "wallpaper-vintage-brown-fabric");
 });
 
+test("places the supplied woven rugs in the bathroom and WC at measured sizes", () => {
+  const bathMat = DEFAULT_APARTMENT_DOCUMENT.builtIns.find((item) => item.catalogId === "bath-mat");
+  const wcMat = DEFAULT_APARTMENT_DOCUMENT.builtIns.find((item) => item.catalogId === "wc-mat");
+
+  assert.ok(bathMat);
+  assert.ok(wcMat);
+  assert.deepEqual(bathMat.size, { width: 1.22, depth: 0.61, height: 0.018 });
+  assert.deepEqual(wcMat.size, { width: 0.77, depth: 0.46, height: 0.018 });
+  assert.equal(bathMat.materialVariants?.main, "temu-bath-rug-woven");
+  assert.equal(wcMat.materialVariants?.main, "temu-bath-rug-woven");
+  assert.equal(bathMat.collision, "decorative");
+  assert.equal(wcMat.collision, "decorative");
+  assert.ok(bathMat.metadata?.notes?.some((note) => /122.*61 cm/i.test(note)));
+  assert.ok(wcMat.metadata?.notes?.some((note) => /77.*46 cm/i.test(note)));
+});
+
 test("includes the photographed finishes and requested fixed living-room composition", () => {
   assert.equal(DEFAULT_APARTMENT_DOCUMENT.rooms.find((room) => room.id === "zimmer1")?.surfaces.floor, "parquet-oak-narrow");
   assert.equal(DEFAULT_APARTMENT_DOCUMENT.rooms.find((room) => room.id === "wohnkueche")?.surfaces.floor, "parquet-oak-narrow");

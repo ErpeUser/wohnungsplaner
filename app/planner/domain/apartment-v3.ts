@@ -132,10 +132,10 @@ const builtIns: PlannerBuiltIn[] = [
     confidence: "estimated",
     notes: ["Festgelegt: Ø 60 cm, mittig über dem 60-cm-Waschtisch; rundum ausreichend Wandabstand für Beleuchtung und Reinigung."],
   }),
-  builtIn("bath-mat", "Badteppich-Platzhalter · 80 × 120 cm", "bad", "other", "bath-mat", -1.3, 8.9, 0.8, 1.2, 0.018, 0, "fabric-sand", 0.012, {
-    source: "Bad-Inspirationsbild und freie Bewegungsfläche vor Wanne/Waschtisch",
-    confidence: "estimated",
-    notes: ["Festgelegt: 80 × 120 cm, flach und rutschhemmend; auf die gegenüberliegende freie Seite neben der Wanne verschoben, mit freiem Türschwenk und Abstand zu Waschtisch/Waschmaschine."],
+  builtIn("bath-mat", "Badteppich · Waffelstruktur Beige · 122 × 61 cm", "bad", "other", "bath-mat", -1.3, 8.78, 1.22, 0.61, 0.018, 0, "temu-bath-rug-woven", 0.012, {
+    source: "Vom Nutzer bereitgestelltes Temu-Produktbild · Art. 606121368598635",
+    confidence: "confirmed",
+    notes: ["Badteppich exakt 122 × 61 cm, Florhöhe 1 cm; vor Wanne und Waschtisch mit freiem Türschwenk platziert."],
   }),
   builtIn("bath-shower-rod", "Duschvorhangstange · Brilliant Silber · 171–210 cm", "bad", "other", "bath-shower-rod", -1.64, 9.19, 2.05, 0.03, 0.03, -90, "chrome-polished", 2.18, {
     source: "Badewannenmaß und Inspirationsbild",
@@ -150,6 +150,11 @@ const builtIns: PlannerBuiltIn[] = [
   builtIn("wc-pan", "Wand-WC", "wc", "sanitary", "sanitary-wall-wc", -1.97, 4.4, 0.38, 0.58, 0.42, 0, "#f5f4f0", 0.18),
   builtIn("wc-flush", "WC-Betätigungsplatte", "wc", "sanitary", "wc-flush-plate", -1.97, 4.115, 0.24, 0.035, 0.16, 0, "metal-satin", 1.02),
   builtIn("wc-revision", "WC-Revisionsfeld", "wc", "sanitary", "wc-revision-panel", -1.97, 4.11, 0.42, 0.03, 0.3, 0, "tile-white-rect", 1.68),
+  builtIn("wc-mat", "WC-Teppich · Waffelstruktur Beige · 77 × 46 cm", "wc", "other", "wc-mat", -1.97, 5.27, 0.77, 0.46, 0.018, 0, "temu-bath-rug-woven", 0.012, {
+    source: "Vom Nutzer bereitgestelltes Temu-Produktbild · Art. 606121368598635",
+    confidence: "confirmed",
+    notes: ["WC-Teppich exakt 77 × 46 cm, Florhöhe 1 cm; vor dem Wand-WC auf der freien Bodenfläche platziert."],
+  }),
   builtIn("living-slats", "Holzlamellen auf dunklem Träger", "wohnkueche", "other", "living-slat-wall", 4.3636, 6.5579, 1.052, 0.035, 2.54, 72.23, "slat-oak-dark", 0),
   builtIn("living-moss", "Moosfeld an Lamellenwand", "wohnkueche", "other", "living-moss-panel", 4.3208, 6.5716, 1.01, 0.055, 0.78, 72.23, "moss-green", 0.99),
   builtIn("living-clock", "Silberne Wanduhr", "wohnkueche", "other", "living-clock", 4.2827, 6.5838, 0.52, 0.065, 0.52, 72.23, "metal-satin", 1.17),
@@ -217,6 +222,7 @@ const DECORATIVE_BUILT_IN_IDS = new Set([
   "builtin-kitchen-backsplash-corner",
   "builtin-bath-round-mirror",
   "builtin-bath-mat",
+  "builtin-wc-mat",
   "builtin-bath-shower-rod",
   "builtin-bath-shower-curtain",
   "builtin-living-slats",
@@ -243,7 +249,9 @@ const DECORATIVE_BUILT_IN_IDS = new Set([
 ]);
 
 const finalBuiltIns = builtIns.map((item) => item.id === "builtin-bath-mat"
-  ? { ...item, label: "Badteppich - flauschige Creme-Textur - 120 x 80 cm", position: { x: -1.25, z: 8.8 }, rotation: 90, size: { ...item.size, width: 1.2, depth: 0.8 }, materialVariants: { ...item.materialVariants, main: "bath-mat-shaggy-cream" }, collision: "decorative" as const }
+  ? { ...item, materialVariants: { ...item.materialVariants, main: "temu-bath-rug-woven" }, collision: "decorative" as const }
+  : item.id === "builtin-wc-mat"
+    ? { ...item, materialVariants: { ...item.materialVariants, main: "temu-bath-rug-woven" }, collision: "decorative" as const }
   : item.id === "builtin-bath-basin-cabinet-scout"
     ? { ...item, position: { ...item.position, z: 9.8 } }
     : item.id === "builtin-bath-washer-cabinet-scout"

@@ -242,8 +242,19 @@ function BuiltInDetail({ item }: { item: PlanObjectDescriptor }) {
       <Circle x={centerX} y={centerY} radius={width * 0.47} stroke="#cfdfe1" strokeWidth={0.018} fill="#dbe5e6" />
     </Group>;
   }
-  if (id === "bath-mat") {
-    return <Line points={[box.minX, box.minZ, box.maxX, box.minZ, box.maxX, box.maxZ, box.minX, box.maxZ]} closed stroke="#b79a78" strokeWidth={0.03} dash={[0.06, 0.025]} listening={false} />;
+  if (id === "bath-mat" || id === "wc-mat") {
+    const weaveStep = Math.max(0.08, Math.min(width, depth) * 0.22);
+    const weaveLines = [];
+    for (let x = box.minX + weaveStep; x < box.maxX; x += weaveStep) {
+      weaveLines.push(<Line key={`vertical-${x}`} points={[x, box.minZ, x, box.maxZ]} stroke="#cbb08e" strokeWidth={0.012} opacity={0.7} />);
+    }
+    for (let z = box.minZ + weaveStep; z < box.maxZ; z += weaveStep) {
+      weaveLines.push(<Line key={`horizontal-${z}`} points={[box.minX, z, box.maxX, z]} stroke="#aa8b69" strokeWidth={0.012} opacity={0.7} />);
+    }
+    return <Group listening={false}>
+      <Line points={[box.minX, box.minZ, box.maxX, box.minZ, box.maxX, box.maxZ, box.minX, box.maxZ]} closed fill="#c9ad8d" stroke="#8f7355" strokeWidth={0.03} />
+      {weaveLines}
+    </Group>;
   }
   if (id === "bath-shower-rod") {
     const centerZ = (box.minZ + box.maxZ) / 2;

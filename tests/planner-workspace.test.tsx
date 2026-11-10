@@ -35,6 +35,19 @@ import { PlannerWorkspace } from "../app/planner/workspace/planner-workspace.tsx
 import { ShoppingListDrawer } from "../app/planner/workspace/shopping-list-drawer.tsx";
 
 describe("PlannerWorkspace", () => {
+  test("lists the measured bathroom and WC rug set with the supplied Temu link", () => {
+    render(<ShoppingListDrawer onClose={() => undefined} />);
+
+    const heading = screen.getByRole("heading", { name: "Badematten-Set Waffelstruktur Beige" });
+    const product = heading.closest("article");
+    assert.ok(product);
+    assert.match(product.textContent ?? "", /Bad \/ WC.*122.*61 cm.*77.*46 cm/);
+    assert.equal(
+      product.querySelector("a")?.getAttribute("href"),
+      "https://www.temu.com/goods.html?_bg_fs=1&goods_id=606121368598635&sku_id=102680185861178&_oak_page_source=501&page_source=10037&top_gallery_url=https%3A%2F%2Fimg.kwcdn.com%2Fproduct%2Ffancy%2F9ee28586-74e2-44c8-8a12-b513515e7bb7.jpg&_x_sessn_id=8g2dvy87si&refer_page_name=shopping_cart&refer_page_id=10037_1794340300301_s2tdaqql0f&refer_page_sn=10037",
+    );
+  });
+
   test("lists three Kaleo chairs with their verified product dimensions", () => {
     render(<ShoppingListDrawer onClose={() => undefined} />);
 

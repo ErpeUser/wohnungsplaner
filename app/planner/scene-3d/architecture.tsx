@@ -733,7 +733,7 @@ function ParametricBuiltIn({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   if (item.catalogId === "living-wall-light") return <WallLight item={item} />;
   if (item.catalogId === "sanitary-washbasin") return <Washbasin item={item} />;
   if (item.catalogId === "bath-round-mirror") return <BathRoundMirror item={item} />;
-  if (item.catalogId === "bath-mat") return <BathMat item={item} />;
+  if (item.catalogId === "bath-mat" || item.catalogId === "wc-mat") return <BathMat item={item} />;
   if (item.catalogId === "bath-shower-rod") return <BathShowerRod item={item} />;
   if (item.catalogId === "bath-shower-curtain") return <BathShowerCurtain item={item} />;
   if (item.catalogId === "bath-basin-cabinet-scout") return <ScoutBasinCabinet item={item} />;

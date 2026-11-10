@@ -109,6 +109,7 @@ const RECIPES: Record<string, MaterialRecipe> = {
   "rug-gala-taupe": { color: "#aa9b8e", roughness: 1 },
   "rug-temu-shaggy-white": { color: "#f1ede4", roughness: 1 },
   "bath-mat-shaggy-cream": { color: "#f1e8da", roughness: 1 },
+  "temu-bath-rug-woven": { color: "#c9ad8d", roughness: 1 },
   "rug-temu-shaggy-shadow": { color: "#d8d0c2", roughness: 1 },
   "rug-temu-easy-line-colorblock": { color: "#ded5bd", roughness: 1 },
   "rug-hall-overlap-taupe": { color: "#b9aa98", roughness: 1 },
@@ -174,6 +175,7 @@ const TEXTURES: Record<string, string> = {
   "rug-gala-taupe": "/planner-assets/textures/fabric/rug.svg",
   "rug-temu-shaggy-white": "/planner-assets/products/temu-shaggy-rug-white-607474249752115.svg",
   "bath-mat-shaggy-cream": "/planner-assets/textures/fabric/bath-mat-shaggy-cream.svg",
+  "temu-bath-rug-woven": "/planner-assets/products/temu-bath-rug-606121368598635-texture.png",
   "rug-temu-shaggy-shadow": "/planner-assets/textures/fabric/rug.svg",
   "rug-temu-easy-line-colorblock": "/planner-assets/textures/fabric/temu-easy-line-colorblock-rug.svg",
   "rug-hall-overlap-taupe": "/planner-assets/textures/fabric/hall-rug-overlap-taupe.svg",
@@ -273,6 +275,11 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
     material.map = pile;
     material.bumpMap = pile;
     material.bumpScale = materialId === "rug-rabbit-pile" ? 0.024 : 0.014;
+    material.needsUpdate = true;
+  } else if (materialId === "temu-bath-rug-woven") {
+    material.map = loadPlannerTexture(texturePath!);
+    material.bumpMap = material.map;
+    material.bumpScale = 0.012;
     material.needsUpdate = true;
   } else if (materialId === "leaf-olive-soft") {
     const leaves = loadProductLeafTexture();
@@ -757,7 +764,7 @@ function loadPlannerTexture(path: string) {
   texture.colorSpace = SRGBColorSpace;
   texture.wrapS = RepeatWrapping;
   texture.wrapT = RepeatWrapping;
-  if (path.includes("temu-easy-line-colorblock-rug") || path.includes("hall-rug-")) {
+  if (path.includes("temu-easy-line-colorblock-rug") || path.includes("hall-rug-") || path.includes("temu-bath-rug-")) {
     texture.repeat.set(1, 1);
   } else {
     texture.repeat.set(path.includes("oak-blonde") ? 3.6 : 2.4, path.includes("oak-blonde") ? 1.45 : 2.4);
