@@ -13,18 +13,22 @@ async function findArtifacts(dir, out = []) {
   return out;
 }
 
-export async function runBuild({ dryRun = false, force = false } = {}) {
-  const files = await changedFiles("HEAD");
+export async function runBuild({ dryRun = false, force = false, base = "HEAD" } = {}) {
+  const files = await changedFiles(base);
   const changes = classifyChanges(files);
   const decision = determineActions(changes, {});
-  if (!force && !decision.build) return { decision, built: false, reason: decision.reason };
+  if (!force && !decision.build) {
+    const result = { base, decision, built: false, reason: decision.reason };
+    console.log(JSON.stringify(result, null, 2));
+    return result;
+  }
   if (decision.installDependencies) await command(process.platform === "win32" ? "npm.cmd" : "npm", ["ci", "--ignore-scripts", "--no-audit", "--no-fund"], { dryRun });
   const buildResult = await command(process.platform === "win32" ? "npm.cmd" : "npm", ["run", "build"], { dryRun });
   const head = (await git(["rev-parse", "HEAD"], { allowFailure: true })).stdout.trim();
   const artifacts = await findArtifacts(path.join(repoRoot, "release"));
   const artifactHashes = {};
   for (const artifact of artifacts) artifactHashes[path.relative(repoRoot, artifact)] = sha256File(await readFile(artifact));
-  const result = { decision, built: !dryRun && buildResult.code === 0, planned: dryRun, sourceCommit: head || null, artifacts: artifactHashes };
+  const result = { base, decision, built: !dryRun && buildResult.code === 0, planned: dryRun, sourceCommit: head || null, artifacts: artifactHashes };
   if (result.built && !dryRun) await saveState("codex-build-state.json", { ...result, lastSuccessfulBuild: new Date().toISOString() });
   console.log(JSON.stringify(result, null, 2));
   if (!result.built && !dryRun) throw new Error("Build fehlgeschlagen");
