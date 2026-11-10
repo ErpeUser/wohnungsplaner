@@ -10,11 +10,76 @@ type ShoppingItem = {
   imageUrl?: string;
   searchHint?: string;
   generic?: boolean;
-  type: "washer" | "basin" | "bed" | "rug" | "camel-rug" | "hallway-rug" | "sofa" | "hallway" | "table" | "chair" | "vinyl" | "mirror" | "decor";
+  type: "washer" | "basin" | "bed" | "rug" | "camel-rug" | "hallway-rug" | "sofa" | "hallway" | "table" | "chair" | "vinyl" | "mirror" | "appliance" | "decor";
   retailer: string;
 };
 
 const SHOPPING_ITEMS: ShoppingItem[] = [
+  {
+    id: "kitchen-fridge-60cm",
+    name: "Einbaukühlschrank / Kühl-Gefrier-Kombination",
+    room: "Wohnküche",
+    dimensions: "Nische 60 × 65 × 204 cm · schwarzes Frontbild · genaue Gerätehöhe vor Bestellung prüfen",
+    price: null,
+    quantity: 1,
+    amountLabel: "1 Stück · Nischenmaß aus dem Wohnungsplan",
+    searchHint: "Einbaukühlschrank schwarz 60 cm Nische 204 cm energieeffizient",
+    generic: true,
+    type: "appliance",
+    retailer: "frei wählbar",
+  },
+  {
+    id: "kitchen-oven-60cm",
+    name: "Einbaubackofen 60 cm",
+    room: "Wohnküche",
+    dimensions: "Frontmaß ca. 60 × 59 cm · schwarzes Glas · unter dem Induktionsfeld",
+    price: null,
+    quantity: 1,
+    amountLabel: "1 Stück · vorhandene Planung: Gorenje 60 cm",
+    searchHint: "Gorenje Einbaubackofen 60 cm schwarz Glas Energieklasse",
+    generic: true,
+    type: "appliance",
+    retailer: "frei wählbar",
+  },
+  {
+    id: "kitchen-induction-hob-60cm",
+    name: "Induktionskochfeld 60 cm",
+    room: "Wohnküche",
+    dimensions: "ca. 58 × 52 cm · 4 Kochzonen · schwarze Glasfläche · über dem Backofen",
+    price: null,
+    quantity: 1,
+    amountLabel: "1 Stück · Ausschnitt und Anschluss vor Bestellung prüfen",
+    searchHint: "Induktionskochfeld 60 cm 4 Zonen schwarz flächenbündig",
+    generic: true,
+    type: "appliance",
+    retailer: "frei wählbar",
+  },
+  {
+    id: "kitchen-hood-60cm",
+    name: "Schräghaube / Dunstabzug 60 cm",
+    room: "Wohnküche",
+    dimensions: "ca. 60 × 34 × 66 cm · schwarzes Glas · Umluft oder Abluft nach Anschluss klären",
+    price: null,
+    quantity: 1,
+    amountLabel: "1 Stück · vorhandene Planung: 60-cm-Schräghaube",
+    searchHint: "Dunstabzug Schräghaube 60 cm schwarz Glas leise",
+    generic: true,
+    type: "appliance",
+    retailer: "frei wählbar",
+  },
+  {
+    id: "kitchen-sink-60cm",
+    name: "Edelstahlspüle 60 cm",
+    room: "Wohnküche",
+    dimensions: "ca. 52 × 42 × 16 cm · ein Becken · Armaturloch und Unterschrankmaß prüfen",
+    price: null,
+    quantity: 1,
+    amountLabel: "1 Stück · Spülenposition unter der Mikrowelle",
+    searchHint: "Edelstahlspüle 60 cm Einbauspüle ein Becken gebürstet",
+    generic: true,
+    type: "appliance",
+    retailer: "frei wählbar",
+  },
   {
     id: "184900692R",
     name: "Waschmaschinenschrank Scout",

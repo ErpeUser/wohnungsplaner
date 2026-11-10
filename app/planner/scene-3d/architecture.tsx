@@ -598,10 +598,29 @@ function Floor({ floor }: { floor: SceneFloor }) {
     next.closePath();
     return next;
   }, [floor.points]);
+  const floorMaterial = useMemo(() => {
+    const base = getPlannerMaterial(floor.materialId);
+    const clone = base.clone();
+    clone.name = `${base.name}-${floor.id}`;
+    if (clone.map) {
+      const width = Math.max(...floor.points.map((point) => point.x)) - Math.min(...floor.points.map((point) => point.x));
+      const depth = Math.max(...floor.points.map((point) => point.z)) - Math.min(...floor.points.map((point) => point.z));
+      const scale = floor.materialId.includes("parquet") || floor.materialId.includes("oak") ? 0.42 : 0.32;
+      clone.map = clone.map.clone();
+      clone.map.repeat.set(Math.max(1, width / scale), Math.max(1, depth / scale));
+      clone.map.needsUpdate = true;
+      if (clone.bumpMap) {
+        clone.bumpMap = clone.map;
+        clone.bumpScale = floor.materialId.includes("tile") ? 0.035 : 0.018;
+      }
+      clone.needsUpdate = true;
+    }
+    return clone;
+  }, [floor]);
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.012, 0]} receiveShadow>
       <shapeGeometry args={[shape]} />
-      <primitive object={getPlannerMaterial(floor.materialId)} attach="material" side={DoubleSide} />
+      <primitive object={floorMaterial} attach="material" side={DoubleSide} />
     </mesh>
   );
 }
@@ -805,6 +824,7 @@ function KitchenBacksplash({ item }: { item: SceneObject<PlannerBuiltIn> }) {
 
 function KitchenFloorZone({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   const [width, height, depth] = item.size;
+  const tileHeight = Math.min(height, 0.006);
   const tileMaterial = useMemo(() => {
     const base = getPlannerMaterial(item.materialId);
     const clone = base.clone();
@@ -819,9 +839,29 @@ function KitchenFloorZone({ item }: { item: SceneObject<PlannerBuiltIn> }) {
     return clone;
   }, [depth, item.materialId, item.source.id, width]);
   return (
-    <mesh scale={[width, height, depth]} geometry={SHARED_BOX} receiveShadow>
-      <primitive object={tileMaterial} attach="material" />
-    </mesh>
+    <group>
+      <mesh position={[0, -height / 2 + tileHeight / 2, 0]} scale={[width, tileHeight, depth]} geometry={SHARED_BOX} receiveShadow>
+        <primitive object={tileMaterial} attach="material" />
+      </mesh>
+      <group position={[0, -height / 2 + tileHeight + 0.0015, 0]}>
+        {Array.from({ length: Math.max(1, Math.floor(width / 0.32)) }, (_, index) => {
+          const x = -width / 2 + (index + 1) * 0.32;
+          return x < width / 2 - 0.015 ? (
+            <mesh key={`tile-x-${index}`} position={[x, 0, 0]} scale={[0.009, 0.004, depth]} geometry={SHARED_BOX}>
+              <primitive object={getPlannerMaterial("tile-grout")} attach="material" />
+            </mesh>
+          ) : null;
+        })}
+        {Array.from({ length: Math.max(1, Math.floor(depth / 0.32)) }, (_, index) => {
+          const z = -depth / 2 + (index + 1) * 0.32;
+          return z < depth / 2 - 0.015 ? (
+            <mesh key={`tile-z-${index}`} position={[0, 0, z]} scale={[width, 0.004, 0.009]} geometry={SHARED_BOX}>
+              <primitive object={getPlannerMaterial("tile-grout")} attach="material" />
+            </mesh>
+          ) : null;
+        })}
+      </group>
+    </group>
   );
 }
 

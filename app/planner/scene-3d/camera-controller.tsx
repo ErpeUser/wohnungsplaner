@@ -61,16 +61,16 @@ export function createOrbitPose(scene: SceneModel, activeRoomId: string | null):
   const direction = activeRoomId === "zimmer1"
     ? { x: 0.78, z: -0.94 }
     : activeRoomId === "vorraum"
-      ? { x: 0.55, z: -1.15 }
+      ? { x: 0.48, z: -0.88 }
       : { x: 0.72, z: 0.9 };
   const hallOverview = activeRoomId === "vorraum";
   return {
     position: [
       centerX + span * direction.x,
-      hallOverview ? Math.max(4.2, span * 0.82) : Math.max(4.8, span * 0.72),
+      hallOverview ? Math.max(3.15, span * 0.62) : Math.max(4.8, span * 0.72),
       centerZ + span * direction.z,
     ],
-    target: [centerX, hallOverview ? 0.9 : centerY, centerZ],
+    target: [centerX, hallOverview ? 0.82 : centerY, centerZ],
   };
 }
 
@@ -499,3 +499,4 @@ function pointInOrNearPolygon(point: Point2, polygon: Point2[], radius: number) 
     return (point.x - nearestX) ** 2 + (point.z - nearestZ) ** 2 <= radiusSquared;
   });
 }
+

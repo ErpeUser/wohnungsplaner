@@ -50,6 +50,7 @@ const RECIPES: Record<string, MaterialRecipe> = {
   "tile-white-rect": { color: "#f0efeb", roughness: 0.58 },
   "tile-white-square": { color: "#efeeea", roughness: 0.6 },
   "tile-kitchen-grey-square": { color: "#d9d8d3", roughness: 0.62 },
+  "tile-grout": { color: "#9d9b94", roughness: 0.82 },
   "kitchen-white-gloss": { color: "#f7f5f0", roughness: 0.2, clearcoat: 0.66, clearcoatRoughness: 0.2 },
   "cashmere-matte": { color: "#cfc3b2", roughness: 0.52, clearcoat: 0.1, clearcoatRoughness: 0.7 },
   "scout-oak": { color: "#b9a68c", roughness: 0.66 },
@@ -209,6 +210,8 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
   const texturePath = TEXTURES[materialId];
   if (tileTexture) {
     material.map = loadPlannerTileTexture(materialId, tileTexture);
+    material.bumpMap = material.map;
+    material.bumpScale = 0.035;
     material.needsUpdate = true;
   } else if (materialId === "oak-backsplash") {
     const backsplashTexture = loadKitchenWalnutBacksplashTexture();
@@ -233,6 +236,10 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
     material.needsUpdate = true;
   } else if (texturePath && typeof document !== "undefined") {
     material.map = loadPlannerTexture(texturePath);
+    if (materialId.startsWith("parquet-") || materialId.startsWith("floor-") || materialId.startsWith("oak-")) {
+      material.bumpMap = material.map;
+      material.bumpScale = materialId.startsWith("floor-") ? 0.035 : 0.018;
+    }
     material.needsUpdate = true;
   }
   return material;

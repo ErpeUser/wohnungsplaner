@@ -47,7 +47,12 @@ export function chooseQualityTier(): QualityTier {
   if (typeof window === "undefined") return "balanced";
   const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
   const cores = navigator.hardwareConcurrency || 4;
-  if (reducedMotion || cores <= 4 || window.devicePixelRatio > 2.5) return "low";
+  // A desktop with four cores can still render the planner comfortably. The
+  // old CPU cut-off disabled every shadow on common office hardware, making
+  // cabinets, tiles and rugs read as flat colour blocks. Keep the lightweight
+  // tier for explicit reduced-motion preferences or very high pixel densities.
+  if (reducedMotion || window.devicePixelRatio > 2.5) return "low";
   if (cores >= 10 && window.devicePixelRatio <= 2) return "high";
   return "balanced";
 }
+

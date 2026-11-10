@@ -8,7 +8,7 @@ import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
 import { resolveFurnitureAsset } from "../catalog/asset-manifest.ts";
 import { resolvePlannerAsset } from "../catalog/asset-resolver.ts";
 import { getPlannerMaterial } from "./materials.ts";
-import { furnitureRenderTransform, type SceneModel, type SceneObject } from "./scene-model.ts";
+import { furnitureRenderTransform, furnitureWorldPosition, type SceneModel, type SceneObject } from "./scene-model.ts";
 import type { PlannerPlacement } from "../domain/types.ts";
 
 const SHARED_BOX = new BoxGeometry(1, 1, 1);
@@ -89,7 +89,7 @@ function FurnitureInstance({
 
   return (
     <group
-      position={[item.position[0], item.position[1] - item.size[1] / 2, item.position[2]]}
+      position={furnitureWorldPosition(item, renderTransform)}
       rotation={[0, item.rotationY, 0]}
       scale={renderTransform.scale}
       onClick={(event) => {

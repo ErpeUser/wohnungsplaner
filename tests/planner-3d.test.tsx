@@ -27,7 +27,7 @@ import { createOrbitPose, orbitFovForRoom } from "../app/planner/scene-3d/camera
 import { Planner3D } from "../app/planner/scene-3d/planner-3d.tsx";
 import { getPlannerMaterial, PLANNER_TEXTURE_READY_EVENT } from "../app/planner/scene-3d/materials.ts";
 import { qualitySettings, detectThreeSupport } from "../app/planner/scene-3d/quality.ts";
-import { createSceneModel, furnitureRenderTransform } from "../app/planner/scene-3d/scene-model.ts";
+import { createSceneModel, furnitureRenderTransform, furnitureWorldPosition } from "../app/planner/scene-3d/scene-model.ts";
 import * as sceneModelModule from "../app/planner/scene-3d/scene-model.ts";
 
 describe("createSceneModel", () => {
@@ -149,12 +149,14 @@ describe("createSceneModel", () => {
     expect(scene.doors.every((door) => door.leafOutlineSides === "both")).toBe(true);
   });
 
-  test("keeps the compact hall overview elevated while using a wider perspective", () => {
+  test("frames the compact hall overview tightly enough to fill the viewport", () => {
     const scene = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, "vorraum");
     const pose = createOrbitPose(scene, "vorraum");
 
-    expect(pose.position[1]).toBeGreaterThanOrEqual(4.2);
-    expect(pose.position[1]).toBeGreaterThan(scene.doors[0]!.height * 2);
+    expect(pose.position[1]).toBeGreaterThanOrEqual(3.15);
+    expect(pose.position[1]).toBeGreaterThan(scene.doors[0]!.height * 1.4);
+    expect(Math.hypot(pose.position[0] - pose.target[0], pose.position[2] - pose.target[2]))
+      .toBeLessThan(scene.bounds.maxX - scene.bounds.minX + 2.4);
     expect(orbitFovForRoom("vorraum")).toBeGreaterThan(orbitFovForRoom("wohnkueche"));
   });
 
@@ -294,7 +296,7 @@ describe("createSceneModel", () => {
     };
     const scene = createSceneModel(document, null);
     expect(scene.placements[0]?.asset).toBe(asset);
-    expect(scene.placements[0]?.position[1]).toBeCloseTo(source.size.height / 2 + asset.floorOffset);
+    expect(scene.placements[0]?.position[1]).toBeCloseTo(source.size.height / 2);
   });
 
   test("applies meterScale to real models while placeholders keep the requested footprint", () => {
@@ -330,6 +332,7 @@ describe("createSceneModel", () => {
 
     expect(furnitureRenderTransform(item).scale).toEqual([0.005, 0.005, 0.005]);
     expect(furnitureRenderTransform(item).floorOffset).toBe(0.06);
+    expect(furnitureWorldPosition(item)).toEqual([source.position.x, 0.06, source.position.z]);
     expect(furnitureRenderTransform(item, { meterScale: 1, useAssetDimensions: false }).scale)
       .toEqual([item.size[0], item.size[1], item.size[2]]);
   });

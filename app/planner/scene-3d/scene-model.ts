@@ -500,7 +500,10 @@ function objectDescriptor<T extends PlannerBuiltIn | PlannerPlacement>(item: T, 
     id: item.id,
     roomId: item.roomId,
     catalogId,
-    position: [item.position.x, ("elevation" in item ? item.elevation ?? 0 : 0) + visualLift + (asset?.floorOffset ?? 0) + item.size.height / 2, item.position.z],
+    // Keep the document position independent from imported-model metadata.
+    // The renderer applies floorOffset exactly once after resolving the GLB
+    // transform, so cutaway/framing math continues to use the real placement.
+    position: [item.position.x, ("elevation" in item ? item.elevation ?? 0 : 0) + visualLift + item.size.height / 2, item.position.z],
     size: [item.size.width, item.size.height, item.size.depth],
     rotationY: -item.rotation * Math.PI / 180,
     materialId: item.materialVariants?.main ?? item.materialVariants?.color ?? "object-neutral",
@@ -542,6 +545,18 @@ export function furnitureRenderTransform(
     floorOffset: item.assetTransform?.floorOffset ?? 0,
     pivot: item.assetTransform?.pivot ?? "center" as const,
   };
+}
+
+export function furnitureWorldPosition(
+  item: SceneObject<PlannerPlacement>,
+  transform = furnitureRenderTransform(item),
+): [number, number, number] {
+  const pivotAdjustment = transform.pivot === "center" ? 0 : item.size[1] / 2;
+  return [
+    item.position[0],
+    item.position[1] - item.size[1] / 2 + transform.floorOffset + pivotAdjustment,
+    item.position[2],
+  ];
 }
 
 function boundsFromFloors(floors: SceneFloor[]): SceneBounds {
