@@ -61,68 +61,6 @@ und die npm-Warnung zur unbekannten `http-proxy`-Konfiguration.
 
 ## Offene Übergabeaufträge
 
-### OPEN-CHESS-001 – Private-Hub-Pfeile und Allie-Pairing-Fehler
-
-**Priorität:** P0, sobald das betreffende Schachprojekt identifiziert ist.
-
-**Beobachtung:** Der Auftrag nennt eine chess.com-ähnliche private-Hub-UI mit
-fehlenden Pfeilen sowie die Meldung „Lokaler Allie-Server nicht erreichbar: Zu
-viele Pairing-Versuche“. Im Repository `ErpeUser/wohnungsplaner` gibt es keine
-Treffer für `private hub`, `allie`, `pairing`, `server nicht erreichbar`,
-`pfeil` oder `arrow` außerhalb allgemeiner Pfeiltasten-/Raumplanertexte. Es
-existieren auch keine Schach-Routen, Pairing-Handler, WebSocket-Clients oder
-Allie-Konfigurationen. Eine Änderung an Wohnungsplaner-Dateien würde deshalb
-keine nachweisbare Wirkung haben.
-
-**Blockade:** Das betroffene Schach-Repository, der konkrete Pfad bzw. eine
-laufende URL und die Server-/Client-Logs wurden nicht bereitgestellt. Es fehlen
-damit die echte Komponente, die Übersetzungs-/Routingstruktur und der Vertrag
-des Pairing-Endpoints. Dieser Auftrag ist keine Behauptung, dass die Funktion
-in diesem Projekt erledigt sei.
-
-**Unmittelbarer nächster Befehl nach Bereitstellung des richtigen Quellbaums:**
-
-```bash
-rg -n -i "private.?hub|allie|pairing|pfeil|arrow|lokaler|server nicht erreichbar" <schach-repository>
-```
-
-Danach sind die gefundene Hub-Komponente, die Icon-/SVG-Quelle, der Pairing-
-Client und der lokale Allie-Serverpfad zu benennen. Erst dann kann der Fix
-implementiert werden:
-
-1. Pfeile als echte, fokussierbare Buttons mit `aria-label`, sichtbarem
-   Hover-/Focus-State und pointer/keyboard-Navigation in der gefundenen
-   Hub-Komponente ergänzen; eine bestehende Icon-Bibliothek des Projekts
-   verwenden.
-2. Pairing-Versuche clientseitig mit Request-ID, AbortController und
-   exponentiellem Backoff begrenzen; parallele Versuche für denselben Nutzer
-   deduplizieren.
-3. Serverseitig Rate-Limit/Lease pro Session durchsetzen und bei erreichbarem
-   Retry-Limit einen maschinenlesbaren Fehler (`code`, `retryAfterMs`) statt
-   des unstrukturierten Textes liefern.
-4. UI-Zustände für `connecting`, `retrying`, `unavailable` und `paired` mit
-   verständlicher Aktion („Erneut versuchen“) und Status-Live-Region abbilden.
-
-**Benötigte Eingaben:** richtiges Repository oder die betroffenen Dateien,
-lokaler Allie-Endpunkt, Auth-/Session-Vertrag, erwartete maximale
-Pairing-Versuche und ein reproduzierbarer Logauszug. Keine API-Schlüssel in
-Git committen.
-
-**Tests nach Einfügung in die echte Codebasis:**
-
-```bash
-# Pfade an das gefundene Schachprojekt anpassen
-npm test -- <hub-ui-test> <pairing-client-test> <pairing-server-test>
-npm run typecheck
-npm run lint
-```
-
-Akzeptanz: Pfeile sind per Maus, Touch und Tastatur sichtbar und bedienbar;
-der Hub zeigt korrekte Fokus-/Disabled-Zustände; zehn parallele Pairing-
-Auslöser erzeugen höchstens eine aktive Anfrage; nach dem Limit erscheint ein
-Retry-Zeitpunkt; ein erreichbarer lokaler Allie-Server führt erfolgreich zu
-`paired`; ein nicht erreichbarer Server bleibt ohne Endlosschleife bedienbar.
-
 ### OPEN-AI-IMPORT-002 – PreparedAsset an Upload, Store und Platzierung anbinden
 
 **Priorität:** P1.
