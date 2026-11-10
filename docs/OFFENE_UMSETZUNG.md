@@ -41,9 +41,9 @@ Dateien, Routen und APIs werden ausdrücklich als unbekannt behandelt.
 - Der GitHub-Standardbranch wurde über die autorisierte GitHub-Schnittstelle
   als `main` bestätigt. Der geprüfte Ausgangs-Head war `8eff500...`; der
   frühere Referenzstand `0a8a4416243aece82a02190e635f8fc7053b4525` blieb
-  Vorfahr. Die abschließende Prüfung zeigt `main` auf
-  `14926e84b72c0be93dfd284a20e3e230b7483788`, neun Commits voraus und ohne
-  Rückstand. Die PR-Abfrage blieb leer; es gibt nur `main`.
+  Vorfahr. Die abschließende Prüfung über die autorisierte GitHub-Schnittstelle
+  bestätigte den finalen Fast-Forward-HEAD von `main` ohne Rückstand. Die
+  PR-Abfrage blieb leer; es gibt nur `main`.
 - Ein direkter Shell-Klon war in dieser Umgebung nicht ausführbar:
   `fatal: could not read Username for 'https://github.com': No such device or address`.
   Die Arbeitskopie wurde deshalb aus der autorisierten GitHub-Dateiansicht
