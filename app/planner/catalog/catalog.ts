@@ -164,7 +164,7 @@ const PRODUCT_REALISM: Record<string, ProductRealismSpec> = {
   },
   "rug-living-concept-240x240": {
     sourceLabel: "Wohnküchen-Fotoreferenz / Entwurfsgröße",
-    dimensions: "240 × 240 cm · niedriger bis mittlerer Flor",
+    dimensions: "250 × 180 cm · niedriger bis mittlerer Flor",
     confidence: "estimated",
     construction: ["warmes Elfenbein-Greige", "dezente Hoch-Tief-Struktur", "flache Kante für die Relaxmechanik"],
   },
@@ -217,7 +217,7 @@ export const FURNITURE_CATALOG: FurnitureCatalogItem[] = [
   item("rug-temu-easy-line-120x180", "Easy-Line Color-Block-Teppich", "Licht/Deko", "Flacher Samtteppich mit abstrakten Color-Block-Flächen in Creme, Salbeigrün und warmem Beige", [1.2, 1.8, 0.025], "fixed", "rug", "rug", TEMU_EASY_LINE_COLORBLOCK),
   item("rug-temu-easy-line-140x200", "Vorraumteppich Taupe-Kreisbögen 140 × 200", "Licht/Deko", "Derselbe gewählte Vorraumteppich als größere Vergleichsgröße", [1.4, 2, 0.025], "fixed", "rug", "rug", TEMU_EASY_LINE_COLORBLOCK),
   item("rug-temu-rabbit-ivory-100x180", "Kunstkaninchen-Plüschteppich Elfenbein", "Licht/Deko", "Einfarbiger elfenbeinfarbener Teppich mit dichter, weicher Kunstkaninchen-Plüschoberfläche", [1, 1.8, 0.04], "fixed", "rug", "rug", TEMU_RABBIT_IVORY),
-  item("rug-living-concept-240x240", "Wohnteppich Konzept 240 × 240", "Licht/Deko", "Unverbindlicher quadratischer Entwurf in warmem Elfenbein-Greige mit dezenter Hoch-Tief-Struktur", [2.4, 2.4, 0.02], "fixed", "rug", "rug", LIVING_RUG_IVORY_GREIGE),
+  item("rug-living-concept-240x240", "Wohnteppich Konzept 250 × 180", "Licht/Deko", "Unverbindlicher rechteckiger Entwurf in warmem Elfenbein-Greige mit dezenter Hoch-Tief-Struktur", [2.5, 1.8, 0.02], "fixed", "rug", "rug", LIVING_RUG_IVORY_GREIGE),
   item("floor-lamp", "Stehleuchte", "Licht/Deko", "Schlanke Leselampe", [0.38, 0.38, 1.65], "fixed", "light", "lamp", WOOD),
   item("plant-medium", "Pflanze", "Licht/Deko", "Mittelgroße Zimmerpflanze", [0.55, 0.55, 1.15], "uniform", "plant", "plant", WOOD),
   item("plant-zimmer1-olive", "Olivpflanze Zimmer 1", "Licht/Deko", "Schlanke 110-cm-Pflanze im matten beigefarbenen Topf", [0.42, 0.42, 1.1], "fixed", "plant", "plant", ZIMMER1_PLANT),

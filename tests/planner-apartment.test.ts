@@ -174,6 +174,16 @@ test("places the supplied woven rugs in the bathroom and WC at measured sizes", 
   assert.ok(wcMat.metadata?.notes?.some((note) => /77.*46 cm/i.test(note)));
 });
 
+test("keeps the living-room rug in its corner while using the requested 250 × 180 cm size", () => {
+  const rug = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "living-rug-concept");
+
+  assert.ok(rug);
+  assert.deepEqual(rug.position, { x: 1.55, z: 7.75 });
+  assert.equal(rug.rotation, 0);
+  assert.deepEqual(rug.size, { width: 2.5, depth: 1.8, height: 0.02 });
+  assert.ok(rug.metadata?.notes?.some((note) => /250.*180 cm/i.test(note)));
+});
+
 test("keeps the bathroom rug aligned like the original plan graphic and records the selected shower curtain", () => {
   const bathMat = DEFAULT_APARTMENT_DOCUMENT.builtIns.find((item) => item.catalogId === "bath-mat");
   const curtain = DEFAULT_APARTMENT_DOCUMENT.builtIns.find((item) => item.catalogId === "bath-shower-curtain");
