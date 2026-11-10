@@ -62,6 +62,13 @@ export async function runCodexPipeline(options = {}) {
     if (!publish.ok) {
       return blockedResult(mode, { preflight, sync, reconciliation, decision, build, runtime, postflight, publish }, publish.blocked || "Push blockiert");
     }
+    if (!dryRun && publish.after && (publish.after.dirty || publish.after.ahead !== 0 || publish.after.behind !== 0)) {
+      return blockedResult(
+        mode,
+        { preflight, sync, reconciliation, decision, build, runtime, postflight, publish },
+        "Arbeitsbaum bleibt nach der Validierung uncommittet oder nicht synchron; lokale Änderungen wurden erhalten",
+      );
+    }
   }
 
   return { mode, preflight, sync, reconciliation, decision, build, runtime, postflight, publish, ok: true };
