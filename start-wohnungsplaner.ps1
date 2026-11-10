@@ -1,8 +1,17 @@
 $ErrorActionPreference = "Stop"
 
 $projectDirectory = Split-Path -Parent $MyInvocation.MyCommand.Path
-$plannerUrl = "http://localhost:5173/"
+$plannerUrl = "http://127.0.0.1:5173/"
 $port = 5173
+$nodeCandidates = @(
+  (Join-Path ${env:ProgramFiles} "nodejs\node.exe"),
+  (Join-Path ${env:ProgramFiles(x86)} "nodejs\node.exe")
+)
+$nodePath = $nodeCandidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+
+if (-not $nodePath) {
+  try { $nodePath = (Get-Command node.exe -ErrorAction Stop).Source } catch { $nodePath = $null }
+}
 
 function Test-PlannerReady {
   try {
@@ -14,12 +23,37 @@ function Test-PlannerReady {
 }
 
 if (-not (Test-PlannerReady)) {
+  if (-not $nodePath) {
+    Add-Type -AssemblyName PresentationFramework
+    [System.Windows.MessageBox]::Show(
+      "Node.js wurde nicht gefunden. Bitte Node.js installieren und die Verknüpfung erneut starten.",
+      "Wohnungsplaner",
+      "OK",
+      "Error"
+    ) | Out-Null
+    exit 1
+  }
+
+  $serverEntryPoint = Join-Path $projectDirectory "serve-local.mjs"
+  $serverBuild = Join-Path $projectDirectory "dist\server\index.js"
+  if (-not (Test-Path -LiteralPath $serverEntryPoint) -or -not (Test-Path -LiteralPath $serverBuild)) {
+    Add-Type -AssemblyName PresentationFramework
+    [System.Windows.MessageBox]::Show(
+      "Der lokale Build fehlt. Bitte den Wohnungsplaner einmal neu bauen.",
+      "Wohnungsplaner",
+      "OK",
+      "Error"
+    ) | Out-Null
+    exit 1
+  }
+
   $processInfo = [System.Diagnostics.ProcessStartInfo]::new()
-  $processInfo.FileName = "cmd.exe"
-  $processInfo.Arguments = "/c npm.cmd run dev -- --host 127.0.0.1"
+  $processInfo.FileName = $nodePath
+  $processInfo.Arguments = "`"$serverEntryPoint`""
   $processInfo.WorkingDirectory = $projectDirectory
-  $processInfo.UseShellExecute = $true
-  $processInfo.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Minimized
+  $processInfo.UseShellExecute = $false
+  $processInfo.CreateNoWindow = $true
+  $env:PORT = [string]$port
   [void][System.Diagnostics.Process]::Start($processInfo)
 
   $deadline = (Get-Date).AddSeconds(45)
