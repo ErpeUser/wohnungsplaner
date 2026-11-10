@@ -1,0 +1,163 @@
+<style>
+  :root { --cream:#f4eee6; --greige:#cbb8a7; --oak:#a77d57; --ink:#403b37; --fixed:#aaa39a; --blue:#9dcbd4; --green:#738269; }
+  .hero { max-width:1050px; margin-bottom:18px; }
+  .layout { display:grid; grid-template-columns:minmax(360px,1.05fr) minmax(330px,.95fr); gap:22px; align-items:start; }
+  .panel { background:#fffdf9; border:1px solid #ddd4ca; border-radius:16px; overflow:hidden; box-shadow:0 12px 32px rgba(65,50,39,.09); }
+  .panel-head { padding:14px 17px 0; }
+  .plan-wrap { padding:8px 18px 18px; background:linear-gradient(145deg,#f8f3ec,#eee5da); }
+  .plan { display:block; width:100%; max-height:650px; }
+  .detail-stack { display:grid; gap:16px; }
+  .elevation { padding:15px; }
+  .wall { position:relative; height:210px; border:1px solid #cfc4b9; overflow:hidden; background:#d3c0ae; border-radius:10px; }
+  .wall:after { content:""; position:absolute; left:0; right:0; bottom:0; height:24px; background:linear-gradient(90deg,#9b7656,#c29b75 22%,#916c4d 43%,#c49d77 65%,#9a7454); opacity:.78; }
+  .slats { position:absolute; inset:0 auto 24px 0; width:72px; background:repeating-linear-gradient(90deg,#8c6748 0 5px,#d5b28f 5px 11px); }
+  .daybed { position:absolute; left:38px; bottom:24px; width:236px; height:82px; background:#eee6dc; border:2px solid #b7a28e; border-radius:34px 34px 9px 9px; box-shadow:0 7px 13px #806b5733; }
+  .daybed:before { content:""; position:absolute; left:12px; right:12px; bottom:52px; height:70px; background:#e6d9cc; border-radius:32px; border:2px solid #b7a28e; }
+  .pillow { position:absolute; width:58px; height:47px; border-radius:20px; bottom:67px; background:#faf7f2; border:1px solid #d5c7b8; }
+  .p1{left:56px}.p2{left:119px;background:#c8b09a}.p3{left:182px}
+  .led { position:absolute; left:82px; right:18px; top:17px; height:3px; background:#ffd899; box-shadow:0 0 17px 7px #ffd89999; }
+  .art { position:absolute; top:35px; width:42px; height:51px; background:#f7f2eb; border:4px solid #eee9e3; box-shadow:0 2px 6px #5a4b3b33; }
+  .a1{left:110px}.a2{left:160px}.a3{left:210px}
+  .desk-wall { background:#eee9e2; }
+  .desk { position:absolute; left:52px; right:52px; bottom:24px; height:62px; background:#f8f7f4; border:2px solid #b4afa8; }
+  .drawer { position:absolute; left:52px; bottom:24px; width:64px; height:62px; background:repeating-linear-gradient(#f8f7f4 0 14px,#aaa 14px 15px); border:2px solid #b4afa8; z-index:2; }
+  .mirror { position:absolute; left:65px; right:65px; bottom:98px; height:86px; background:linear-gradient(135deg,#d7dcdd,#f5f7f5 45%,#cbd1d2); border:8px solid #fafafa; box-shadow:0 3px 12px #64584e44; }
+  .shelf { position:absolute; left:76px; right:76px; top:8px; height:10px; background:#f7f5f1; box-shadow:0 3px 5px #4b413844; }
+  .plant { position:absolute; top:-11px; right:7px; font-size:26px; }
+  .monitor { position:absolute; right:59px; bottom:86px; width:54px; height:38px; background:#302f2d; border:3px solid #777; z-index:3; }
+  .monitor:after { content:""; position:absolute; left:24px; top:38px; width:4px; height:18px; background:#777; }
+  .card-copy { padding:13px 15px 16px; }
+  .chips { display:flex; flex-wrap:wrap; gap:7px; margin-top:9px; }
+  .chip { font-size:11px; border-radius:999px; padding:5px 9px; background:#eee8e0; color:#5c534b; }
+  .checklist { margin:0; padding:14px 18px 17px 36px; font-size:13px; line-height:1.55; }
+  .approval { margin-top:18px; padding:14px 17px; border-radius:12px; background:#edf1ea; border:1px solid #cbd4c4; }
+  @media(max-width:930px){.layout{grid-template-columns:1fr}.plan{max-height:none}}
+</style>
+
+<div class="hero">
+  <div class="label">Zimmer 1 · Variante C ausgearbeitet</div>
+  <h2>Endanordnung: warme Lounge-Schlafzone + klare PC-/Spiegelecke</h2>
+  <p class="subtitle">Maßstäbliche Draufsicht mit festem Bestand, neuem 120×200-cm-Bett, Licht, Textilien, Dekoration und allen bekannten Anschlüssen.</p>
+</div>
+
+<div class="layout">
+  <section class="panel">
+    <div class="panel-head"><h3>2D-Endskizze</h3><p class="subtitle">Die grüne Linie markiert den freien Hauptweg.</p></div>
+    <div class="plan-wrap">
+      <svg class="plan" viewBox="-42 -35 450 477" role="img" aria-label="Ausgearbeitete Endskizze Zimmer 1">
+        <defs>
+          <pattern id="slat" width="9" height="9" patternUnits="userSpaceOnUse"><rect width="5" height="9" fill="#9c724f"/><rect x="5" width="4" height="9" fill="#d8b892"/></pattern>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#738269"/></marker>
+        </defs>
+        <path d="M0 0H356V397H250V333H0Z" fill="#fffdfa" stroke="#403b37" stroke-width="5"/>
+
+        <!-- Akzentwand / Teppich / Bett -->
+        <rect x="18" y="0" width="242" height="12" fill="url(#slat)"/>
+        <rect x="18" y="16" width="246" height="178" rx="12" fill="#eeeae3" stroke="#d7d3cc" stroke-width="2" stroke-dasharray="6 4"/>
+        <rect x="35" y="0" width="200" height="120" rx="15" fill="#dcc7b3" stroke="#9d8067" stroke-width="2"/>
+        <rect x="35" y="0" width="200" height="25" rx="10" fill="#b89475"/>
+        <rect x="35" y="0" width="25" height="120" rx="10" fill="#b89475"/>
+        <rect x="66" y="35" width="61" height="59" rx="19" fill="#fbf8f3" stroke="#c9b9a9"/>
+        <rect x="135" y="35" width="62" height="59" rx="19" fill="#c9af98" stroke="#9d8067"/>
+        <text x="135" y="108" text-anchor="middle" font-size="12" fill="#614a3a" font-weight="700">POLSTERBETT 120 × 200</text>
+        <text x="141" y="151" text-anchor="middle" font-size="10" fill="#7b746d">TEPPICH CA. 245 × 180</text>
+
+        <!-- Beistelltisch / PC chair / desk -->
+        <circle cx="257" cy="43" r="17" fill="#b99b7c" stroke="#765f49" stroke-width="2"/><circle cx="257" cy="43" r="7" fill="#f5eee6"/>
+        <circle cx="274" cy="92" r="22" fill="#d9d0c6" stroke="#8d8379" stroke-width="2"/><path d="M262 83h24M266 95h16" stroke="#9b8d80"/>
+        <rect x="301" y="0" width="55" height="129" fill="#b5aea5" stroke="#59544e" stroke-width="2"/>
+        <line x1="301" y1="43" x2="356" y2="43" stroke="#7e776f"/><line x1="301" y1="86" x2="356" y2="86" stroke="#7e776f"/>
+        <rect x="310" y="14" width="20" height="100" rx="2" fill="#d7e2e3" stroke="#83999c" stroke-width="2"/>
+        <text x="320" y="64" text-anchor="middle" font-size="9" fill="#58757d" transform="rotate(90 320 64)">SPIEGEL 110 × 70</text>
+        <text x="344" y="66" text-anchor="middle" font-size="9" fill="#fff" transform="rotate(90 344 66)">PC-TISCH 129 × 55</text>
+
+        <!-- Fenster / Vorhang -->
+        <line x1="356" y1="129" x2="356" y2="260" stroke="#7bb3bf" stroke-width="9"/>
+        <path d="M345 120q-16 18 0 35v84q-16 20 0 31" fill="none" stroke="#cfb79f" stroke-width="8"/>
+        <text x="380" y="195" text-anchor="middle" font-size="10" fill="#4f8792" transform="rotate(90 380 195)">FENSTER 131 + DECKENVORHANG</text>
+
+        <!-- Regale / Pflanze / Pouf -->
+        <rect x="0" y="143" width="13" height="51" rx="3" fill="#b28d69" stroke="#765f49"/>
+        <rect x="0" y="202" width="13" height="48" rx="3" fill="#b28d69" stroke="#765f49"/>
+        <circle cx="27" cy="243" r="18" fill="#8ca17e" stroke="#56664d"/><circle cx="33" cy="235" r="13" fill="#718a67"/>
+        <circle cx="274" cy="223" r="25" fill="#d7c0aa" stroke="#94765e" stroke-width="2"/><path d="M254 223q20-15 40 0M256 232q18-12 36 0" stroke="#aa8d72" fill="none"/>
+        <text x="274" y="261" text-anchor="middle" font-size="9" fill="#725b48">POUF / HOCKER Ø 50</text>
+
+        <!-- Wardrobe / 25 cm gap -->
+        <rect x="0" y="271" width="225" height="62" fill="#aaa39a" stroke="#59544e" stroke-width="2"/>
+        <line x1="45" y1="271" x2="45" y2="333" stroke="#77716a"/><line x1="90" y1="271" x2="90" y2="333" stroke="#77716a"/><line x1="135" y1="271" x2="135" y2="333" stroke="#77716a"/><line x1="180" y1="271" x2="180" y2="333" stroke="#77716a"/>
+        <rect x="99" y="275" width="28" height="54" fill="#dbe1e1" opacity=".85"/>
+        <text x="112" y="304" text-anchor="middle" font-size="11" fill="#fff" font-weight="700">SCHRANK 225 × 62</text>
+        <path d="M225 349h25M225 343v12M250 343v12" stroke="#987a60" stroke-width="2"/>
+        <text x="237" y="369" text-anchor="middle" font-size="10" fill="#765f49">25 cm frei</text>
+
+        <!-- door -->
+        <path d="M263 397h80" stroke="#8b735e" stroke-width="7"/>
+        <path d="M263 397a80 80 0 0 1 80-80" fill="none" stroke="#bba48e" stroke-width="2" stroke-dasharray="5 4"/>
+        <text x="302" y="421" text-anchor="middle" font-size="10" fill="#765f49">TÜR 80 · Schwenkbereich frei</text>
+
+        <!-- fixtures -->
+        <circle cx="178" cy="170" r="9" fill="#ffe2a3" stroke="#b88e3f" stroke-width="2"/><path d="M178 154v-8M164 158l-6-6M192 158l6-6" stroke="#b88e3f"/>
+        <text x="178" y="188" text-anchor="middle" font-size="9" fill="#896821">DECKENLICHT</text>
+        <circle cx="178" cy="108" r="7" fill="#f2f2f2" stroke="#777" stroke-width="2"/><circle cx="178" cy="108" r="2" fill="#777"/>
+        <text x="178" y="99" text-anchor="middle" font-size="8" fill="#666">RAUCHMELDER</text>
+        <rect x="0" y="212" width="8" height="13" fill="#fff" stroke="#5372aa" stroke-width="2"/><circle cx="4" cy="216" r="1.3" fill="#5372aa"/><circle cx="4" cy="221" r="1.3" fill="#5372aa"/>
+        <rect x="43" y="0" width="14" height="7" fill="#fff" stroke="#5372aa" stroke-width="2"/><circle cx="47" cy="3.5" r="1" fill="#5372aa"/><circle cx="51" cy="3.5" r="1" fill="#5372aa"/><circle cx="55" cy="3.5" r="1" fill="#5372aa"/>
+        <rect x="246" y="356" width="8" height="14" fill="#fff7cc" stroke="#b89531" stroke-width="2"/>
+        <rect x="350" y="118" width="6" height="14" fill="#fff7cc" stroke="#b89531"/>
+        <rect x="349" y="55" width="7" height="12" fill="#eee" stroke="#777"/>
+
+        <!-- walking route -->
+        <path d="M302 382C302 330 300 293 259 282C228 273 213 231 233 197" fill="none" stroke="#738269" stroke-width="5" opacity=".75" marker-end="url(#arrow)"/>
+        <text x="310" y="294" font-size="9" fill="#53604c" transform="rotate(-81 310 294)">HAUPTWEG FREI</text>
+
+        <!-- callouts -->
+        <g font-size="9" fill="#514a44">
+          <text x="-35" y="170">2 WANDREGALE</text><line x1="-4" y1="167" x2="12" y2="167" stroke="#514a44"/>
+          <text x="-35" y="244">PFLANZE</text><line x1="-2" y1="241" x2="12" y2="241" stroke="#514a44"/>
+          <text x="-35" y="220" fill="#315a96">STECKDOSE</text>
+          <text x="33" y="-12" fill="#315a96">3-FACH-STECKDOSE zugänglich</text>
+          <text x="258" y="350" fill="#936e12">LICHTSCHALTER frei</text>
+        </g>
+      </svg>
+    </div>
+    <ol class="checklist">
+      <li><strong>120×200-Polsterbett</strong> quer in der ausgewählten Ecke, mit Stauraum und gepolsterter Wandseite.</li>
+      <li><strong>Großer heller Teppich</strong> verbindet Bettzone und Raummitte, ohne Schrank oder Eingang zu blockieren.</li>
+      <li><strong>PC-/Spiegelplatz</strong> bleibt am Fenster; Monitor auf Schwenkarm, damit der Spiegel nutzbar bleibt.</li>
+      <li><strong>Schweberegale, Pflanze und kleiner Pouf</strong> füllen freie Stellen, bleiben aber leicht und beweglich.</li>
+      <li><strong>Tür, Fenster, Schalter und Steckdosen</strong> bleiben erreichbar; hinter dem Schrank wird nichts neu angeschlossen.</li>
+    </ol>
+  </section>
+
+  <div class="detail-stack">
+    <section class="panel elevation">
+      <h3>Bett-/Loungewand</h3>
+      <div class="wall">
+        <div class="slats"></div><div class="led"></div>
+        <div class="art a1"></div><div class="art a2"></div><div class="art a3"></div>
+        <div class="daybed"></div><div class="pillow p1"></div><div class="pillow p2"></div><div class="pillow p3"></div>
+      </div>
+      <div class="card-copy">
+        <p>Warm-Greige als Akzent, schmaler Holzlamellenbereich, indirektes 2700-K-Licht und drei ruhige Bilder. Das Bett wirkt tagsüber wie ein hochwertiges Sofa.</p>
+        <div class="chips"><span class="chip">Creme-Bouclé</span><span class="chip">Greige</span><span class="chip">helle Eiche</span><span class="chip">warmes Licht</span></div>
+      </div>
+    </section>
+
+    <section class="panel elevation">
+      <h3>PC-/Spiegelecke</h3>
+      <div class="wall desk-wall">
+        <div class="shelf"><span class="plant">☘</span></div>
+        <div class="mirror"></div><div class="monitor"></div><div class="desk"></div><div class="drawer"></div>
+      </div>
+      <div class="card-copy">
+        <p>Spiegel ca. 110×70 cm, Unterkante etwa 12 cm über der Tischplatte. Ein schwenkbarer Monitorarm und ein Regal oberhalb halten die 129-cm-Fläche funktional und dekorativ.</p>
+        <div class="chips"><span class="chip">Kabelwanne</span><span class="chip">Monitorarm</span><span class="chip">LED unter Regal</span><span class="chip">kleine Pflanze</span></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="approval">
+  <strong>Zu bestätigen:</strong> Passt diese Raumaufteilung als Grundlage? Danach folgen Material-/Dekoliste, konkrete Kaufoptionen und die endgültige 3D-/PDF-Ausarbeitung.
+</div>
