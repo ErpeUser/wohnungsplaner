@@ -259,7 +259,7 @@ Frische Nachweise dieser Nachrunde:
 - npm run assets:check: reproduziert denselben model-sofa-Byte-/SHA-Fehler
 
 Ein parallel gestarteter kombinierter Cutover-Lauf blieb nach zwei erfolgreichen
-SSR-Tests hängen, obwohl der isolierte npm run test:cutover-Lauf mit 4/4
+SSR-Tests hängen, obwohl der isolierte npm run test:cutover-Lauf mit 5/5
 bestand. Das ist als Ressourcen-/Parallelitätsproblem dokumentiert, nicht als
 grüner kombinierter Lauf behauptet.
 
