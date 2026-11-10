@@ -2,7 +2,7 @@ import { git, repositorySnapshot, saveState, parseArgs, ensureLocalDir, localDir
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-async function snapshotWorkingTree(before) {
+async function snapshotWorkingTree() {
   await ensureLocalDir();
   const patch = await git(["diff", "HEAD", "--binary"], { allowFailure: true });
   const untracked = await git(["ls-files", "--others", "--exclude-standard", "-z"], { allowFailure: true });
@@ -40,7 +40,7 @@ export async function synchronize({ dryRun = false, push = false } = {}) {
   if (before.dirty) {
     actions.push({ action: "preserve-uncommitted", status: before.status });
     if (!dryRun) {
-      actions.push({ action: "snapshot-written", ...await snapshotWorkingTree(before) });
+      actions.push({ action: "snapshot-written", ...await snapshotWorkingTree() });
     }
     if (before.behind > 0 || (before.ahead > 0 && before.behind > 0)) {
       const result = { ok: false, blocked: "Arbeitsbaum enthält uncommittete Änderungen und Remote ist nicht identisch", before, actions };
