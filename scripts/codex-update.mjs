@@ -11,7 +11,7 @@ import { reconcile } from "./codex-pr-reconcile.mjs";
  */
 export async function runCodexUpdate({ mode = "check", dryRun = false } = {}) {
   if (!["check", "sync", "full"].includes(mode)) {
-    throw new Error(\`Ungültiger Update-Modus: \${mode}. Erlaubt sind check, sync und full.\`);
+    throw new Error(`Ungültiger Update-Modus: ${mode}. Erlaubt sind check, sync und full.`);
   }
 
   const preflight = await runPreflight({ dryRun });
