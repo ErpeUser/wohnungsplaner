@@ -1164,7 +1164,12 @@
 }
 
 .planner-shopping__preview--rug {
-  background: #eee9e0 url("/planner-assets/products/temu-shaggy-rug-white-607474249752115.png") center 68% / cover no-repeat;
+  background:
+    radial-gradient(circle at 18% 24%, rgba(255, 255, 255, 0.82) 0 1px, transparent 2px),
+    radial-gradient(circle at 72% 68%, rgba(185, 171, 153, 0.26) 0 1px, transparent 2px),
+    repeating-linear-gradient(112deg, rgba(255, 255, 255, 0.34) 0 2px, rgba(206, 195, 181, 0.2) 2px 4px),
+    #eee9e0;
+  background-size: 13px 13px, 17px 17px, 9px 9px, auto;
   box-shadow: inset 0 0 0 1px rgba(75, 65, 53, 0.14);
 }
 
