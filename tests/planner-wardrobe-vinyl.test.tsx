@@ -28,4 +28,25 @@ describe("Zimmer 1 wardrobe vinyl", () => {
       "https://www.temu.com/at/selbstklebende-abziehbare-vinyl-tapete-fur-schranke-kleiderschranke--strukturierte-peel-stick-paneele-wasserdichte-feuchtigkeitsbestandige-abdeckung-diy--mit-einfacher-installation-kein-kleber-werkzeug-erforderlich-renovierung-dachdeckung-g-601099691023748.html",
     );
   });
+
+  test("keeps the supplied Temu variants, dimensions, and gallery sources", () => {
+    render(<ShoppingListDrawer onClose={() => undefined} />);
+
+    const expectedProducts = [
+      ["Verstellbare Duschvorhangstange Brilliant Silber", "171–210 cm", "ea6eba656ec54de9b4573e862fd03670-goods.jpeg"],
+      ["Duschvorhang Nordic Leinenoptik Beige", "180 × 200 cm", "8c9546b8-32e0-4a61-8592-59984629b463.jpg"],
+      ["Kunstkaninchen-Plüschteppich Elfenbein", "SKU 17592283638107", "24fbeb33-a33d-452e-a545-2a62168e7da4.jpg"],
+      ["Vorraumteppich Taupe-Kreisbögen", "120 × 180 cm", "ef8fa5769f22493ea60088b637079477-goods.jpeg"],
+      ["Selbstklebende Tapete Macaron Milchkaffee", "600 × 40 cm", "59d4ac36-1c9c-4498-b39f-6fdac2fe25c4.jpg"],
+      ["Selbstklebende Tapete in warmbeiger Stoffstruktur", "10,0 m × 44,96 cm", "096428a6-7815-47e1-8e90-66928505c704.jpg"],
+    ] as const;
+
+    for (const [name, dimension, galleryFile] of expectedProducts) {
+      const product = screen.getByRole("heading", { name }).closest("article");
+      assert.ok(product);
+      assert.match(product.textContent ?? "", new RegExp(dimension.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+      assert.match(product.querySelector("img")?.getAttribute("src") ?? "", new RegExp(galleryFile.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+      assert.match(product.querySelector("a")?.getAttribute("href") ?? "", /top_gallery_url=/);
+    }
+  });
 });

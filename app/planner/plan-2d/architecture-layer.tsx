@@ -246,10 +246,31 @@ function BuiltInDetail({ item }: { item: PlanObjectDescriptor }) {
     return <Line points={[box.minX, box.minZ, box.maxX, box.minZ, box.maxX, box.maxZ, box.minX, box.maxZ]} closed stroke="#b79a78" strokeWidth={0.03} dash={[0.06, 0.025]} listening={false} />;
   }
   if (id === "bath-shower-rod") {
-    return <Line points={[box.minX, (box.minZ + box.maxZ) / 2, box.maxX, (box.minZ + box.maxZ) / 2]} stroke="#8b8c88" strokeWidth={0.04} listening={false} />;
+    const centerZ = (box.minZ + box.maxZ) / 2;
+    return <Group listening={false}>
+      <Line points={[box.minX, centerZ, box.maxX, centerZ]} stroke="#d6d9d7" strokeWidth={0.045} />
+      <Line points={[box.minX, centerZ, box.maxX, centerZ]} stroke="#717876" strokeWidth={0.018} opacity={0.8} />
+      <Circle x={box.minX} y={centerZ} radius={0.065} fill="#dfe2df" stroke="#6f7774" strokeWidth={0.018} />
+      <Circle x={box.maxX} y={centerZ} radius={0.065} fill="#dfe2df" stroke="#6f7774" strokeWidth={0.018} />
+    </Group>;
   }
   if (id === "bath-shower-curtain") {
-    return <Group listening={false}><Line points={[box.minX, box.minZ, box.maxX, box.minZ, box.maxX, box.maxZ, box.minX, box.maxZ]} closed stroke="#d8cbb9" strokeWidth={0.025} fill="#eee6d9" opacity={0.78} /></Group>;
+    const folds = 12;
+    const foldSpacing = width / folds;
+    return <Group listening={false}>
+      <Line points={[box.minX, box.minZ, box.maxX, box.minZ, box.maxX, box.maxZ, box.minX, box.maxZ]} closed stroke="#c5b5a0" strokeWidth={0.025} fill="#e6dac9" opacity={0.82} />
+      {Array.from({ length: folds - 1 }, (_, index) => {
+        const x = box.minX + foldSpacing * (index + 1);
+        return <Line key={`fold-${index}`} points={[x, box.minZ + 0.02, x, box.maxZ - 0.02]} stroke={index % 2 ? "#c8b8a4" : "#f5eee4"} strokeWidth={0.012} opacity={0.72} />;
+      })}
+      {Array.from({ length: folds }, (_, index) => {
+        const x = box.minX + foldSpacing * (index + 0.5);
+        return <Group key={`hook-${index}`}>
+          <Circle x={x} y={box.minZ + 0.025} radius={0.028} stroke="#8f9691" strokeWidth={0.012} fill="#e9ece8" />
+          <Circle x={x} y={box.maxZ - 0.01} radius={0.018} fill="#d7c1a5" />
+        </Group>;
+      })}
+    </Group>;
   }
   if (id === "sanitary-wall-wc") {
     return <Circle x={(box.minX + box.maxX) / 2} y={(box.minZ + box.maxZ) / 2} radius={Math.min(width, depth) * 0.3} stroke="#7f9699" strokeWidth={0.025} listening={false} />;
@@ -318,7 +339,7 @@ function planObjectColor(catalogId: string | undefined, kind: string) {
   if (catalogId === "zimmer1-desk-accessories" || catalogId === "zimmer1-nightstand-decor") return "#d7c8b4";
   if (catalogId === "vorraum-wall-decor") return "#c6ae8e";
   if (catalogId === "wall-finish-taupe") return "#B4A495";
-  if (catalogId === "wall-finish-vintage-fabric-wallpaper") return "#b7a794";
+  if (catalogId === "wall-finish-vintage-fabric-wallpaper") return "#a8876b";
   if (catalogId === "living-tv" || catalogId === "living-floating-cabinet" || catalogId === "kitchen-worktop") return "#171919";
   if (kind === "kitchen") return "#ebe7de";
   if (kind === "sanitary") return "#e7efed";

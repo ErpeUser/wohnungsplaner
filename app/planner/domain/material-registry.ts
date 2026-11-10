@@ -9,7 +9,7 @@ const SURFACE_MATERIAL_IDS = new Set([
   "paint-warm-taupe", "paint-white", "tile-white-rect", "tile-white-square",
   "tile-kitchen-grey-square", "kitchen-white-gloss", "cashmere-matte", "scout-oak",
   "oak-backsplash", "walnut-grain-dark", "kitchen-worktop-black", "kitchen-plinth-grey",
-  "slat-oak-dark", "object-neutral",
+  "slat-oak-dark", "object-neutral", "wallpaper-milk-coffee-macaron", "wallpaper-vintage-brown-fabric",
 ]);
 
 const CATALOG_MATERIAL_IDS = new Set(

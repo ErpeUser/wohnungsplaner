@@ -46,6 +46,11 @@ const RECIPES: Record<string, MaterialRecipe> = {
   "paint-warm-white": { color: "#f4f2ed", roughness: 0.9 },
   "paint-warm-taupe": { color: "#B4A495", roughness: 0.88 },
   "wallpaper-vintage-beige-fabric": { color: "#fffaf5", roughness: 0.98 },
+  // The two supplied Temu wallpaper variants remain selectable surface
+  // materials.  Their finish is matte, lightly fibrous and removable rather
+  // than glossy paint or a flat RGB swatch.
+  "wallpaper-milk-coffee-macaron": { color: "#d6bea6", roughness: 0.97 },
+  "wallpaper-vintage-brown-fabric": { color: "#a8876b", roughness: 0.98 },
   "paint-white": { color: "#f7f6f2", roughness: 0.9 },
   "tile-white-rect": { color: "#f0efeb", roughness: 0.58 },
   "tile-white-square": { color: "#efeeea", roughness: 0.6 },
@@ -287,6 +292,18 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
     material.bumpMap = wallpaperTexture;
     material.bumpScale = 0.006;
     material.needsUpdate = true;
+  } else if (materialId === "wallpaper-milk-coffee-macaron") {
+    const wallpaperTexture = loadMacaronMilkCoffeeWallpaperTexture();
+    material.map = wallpaperTexture;
+    material.bumpMap = wallpaperTexture;
+    material.bumpScale = 0.005;
+    material.needsUpdate = true;
+  } else if (materialId === "wallpaper-vintage-brown-fabric") {
+    const wallpaperTexture = loadVintageBrownFabricWallpaperTexture();
+    material.map = wallpaperTexture;
+    material.bumpMap = wallpaperTexture;
+    material.bumpScale = 0.008;
+    material.needsUpdate = true;
   } else if (materialId === "outdoor-concrete") {
     material.map = loadConcreteTexture();
     material.needsUpdate = true;
@@ -502,6 +519,85 @@ function loadVintageBeigeFabricWallpaperTexture() {
   texture.wrapS = RepeatWrapping;
   texture.wrapT = RepeatWrapping;
   texture.repeat.set(4.8, 3.65);
+  texture.magFilter = LinearFilter;
+  texture.minFilter = LinearMipmapLinearFilter;
+  texture.generateMipmaps = true;
+  texture.needsUpdate = true;
+  textureCache.set(key, texture);
+  return texture;
+}
+
+/**
+ * Warm milk-coffee removable wallpaper from the supplied Temu reference.
+ * The real roll is 600 × 40 cm; the material deliberately keeps a very fine
+ * cross-weave so it reads as a continuous roll at room scale instead of a
+ * repeated square image.
+ */
+function loadMacaronMilkCoffeeWallpaperTexture() {
+  const key = "generated:wallpaper-milk-coffee-macaron";
+  const cached = textureCache.get(key);
+  if (cached) return cached;
+  const size = 192;
+  const data = new Uint8Array(size * size * 4);
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      const warp = Math.sin(y * Math.PI * 0.72 + x * 0.03) * 2.4;
+      const weft = Math.sin(x * Math.PI * 0.66 + y * 0.025) * 2.1;
+      const paper = Math.sin((x + y) * 0.17) * 1.4;
+      const noise = ((x * 19 + y * 37 + x * y * 3) % 9) - 4;
+      const value = warp + weft + paper + noise * 0.32;
+      const offset = (y * size + x) * 4;
+      data[offset] = Math.max(0, Math.min(255, 214 + value));
+      data[offset + 1] = Math.max(0, Math.min(255, 190 + value * 0.94));
+      data[offset + 2] = Math.max(0, Math.min(255, 164 + value * 0.8));
+      data[offset + 3] = 255;
+    }
+  }
+  const texture = new DataTexture(data, size, size, RGBAFormat, UnsignedByteType);
+  texture.name = "planner-texture-wallpaper-milk-coffee-macaron";
+  texture.colorSpace = SRGBColorSpace;
+  texture.wrapS = RepeatWrapping;
+  texture.wrapT = RepeatWrapping;
+  texture.repeat.set(3.8, 2.9);
+  texture.magFilter = LinearFilter;
+  texture.minFilter = LinearMipmapLinearFilter;
+  texture.generateMipmaps = true;
+  texture.needsUpdate = true;
+  textureCache.set(key, texture);
+  return texture;
+}
+
+/**
+ * Slightly deeper brown textile wallpaper from the second supplied Temu
+ * reference (10 m × 44.96 cm).  The broad fibers are intentionally subtle so
+ * the seam spacing remains believable when a whole wall is covered.
+ */
+function loadVintageBrownFabricWallpaperTexture() {
+  const key = "generated:wallpaper-vintage-brown-fabric";
+  const cached = textureCache.get(key);
+  if (cached) return cached;
+  const size = 192;
+  const data = new Uint8Array(size * size * 4);
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      const horizontal = Math.sin(y * Math.PI * 0.78) * 4.4;
+      const vertical = Math.sin(x * Math.PI * 0.58 + y * 0.04) * 3.7;
+      const broad = Math.sin((x * 0.9 + y * 0.35) * 0.12) * 2.4;
+      const irregular = ((x * 29 + y * 17 + x * y * 5) % 13) - 6;
+      const weave = horizontal + vertical + broad + irregular * 0.36;
+      const offset = (y * size + x) * 4;
+      data[offset] = Math.max(0, Math.min(255, 169 + weave));
+      data[offset + 1] = Math.max(0, Math.min(255, 139 + weave * 0.92));
+      data[offset + 2] = Math.max(0, Math.min(255, 112 + weave * 0.78));
+      data[offset + 3] = 255;
+    }
+  }
+  const texture = new DataTexture(data, size, size, RGBAFormat, UnsignedByteType);
+  texture.name = "planner-texture-wallpaper-vintage-brown-fabric";
+  texture.colorSpace = SRGBColorSpace;
+  texture.wrapS = RepeatWrapping;
+  texture.wrapT = RepeatWrapping;
+  texture.repeat.set(4.8, 3.4);
   texture.magFilter = LinearFilter;
   texture.minFilter = LinearMipmapLinearFilter;
   texture.generateMipmaps = true;

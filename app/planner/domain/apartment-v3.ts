@@ -161,17 +161,17 @@ const builtIns: PlannerBuiltIn[] = [
   }),
   builtIn("living-tv", "Fernseher · Wunschplanung", "wohnkueche", "other", "living-tv", 0.25, 7.975, 1.28, 0.07, 0.74, 270, "screen-black", 1.12, assumptionMetadata("TV mit 128 cm Breite mittig auf dem exakt 195 cm breiten Lamellenfeld; seitlich jeweils 33,5 cm Luft.")),
   builtIn("living-floating-cabinet", "Schwarzer Hängeschrank · Wunschplanung", "wohnkueche", "storage", "living-floating-cabinet", 0.29, 7.975, 1.72, 0.36, 0.31, 270, "cabinet-black", 0.5, assumptionMetadata("Hängeschrank mit 172 cm Breite mittig unter dem TV; seitlich jeweils 11,5 cm Abstand zum Rand des 195-cm-Lamellenfelds.")),
-  builtIn("z1-bed-accent-wall", "Tapetenwand hinter dem Bett · warmbeige Stoffstruktur", "zimmer1", "other", "wall-finish-vintage-fabric-wallpaper", 0.068, 1.665, 3.33, 0.008, 2.54, 90, "wallpaper-vintage-beige-fabric", 0, {
+  builtIn("z1-bed-accent-wall", "Tapetenwand hinter dem Bett · Vintage-Braun Stoffmuster", "zimmer1", "other", "wall-finish-vintage-fabric-wallpaper", 0.068, 1.665, 3.33, 0.008, 2.54, 90, "wallpaper-vintage-brown-fabric", 0, {
     source: "Nutzerwahl und Temu-Produktbild · Art. 601099526356869 · 31.10.2026",
     confidence: "confirmed",
     notes: ["Die gesamte 333 × 254 cm große Wandfläche unmittelbar hinter dem Bett wird mit der gewählten warmbeigen, textilartig strukturierten selbstklebenden Tapete belegt."],
   }),
-  builtIn("z1-entry-wallpaper-return", "Tapetenwand direkt neben der Zimmer-1-Tür", "zimmer1", "other", "wall-finish-vintage-fabric-wallpaper", 2.565, 3.65, 0.64, 0.008, 2.54, 270, "wallpaper-vintage-beige-fabric", 0, {
+  builtIn("z1-entry-wallpaper-return", "Tapetenwand direkt neben der Zimmer-1-Tür", "zimmer1", "other", "wall-finish-vintage-fabric-wallpaper", 2.565, 3.65, 0.64, 0.008, 2.54, 270, "wallpaper-vintage-brown-fabric", 0, {
     source: "Nutzerwunsch · Fortsetzung der gewählten Bettwand-Tapete · 31.10.2026",
     confidence: "confirmed",
     notes: ["Die 64 cm breite Rücksprungwand direkt rechts neben der Zimmer-1-Tür erhält durchgehend dieselbe warmbeige Stofftapete wie die Wand hinter dem Bett; die Tapete läuft über die Ecke bis an die Türzarge weiter."],
   }),
-  builtIn("z1-entry-wallpaper-door-strip", "Tapetenstreifen rechts an der Zimmer-1-Tür", "zimmer1", "other", "wall-finish-vintage-fabric-wallpaper", 3.43, 3.962, 0.26, 0.008, 2.54, 0, "wallpaper-vintage-beige-fabric", 0, {
+  builtIn("z1-entry-wallpaper-door-strip", "Tapetenstreifen rechts an der Zimmer-1-Tür", "zimmer1", "other", "wall-finish-vintage-fabric-wallpaper", 3.43, 3.962, 0.26, 0.008, 2.54, 0, "wallpaper-vintage-brown-fabric", 0, {
     source: "Nutzerwunsch · markierte Wandfläche rechts neben der Zimmer-1-Tür · 01.11.2026",
     confidence: "confirmed",
     notes: ["Die Tapete wird um die Ecke auf dem 26 cm breiten Wandstreifen zwischen Türzarge und Außenwand fortgeführt, sodass sie aus der frontalen Türperspektive sichtbar bleibt."],
@@ -328,7 +328,7 @@ const placements: PlannerPlacement[] = [
     90,
     "rug-temu-rabbit-ivory",
     {
-      source: "Temu Produktseite und Originalabbildung · Art. 601099532250952 · SKU 17592283638116 · 02.11.2026",
+      source: "Temu Produktseite und Originalabbildung · Art. 601099532250952 · SKU 17592283638107 · 10.11.2026",
       confidence: "confirmed",
       notes: [
         "Nutzerwahl: einfarbiger Kunstkaninchen-Plüschteppich in Elfenbein.",

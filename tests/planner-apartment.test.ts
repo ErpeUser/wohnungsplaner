@@ -144,6 +144,18 @@ test("keeps the Zimmer 1 plan door visible by default and the photographed showe
   assert.equal(shower?.rotation, 90);
 });
 
+test("keeps the supplied Temu bath dimensions and the selected vintage wallpaper material", () => {
+  const rod = DEFAULT_APARTMENT_DOCUMENT.builtIns.find((item) => item.catalogId === "bath-shower-rod");
+  const curtain = DEFAULT_APARTMENT_DOCUMENT.builtIns.find((item) => item.catalogId === "bath-shower-curtain");
+  const accentWall = DEFAULT_APARTMENT_DOCUMENT.builtIns.find((item) => item.id === "builtin-z1-bed-accent-wall");
+
+  assert.deepEqual(rod?.size, { width: 2.05, depth: 0.03, height: 0.03 });
+  assert.equal(rod?.materialVariants?.main, "chrome-polished");
+  assert.deepEqual(curtain?.size, { width: 1.8, depth: 0.018, height: 2 });
+  assert.equal(curtain?.materialVariants?.main, "shower-curtain-linen-beige");
+  assert.equal(accentWall?.materialVariants?.main, "wallpaper-vintage-brown-fabric");
+});
+
 test("includes the photographed finishes and requested fixed living-room composition", () => {
   assert.equal(DEFAULT_APARTMENT_DOCUMENT.rooms.find((room) => room.id === "zimmer1")?.surfaces.floor, "parquet-oak-narrow");
   assert.equal(DEFAULT_APARTMENT_DOCUMENT.rooms.find((room) => room.id === "wohnkueche")?.surfaces.floor, "parquet-oak-narrow");

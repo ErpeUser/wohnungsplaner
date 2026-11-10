@@ -1264,14 +1264,46 @@ function BathMat({ item }: { item: SceneObject<PlannerBuiltIn> }) {
 
 function BathShowerRod({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   const [width, height, depth] = item.size;
+  // The supplied Temu rod is a 171–210 cm pressure-fit tube.  Keep the
+  // document's 205 cm setting as the single source of placement truth and
+  // model the telescoping sleeve, collars and wall pads inside that existing
+  // built-in footprint.
+  const rod = getPlannerMaterial(item.materialId || "chrome-polished");
+  const plate = getPlannerMaterial("metal-satin");
+  const collarX = width * 0.17;
+  const plateRadius = Math.max(0.045, Math.min(0.06, width * 0.028));
   return (
     <group>
       <mesh rotation={[0, 0, Math.PI / 2]} scale={[depth, width, height]} geometry={SHARED_CYLINDER} renderOrder={18} castShadow>
-        <primitive object={getPlannerMaterial(item.materialId || "chrome-polished")} attach="material" />
+        <primitive object={rod} attach="material" />
       </mesh>
+      <mesh rotation={[0, 0, Math.PI / 2]} position={[-collarX, 0, 0]} scale={[depth * 1.28, width * 0.21, height * 1.28]} geometry={SHARED_CYLINDER} castShadow>
+        <primitive object={rod} attach="material" />
+      </mesh>
+      <mesh rotation={[0, 0, Math.PI / 2]} position={[collarX, 0, 0]} scale={[depth * 1.18, width * 0.16, height * 1.18]} castShadow geometry={SHARED_CYLINDER}>
+        <primitive object={rod} attach="material" />
+      </mesh>
+      {[-collarX, collarX].map((x) => (
+        <mesh key={`collar-${x}`} position={[x, 0, 0]} rotation={[0, Math.PI / 2, 0]} scale={[depth * 1.35, depth * 1.35, depth * 1.35]} geometry={SHARED_TORUS} castShadow>
+          <primitive object={rod} attach="material" />
+        </mesh>
+      ))}
       {[-0.5, 0.5].map((ratio) => (
-        <mesh key={ratio} position={[ratio * width, 0, 0]} scale={[0.055, 0.028, 0.055]} geometry={SHARED_CYLINDER} castShadow>
-          <primitive object={getPlannerMaterial(item.materialId || "chrome-polished")} attach="material" />
+        <group key={`mount-${ratio}`} position={[ratio * width, 0, 0]}>
+          <mesh rotation={[0, 0, Math.PI / 2]} scale={[depth * 1.1, depth * 1.4, depth * 1.1]} geometry={SHARED_CYLINDER} castShadow>
+            <primitive object={rod} attach="material" />
+          </mesh>
+          <mesh rotation={[0, 0, Math.PI / 2]} scale={[plateRadius, depth * 0.7, plateRadius]} geometry={SHARED_CYLINDER} castShadow>
+            <primitive object={plate} attach="material" />
+          </mesh>
+          <mesh position={[ratio * 0.008, 0, 0]} rotation={[0, Math.PI / 2, 0]} scale={[plateRadius * 0.94, plateRadius * 0.94, plateRadius * 0.94]} geometry={SHARED_TORUS}>
+            <primitive object={plate} attach="material" />
+          </mesh>
+        </group>
+      ))}
+      {[-0.5, 0.5].map((ratio) => (
+        <mesh key={`end-cap-${ratio}`} position={[ratio * width, 0, 0]} rotation={[0, 0, Math.PI / 2]} scale={[depth * 1.5, depth * 0.16, depth * 1.5]} geometry={SHARED_CYLINDER} castShadow>
+          <primitive object={rod} attach="material" />
         </mesh>
       ))}
     </group>
@@ -1280,26 +1312,75 @@ function BathShowerRod({ item }: { item: SceneObject<PlannerBuiltIn> }) {
 
 function BathShowerCurtain({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   const [width, height, depth] = item.size;
-  const folds = 12;
+  const folds = 12; // matches the supplied 12-hook variant
+  const curtain = getPlannerMaterial(item.materialId || "shower-curtain-linen-beige");
+  const chrome = getPlannerMaterial("chrome-polished");
   return (
     <group>
+      <RoundedBox
+        args={[width, 0.024, Math.max(depth * 1.25, 0.022)]}
+        radius={0.008}
+        smoothness={2}
+        position={[0, height / 2 - 0.014, 0]}
+        renderOrder={17}
+        castShadow
+        receiveShadow
+      >
+        <primitive object={curtain} attach="material" />
+      </RoundedBox>
       {Array.from({ length: folds }, (_, index) => (
         <RoundedBox
           key={index}
-          args={[width / folds * 1.12, height, depth]}
+          args={[width / folds * 1.08, height - 0.03, Math.max(depth, 0.018)]}
           radius={0.012}
           smoothness={2}
-          position={[-width / 2 + width * (index + 0.5) / folds, 0, (index % 2 - 0.5) * 0.012]}
+          position={[
+            -width / 2 + width * (index + 0.5) / folds,
+            -0.004,
+            Math.sin(index * 1.65) * 0.011,
+          ]}
+          rotation={[0, Math.sin(index * 1.65) * 0.028, 0]}
           renderOrder={16}
           castShadow
           receiveShadow
         >
-          <primitive object={getPlannerMaterial(item.materialId || "shower-curtain-linen-beige")} attach="material" />
+          <primitive object={curtain} attach="material" />
         </RoundedBox>
       ))}
       {Array.from({ length: folds }, (_, index) => (
-        <mesh key={`ring-${index}`} position={[-width / 2 + width * (index + 0.5) / folds, height / 2 - 0.018, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[0.024, 0.024, 0.024]} geometry={SHARED_TORUS}>
-          <primitive object={getPlannerMaterial("chrome-polished")} attach="material" />
+        <group key={`hook-${index}`} position={[-width / 2 + width * (index + 0.5) / folds, height / 2 + 0.003, 0]}>
+          <mesh rotation={[0, Math.PI / 2, 0]} scale={[0.024, 0.024, 0.024]} geometry={SHARED_TORUS} castShadow>
+            <primitive object={chrome} attach="material" />
+          </mesh>
+          <mesh position={[0, -0.018, 0]} scale={[0.008, 0.035, 0.008]} geometry={SHARED_CYLINDER}>
+            <primitive object={chrome} attach="material" />
+          </mesh>
+        </group>
+      ))}
+      <RoundedBox
+        args={[width, 0.022, Math.max(depth * 1.18, 0.02)]}
+        radius={0.007}
+        smoothness={2}
+        position={[0, -height / 2 + 0.012, 0]}
+        renderOrder={17}
+        castShadow
+        receiveShadow
+      >
+        <primitive object={curtain} attach="material" />
+      </RoundedBox>
+      {Array.from({ length: folds }, (_, index) => (
+        <mesh
+          key={`tassel-${index}`}
+          position={[
+            -width / 2 + width * (index + 0.5) / folds,
+            -height / 2 - 0.024,
+            Math.sin(index * 1.65) * 0.011,
+          ]}
+          scale={[0.014, 0.026, 0.014]}
+          geometry={SHARED_SPHERE}
+          castShadow
+        >
+          <primitive object={curtain} attach="material" />
         </mesh>
       ))}
     </group>
