@@ -231,6 +231,12 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
   } else if (materialId === "outdoor-concrete") {
     material.map = loadConcreteTexture();
     material.needsUpdate = true;
+  } else if (materialId === "epoxy-grey") {
+    const epoxyTexture = loadEpoxyFloorTexture();
+    material.map = epoxyTexture;
+    material.bumpMap = epoxyTexture;
+    material.bumpScale = 0.006;
+    material.needsUpdate = true;
   } else if (materialId === "balcony-floor-beige") {
     material.map = loadBalconyFloorTexture();
     material.needsUpdate = true;
@@ -376,6 +382,41 @@ function loadConcreteTexture() {
   texture.wrapS = RepeatWrapping;
   texture.wrapT = RepeatWrapping;
   texture.repeat.set(3.6, 3.6);
+  texture.magFilter = LinearFilter;
+  texture.minFilter = LinearMipmapLinearFilter;
+  texture.generateMipmaps = true;
+  texture.needsUpdate = true;
+  textureCache.set(key, texture);
+  return texture;
+}
+
+function loadEpoxyFloorTexture() {
+  const key = "generated:epoxy-grey";
+  const cached = textureCache.get(key);
+  if (cached) return cached;
+  const size = 128;
+  const data = new Uint8Array(size * size * 4);
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      // Fine aggregate and broad, low-contrast variation keep the resin
+      // surface from reading as a flat RGB swatch while preserving the grey
+      // epoxy appearance documented in the apartment plan.
+      const micro = ((x * 19 + y * 37 + x * y * 3) % 13) - 6;
+      const broad = Math.sin(x / 17) * 2.4 + Math.cos(y / 23) * 1.8;
+      const value = Math.max(0, Math.min(255, 154 + micro + broad));
+      const offset = (y * size + x) * 4;
+      data[offset] = value;
+      data[offset + 1] = Math.max(0, Math.min(255, value + 2));
+      data[offset + 2] = Math.max(0, Math.min(255, value + 1));
+      data[offset + 3] = 255;
+    }
+  }
+  const texture = new DataTexture(data, size, size, RGBAFormat, UnsignedByteType);
+  texture.name = "planner-texture-epoxy-grey";
+  texture.colorSpace = SRGBColorSpace;
+  texture.wrapS = RepeatWrapping;
+  texture.wrapT = RepeatWrapping;
+  texture.repeat.set(2.6, 2.6);
   texture.magFilter = LinearFilter;
   texture.minFilter = LinearMipmapLinearFilter;
   texture.generateMipmaps = true;

@@ -15,6 +15,24 @@ const SHARED_BOX = new BoxGeometry(1, 1, 1);
 const SHARED_CYLINDER = new CylinderGeometry(0.5, 0.5, 1, 24);
 const SHARED_SPHERE = new SphereGeometry(0.5, 20, 12);
 
+function DetailStrip({
+  position,
+  scale,
+  materialId,
+  rotation = [0, 0, 0],
+}: {
+  position: [number, number, number];
+  scale: [number, number, number];
+  materialId: string;
+  rotation?: [number, number, number];
+}) {
+  return (
+    <mesh position={position} scale={scale} rotation={rotation} geometry={SHARED_BOX} castShadow>
+      <primitive object={getPlannerMaterial(materialId)} attach="material" />
+    </mesh>
+  );
+}
+
 export function Furniture3D({
   scene,
   selectionId,
@@ -250,6 +268,7 @@ function LedChargingNightstand() {
 
 function ChicagoSofa() {
   const fabric = getPlannerMaterial("fabric-chicago-beige");
+  const seam = getPlannerMaterial("fabric-sand");
   const dark = getPlannerMaterial("metal-black");
   const control = getPlannerMaterial("screen-black");
   const seatCenters = [-0.225, 0.225];
@@ -270,6 +289,12 @@ function ChicagoSofa() {
           </RoundedBox>
           <RoundedBox args={[0.42, 0.1, 0.27]} radius={0.05} smoothness={7} position={[x, 0.315, 0.88]} rotation={[0.05, 0, 0]} castShadow receiveShadow>
             <primitive object={fabric} attach="material" />
+          </RoundedBox>
+          <RoundedBox args={[0.35, 0.012, 0.018]} radius={0.006} smoothness={3} position={[x, 0.495, 0.373]} rotation={[0.02, 0, 0]} castShadow>
+            <primitive object={seam} attach="material" />
+          </RoundedBox>
+          <RoundedBox args={[0.34, 0.012, 0.018]} radius={0.006} smoothness={3} position={[x, 0.405, 0.79]} rotation={[0.12, 0, 0]} castShadow>
+            <primitive object={seam} attach="material" />
           </RoundedBox>
           <mesh position={[x, 0.22, 0.48]} scale={[0.31, 0.035, 0.73]} geometry={SHARED_BOX} castShadow>
             <primitive object={dark} attach="material" />
@@ -296,6 +321,12 @@ function ChicagoSofa() {
           <primitive object={fabric} attach="material" />
         </RoundedBox>
       ))}
+      <RoundedBox args={[0.82, 0.012, 0.018]} radius={0.006} smoothness={3} position={[0, 0.74, -0.405]} rotation={[-0.08, 0, 0]} castShadow>
+        <primitive object={seam} attach="material" />
+      </RoundedBox>
+      <RoundedBox args={[0.78, 0.012, 0.018]} radius={0.006} smoothness={3} position={[0, 0.29, 0.39]} rotation={[0.02, 0, 0]} castShadow>
+        <primitive object={seam} attach="material" />
+      </RoundedBox>
 
       {[
         [-0.42, -0.31, 0.18],
@@ -346,6 +377,10 @@ function TejoHallway() {
       <mesh position={[-0.327, 0.53, 0.496]} scale={[0.235, 0.49, 0.008]} geometry={SHARED_BOX} receiveShadow>
         <primitive object={mirror} attach="material" />
       </mesh>
+      <DetailStrip position={[-0.327, 0.53, 0.505]} scale={[0.285, 0.012, 0.012]} materialId="metal-satin" />
+      <DetailStrip position={[-0.327, 0.53, 0.459]} scale={[0.285, 0.012, 0.012]} materialId="metal-satin" />
+      <DetailStrip position={[-0.47, 0.53, 0.482]} scale={[0.012, 0.53, 0.012]} materialId="metal-satin" />
+      <DetailStrip position={[-0.184, 0.53, 0.482]} scale={[0.012, 0.53, 0.012]} materialId="metal-satin" />
 
       <RoundedBox args={[0.61, 0.57, 0.055]} radius={0.01} smoothness={3} position={[0.18, 0.515, -0.445]} castShadow receiveShadow>
         <primitive object={panel} attach="material" />
@@ -359,6 +394,8 @@ function TejoHallway() {
       <RoundedBox args={[0.58, 0.055, 0.73]} radius={0.025} smoothness={5} position={[0.19, 0.244, 0.07]} castShadow receiveShadow>
         <primitive object={panel} attach="material" />
       </RoundedBox>
+      <DetailStrip position={[0.19, 0.27, 0.445]} scale={[0.48, 0.012, 0.012]} materialId="tejo-cashmere" />
+      <DetailStrip position={[0.19, 0.515, -0.478]} scale={[0.48, 0.012, 0.012]} materialId="metal-satin" />
 
       <RoundedBox args={[0.98, 0.19, 0.94]} radius={0.012} smoothness={3} position={[0, 0.9, 0]} castShadow receiveShadow>
         <primitive object={cashmere} attach="material" />
@@ -438,6 +475,12 @@ function BlissBed() {
       <RoundedBox args={[0.83, 0.095, 0.84]} radius={0.05} smoothness={7} position={[0, 0.56, 0.035]} rotation={[-0.018, 0, 0]} castShadow receiveShadow>
         <primitive object={bedding} attach="material" />
       </RoundedBox>
+      <RoundedBox args={[0.78, 0.012, 0.024]} radius={0.008} smoothness={3} position={[0, 0.62, 0.458]} castShadow>
+        <primitive object={taupe} attach="material" />
+      </RoundedBox>
+      <RoundedBox args={[0.78, 0.012, 0.024]} radius={0.008} smoothness={3} position={[0, 0.63, -0.405]} castShadow>
+        <primitive object={taupe} attach="material" />
+      </RoundedBox>
       {[-0.225, 0.225].map((x) => (
         <RoundedBox key={`pillow-${x}`} args={[0.37, 0.12, 0.21]} radius={0.058} smoothness={7} position={[x, 0.68, -0.31]} rotation={[-0.14, 0, x * 0.08]} castShadow receiveShadow>
           <primitive object={white} attach="material" />
@@ -456,6 +499,11 @@ function BlissBed() {
         <RoundedBox key={`${x}-${y}`} args={[0.232, 0.235, 0.06]} radius={0.058} smoothness={7} position={[x, y, -0.407]} castShadow receiveShadow>
           <primitive object={fabric} attach="material" />
         </RoundedBox>
+      )))}
+      {headboardRows.flatMap((y) => headboardColumns.map((x) => (
+        <mesh key={`button-${x}-${y}`} position={[x, y, -0.447]} scale={[0.018, 0.018, 0.018]} geometry={SHARED_SPHERE} castShadow>
+          <primitive object={taupe} attach="material" />
+        </mesh>
       )))}
       {[-0.38, 0.38].flatMap((x) => [-0.34, 0.35].map((z) => [x, z] as const)).map(([x, z]) => (
         <mesh key={`${x}-${z}`} position={[x, 0.023, z]} scale={[0.045, 0.045, 0.045]} geometry={SHARED_CYLINDER} castShadow>
@@ -770,6 +818,11 @@ function PhotoWardrobe() {
           <primitive object={frame} attach="material" />
         </mesh>
       ))}
+      {modules.map((module) => (
+        <mesh key={`wardrobe-reveal-${module.center}`} position={[module.center, 0.5, 0.526]} scale={[0.004, 0.9, 0.008]} geometry={SHARED_BOX}>
+          <primitive object={getPlannerMaterial("drawer-charcoal")} attach="material" />
+        </mesh>
+      ))}
       {upperHandleXs.map((x) => (
         <mesh key={x} position={[x, 0.58, 0.535]} scale={[0.014, 0.16, 0.014]} geometry={SHARED_CYLINDER} castShadow>
           <primitive object={metal} attach="material" />
@@ -822,6 +875,7 @@ function ViccoSherryVanity() {
           <RoundedBox args={[0.286, 0.086, 0.025]} radius={0.01} smoothness={3} castShadow>
             <primitive object={white} attach="material" />
           </RoundedBox>
+          <DetailStrip position={[0, -0.046, 0.019]} scale={[0.26, 0.006, 0.008]} materialId="drawer-charcoal" />
           <mesh position={[0, 0.005, 0.022]} rotation={[0, 0, Math.PI / 2]} scale={[0.012, 0.13, 0.012]} geometry={SHARED_CYLINDER} castShadow>
             <primitive object={gold} attach="material" />
           </mesh>
@@ -843,6 +897,10 @@ function ViccoSherryVanity() {
         <RoundedBox args={[0.84, 0.408, 0.022]} radius={0.012} smoothness={5} position={[0, 0, 0.031]} castShadow>
           <primitive object={mirror} attach="material" />
         </RoundedBox>
+        <DetailStrip position={[0, 0.224, 0.052]} scale={[0.82, 0.009, 0.012]} materialId="metal-gold" />
+        <DetailStrip position={[0, -0.224, 0.052]} scale={[0.82, 0.009, 0.012]} materialId="metal-gold" />
+        <DetailStrip position={[-0.412, 0, 0.052]} scale={[0.009, 0.42, 0.012]} materialId="metal-gold" />
+        <DetailStrip position={[0.412, 0, 0.052]} scale={[0.009, 0.42, 0.012]} materialId="metal-gold" />
         {[-1, 1].map((side) => (
           <mesh key={`led-horizontal-${side}`} position={[0, side * 0.19, 0.052]} scale={[0.79, 0.014, 0.012]} geometry={SHARED_BOX}>
             <meshStandardMaterial color="#fff4dc" emissive="#ffd7a0" emissiveIntensity={1.85} roughness={0.32} />
@@ -903,6 +961,7 @@ function PhotoOfficeChair() {
 
 function TemuIvoryExecutiveChair() {
   const leather = getPlannerMaterial("leather-ivory");
+  const seam = getPlannerMaterial("fabric-sand");
   const chrome = getPlannerMaterial("chrome-polished");
   const black = getPlannerMaterial("screen-black");
   const legAngles = [0, 72, 144, 216, 288].map((degrees) => degrees * Math.PI / 180);
@@ -919,11 +978,13 @@ function TemuIvoryExecutiveChair() {
 
       <RoundedBox args={[0.86, 0.18, 0.7]} radius={0.1} smoothness={6} position={[0, 0.5, 0.04]} castShadow receiveShadow><primitive object={leather} attach="material" /></RoundedBox>
       <RoundedBox args={[0.7, 0.1, 0.58]} radius={0.075} smoothness={6} position={[0, 0.57, 0.065]} castShadow><primitive object={leather} attach="material" /></RoundedBox>
+      <RoundedBox args={[0.58, 0.01, 0.016]} radius={0.005} smoothness={3} position={[0, 0.62, 0.345]} castShadow><primitive object={seam} attach="material" /></RoundedBox>
       <RoundedBox args={[0.22, 0.12, 0.5]} radius={0.055} smoothness={5} position={[-0.34, 0.59, 0.02]} rotation={[0, 0, -0.1]} castShadow><primitive object={leather} attach="material" /></RoundedBox>
       <RoundedBox args={[0.22, 0.12, 0.5]} radius={0.055} smoothness={5} position={[0.34, 0.59, 0.02]} rotation={[0, 0, 0.1]} castShadow><primitive object={leather} attach="material" /></RoundedBox>
 
       <RoundedBox args={[0.62, 0.55, 0.16]} radius={0.08} smoothness={6} position={[0, 0.76, -0.255]} rotation={[-0.07, 0, 0]} castShadow receiveShadow><primitive object={leather} attach="material" /></RoundedBox>
       <RoundedBox args={[0.72, 0.22, 0.18]} radius={0.09} smoothness={6} position={[0, 0.99, -0.27]} rotation={[-0.04, 0, 0]} castShadow><primitive object={leather} attach="material" /></RoundedBox>
+      <RoundedBox args={[0.5, 0.01, 0.016]} radius={0.005} smoothness={3} position={[0, 0.82, -0.352]} rotation={[-0.07, 0, 0]} castShadow><primitive object={seam} attach="material" /></RoundedBox>
       <RoundedBox args={[0.17, 0.38, 0.15]} radius={0.07} smoothness={5} position={[-0.34, 0.8, -0.22]} rotation={[-0.06, 0, -0.08]} castShadow><primitive object={leather} attach="material" /></RoundedBox>
       <RoundedBox args={[0.17, 0.38, 0.15]} radius={0.07} smoothness={5} position={[0.34, 0.8, -0.22]} rotation={[-0.06, 0, 0.08]} castShadow><primitive object={leather} attach="material" /></RoundedBox>
 
@@ -936,6 +997,7 @@ function TemuIvoryExecutiveChair() {
 
       <mesh position={[0, 0.39, 0.31]} scale={[0.48, 0.035, 0.42]} geometry={SHARED_BOX} castShadow><primitive object={chrome} attach="material" /></mesh>
       <RoundedBox args={[0.58, 0.105, 0.35]} radius={0.055} smoothness={5} position={[0, 0.42, 0.33]} castShadow><primitive object={leather} attach="material" /></RoundedBox>
+      <mesh position={[0, 0.43, 0.51]} scale={[0.02, 0.02, 0.02]} geometry={SHARED_SPHERE} castShadow><primitive object={chrome} attach="material" /></mesh>
     </group>
   );
 }
@@ -962,9 +1024,8 @@ function BozanDiningTable() {
       <mesh position={[0, 0.982, 0]} scale={[1, 0.036, 1]} geometry={SHARED_CYLINDER} castShadow receiveShadow>
         <primitive object={oak} attach="material" />
       </mesh>
-      <mesh position={[0, 1.002, 0]} scale={[0.012, 0.006, 0.93]} geometry={SHARED_BOX} castShadow>
-        <primitive object={oakEdge} attach="material" />
-      </mesh>
+      <DetailStrip position={[0, 1.003, 0]} scale={[0.012, 0.006, 0.93]} materialId="oak-artisan-edge" />
+      <DetailStrip position={[0, 0.965, 0.498]} scale={[0.86, 0.012, 0.012]} materialId="oak-artisan-edge" />
       <RoundedBox args={[0.72, 0.12, 0.72]} radius={0.018} smoothness={4} position={[0, 0.89, 0]} castShadow receiveShadow>
         <primitive object={oakEdge} attach="material" />
       </RoundedBox>
@@ -979,6 +1040,11 @@ function BozanDiningTable() {
       <mesh position={[0, 0.46, 0]} scale={[0.13, 0.18, 0.13]} geometry={SHARED_CYLINDER} castShadow>
         <primitive object={black} attach="material" />
       </mesh>
+      {[0, Math.PI / 2, Math.PI, Math.PI * 1.5].map((angle) => (
+        <mesh key={`bozan-bolt-${angle}`} position={[Math.cos(angle) * 0.17, 0.9, Math.sin(angle) * 0.17]} scale={[0.018, 0.012, 0.018]} geometry={SHARED_SPHERE} castShadow>
+          <primitive object={black} attach="material" />
+        </mesh>
+      ))}
     </group>
   );
 }
@@ -1006,6 +1072,12 @@ function KaleoArmchair() {
       <RoundedBox args={[0.8, 0.11, 0.58]} radius={0.075} smoothness={7} position={[0, 0.675, 0.07]} castShadow receiveShadow>
         <primitive object={fabric} attach="material" />
       </RoundedBox>
+      <RoundedBox args={[0.7, 0.012, 0.018]} radius={0.006} smoothness={3} position={[0, 0.748, 0.365]} castShadow>
+        <primitive object={seam} attach="material" />
+      </RoundedBox>
+      <RoundedBox args={[0.7, 0.012, 0.018]} radius={0.006} smoothness={3} position={[0, 0.55, -0.31]} rotation={[-0.1, 0, 0]} castShadow>
+        <primitive object={seam} attach="material" />
+      </RoundedBox>
 
       {[-0.445, 0.445].map((x) => (
         <RoundedBox key={x} args={[0.11, 0.27, 0.62]} radius={0.055} smoothness={6} position={[x, 0.7, 0.015]} rotation={[0, 0, x < 0 ? -0.04 : 0.04]} castShadow receiveShadow>
@@ -1026,6 +1098,9 @@ function KaleoArmchair() {
       ))}
       <mesh position={[0, 0.82, -0.4]} scale={[0.72, 0.01, 0.01]} geometry={SHARED_BOX} castShadow>
         <primitive object={seam} attach="material" />
+      </mesh>
+      <mesh position={[0, 0.54, 0]} scale={[0.2, 0.012, 0.2]} geometry={SHARED_CYLINDER} castShadow>
+        <primitive object={metal} attach="material" />
       </mesh>
     </group>
   );

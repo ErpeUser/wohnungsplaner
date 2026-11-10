@@ -10,6 +10,13 @@ export type FurnitureMaterial = {
   color: string;
 };
 
+export type ProductRealismSpec = {
+  sourceLabel: string;
+  dimensions: string;
+  confidence: "verified" | "estimated";
+  construction: readonly string[];
+};
+
 export type FurnitureCatalogItem = {
   id: string;
   name: string;
@@ -21,6 +28,7 @@ export type FurnitureCatalogItem = {
   fallback3d: string;
   renderMode: FurnitureRenderMode;
   materials: FurnitureMaterial[];
+  realism?: ProductRealismSpec;
 };
 
 const WOOD = [
@@ -81,6 +89,93 @@ const TEMU_EXECUTIVE_IVORY = [
   { id: "leather-ivory", label: "Cremefarbenes Kunstleder / Chrom", color: "#e5ded4" },
 ];
 
+const PRODUCT_REALISM: Record<string, ProductRealismSpec> = {
+  "bed-bliss-120": {
+    sourceLabel: "XXXLutz / Homesy Art. 800001233737",
+    dimensions: "Liegefläche 120 × 200 cm · Gesamt ca. 120 × 200 × 108 cm · Füße ca. 4,5 cm",
+    confidence: "verified",
+    construction: ["beiger Polsterstoff", "vierteiliger gepolsterter Kopfteil", "Bettkasten mit Lattenrost", "Holz-/Metallrahmen"],
+  },
+  "sofa-chicago-206": {
+    sourceLabel: "Möbelix / Chicago Art. 2424010201",
+    dimensions: "ca. 206 × 107 × 78 cm · Sitzhöhe 50 cm · Sitztiefe 56 cm",
+    confidence: "verified",
+    construction: ["beiger Polyester-Chenillebezug", "zwei Relaxsitze", "Taschenfederkern und Wellenunterfederung", "konische schwarze Metallfüße, ca. 13,5 cm"],
+  },
+  "hallway-tejo-115": {
+    sourceLabel: "Möbelix / Tejo Art. 2778003504",
+    dimensions: "ca. 115 × 37,5 × 231,9 cm · Spiegel ca. 35 × 140 cm",
+    confidence: "verified",
+    construction: ["Kaschmir-/Eiche-Nachbildung", "raumhoher Korpus", "Spiegel, Sitzbank, Hakenleiste", "fünf Einlegeböden und seitenverkehrt montierbar"],
+  },
+  "dining-table-bozan-110": {
+    sourceLabel: "Möbelix / Bozan AZ Art. 2858001801",
+    dimensions: "geschlossen Ø 110 × 76 cm · ausgezogen 150 × 110 cm",
+    confidence: "verified",
+    construction: ["Artisan-Eiche-Melaminoberfläche", "25-mm-Platte", "schwarzes pulverbeschichtetes Metall-Sterngestell", "mittige Auszugfuge"],
+  },
+  "chair-kaleo-chenille-beige": {
+    sourceLabel: "Möbelix / Kaleo Art. 1634004202",
+    dimensions: "ca. 63 × 64 × 87 cm · Sitzhöhe 50 cm · Armlehne 66 cm",
+    confidence: "verified",
+    construction: ["beiger Chenillebezug in Leinenoptik", "Sitzfläche 360° drehbar", "Sitzfläche ca. 46 × 46 cm", "schwarzer pulverbeschichteter Rundfuß, ca. 50 cm"],
+  },
+  "vanity-vicco-sherry-120": {
+    sourceLabel: "Vicco Sherry / vorhandene Nutzerreferenz",
+    dimensions: "Tisch ca. 120 × 55 × 75 cm · integrierter LED-Spiegel ca. 110 × 70 cm",
+    confidence: "estimated",
+    construction: ["mattweißer Korpus", "fünf Schubladen", "goldfarbene Griffe und Rahmen", "LED-Rahmen am Spiegel"],
+  },
+  "chair-temu-executive-ivory": {
+    sourceLabel: "Temu Produktbild / goods_id 606296522765554",
+    dimensions: "ca. 64 × 51 × 105–114 cm · Sitzhöhe 47–56 cm",
+    confidence: "estimated",
+    construction: ["cremefarbenes Kunstleder", "hohe Rückenlehne und Kopfstütze", "gepolsterte Armlehnen", "ausziehbare Fußstütze und verchromtes Fünfsternuntergestell"],
+  },
+  "nightstand-led-2drawer-white": {
+    sourceLabel: "Temu Produktbild / Art. 601100375290552",
+    dimensions: "ca. 39,6 × 30 × 60,4 cm",
+    confidence: "estimated",
+    construction: ["weißer Korpus", "zwei Schubladen", "beleuchtetes offenes Ablagefach", "Steckdosen und USB-Ladeflächen"],
+  },
+  "wardrobe-225": {
+    sourceLabel: "Zimmer-1-Fotoreferenz / vorhandener Kleiderschrank",
+    dimensions: "ca. 225 × 62 × 220 cm",
+    confidence: "estimated",
+    construction: ["fünf Frontmodule", "mittiges Spiegelmodul", "zwei Schubladenmodule", "weiße matte Fronten und Metallprofile"],
+  },
+  "rug-temu-rabbit-ivory-100x180": {
+    sourceLabel: "Temu Produktbild / Art. 601099532250952",
+    dimensions: "100 × 180 cm · Florhöhe im Modell ca. 4 cm",
+    confidence: "estimated",
+    construction: ["einfarbiger elfenbeinfarbener Kunstkaninchen-Plüsch", "dichte weiche Florbüschel", "gerundete Kanten"],
+  },
+  "rug-temu-easy-line-120x180": {
+    sourceLabel: "Temu Produktbild / Art. 607246280935328",
+    dimensions: "120 × 180 cm · flacher Samtflor",
+    confidence: "estimated",
+    construction: ["abstrakte Color-Block-Flächen", "Creme, Salbei und warmes Beige", "feine helle Konturlinien"],
+  },
+  "rug-gala-shaggy-2505-100x200": {
+    sourceLabel: "Zimmer-1-Referenz / Gala Shaggy 2505",
+    dimensions: "100 × 200 cm · Florhöhe ca. 30 mm",
+    confidence: "estimated",
+    construction: ["beige-taupe Streifen", "Hochflorstruktur", "weicher textile Kantenabschluss"],
+  },
+  "rug-living-concept-240x240": {
+    sourceLabel: "Wohnküchen-Fotoreferenz / Entwurfsgröße",
+    dimensions: "240 × 240 cm · niedriger bis mittlerer Flor",
+    confidence: "estimated",
+    construction: ["warmes Elfenbein-Greige", "dezente Hoch-Tief-Struktur", "flache Kante für die Relaxmechanik"],
+  },
+  "plant-zimmer1-olive": {
+    sourceLabel: "Zimmer-1-Fotoreferenz / vorhandene Deko",
+    dimensions: "Stellfläche ca. 42 × 42 cm · Höhe ca. 110 cm",
+    confidence: "estimated",
+    construction: ["schlanker Stamm", "olivgrüne Blätter", "matter beigefarbener Keramiktopf"],
+  },
+};
+
 // Product-specific entries have hand-authored parametric geometry until a
 // normalized product GLB with matching dimensions and materials is approved.
 // Generic catalog items stay on the local GLB path automatically.
@@ -88,6 +183,9 @@ const PHOTO_FIRST_IDS = new Set([
   "bed-bliss-120", "wardrobe-225", "vanity-vicco-sherry-120",
   "chair-temu-executive-ivory", "chair-kaleo-chenille-beige", "sofa-sectional-photo",
   "sofa-chicago-206", "dining-table-bozan-110", "nightstand-led-2drawer-white",
+  "hallway-tejo-115", "rug-gala-shaggy-2505-100x200", "rug-temu-shaggy-white-120x200",
+  "rug-temu-easy-line-120x180", "rug-temu-easy-line-140x200", "rug-temu-rabbit-ivory-100x180",
+  "rug-living-concept-240x240", "plant-zimmer1-olive",
 ]);
 
 export const FURNITURE_CATALOG: FurnitureCatalogItem[] = [
@@ -159,5 +257,10 @@ function item(
     fallback3d,
     renderMode: PHOTO_FIRST_IDS.has(id) ? "parametric" : "auto",
     materials,
+    realism: PRODUCT_REALISM[id],
   };
+}
+
+export function getProductRealismSpec(id: string) {
+  return PRODUCT_REALISM[id];
 }

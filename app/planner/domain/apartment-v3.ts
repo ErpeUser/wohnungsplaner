@@ -34,13 +34,24 @@ const roomOutlines: RoomOutlineInput[] = [
   room("wc", "WC", 1.42, true, "porcelain-light-taupe", [
     point(-2.42, 4.1), point(-1.52, 4.1), point(-1.52, 5.68), point(-2.42, 5.68),
   ]),
-  room("balkon", "Balkon / Loggia", 6.03, true, "balcony-floor-beige", [
+  // The Vermietungsplan labels the 2.23 m² loggia as epoxy resin and the
+  // adjoining 3.80 m² balcony as the same hard-wearing exterior finish.  The
+  // single room polygon keeps the existing plan topology while using the
+  // measured grey epoxy surface instead of the previous beige placeholder.
+  room("balkon", "Balkon / Loggia", 6.03, true, "epoxy-grey", [
     point(5.12, 8.86), point(5.2, 8.6), point(5.643, 10.07),
     point(6.12, 11.65), point(3.58, 11.78), point(3.58, 8.95),
   ], 2.23),
 ];
 
 const wallGraph = buildWallGraph(roomOutlines);
+
+// The Vermietungsplan and the installed ceiling fixtures use a 2.56 m clear
+// room height.  `buildWallGraph` keeps a generic 2.60 m fallback for older
+// documents, so pin this measured apartment to its documented height here.
+// This keeps wall tops, ceiling lights and the room-finish references on the
+// same datum without changing the generic graph builder.
+for (const wall of wallGraph.walls) wall.height = 2.56;
 
 type LegacyOpening = {
   id: string;
@@ -71,7 +82,7 @@ const sourceOpenings: LegacyOpening[] = [
   opening("living-east-window", "Fenster links der Dekowand", ["wohnkueche"], "window", 3.94, 4.98, 4.27, 6.02, 2.42, 0.62, undefined, "plan-scaled"),
   opening("living-feature-window", "Fenster rechts der Dekowand", ["wohnkueche"], "window", 4.6, 7.05, 4.899, 8.091, 2.35, 0.68, undefined, "plan-scaled"),
   opening("living-loggia-door", "Balkon / Loggia", ["wohnkueche", "balkon"], "door", 3.76, 8.939, 4.558, 8.893, 2.35, 0, "end", "plan-scaled", 1),
-  opening("zimmer2-balcony-door", "Fenster Zimmer 2 zum Balkon", ["zimmer2", "balkon"], "window", 3.58, 10.02, 3.58, 10.82, 2.42, 0.62, undefined, "plan-scaled"),
+  opening("zimmer2-balcony-door", "Balkontür Zimmer 2", ["zimmer2", "balkon"], "door", 3.58, 10.02, 3.58, 10.82, 2.42, 0, "end", "confirmed", -1),
 ];
 
 const openings: PlannerOpening[] = sourceOpenings.map((source) => {
