@@ -3,40 +3,122 @@ import assert from "node:assert/strict";
 import { classifyChanges, determineActions } from "../scripts/codex-utils.mjs";
 import { canAutoMerge } from "../scripts/codex-pr-reconcile.mjs";
 
+const approvedGreenPr = {
+  baseRefName: "main",
+  isDraft: false,
+  mergeable: "MERGEABLE",
+  reviewDecision: "APPROVED",
+  statusCheckRollup: [{ context: "quality", conclusion: "SUCCESS" }],
+};
+
 test("identical/empty changes are a no-op", () => {
-  const c = classifyChanges([]); assert.equal(determineActions(c).build, false);
+  const c = classifyChanges([]);
+  assert.equal(determineActions(c).build, false);
+  assert.equal(determineActions(c).restart, false);
 });
-test("remote newer, local newer, and divergence are represented by sync matrix", () => {
-  assert.deepEqual([0, 2], [0, 2]); assert.deepEqual([2, 0], [2, 0]); assert.notDeepEqual([1, 2], [0, 0]);
+
+test("source classification is deterministic for repeated input", () => {
+  const files = ["README.md", "app/page.tsx", "package-lock.json"];
+  assert.deepEqual(classifyChanges(files), classifyChanges(files));
 });
-test("dirty work is observable", () => assert.equal(classifyChanges(["src/app.ts"]).sourceChanged, true));
-test("unreachable GitHub is not treated as success", () => assert.equal(Boolean({ githubReachable: false }.githubReachable), false));
-test("approved PR is eligible", () => assert.equal(canAutoMerge({ baseRefName: "main", isDraft: false, mergeable: "MERGEABLE", reviewDecision: "APPROVED", statusCheckRollup: [{ conclusion: "SUCCESS" }] }, "main"), true));
-test("failed checks, conflicts, draft and wrong base are held", () => {
+
+test("source changes are observed as build-relevant", () => {
+  assert.equal(classifyChanges(["app/app.ts"]).sourceChanged, true);
+});
+
+test("approved mergeable PR with at least one successful check is eligible", () => {
+  assert.equal(canAutoMerge(approvedGreenPr, "main"), true);
+});
+
+test("missing review approval is held", () => {
+  assert.equal(canAutoMerge({ ...approvedGreenPr, reviewDecision: undefined }, "main"), false);
+  assert.equal(canAutoMerge({ ...approvedGreenPr, reviewDecision: "CHANGES_REQUESTED" }, "main"), false);
+});
+
+test("missing or empty status checks are held", () => {
+  assert.equal(canAutoMerge({ ...approvedGreenPr, statusCheckRollup: undefined }, "main"), false);
+  assert.equal(canAutoMerge({ ...approvedGreenPr, statusCheckRollup: [] }, "main"), false);
+});
+
+test("missing check conclusion is held", () => {
+  assert.equal(canAutoMerge({ ...approvedGreenPr, statusCheckRollup: [{ context: "quality" }] }, "main"), false);
+});
+
+test("failed, pending, conflicting, draft and wrong-base PRs are held", () => {
   for (const pr of [
-    { baseRefName: "main", isDraft: true, mergeable: "MERGEABLE" },
-    { baseRefName: "main", isDraft: false, mergeable: "CONFLICTING" },
-    { baseRefName: "main", isDraft: false, mergeable: "MERGEABLE", statusCheckRollup: [{ conclusion: "FAILURE" }] },
-    { baseRefName: "dev", isDraft: false, mergeable: "MERGEABLE" },
-  ]) assert.equal(canAutoMerge(pr, "main"), false);
+    { ...approvedGreenPr, statusCheckRollup: [{ context: "quality", conclusion: "FAILURE" }] },
+    { ...approvedGreenPr, statusCheckRollup: [{ context: "quality", conclusion: "PENDING" }] },
+    { ...approvedGreenPr, mergeable: "CONFLICTING" },
+    { ...approvedGreenPr, isDraft: true },
+    { ...approvedGreenPr, baseRefName: "dev" },
+  ]) {
+    assert.equal(canAutoMerge(pr, "main"), false);
+  }
 });
-test("merged branch versus unique branch is a policy distinction", () => { assert.equal(["merged", "unique"].length, 2); });
-test("protected branches are never implicitly deleted", () => assert.equal(true, true));
-test("documentation only does not build", () => assert.equal(determineActions(classifyChanges(["docs/guide.md"])).build, false));
-test("CSS change builds and restarts", () => { const d = determineActions(classifyChanges(["app/style.css"])); assert.equal(d.build, true); assert.equal(d.restart, true); });
-test("lockfile installs dependencies", () => assert.equal(determineActions(classifyChanges(["package-lock.json"])).installDependencies, true));
-test("relevant source builds", () => assert.equal(determineActions(classifyChanges(["app/page.tsx"])).build, true));
-test("desktop config requests desktop build", () => assert.equal(determineActions(classifyChanges(["src-tauri/tauri.conf.json"])).buildDesktop, true));
-test("absent desktop config does not invent a build", () => assert.equal(determineActions(classifyChanges(["app/page.tsx"])).buildDesktop, false));
-test("runtime restart is separate from build", () => { const d = determineActions(classifyChanges(["app/page.tsx"])); assert.equal(d.build, true); assert.equal(d.restart, true); });
-test("test-only files do not build", () => assert.equal(determineActions(classifyChanges(["tests/example.test.ts"])).build, false));
-test("server changes build and restart", () => { const d = determineActions(classifyChanges(["serve-local.mjs"])); assert.equal(d.build, true); assert.equal(d.restart, true); });
-test("assets are build-relevant", () => assert.equal(determineActions(classifyChanges(["public/model.glb"])).build, true));
-test("dependency manifest installs and builds", () => { const d = determineActions(classifyChanges(["package.json"])); assert.equal(d.installDependencies, true); assert.equal(d.build, true); });
-test("build failure is not represented as success", () => assert.equal({ built: false }.built, false));
-test("restart failure is not represented as success", () => assert.equal({ restarted: false }.restarted, false));
-test("rollback remains explicit and does not delete artifacts", () => assert.equal(true, true));
-test("remote-head changes require a fresh comparison", () => assert.notEqual("old", "new"));
-test("repeated classification is idempotent", () => assert.deepEqual(classifyChanges(["README.md"]), classifyChanges(["README.md"])));
-test("mixed documentation and source is build-relevant", () => assert.equal(determineActions(classifyChanges(["README.md", "app/page.tsx"])).build, true));
-test("unknown files are conservatively no-build", () => assert.equal(determineActions(classifyChanges([".editorconfig"])).build, false));
+
+test("documentation only does not build", () => {
+  assert.equal(determineActions(classifyChanges(["docs/guide.md"])).build, false);
+});
+
+test("CSS change builds and restarts", () => {
+  const decision = determineActions(classifyChanges(["app/style.css"]));
+  assert.equal(decision.build, true);
+  assert.equal(decision.restart, true);
+});
+
+test("lockfile installs dependencies", () => {
+  assert.equal(determineActions(classifyChanges(["package-lock.json"])).installDependencies, true);
+});
+
+test("relevant source builds", () => {
+  assert.equal(determineActions(classifyChanges(["app/page.tsx"])).build, true);
+});
+
+test("desktop config requests desktop build", () => {
+  assert.equal(determineActions(classifyChanges(["src-tauri/tauri.conf.json"])).buildDesktop, true);
+});
+
+test("absent desktop config does not invent a build", () => {
+  assert.equal(determineActions(classifyChanges(["app/page.tsx"])).buildDesktop, false);
+});
+
+test("runtime restart is separate from desktop packaging", () => {
+  const decision = determineActions(classifyChanges(["app/page.tsx"]));
+  assert.equal(decision.build, true);
+  assert.equal(decision.restart, true);
+  assert.equal(decision.buildDesktop, false);
+});
+
+test("test-only files do not build", () => {
+  assert.equal(determineActions(classifyChanges(["tests/example.test.ts"])).build, false);
+});
+
+test("server changes build and restart", () => {
+  const decision = determineActions(classifyChanges(["serve-local.mjs"]));
+  assert.equal(decision.build, true);
+  assert.equal(decision.restart, true);
+});
+
+test("assets are build-relevant", () => {
+  assert.equal(determineActions(classifyChanges(["public/model.glb"])).build, true);
+});
+
+test("dependency manifest installs and builds", () => {
+  const decision = determineActions(classifyChanges(["package.json"]));
+  assert.equal(decision.installDependencies, true);
+  assert.equal(decision.build, true);
+});
+
+test("repeated classification remains idempotent", () => {
+  const first = determineActions(classifyChanges(["README.md"]));
+  const second = determineActions(classifyChanges(["README.md"]));
+  assert.deepEqual(second, first);
+});
+
+test("mixed documentation and source is build-relevant", () => {
+  assert.equal(determineActions(classifyChanges(["README.md", "app/page.tsx"])).build, true);
+});
+
+test("unknown files are conservatively no-build", () => {
+  assert.equal(determineActions(classifyChanges([".editorconfig"])).build, false);
+});
