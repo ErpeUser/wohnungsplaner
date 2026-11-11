@@ -17,6 +17,9 @@ test("führt die Händlermaße der tatsächlich platzierten Produkte unveränder
     "sofa-chicago-206": [2.06, 1.07, 0.78],
     "hallway-tejo-115": [1.15, 0.375, 2.319],
     "dining-table-bozan-110": [1.1, 1.1, 0.76],
+    "dining-table-aliexpress-100-140": [1, 1, 0.75],
+    "dining-table-temu-606997-120-160": [1.2, 1.2, 0.755],
+    "dining-table-kaufland-567080013-120-160": [1.2, 0.8, 0.755],
     "chair-kaleo-chenille-beige": [0.63, 0.64, 0.87],
     "vanity-vicco-sherry-120": [1.2, 0.55, 1.45],
     "chair-temu-executive-ivory": [0.64, 0.51, 1.14],
@@ -30,7 +33,7 @@ test("führt die Händlermaße der tatsächlich platzierten Produkte unveränder
 
 test("dokumentiert Konstruktion und Herkunft für jedes produktbezogene Möbel", () => {
   const productIds = [
-    "bed-bliss-120", "sofa-aliexpress-142", "sofa-aliexpress-142-open", "sofa-chicago-206", "sofa-sectional-photo", "hallway-tejo-115", "dining-table-bozan-110",
+    "bed-bliss-120", "sofa-aliexpress-142", "sofa-aliexpress-142-open", "sofa-chicago-206", "sofa-sectional-photo", "hallway-tejo-115", "dining-table-bozan-110", "dining-table-aliexpress-100-140", "dining-table-temu-606997-120-160", "dining-table-kaufland-567080013-120-160",
     "chair-kaleo-chenille-beige", "vanity-vicco-sherry-120", "chair-temu-executive-ivory",
     "nightstand-led-2drawer-white", "wardrobe-225", "rug-temu-rabbit-ivory-100x180",
     "rug-temu-shaggy-white-120x200", "rug-temu-easy-line-120x180", "rug-temu-easy-line-140x200",
@@ -55,7 +58,7 @@ test("dokumentiert Konstruktion und Herkunft für jedes produktbezogene Möbel",
 
 test("hält produktbezogene Modelle parametrisch bis ein lizenziertes GLB vorliegt", () => {
   const productIds = [
-    "bed-bliss-120", "sofa-aliexpress-142", "sofa-aliexpress-142-open", "sofa-chicago-206", "sofa-sectional-photo", "hallway-tejo-115", "dining-table-bozan-110",
+    "bed-bliss-120", "sofa-aliexpress-142", "sofa-aliexpress-142-open", "sofa-chicago-206", "sofa-sectional-photo", "hallway-tejo-115", "dining-table-bozan-110", "dining-table-aliexpress-100-140", "dining-table-temu-606997-120-160", "dining-table-kaufland-567080013-120-160",
     "chair-kaleo-chenille-beige", "vanity-vicco-sherry-120", "chair-temu-executive-ivory",
     "nightstand-led-2drawer-white", "wardrobe-225", "rug-temu-rabbit-ivory-100x180",
     "rug-temu-shaggy-white-120x200", "rug-temu-easy-line-120x180", "rug-temu-easy-line-140x200",

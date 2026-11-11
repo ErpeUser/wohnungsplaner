@@ -55,6 +55,15 @@ const TEJO_CASHMERE = [
 const BOZAN_ARTISAN = [
   { id: "oak-artisan", label: "Artisan Eiche", color: "#b78352" },
 ];
+const TABLE_KAUFLAND_WALNUT = [
+  { id: "walnut", label: "Walnussbraun", color: "#76513b" },
+];
+const TABLE_TEMU_OAK = [
+  { id: "oak-natural", label: "Eiche natur", color: "#b98a5e" },
+];
+const TABLE_ALI_OAK = [
+  { id: "oak-artisan", label: "Artisan Eiche", color: "#b78352" },
+];
 const KALEO_BEIGE = [
   { id: "fabric-kaleo-beige", label: "Chenille Beige in Leinenoptik", color: "#ddd2c2" },
 ];
@@ -105,7 +114,7 @@ const PRODUCT_REALISM: Record<string, ProductRealismSpec> = {
   },
   "sofa-aliexpress-142-open": {
     sourceLabel: "AliExpress Art. 1005013379584796 · Maßgrafik vom Nutzer",
-    dimensions: "ausgezogen 142 × 172 × 86,5 cm, geschlossen 142 × 90 cm, Sitzhöhe 42 cm",
+    dimensions: "ausgezogen 142 × 172 × 86,5 cm · Gesamttiefe 172 cm, geschlossen 142 × 90 cm, Sitzhöhe 42 cm",
     confidence: "verified",
     construction: ["cremefarbener Stoffbezug", "zwei gerundete Rückenpolster mit Lendenkissen", "zwei ausgezogene Beinauflagen", "schwarze ausziehbare Scherenmechanik"],
   },
@@ -144,6 +153,24 @@ const PRODUCT_REALISM: Record<string, ProductRealismSpec> = {
     dimensions: "geschlossen Ø 110 × 76 cm · ausgezogen 150 × 110 cm",
     confidence: "verified",
     construction: ["Artisan-Eiche-Melaminoberfläche", "25-mm-Platte", "schwarzes pulverbeschichtetes Metall-Sterngestell", "mittige Auszugfuge"],
+  },
+  "dining-table-aliexpress-100-140": {
+    sourceLabel: "AliExpress Art. 1005013489223528 · OG-Titel und Maßbild-Spiegel",
+    dimensions: "geschlossen rund 100 × 100 × 75 cm · ausgezogen oval 140 × 100 × 75 cm",
+    confidence: "estimated",
+    construction: ["ausziehbare runde/ovale Tischplatte", "glatte Holzdekoroberfläche", "schwarze Metallstütze", "Höhe aus dem gespeicherten Maßbild geschätzt"],
+  },
+  "dining-table-temu-606997-120-160": {
+    sourceLabel: "Temu g-606997911062061 · Canonical-Slug und dimensionsgleicher Mirror",
+    dimensions: "geschlossen rund 120 × 120 × 75,5 cm · ausgezogen oval 160 × 120 × 75,5 cm",
+    confidence: "estimated",
+    construction: ["Eiche-Dekor/MDF", "Stauraum unter der Platte", "Schiebetüren und verstellbare Regalböden", "ausziehbare Mittelplatte"],
+  },
+  "dining-table-kaufland-567080013-120-160": {
+    sourceLabel: "Kaufland.at Produkt 567080013 · Maßgrafik und Galerie",
+    dimensions: "geschlossen oval 120 × 80 × 75,5 cm · ausgezogen oval 160 × 80 × 75,5 cm",
+    confidence: "verified",
+    construction: ["MDF/Holzdekor in Braun", "vertikal strukturierter Sockel", "1,8 cm starke Tischplatte", "40-cm-Mittelblatt und 60-cm-Endstücke"],
   },
   "chair-kaleo-chenille-beige": {
     sourceLabel: "Möbelix / Kaleo Art. 1634004202",
@@ -214,7 +241,7 @@ export const PHOTO_FIRST_IDS: ReadonlySet<string> = new Set([
   "bed-bliss-120", "wardrobe-225", "vanity-vicco-sherry-120",
   "chair-temu-executive-ivory", "chair-kaleo-chenille-beige", "sofa-sectional-photo",
   "sofa-chicago-206", "sofa-aliexpress-142", "sofa-aliexpress-142-open", "dining-table-bozan-110", "nightstand-led-2drawer-white",
-  "hallway-tejo-115", "rug-gala-shaggy-2505-100x200", "rug-temu-shaggy-white-120x200",
+  "hallway-tejo-115", "dining-table-aliexpress-100-140", "dining-table-temu-606997-120-160", "dining-table-kaufland-567080013-120-160", "rug-gala-shaggy-2505-100x200", "rug-temu-shaggy-white-120x200",
   "rug-temu-easy-line-120x180", "rug-temu-easy-line-140x200", "rug-temu-rabbit-ivory-100x180",
   "rug-living-concept-240x240", "plant-zimmer1-olive",
 ]);
@@ -244,6 +271,9 @@ export const FURNITURE_CATALOG: FurnitureCatalogItem[] = [
   item("lowboard", "Lowboard", "Aufbewahren", "Niedriges Medienmöbel", [1.8, 0.42, 0.5], "free", "storage", "cabinet", WOOD),
   item("dining-table", "Esstisch", "Tische", "Tisch für vier bis sechs Personen", [1.6, 0.9, 0.75], "free", "table", "table", WOOD),
   item("dining-table-bozan-110", "Ausziehtisch Bozan 110", "Tische", "Runder Esstisch in Artisan-Eiche mit schwarzem Sternfuß, ausziehbar auf 150 × 110 cm", [1.1, 1.1, 0.76], "fixed", "table", "table", BOZAN_ARTISAN),
+  item("dining-table-aliexpress-100-140", "AliExpress Tisch 100 → 140", "Tische", "Runder Ausziehtisch mit ovaler 140-cm-Auszugstellung", [1, 1, 0.75], "fixed", "table", "table", TABLE_ALI_OAK),
+  item("dining-table-temu-606997-120-160", "Temu Tisch 120 → 160 mit Stauraum", "Tische", "Runder Eiche-Dekor-Tisch mit Stauraumkorpus und ovaler 160-cm-Auszugstellung", [1.2, 1.2, 0.755], "fixed", "table", "table", TABLE_TEMU_OAK),
+  item("dining-table-kaufland-567080013-120-160", "Flieks Tisch 120 → 160", "Tische", "Ovaler MDF-Tisch mit strukturiertem Sockel und 40-cm-Mittelblatt", [1.2, 0.8, 0.755], "fixed", "table", "table", TABLE_KAUFLAND_WALNUT),
   item("rug-200", "Teppich", "Licht/Deko", "Flach gewebter Teppich", [2, 1.4, 0.02], "free", "rug", "rug", FABRIC),
   item("rug-gala-shaggy-2505-100x200", "Hochflor-Teppich Gala Shaggy 2505", "Licht/Deko", "Beige-taupe gestreifter Hochflor-Teppich mit 30-mm-Flor", [2, 1, 0.03], "fixed", "rug", "rug", ZIMMER1_RUG),
   item("rug-temu-shaggy-white-120x200", "Flauschiger Zottelteppich Weiß", "Licht/Deko", "Weißer, weicher Hochflor-Teppich in der gewählten Temu-Ausführung", [1.2, 2, 0.04], "fixed", "rug", "rug", TEMU_SHAGGY_WHITE),

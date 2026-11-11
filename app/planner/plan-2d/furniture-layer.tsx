@@ -2,7 +2,7 @@
 
 import Konva from "konva";
 import { useEffect, useRef, useState } from "react";
-import { Circle, Group, Layer, Line, Path, Rect, Text, Transformer } from "react-konva";
+import { Circle, Ellipse, Group, Layer, Line, Path, Rect, Text, Transformer } from "react-konva";
 
 import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
 import type { CommandResult } from "../domain/commands.ts";
@@ -367,6 +367,20 @@ function FurnitureSymbol({
       <Group>
         <Circle radius={Math.min(width, depth) / 2} fill={fill} stroke="#52625a" strokeWidth={0.025} />
         {symbol === "plant" ? <Line points={[-width / 3, 0, width / 3, 0, 0, -depth / 3, 0, depth / 3]} stroke="#f4efe5" strokeWidth={0.025} /> : null}
+      </Group>
+    );
+  }
+
+  if (placement.catalogId.startsWith("dining-table-") && placement.catalogId !== "dining-table-bozan-110") {
+    const extended = placement.metadata?.notes?.some((note) => /Zustand extended/i.test(note)) ?? false;
+    const label = `${Math.round(width * 100)} × ${Math.round(depth * 100)} cm`;
+    return (
+      <Group data-testid="plan-graphic-table-comparison">
+        <Ellipse radiusX={width / 2} radiusY={depth / 2} fill={fill} stroke="#5f554b" strokeWidth={0.025} />
+        {extended ? <Line points={[0, -depth * 0.86, 0, depth * 0.86]} stroke="#8d603c" strokeWidth={0.018} dash={[0.06, 0.04]} /> : null}
+        <Line points={[-width * 0.25, -depth * 0.22, width * 0.25, depth * 0.22]} stroke="#242728" strokeWidth={0.045} />
+        <Line points={[width * 0.25, -depth * 0.22, -width * 0.25, depth * 0.22]} stroke="#242728" strokeWidth={0.045} />
+        <Text x={-width / 2} y={-0.045} width={width} align="center" text={label} fontFamily="Arial" fontSize={0.08} fill="#30383a" listening={false} />
       </Group>
     );
   }

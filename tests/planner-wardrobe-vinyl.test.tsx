@@ -56,7 +56,7 @@ describe("Zimmer 1 wardrobe vinyl", () => {
     render(<ShoppingListDrawer onClose={() => undefined} />);
     const hooks = screen.getByRole("heading", { name: /4 runde Kleider- und Handtuchhaken/ }).closest("article");
     assert.ok(hooks);
-    assert.match(hooks.textContent ?? "", /6,36\s*€/);
+    assert.match(hooks.textContent ?? "", /€\s*6,36/);
     assert.match(hooks.textContent ?? "", /1 Packung = 4 Haken/);
     assert.match(hooks.textContent ?? "", /118446205486445/);
     assert.match(hooks.querySelector("a")?.getAttribute("href") ?? "", /goods_id=607039887632432&sku_id=118446205486445/);

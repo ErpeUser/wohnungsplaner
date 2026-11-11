@@ -89,13 +89,11 @@ const RETIRED_BASELINE_PLACEMENT_IDS = new Set([
   "living-kylly-sofa",
   "living-amber-chair-west",
   "living-amber-chair-east",
-  "living-kaleo-chair-north",
 ]);
 
 const RETIRED_DINING_PLACEMENT_IDS = new Set([
   "living-amber-chair-west",
   "living-amber-chair-east",
-  "living-kaleo-chair-north",
 ]);
 
 const CURRENT_DINING_GROUP_IDS = new Set([
@@ -103,6 +101,7 @@ const CURRENT_DINING_GROUP_IDS = new Set([
   "living-kaleo-chair-west",
   "living-kaleo-chair-east",
   "living-kaleo-chair-south",
+  "living-kaleo-chair-north",
 ]);
 
 const LEGACY_DINING_GROUP_POSITION_SETS = [
@@ -140,6 +139,7 @@ const BASELINE_VISUAL_PLACEMENT_REFRESH_IDS = new Set([
   "living-kaleo-chair-west",
   "living-kaleo-chair-east",
   "living-kaleo-chair-south",
+  "living-kaleo-chair-north",
   "vorraum-temu-rabbit-rug",
   "hall-tejo-wardrobe",
 ]);
@@ -172,16 +172,33 @@ export function upgradeRetiredDiningGroup(document: PlannerDocumentV3): PlannerD
         && Math.abs(item.position.z - position.z) < 0.001;
     })
   ));
-  if (!containsRetiredChair && !hasLegacyPosition) return document;
-  const currentGroup = DEFAULT_APARTMENT_DOCUMENT.placements.filter((item) => CURRENT_DINING_GROUP_IDS.has(item.id));
+  let upgraded = document;
+  if (containsRetiredChair || hasLegacyPosition) {
+    const currentGroup = DEFAULT_APARTMENT_DOCUMENT.placements.filter((item) => CURRENT_DINING_GROUP_IDS.has(item.id));
+    upgraded = parsePlannerDocument({
+      ...document,
+      placements: [
+        ...document.placements.filter((item) => (
+          !RETIRED_DINING_PLACEMENT_IDS.has(item.id) && !CURRENT_DINING_GROUP_IDS.has(item.id)
+        )),
+        ...currentGroup,
+      ],
+    });
+  }
+  const table = upgraded.placements.find((item) => item.id === "living-bozan-table");
+  const defaultNorth = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "living-kaleo-chair-north");
+  const hasMigrationMarker = table?.metadata?.notes?.some((note) => /Vier Kaleo-Armlehnstühle/i.test(note));
+  if (!table || !defaultNorth || hasMigrationMarker || upgraded.placements.some((item) => item.id === defaultNorth.id)) {
+    return upgraded;
+  }
   return parsePlannerDocument({
-    ...document,
+    ...upgraded,
     placements: [
-      ...document.placements.filter((item) => (
-        !RETIRED_DINING_PLACEMENT_IDS.has(item.id) && !CURRENT_DINING_GROUP_IDS.has(item.id)
-      )),
-      ...currentGroup,
-    ],
+      ...upgraded.placements,
+      defaultNorth,
+    ].map((item) => item.id === table.id
+      ? { ...item, metadata: { ...item.metadata, notes: [...(item.metadata?.notes ?? []), "Vier Kaleo-Armlehnstühle sind als aktuelle Essgruppe markiert."] } }
+      : item),
   });
 }
 
@@ -448,9 +465,13 @@ function isOlderBaselineModel(document: PlannerDocumentV3) {
   });
   if (fixturesNeedRefresh) return true;
   const storedPlacements = new Map(document.placements.map((item) => [item.id, item]));
+  const diningTable = storedPlacements.get("living-bozan-table");
+  const hasMarkedFourChairGroup = diningTable?.metadata?.notes?.some((note) => /Vier Kaleo-Armlehnstühle/i.test(note)) ?? false;
   return DEFAULT_APARTMENT_DOCUMENT.placements.some((item) => {
     if (!BASELINE_VISUAL_PLACEMENT_REFRESH_IDS.has(item.id)) return false;
     const previous = storedPlacements.get(item.id);
+    if (item.id === "living-bozan-table" && previous && isTableComparisonPlacement(previous)) return false;
+    if (item.id === "living-kaleo-chair-north" && !previous && hasMarkedFourChairGroup) return false;
     return !previous
       || previous.rotation !== item.rotation
       || previous.position.x !== item.position.x
@@ -498,7 +519,11 @@ function rebaseBaselineModel(stored: PlannerDocumentV3): PlannerDocumentV3 {
     ],
     placements: [
       ...DEFAULT_APARTMENT_DOCUMENT.placements.map((item) => (
-        BASELINE_VISUAL_PLACEMENT_REFRESH_IDS.has(item.id) ? item : storedPlacements.get(item.id) ?? item
+        BASELINE_VISUAL_PLACEMENT_REFRESH_IDS.has(item.id)
+          ? item.id === "living-bozan-table" && storedPlacements.get(item.id) && isTableComparisonPlacement(storedPlacements.get(item.id)!)
+            ? storedPlacements.get(item.id)!
+            : item
+          : storedPlacements.get(item.id) ?? item
       )),
       ...stored.placements.filter((item) => !baselinePlacementIds.has(item.id) && !RETIRED_BASELINE_PLACEMENT_IDS.has(item.id)),
     ],
@@ -520,6 +545,12 @@ function rebaseBaselineModel(stored: PlannerDocumentV3): PlannerDocumentV3 {
         : stored.viewPreferences.activeRoomId,
     },
   });
+}
+
+function isTableComparisonPlacement(placement: PlannerDocumentV3["placements"][number]) {
+  return placement.id === "living-bozan-table"
+    && placement.catalogId !== "dining-table-bozan-110"
+    && placement.catalogId.startsWith("dining-table-");
 }
 
 function emptyResult(): MigrationResult {

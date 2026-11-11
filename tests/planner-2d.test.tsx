@@ -298,7 +298,7 @@ describe("PlanCanvas", () => {
     );
 
     assert.ok(screen.getByTestId("plan-stage"));
-    assert.equal(document.querySelectorAll('[data-konva-node="Layer"]').length, 3);
+    assert.equal(document.querySelectorAll('[data-konva-node="Layer"]').length, 6);
     expect(screen.getByText(/8 Bereiche/)).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "Ansicht zurücksetzen" }));
     await user.click(screen.getByRole("button", { name: "Maße anzeigen" }));

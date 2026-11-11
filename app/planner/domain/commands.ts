@@ -1,5 +1,7 @@
 import { inspectPlacement, type CollisionHit } from "./collisions.ts";
+import { getTableModelForCatalogId, metresFromCentimetres } from "../tables/table-models.ts";
 import { isKnownMaterialId } from "./material-registry.ts";
+import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
 import type {
   PlannerAssetRecord,
   PlannerDocumentV3,
@@ -14,6 +16,14 @@ export type PlannerCommand =
   | { type: "addPlacement"; placement: PlannerPlacement }
   | { type: "movePlacement"; placementId: string; position: Point2 }
   | { type: "resizePlacement"; placementId: string; size: Size3 }
+  | {
+      type: "setPlacementProduct";
+      placementId: string;
+      catalogId: string;
+      size: Size3;
+      materialId?: string;
+      metadata?: PlannerPlacement["metadata"];
+    }
   | { type: "rotatePlacement"; placementId: string; rotation: number }
   | { type: "setPlacementMaterial"; placementId: string; slot: string; materialId: string }
   | { type: "removePlacement"; placementId: string }
@@ -95,6 +105,58 @@ export function applyPlannerCommand(
         ...placement,
         size: { ...command.size },
       }));
+
+    case "setPlacementProduct": {
+      if (document.builtIns.some((item) => item.id === command.placementId)) {
+        return reject(document, "locked", "Fest eingebaute Elemente können nicht verändert werden.");
+      }
+      const selected = document.placements.find((item) => item.id === command.placementId);
+      if (!selected) return reject(document, "not-found", `Das Objekt ${command.placementId} wurde nicht gefunden.`);
+      if (selected.id !== "living-bozan-table") {
+        return reject(document, "invalid", "Der Tischvergleich kann nur den vorhandenen Esstisch ersetzen.");
+      }
+      const catalogItem = getFurnitureCatalogItem(command.catalogId);
+      if (!catalogItem) return reject(document, "invalid", `Das Produkt ${command.catalogId} ist im Katalog nicht vorhanden.`);
+      const tableModel = getTableModelForCatalogId(command.catalogId);
+      if (!tableModel || catalogItem.symbol !== "table") {
+        return reject(document, "invalid", "Das Produkt ist kein belegtes Tischvergleichsmodell.");
+      }
+      const selectedVariant = tableModel.variants.find((variant) => sameSize(command.size, metresFromCentimetres(variant.sizeCm)));
+      if (!selectedVariant) {
+        return reject(document, "invalid", "Die Tischmaße entsprechen keinem belegten Ausziehzustand dieses Modells.");
+      }
+      if (!validPlacement({ ...selected, catalogId: command.catalogId, size: command.size })) {
+        return reject(document, "invalid", "Das Produkt enthält ungültige Maße oder Koordinaten.");
+      }
+      const materialId = command.materialId ?? catalogItem.materials[0]?.id;
+      if (!materialId || !isKnownMaterialId(document, materialId) || !catalogItem.materials.some((material) => material.id === materialId)) {
+        return reject(document, "invalid", `Das Material ${materialId ?? "(leer)"} gehört nicht zum Produkt ${command.catalogId}.`);
+      }
+      const candidate: PlannerPlacement = {
+        ...selected,
+        catalogId: command.catalogId,
+        size: { ...command.size },
+        materialVariants: { ...selected.materialVariants, main: materialId },
+        metadata: {
+          source: tableModel.sourceLabel,
+          confidence: selectedVariant.confidence === "unknown" ? "estimated" : selectedVariant.confidence,
+          notes: [
+            ...tableModel.sourceNotes,
+            ...selectedVariant.notes,
+            `Vergleichsmodell ${tableModel.id} · Zustand ${selectedVariant.id}.`,
+            ...(command.metadata?.notes ?? []).filter((note) => !note.startsWith("Vergleichsmodell ")),
+          ],
+        },
+      };
+      const ignorePlacementIds = selected.groupId
+        ? new Set(document.placements.filter((item) => item.groupId === selected.groupId && item.id !== selected.id).map((item) => item.id))
+        : undefined;
+      return validatePlacement(document, candidate, (placement) => ({
+        ...document,
+        updatedAt: timestamp(),
+        placements: document.placements.map((item) => item.id === placement.id ? placement : item),
+      }), ignorePlacementIds);
+    }
 
     case "rotatePlacement":
       return updatePlacement(document, command.placementId, (placement) => ({
@@ -184,6 +246,12 @@ export function applyPlannerCommand(
   }
 }
 
+function sameSize(left: PlannerPlacement["size"], right: PlannerPlacement["size"]) {
+  return Math.abs(left.width - right.width) < 0.0001
+    && Math.abs(left.depth - right.depth) < 0.0001
+    && Math.abs(left.height - right.height) < 0.0001;
+}
+
 function movePlacement(
   document: PlannerDocumentV3,
   placementId: string,
@@ -269,8 +337,9 @@ function validatePlacement(
   document: PlannerDocumentV3,
   placement: PlannerPlacement,
   update: (placement: PlannerPlacement) => PlannerDocumentV3,
+  ignorePlacementIds?: ReadonlySet<string>,
 ): CommandResult {
-  const report = inspectPlacement(document, placement);
+  const report = inspectPlacement(document, placement, { ignorePlacementIds });
   if (report.hard.length > 0) {
     return {
       document,

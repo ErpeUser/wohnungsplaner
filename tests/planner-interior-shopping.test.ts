@@ -33,7 +33,7 @@ test('replaces the Chicago shopping item with the specified AliExpress sofa',()=
  assert.equal(sofa.url,'https://de.aliexpress.com/item/1005013379584796.html');
  assert.equal(sofa.imageUrl,'/planner-assets/products/aliexpress-sofa-1005013379584796.webp');
  assert.equal(SHOPPING_ITEMS.some(entry=>entry.id==='2424010201'),false);
- assert.equal(item('1634004202').quantity,3);
+assert.equal(item('1634004202').quantity,4);
  assert.match(item('2858001801').dimensions,/110.*76/);
 });
 test('includes the exact selected Temu A8447 180 x 250 cm vintage rug',()=>{
@@ -48,6 +48,6 @@ test('includes the exact selected Temu A8447 180 x 250 cm vintage rug',()=>{
 });
 test('adds the purchased living room rug to the known-priced subtotal',()=>{
  const total=SHOPPING_ITEMS.reduce((sum,i)=>sum+(i.price??0)*(i.quantity??1),0);
- assert.equal(Math.round(total*100),207588);
+ assert.equal(Math.round(total*100),213180);
  assert.equal(SHOPPING_ITEMS.filter(i=>i.url).length,20);
 });

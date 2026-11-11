@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { DEFAULT_APARTMENT_DOCUMENT } from "../app/planner/domain/apartment-v3.ts";
+import { applyPlannerCommand } from "../app/planner/domain/commands.ts";
 import {
   PLANNER_BACKUP_KEY,
   PLANNER_MIGRATION_BACKUP_KEY,
@@ -37,7 +38,27 @@ test("persists the imported asset register across reload", () => {
   assert.equal(reloaded.assets?.[0]?.assetUrl, "https://storage.example/assets/chair.glb");
 });
 
-test("replaces the two retired Amber placeholders in a live document with three Kaleo chairs", () => {
+test("bewahrt eine ausgewählte Tischvariante über Save und Reload", () => {
+  const storage = new MemoryStorage();
+  const repository = createLocalStoragePlannerRepository(storage, fixedClock);
+  const switched = applyPlannerCommand(DEFAULT_APARTMENT_DOCUMENT, {
+    type: "setPlacementProduct",
+    placementId: "living-bozan-table",
+    catalogId: "dining-table-kaufland-567080013-120-160",
+    size: { width: 1.6, depth: 0.8, height: 0.755 },
+    materialId: "walnut",
+    metadata: { source: "Kaufland.at Produkt 567080013", confidence: "confirmed", notes: ["160 × 80 × 75,5 cm"] },
+  });
+  assert.equal(switched.error, undefined);
+  repository.save(switched.document);
+  const reloaded = repository.load().document;
+  const table = reloaded.placements.find((item) => item.id === "living-bozan-table")!;
+  assert.equal(table.catalogId, "dining-table-kaufland-567080013-120-160");
+  assert.deepEqual(table.size, { width: 1.6, depth: 0.8, height: 0.755 });
+  assert.equal(table.materialVariants?.main, "walnut");
+});
+
+test("replaces the two retired Amber placeholders in a live document with four Kaleo chairs", () => {
   const stale = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
   stale.placements = stale.placements.filter((item) => item.catalogId !== "chair-kaleo-chenille-beige");
   stale.placements.push(
@@ -66,11 +87,12 @@ test("replaces the two retired Amber placeholders in a live document with three 
 
   assert.notEqual(upgraded, stale);
   assert.equal(upgraded.placements.some((item) => item.catalogId === "chair-amber-chenille-beige"), false);
-  assert.equal(chairs.length, 3);
+  assert.equal(chairs.length, 4);
   assert.deepEqual(
     chairs.map((item) => item.id).toSorted(),
     [
       "living-kaleo-chair-east",
+      "living-kaleo-chair-north",
       "living-kaleo-chair-south",
       "living-kaleo-chair-west",
     ],
@@ -78,23 +100,37 @@ test("replaces the two retired Amber placeholders in a live document with three 
   assert.equal(upgradeRetiredDiningGroup(upgraded), upgraded);
 });
 
-test("removes the refrigerator-side Kaleo chair from an already open four-chair layout", () => {
+test("keeps a deliberately removed fourth chair removed after migration", () => {
   const stale = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
-  stale.placements.push({
-    id: "living-kaleo-chair-north",
-    roomId: "wohnkueche",
-    catalogId: "chair-kaleo-chenille-beige",
-    position: { x: 2.5, z: 4.77 },
-    rotation: 0,
-    size: { width: 0.63, depth: 0.64, height: 0.87 },
-    groupId: "living-dining-group",
-  });
+  stale.placements = stale.placements.filter((item) => item.id !== "living-kaleo-chair-north");
+
+  const upgraded = upgradeRetiredDiningGroup(stale);
+
+  assert.equal(upgraded, stale);
+  assert.equal(upgraded.placements.some((item) => item.id === "living-kaleo-chair-north"), false);
+});
+
+test("keeps a deliberately removed fourth chair removed through repository reload", () => {
+  const stale = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
+  stale.placements = stale.placements.filter((item) => item.id !== "living-kaleo-chair-north");
+  const storage = new MemoryStorage({ [PLANNER_STORAGE_KEY]: JSON.stringify(stale) });
+  const loaded = createLocalStoragePlannerRepository(storage, fixedClock).load();
+
+  assert.equal(loaded.document.placements.some((item) => item.id === "living-kaleo-chair-north"), false);
+});
+
+test("ergänzt einen fehlenden vierten Stuhl in einem alten Drei-Stuhl-Save einmalig", () => {
+  const stale = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
+  stale.placements = stale.placements.filter((item) => item.id !== "living-kaleo-chair-north");
+  const table = stale.placements.find((item) => item.id === "living-bozan-table")!;
+  table.metadata = { ...table.metadata, notes: table.metadata?.notes?.filter((note) => !/Vier Kaleo/i.test(note)) };
 
   const upgraded = upgradeRetiredDiningGroup(stale);
 
   assert.notEqual(upgraded, stale);
-  assert.equal(upgraded.placements.some((item) => item.id === "living-kaleo-chair-north"), false);
-  assert.equal(upgraded.placements.filter((item) => item.catalogId === "chair-kaleo-chenille-beige").length, 3);
+  assert.equal(upgraded.placements.filter((item) => item.catalogId === "chair-kaleo-chenille-beige").length, 4);
+  assert.ok(upgraded.placements.some((item) => item.id === "living-kaleo-chair-north"));
+  assert.equal(upgradeRetiredDiningGroup(upgraded), upgraded);
 });
 
 test("moves an already open three-chair dining group to the balanced aisle position once", () => {

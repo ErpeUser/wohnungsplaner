@@ -8,6 +8,7 @@ import { describe, expect, test, vi } from "vitest";
 vi.mock("react-konva", () => ({
   Arc: () => null,
   Circle: () => null,
+  Ellipse: () => null,
   Group: ({ children }: React.PropsWithChildren) => <>{children}</>,
   Layer: ({ children }: React.PropsWithChildren) => <>{children}</>,
   Line: () => null,
@@ -61,7 +62,7 @@ describe("PlannerWorkspace", () => {
     );
   });
 
-  test("lists three Kaleo chairs with their verified product dimensions", () => {
+  test("lists four Kaleo chairs with their verified product dimensions", () => {
     render(<ShoppingListDrawer onClose={() => undefined} />);
 
     const heading = screen.getByRole("heading", { name: "Armlehnstuhl Kaleo Chenille Beige" });
@@ -69,7 +70,7 @@ describe("PlannerWorkspace", () => {
     assert.ok(product);
     assert.match(product.textContent ?? "", /Wohnküche.*1634004202/);
     assert.match(product.textContent ?? "", /63.*87.*64 cm.*Sitzhöhe 50 cm/);
-    assert.match(product.textContent ?? "", /3 Stück/);
+    assert.match(product.textContent ?? "", /4 Stück/);
     assert.equal(
       product.querySelector("a")?.getAttribute("href"),
       "https://www.moebelix.at/p/livetastic-armlehnstuhl-kaleo-chenille-beige-b-63-cm-001634004202",
@@ -107,6 +108,28 @@ describe("PlannerWorkspace", () => {
     await user.click(screen.getByRole("button", { name: "Begehen" }));
     assert.equal(store.getState().cameraMode, "walk");
     assert.equal(screen.getByTestId("mock-planner-3d").getAttribute("data-camera-mode"), "walk");
+  });
+
+  test("switches measured table models and extension states from accessible tabs", async () => {
+    const user = userEvent.setup();
+    const store = createPlannerStore({ initialDocument: DEFAULT_APARTMENT_DOCUMENT });
+    render(<PlannerWorkspace store={store} />);
+
+    const kaufland = screen.getByRole("tab", { name: /Kaufland 120 → 160/ });
+    await user.click(kaufland);
+    assert.equal(kaufland.getAttribute("aria-selected"), "true");
+    expect(screen.getByText("120 × 80 × 75,5 cm")).toBeTruthy();
+    expect(screen.getByRole("link", { name: /Originalquelle.*Kaufland/i }).getAttribute("href")).toBe("https://www.kaufland.at/product/567080013/");
+
+    await user.click(screen.getByRole("tab", { name: /1 Auszug · oval/ }));
+    expect(screen.getByText("160 × 80 × 75,5 cm")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Im Grundriss anwenden" }));
+    assert.equal(store.getState().document.placements.find((item) => item.id === "living-bozan-table")?.catalogId, "dining-table-kaufland-567080013-120-160");
+    assert.deepEqual(store.getState().document.placements.find((item) => item.id === "living-bozan-table")?.size, { width: 1.6, depth: 0.8, height: 0.755 });
+
+    const unknown = screen.getByRole("tab", { name: /Temu 609726/ });
+    assert.equal((unknown as HTMLButtonElement).disabled, true);
+    assert.equal(unknown.getAttribute("aria-disabled"), "true");
   });
 
   test("groups seven interior rooms and one connected outdoor area", () => {

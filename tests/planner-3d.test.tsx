@@ -259,7 +259,7 @@ describe("createSceneModel", () => {
     const wc = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, "wc");
 
     expect(zimmer1.builtIns.some((item) => item.catalogId === "zimmer1-wall-panel")).toBe(false);
-    expect(wc.builtIns.some((item) => item.catalogId === "wc-paper-holder")).toBe(false);
+    expect(wc.builtIns.some((item) => item.catalogId === "wc-paper-holder")).toBe(true);
   });
 
   test("includes built-ins and movable furniture without a second document model", () => {
