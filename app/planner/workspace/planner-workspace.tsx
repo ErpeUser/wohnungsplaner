@@ -1,15 +1,13 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { PlannerWorkspace as Workspace } from "./planner-workspace-base.tsx";
-import { DEFAULT_APARTMENT_DOCUMENT } from "../domain/apartment-v3.ts";
-import { INTERIOR_UPDATES, refineRoomLayout } from "../domain/room-refinement.ts";
-import { parsePlannerDocument } from "../domain/schema.ts";
-import type { PlannerDocumentV3 } from "../domain/types.ts";
-import { createPlannerStore, type PlannerStore } from "../store/planner-store.ts";
-import { createLocalStoragePlannerRepository, PLANNER_STORAGE_KEY, PLANNER_BACKUP_KEY, type PlannerRepository } from "../store/persistence.ts";
-
-const BACKUP_KEY = "wohnung-interior-refinement-2026-11-11-backup";
+'use client';
+import { useEffect, useState } from 'react';
+import { PlannerWorkspace as Workspace } from './planner-workspace-base.tsx';
+import { DEFAULT_APARTMENT_DOCUMENT } from '../domain/apartment-v3.ts';
+import { INTERIOR_UPDATES, refineRoomLayout } from '../domain/room-refinement.ts';
+import { parsePlannerDocument } from '../domain/schema.ts';
+import type { PlannerDocumentV3 } from '../domain/types.ts';
+import { createPlannerStore, type PlannerStore } from '../store/planner-store.ts';
+import { createLocalStoragePlannerRepository, PLANNER_STORAGE_KEY, PLANNER_BACKUP_KEY, type PlannerRepository } from '../store/persistence.ts';
+import { readRefinedInterior } from '../store/interior-upgrade.ts';
 
 function prepare(document: PlannerDocumentV3): PlannerDocumentV3 {
   if (document.id !== DEFAULT_APARTMENT_DOCUMENT.id) return document;
@@ -19,23 +17,11 @@ function prepare(document: PlannerDocumentV3): PlannerDocumentV3 {
 }
 
 function browserRepository(): PlannerRepository | undefined {
-  if (typeof window === "undefined") return undefined;
+  if (typeof window === 'undefined') return undefined;
   try {
     const storage = window.localStorage;
     const base = createLocalStoragePlannerRepository(storage);
-    const readCurrent = (raw: string | null) => {
-      if (raw === null) return null;
-      let parsed: PlannerDocumentV3;
-      try { parsed = parsePlannerDocument(JSON.parse(raw)); }
-      catch { return null; }
-      if (parsed.id !== DEFAULT_APARTMENT_DOCUMENT.id) return null;
-      const document = prepare(parsed);
-      const changed = document !== parsed;
-      // A quota failure must stop hydration, NOT silently fall back to a
-      // legacy whole-room rebase that could reset user-moved furniture.
-      if (changed && storage.getItem(BACKUP_KEY) === null) storage.setItem(BACKUP_KEY, raw);
-      return { document, warnings: changed ? ["Bad, WC und Kuechenmodell aktualisiert; persoenliche Moebelplatzierungen bleiben erhalten."] : [], legacyBackupJson: changed ? raw : null, unmapped: [] };
-    };
+    const readCurrent = (raw: string | null) => readRefinedInterior(raw, storage, parsePlannerDocument, prepare, DEFAULT_APARTMENT_DOCUMENT.id);
     return {
       ...base,
       load() {
@@ -69,7 +55,7 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
   useEffect(() => {
     if (providedStore) return;
     try { store.getState().hydrate(); }
-    catch { store.getState().setAutosaveStatus("error"); }
+    catch { store.getState().setAutosaveStatus('error'); }
   }, [providedStore, store]);
   return <Workspace store={providedStore ?? store} />;
 }
