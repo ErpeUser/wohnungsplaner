@@ -47,6 +47,18 @@ test("keeps placement footprints outside the physical wall face", () => {
   assert.equal(roomContainsPlacement(document, "room-square", flushToFace), true);
 });
 
+test("does not let an opening on another wall excuse wall penetration", () => {
+  const document = squareRoomDocument();
+  const cornerDoor = {
+    ...document.openings[0],
+    offset: 0,
+    width: 0.8,
+  };
+  const candidate = placement({ x: 0.25, z: 0.025 }, 0.5, 0.05);
+
+  assert.equal(roomContainsPlacement({ ...document, openings: [cornerDoor] }, "room-square", candidate), false);
+});
+
 test("rejects a footprint whose edge crosses a concave room notch", () => {
   const document = concaveRoomDocument();
   const crossing = placement({ x: 2, z: 2 }, 3, 1, 0, "concave");
