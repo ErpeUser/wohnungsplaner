@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   FURNITURE_CATALOG,
+  PHOTO_FIRST_IDS,
   getFurnitureCatalogItem,
   getProductRealismSpec,
 } from "../app/planner/catalog/catalog.ts";
@@ -59,6 +60,16 @@ test("hält produktbezogene Modelle parametrisch bis ein lizenziertes GLB vorlie
     const item = getFurnitureCatalogItem(id)!;
     assert.equal(item.renderMode, "parametric", id);
     assert.equal(resolveFurnitureAsset(item).kind, "parametric", id);
+  }
+});
+
+test("hält für jedes foto-first Produkt Herkunft und Bauweise vor", () => {
+  for (const id of PHOTO_FIRST_IDS) {
+    const item = getFurnitureCatalogItem(id);
+    assert.ok(item, id);
+    assert.ok(item?.realism, id + " needs a product realism specification");
+    assert.ok(item?.realism?.sourceLabel.length > 8);
+    assert.ok(item?.realism?.construction.length >= 3);
   }
 });
 
