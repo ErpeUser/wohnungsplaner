@@ -197,7 +197,7 @@ const PRODUCT_REALISM: Record<string, ProductRealismSpec> = {
 // Product-specific entries have hand-authored parametric geometry until a
 // normalized product GLB with matching dimensions and materials is approved.
 // Generic catalog items stay on the local GLB path automatically.
-const PHOTO_FIRST_IDS = new Set([
+export const PHOTO_FIRST_IDS: ReadonlySet<string> = new Set([
   "bed-bliss-120", "wardrobe-225", "vanity-vicco-sherry-120",
   "chair-temu-executive-ivory", "chair-kaleo-chenille-beige", "sofa-sectional-photo",
   "sofa-chicago-206", "dining-table-bozan-110", "nightstand-led-2drawer-white",
