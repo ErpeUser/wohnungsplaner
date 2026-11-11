@@ -64,12 +64,47 @@ export function roomContainsPlacement(
   const room = deriveRoomPolygon(document, roomId);
   const footprint = placementPolygon(placement);
   if (!footprint.every((point) => pointInPolygon(point, room))) return false;
+  // The room polygon follows wall centre lines. A footprint can therefore be
+  // technically inside while still penetrating the physical wall face by half
+  // the wall thickness. Keep doors/windows passable, then enforce the actual
+  // interior face for every remaining boundary segment.
+  if (!footprint.every((point) => hasWallFaceClearance(document, roomId, point))) return false;
   return !footprint.some((start, index) => {
     const end = footprint[(index + 1) % footprint.length];
     return room.some((roomStart, roomIndex) => (
       segmentsProperlyIntersect(start, end, roomStart, room[(roomIndex + 1) % room.length])
     ));
   });
+}
+
+function hasWallFaceClearance(document: PlannerDocumentV3, roomId: string, point: Point2) {
+  const roomDefinition = document.rooms.find((candidate) => candidate.id === roomId);
+  if (!roomDefinition) return false;
+  const boundaryWalls = roomDefinition.boundary
+    .map((edge) => document.walls.find((wall) => wall.id === edge.wallId))
+    .filter((wall): wall is PlannerDocumentV3["walls"][number] => Boolean(wall));
+  return boundaryWalls.every((wall) => {
+    const clearance = wall.thickness / 2;
+    if (distanceToSegment(point, wall.start, wall.end) >= clearance - GEOMETRY_EPSILON) return true;
+    return document.openings.some((opening) => {
+      if (opening.kind !== "door" && opening.kind !== "window" && opening.kind !== "passage") return false;
+      if (opening.wallId !== wall.id) return false;
+      try {
+        const segment = openingSegment(document, opening);
+        return distanceToSegment(point, segment.start, segment.end) <= clearance + GEOMETRY_EPSILON;
+      } catch {
+        return false;
+      }
+    });
+  });
+}
+
+function distanceToSegment(point: Point2, start: Point2, end: Point2) {
+  const direction = { x: end.x - start.x, z: end.z - start.z };
+  const lengthSquared = direction.x ** 2 + direction.z ** 2;
+  if (lengthSquared <= GEOMETRY_EPSILON ** 2) return Math.hypot(point.x - start.x, point.z - start.z);
+  const ratio = Math.max(0, Math.min(1, ((point.x - start.x) * direction.x + (point.z - start.z) * direction.z) / lengthSquared));
+  return Math.hypot(point.x - (start.x + direction.x * ratio), point.z - (start.z + direction.z * ratio));
 }
 
 export function doorSweepPolygon(document: PlannerDocumentV3, openingId: string): Point2[] {

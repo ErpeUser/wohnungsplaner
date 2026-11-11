@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   FURNITURE_CATALOG,
+  PHOTO_FIRST_IDS,
   getFurnitureCatalogItem,
   getProductRealismSpec,
 } from "../app/planner/catalog/catalog.ts";
@@ -27,11 +28,11 @@ test("führt die Händlermaße der tatsächlich platzierten Produkte unveränder
 
 test("dokumentiert Konstruktion und Herkunft für jedes produktbezogene Möbel", () => {
   const productIds = [
-    "bed-bliss-120", "sofa-chicago-206", "hallway-tejo-115", "dining-table-bozan-110",
+    "bed-bliss-120", "sofa-chicago-206", "sofa-sectional-photo", "hallway-tejo-115", "dining-table-bozan-110",
     "chair-kaleo-chenille-beige", "vanity-vicco-sherry-120", "chair-temu-executive-ivory",
     "nightstand-led-2drawer-white", "wardrobe-225", "rug-temu-rabbit-ivory-100x180",
-    "rug-temu-easy-line-120x180", "rug-gala-shaggy-2505-100x200", "rug-living-concept-240x240",
-    "plant-zimmer1-olive",
+    "rug-temu-shaggy-white-120x200", "rug-temu-easy-line-120x180", "rug-temu-easy-line-140x200",
+    "rug-gala-shaggy-2505-100x200", "rug-living-concept-240x240", "plant-zimmer1-olive",
   ];
 
   for (const id of productIds) {
@@ -48,17 +49,27 @@ test("dokumentiert Konstruktion und Herkunft für jedes produktbezogene Möbel",
 
 test("hält produktbezogene Modelle parametrisch bis ein lizenziertes GLB vorliegt", () => {
   const productIds = [
-    "bed-bliss-120", "sofa-chicago-206", "hallway-tejo-115", "dining-table-bozan-110",
+    "bed-bliss-120", "sofa-chicago-206", "sofa-sectional-photo", "hallway-tejo-115", "dining-table-bozan-110",
     "chair-kaleo-chenille-beige", "vanity-vicco-sherry-120", "chair-temu-executive-ivory",
     "nightstand-led-2drawer-white", "wardrobe-225", "rug-temu-rabbit-ivory-100x180",
-    "rug-temu-easy-line-120x180", "rug-gala-shaggy-2505-100x200", "rug-living-concept-240x240",
-    "plant-zimmer1-olive",
+    "rug-temu-shaggy-white-120x200", "rug-temu-easy-line-120x180", "rug-temu-easy-line-140x200",
+    "rug-gala-shaggy-2505-100x200", "rug-living-concept-240x240", "plant-zimmer1-olive",
   ];
 
   for (const id of productIds) {
     const item = getFurnitureCatalogItem(id)!;
     assert.equal(item.renderMode, "parametric", id);
     assert.equal(resolveFurnitureAsset(item).kind, "parametric", id);
+  }
+});
+
+test("hält für jedes foto-first Produkt Herkunft und Bauweise vor", () => {
+  for (const id of PHOTO_FIRST_IDS) {
+    const item = getFurnitureCatalogItem(id);
+    assert.ok(item, id);
+    assert.ok(item?.realism, id + " needs a product realism specification");
+    assert.ok(item?.realism?.sourceLabel.length > 8);
+    assert.ok(item?.realism?.construction.length >= 3);
   }
 });
 
