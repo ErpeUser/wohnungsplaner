@@ -278,6 +278,25 @@ function FurnitureSymbol({
     );
   }
 
+  if (placement.catalogId === "sofa-aliexpress-142" || placement.catalogId === "sofa-aliexpress-142-open") {
+    const extended = placement.catalogId === "sofa-aliexpress-142-open";
+    return (
+      <Group data-testid="plan-graphic-sofa-aliexpress-142">
+        <Rect {...common} fill="#eee9df" stroke="#a49b8f" strokeWidth={0.02} cornerRadius={0.1} shadowColor="#706454" shadowBlur={0.05} shadowOpacity={0.2} />
+        <Rect x={-width * 0.41} y={-depth * 0.45} width={width * 0.82} height={depth * 0.20} fill="#ded5c8" cornerRadius={0.055} />
+        {[-0.25, 0.25].map((x, index) => (
+          <Group key={index} x={x * width}>
+            <Rect x={-width * 0.205} y={-depth * 0.22} width={width * 0.41} height={depth * (extended ? 0.30 : 0.51)} fill="#f8f4ee" stroke="#cbbfb2" strokeWidth={0.012} cornerRadius={0.06} />
+            <Rect x={-width * 0.16} y={-depth * 0.21} width={width * 0.32} height={depth * 0.10} fill="#eae2d7" cornerRadius={0.035} />
+            {extended ? <Rect x={-width * 0.205} y={depth * 0.1} width={width * 0.41} height={depth * 0.36} fill="#eee8df" stroke="#cbbfb2" strokeWidth={0.01} cornerRadius={0.05} /> : null}
+          </Group>
+        ))}
+        {[-0.445, 0.445].map((x) => <Rect key={x} x={(x - 0.045) * width} y={-depth * 0.37} width={width * 0.09} height={depth * (extended ? 0.55 : 0.68)} fill="#e8dfd3" cornerRadius={0.045} />)}
+        <Text x={-width / 2} y={depth / 2 - 0.085} width={width} align="center" text={extended ? "Relaxsofa · 172 cm" : "Relaxsofa · 142 cm"} fontFamily="Arial" fontSize={0.062} fill="#61564c" listening={false} />
+      </Group>
+    );
+  }
+
   if (placement.catalogId === "sofa-chicago-206") {
     return (
       <Group data-testid="plan-graphic-sofa-chicago-206">

@@ -12,6 +12,8 @@ import { resolveFurnitureAsset } from "../app/planner/catalog/asset-manifest.ts"
 test("führt die Händlermaße der tatsächlich platzierten Produkte unverändert", () => {
   const expected: Record<string, [number, number, number]> = {
     "bed-bliss-120": [1.47, 2.22, 1.08],
+    "sofa-aliexpress-142": [1.42, 0.9, 0.865],
+    "sofa-aliexpress-142-open": [1.42, 1.72, 0.865],
     "sofa-chicago-206": [2.06, 1.07, 0.78],
     "hallway-tejo-115": [1.15, 0.375, 2.319],
     "dining-table-bozan-110": [1.1, 1.1, 0.76],
@@ -28,7 +30,7 @@ test("führt die Händlermaße der tatsächlich platzierten Produkte unveränder
 
 test("dokumentiert Konstruktion und Herkunft für jedes produktbezogene Möbel", () => {
   const productIds = [
-    "bed-bliss-120", "sofa-chicago-206", "sofa-sectional-photo", "hallway-tejo-115", "dining-table-bozan-110",
+    "bed-bliss-120", "sofa-aliexpress-142", "sofa-aliexpress-142-open", "sofa-chicago-206", "sofa-sectional-photo", "hallway-tejo-115", "dining-table-bozan-110",
     "chair-kaleo-chenille-beige", "vanity-vicco-sherry-120", "chair-temu-executive-ivory",
     "nightstand-led-2drawer-white", "wardrobe-225", "rug-temu-rabbit-ivory-100x180",
     "rug-temu-shaggy-white-120x200", "rug-temu-easy-line-120x180", "rug-temu-easy-line-140x200",
@@ -42,6 +44,8 @@ test("dokumentiert Konstruktion und Herkunft für jedes produktbezogene Möbel",
     assert.match(spec.dimensions, /cm/);
     assert.ok(spec.construction.length >= 3);
   }
+  assert.equal(getProductRealismSpec("sofa-aliexpress-142")?.confidence, "verified");
+  assert.match(getProductRealismSpec("sofa-aliexpress-142-open")?.dimensions ?? "", /172 cm/);
   assert.equal(getProductRealismSpec("bed-bliss-120")?.confidence, "verified");
   assert.ok(getProductRealismSpec("sofa-chicago-206")?.construction.includes("zwei Relaxsitze"));
   assert.ok(getProductRealismSpec("chair-kaleo-chenille-beige")?.construction.includes("Sitzfläche 360° drehbar"));
@@ -49,7 +53,7 @@ test("dokumentiert Konstruktion und Herkunft für jedes produktbezogene Möbel",
 
 test("hält produktbezogene Modelle parametrisch bis ein lizenziertes GLB vorliegt", () => {
   const productIds = [
-    "bed-bliss-120", "sofa-chicago-206", "sofa-sectional-photo", "hallway-tejo-115", "dining-table-bozan-110",
+    "bed-bliss-120", "sofa-aliexpress-142", "sofa-aliexpress-142-open", "sofa-chicago-206", "sofa-sectional-photo", "hallway-tejo-115", "dining-table-bozan-110",
     "chair-kaleo-chenille-beige", "vanity-vicco-sherry-120", "chair-temu-executive-ivory",
     "nightstand-led-2drawer-white", "wardrobe-225", "rug-temu-rabbit-ivory-100x180",
     "rug-temu-shaggy-white-120x200", "rug-temu-easy-line-120x180", "rug-temu-easy-line-140x200",

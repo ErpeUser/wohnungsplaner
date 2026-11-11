@@ -95,6 +95,15 @@ test("stores the fixed kitchen and sanitary inventory separately from movable fu
   assert.ok(DEFAULT_APARTMENT_DOCUMENT.placements.some((item) => item.roomId === "vorraum"));
 });
 
+test("places the 142 cm AliExpress sofa on the original sofa spot", () => {
+  const sofa = DEFAULT_APARTMENT_DOCUMENT.placements.find(item=>item.id==="living-chicago-sofa");
+  assert.ok(sofa);
+  assert.equal(sofa.catalogId,"sofa-aliexpress-142");
+  assert.deepEqual(sofa.position,{x:2.2,z:7.82});
+  assert.deepEqual(sofa.size,{width:1.42,depth:0.9,height:0.865});
+  assert.equal(sofa.rotation,90);
+});
+
 test("places the exact Bliss 120 upholstered bed in the free Zimmer 1 corner", () => {
   const bed = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "zimmer1-bliss-bed");
 

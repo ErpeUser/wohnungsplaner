@@ -45,6 +45,7 @@ const FABRIC = [
 const BLISS_BEIGE = [
   { id: "fabric-bliss-beige", label: "Polsterstoff Beige", color: "#d8c9af" },
 ];
+const ALI_SOFA_IVORY = [{ id: "fabric-ali-ivory", label: "Creme-Elfenbein", color: "#eee9df" }];
 const CHICAGO_BEIGE = [
   { id: "fabric-chicago-beige", label: "Chenille Beige", color: "#d8d5cc" },
 ];
@@ -95,6 +96,18 @@ const PRODUCT_REALISM: Record<string, ProductRealismSpec> = {
     dimensions: "Liegefläche 120 × 200 cm · Gesamt ca. 120 × 200 × 108 cm · Füße ca. 4,5 cm",
     confidence: "verified",
     construction: ["beiger Polsterstoff", "vierteiliger gepolsterter Kopfteil", "Bettkasten mit Lattenrost", "Holz-/Metallrahmen"],
+  },
+  "sofa-aliexpress-142": {
+    sourceLabel: "AliExpress Art. 1005013379584796 · Maßgrafik vom Nutzer",
+    dimensions: "geschlossen 142 × 90 × 86,5 cm, ausgezogen 142 × 172 cm, Sitzhöhe 42 cm, 150 kg pro Sitz",
+    confidence: "verified",
+    construction: ["cremefarbener Stoffbezug", "zwei gerundete Rückenpolster mit Lendenkissen", "breite gepolsterte Armlehnen", "zwei ausziehbare Beinauflagen mit dunklem Gestänge", "seitliche Aufbewahrungstasche und Bedienknopf"],
+  },
+  "sofa-aliexpress-142-open": {
+    sourceLabel: "AliExpress Art. 1005013379584796 · Maßgrafik vom Nutzer",
+    dimensions: "ausgezogen 142 × 172 × 86,5 cm, geschlossen 142 × 90 cm, Sitzhöhe 42 cm",
+    confidence: "verified",
+    construction: ["cremefarbener Stoffbezug", "zwei gerundete Rückenpolster mit Lendenkissen", "zwei ausgezogene Beinauflagen", "schwarze ausziehbare Scherenmechanik"],
   },
   "sofa-chicago-206": {
     sourceLabel: "Möbelix / Chicago Art. 2424010201",
@@ -200,7 +213,7 @@ const PRODUCT_REALISM: Record<string, ProductRealismSpec> = {
 export const PHOTO_FIRST_IDS: ReadonlySet<string> = new Set([
   "bed-bliss-120", "wardrobe-225", "vanity-vicco-sherry-120",
   "chair-temu-executive-ivory", "chair-kaleo-chenille-beige", "sofa-sectional-photo",
-  "sofa-chicago-206", "dining-table-bozan-110", "nightstand-led-2drawer-white",
+  "sofa-chicago-206", "sofa-aliexpress-142", "sofa-aliexpress-142-open", "dining-table-bozan-110", "nightstand-led-2drawer-white",
   "hallway-tejo-115", "rug-gala-shaggy-2505-100x200", "rug-temu-shaggy-white-120x200",
   "rug-temu-easy-line-120x180", "rug-temu-easy-line-140x200", "rug-temu-rabbit-ivory-100x180",
   "rug-living-concept-240x240", "plant-zimmer1-olive",
@@ -213,6 +226,8 @@ export const FURNITURE_CATALOG: FurnitureCatalogItem[] = [
   item("nightstand", "Nachttisch", "Schlafen", "Kompakter Nachttisch", [0.45, 0.4, 0.52], "fixed", "storage", "cabinet", WOOD),
   item("nightstand-led-2drawer-white", "LED-Nachttisch mit Ladestation", "Schlafen", "Kompakter weißer Nachttisch mit zwei Schubladen, beleuchtetem Ablagefach, zwei Steckdosen und USB-Ladeanschlüssen", [0.396, 0.3, 0.604], "fixed", "storage", "cabinet", LED_NIGHTSTAND_WHITE),
   item("sofa-3seat", "Sofa", "Sitzen", "Dreisitzer mit realer Sitztiefe", [2.2, 0.92, 0.82], "uniform", "sofa", "sofa", FABRIC),
+  item("sofa-aliexpress-142", "Creme-Relaxsofa AliExpress · 142 cm", "Sitzen", "Zweisitzer mit Lendenkissen, breiten Armlehnen und zwei ausziehbaren Fußstützen", [1.42, 0.9, 0.865], "fixed", "sofa", "sofa", ALI_SOFA_IVORY),
+  item("sofa-aliexpress-142-open", "Creme-Relaxsofa · ausgezogen 172 cm", "Sitzen", "Dasselbe Sofa mit ausgefahrenen Fußstützen und 172 cm Tiefenbedarf", [1.42, 1.72, 0.865], "fixed", "sofa", "sofa", ALI_SOFA_IVORY),
   item("sofa-chicago-206", "Sofa Chicago 206", "Sitzen", "Beiger Chenille-Zweisitzer mit zwei elektrischen Relaxplätzen, Taschenfederkern und schwarzen Metallfüßen", [2.06, 1.07, 0.78], "fixed", "sofa", "sofa", CHICAGO_BEIGE),
   item("sofa-sectional-photo", "Ecksofa Grau", "Sitzen", "Fotobelegtes graues Ecksofa der Wohnküche", [2.35, 1.42, 0.84], "free", "sofa", "sofa", FABRIC),
   item("chair-dining", "Stuhl", "Sitzen", "Esszimmerstuhl", [0.5, 0.55, 0.84], "fixed", "chair", "chair", [...WOOD, ...FABRIC]),

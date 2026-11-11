@@ -154,6 +154,7 @@ function GltfFurniture({ path }: { path: string }) {
 function ParametricFurniture({ fallback, materialId, catalogId }: { fallback: string; materialId: string; catalogId: string }) {
   const material = getPlannerMaterial(materialId);
   if (catalogId === "bed-bliss-120") return <BlissBed />;
+  if (catalogId === "sofa-aliexpress-142" || catalogId === "sofa-aliexpress-142-open") return <IvoryPulloutSofa extended={catalogId === "sofa-aliexpress-142-open"} />;
   if (catalogId === "sofa-chicago-206") return <ChicagoSofa />;
   if (catalogId === "hallway-tejo-115") return <TejoHallway />;
   if (catalogId === "dining-table-bozan-110") return <BozanDiningTable />;
@@ -262,6 +263,48 @@ function LedChargingNightstand() {
           <primitive object={dark} attach="material" />
         </mesh>
       )))}
+    </group>
+  );
+}
+
+/** Metric dimensions are applied by furnitureRenderTransform to this normalized geometry. */
+function IvoryPulloutSofa({ extended }: { extended: boolean }) {
+  const fabric = getPlannerMaterial("fabric-ali-ivory");
+  const shadow = getPlannerMaterial("fabric-ali-shade");
+  const metal = getPlannerMaterial("metal-black");
+  const centers = [-0.235, 0.235];
+  return (
+    <group>
+      <RoundedBox args={[0.83, 0.36, extended ? 0.45 : 0.76]} radius={0.055} smoothness={6} position={[0, 0.23, extended ? -0.20 : 0]} castShadow receiveShadow><primitive object={fabric} attach="material" /></RoundedBox>
+      {centers.map((x) => (
+        <group key={x}>
+          <RoundedBox args={[0.42, 0.15, extended ? 0.37 : 0.55]} radius={0.055} smoothness={6} position={[x, 0.47, extended ? -0.15 : 0.07]} castShadow receiveShadow><primitive object={fabric} attach="material" /></RoundedBox>
+          <RoundedBox args={[0.31, 0.20, 0.11]} radius={0.037} smoothness={5} position={[x, 0.62, -0.19]} rotation={[-0.15, 0, 0]} castShadow receiveShadow><primitive object={fabric} attach="material" /></RoundedBox>
+          <RoundedBox args={[0.43, 0.40, 0.18]} radius={0.07} smoothness={7} position={[x, 0.72, -0.36]} rotation={[-0.06, 0, 0]} castShadow receiveShadow><primitive object={fabric} attach="material" /></RoundedBox>
+          <RoundedBox args={[0.43, 0.21, 0.19]} radius={0.075} smoothness={7} position={[x, 0.89, -0.39]} rotation={[-0.1, 0, 0]} castShadow receiveShadow><primitive object={fabric} attach="material" /></RoundedBox>
+          <DetailStrip position={[x, 0.72, -0.26]} scale={[0.34, 0.006, 0.009]} materialId="fabric-ali-seam" />
+          {extended ? (
+            <group>
+              <DetailStrip position={[x, 0.235, 0.17]} scale={[0.3, 0.025, 0.55]} materialId="metal-black" />
+              <DetailStrip position={[x - 0.10, 0.215, 0.16]} scale={[0.018, 0.018, 0.52]} materialId="metal-black" rotation={[0.13, -0.12, 0]} />
+              <DetailStrip position={[x + 0.10, 0.215, 0.16]} scale={[0.018, 0.018, 0.52]} materialId="metal-black" rotation={[-0.13, 0.12, 0]} />
+              <RoundedBox args={[0.43, 0.16, 0.43]} radius={0.05} smoothness={6} position={[x, 0.42, 0.27]} castShadow receiveShadow><primitive object={fabric} attach="material" /></RoundedBox>
+              <DetailStrip position={[x, 0.43, 0.485]} scale={[0.33, 0.008, 0.012]} materialId="fabric-ali-seam" />
+            </group>
+          ) : <RoundedBox args={[0.43, 0.23, 0.10]} radius={0.036} smoothness={5} position={[x, 0.29, 0.39]} castShadow receiveShadow><primitive object={fabric} attach="material" /></RoundedBox>}
+        </group>
+      ))}
+      {[-0.43, 0.43].map((x) => (
+        <group key={x}>
+          <RoundedBox args={[0.14, 0.49, 0.75]} radius={0.065} smoothness={7} position={[x, 0.405, -0.025]} castShadow receiveShadow><primitive object={fabric} attach="material" /></RoundedBox>
+          <RoundedBox args={[0.19, 0.19, 0.74]} radius={0.08} smoothness={7} position={[x, 0.71, -0.04]} castShadow receiveShadow><primitive object={fabric} attach="material" /></RoundedBox>
+          <DetailStrip position={[x, 0.34, 0]} scale={[0.005, 0.009, 0.44]} materialId="fabric-ali-seam" />
+          {[-0.33, 0.27].map((z) => <mesh key={z} position={[x, 0.047, z]} scale={[0.06, 0.09, 0.065]} geometry={SHARED_BOX}><primitive object={metal} attach="material" /></mesh>)}
+        </group>
+      ))}
+      <RoundedBox args={[0.012, 0.27, 0.32]} radius={0.01} smoothness={4} position={[-0.504, 0.31, 0.02]}><primitive object={shadow} attach="material" /></RoundedBox>
+      <DetailStrip position={[-0.515, 0.44, 0.02]} scale={[0.006, 0.008, 0.28]} materialId="fabric-ali-seam" />
+      <mesh position={[0.51, 0.34, 0.17]} rotation={[0, 0, Math.PI / 2]} scale={[0.058, 0.012, 0.058]} geometry={SHARED_CYLINDER}><primitive object={metal} attach="material" /></mesh>
     </group>
   );
 }
