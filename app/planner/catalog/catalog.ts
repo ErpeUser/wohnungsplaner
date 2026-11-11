@@ -102,6 +102,24 @@ const PRODUCT_REALISM: Record<string, ProductRealismSpec> = {
     confidence: "verified",
     construction: ["beiger Polyester-Chenillebezug", "zwei Relaxsitze", "Taschenfederkern und Wellenunterfederung", "konische schwarze Metallfüße, ca. 13,5 cm"],
   },
+  "sofa-sectional-photo": {
+    sourceLabel: "Wohnküchen-Fotoreferenz / vorhandenes Ecksofa",
+    dimensions: "ca. 235 × 142 × 84 cm",
+    confidence: "estimated",
+    construction: ["grauer Bezugsstoff nach Fotoreferenz", "L-förmige Eckanordnung", "gepolsterte Sitz- und Rückenelemente", "Detailmaße proportional aus den Bestandsfotos geschätzt"],
+  },
+  "rug-temu-shaggy-white-120x200": {
+    sourceLabel: "Temu Produktbild / gewählte 120 × 200 cm Ausführung",
+    dimensions: "120 × 200 cm · Florhöhe im Modell ca. 4 cm",
+    confidence: "estimated",
+    construction: ["weißer Zottel-Hochflor", "dichte weiche Florbüschel", "flache textile Kante", "Maße aus der gewählten Variante übernommen"],
+  },
+  "rug-temu-easy-line-140x200": {
+    sourceLabel: "Temu Produktbild / Easy-Line Color-Block-Teppich",
+    dimensions: "140 × 200 cm · flacher Samtflor",
+    confidence: "estimated",
+    construction: ["abstrakte Color-Block-Flächen", "Creme, Salbei und warmes Beige", "feine helle Konturlinien", "größere Vergleichsgröße desselben Dekors"],
+  },
   "hallway-tejo-115": {
     sourceLabel: "Möbelix / Tejo Art. 2778003504",
     dimensions: "ca. 115 × 37,5 × 231,9 cm · Spiegel ca. 35 × 140 cm",
