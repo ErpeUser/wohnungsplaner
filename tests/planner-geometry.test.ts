@@ -38,6 +38,15 @@ test("requires a transferred placement to fit completely inside the target room"
   assert.equal(roomContainsPlacement(DEFAULT_APARTMENT_DOCUMENT, "zimmer2", crossing), false);
 });
 
+test("keeps placement footprints outside the physical wall face", () => {
+  const document = squareRoomDocument();
+  const penetrating = placement({ x: 0.25, z: 2 }, 0.5, 0.5);
+  const flushToFace = placement({ x: 0.31, z: 2 }, 0.5, 0.5);
+
+  assert.equal(roomContainsPlacement(document, "room-square", penetrating), false);
+  assert.equal(roomContainsPlacement(document, "room-square", flushToFace), true);
+});
+
 test("rejects a footprint whose edge crosses a concave room notch", () => {
   const document = concaveRoomDocument();
   const crossing = placement({ x: 2, z: 2 }, 3, 1, 0, "concave");
