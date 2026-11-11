@@ -88,6 +88,7 @@ function hasWallFaceClearance(document: PlannerDocumentV3, roomId: string, point
     if (distanceToSegment(point, wall.start, wall.end) >= clearance - GEOMETRY_EPSILON) return true;
     return document.openings.some((opening) => {
       if (opening.kind !== "door" && opening.kind !== "window" && opening.kind !== "passage") return false;
+      if (opening.wallId !== wall.id) return false;
       try {
         const segment = openingSegment(document, opening);
         return distanceToSegment(point, segment.start, segment.end) <= clearance + GEOMETRY_EPSILON;
