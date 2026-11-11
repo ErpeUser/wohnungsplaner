@@ -44,6 +44,8 @@ test("dokumentiert Konstruktion und Herkunft für jedes produktbezogene Möbel",
     assert.match(spec.dimensions, /cm/);
     assert.ok(spec.construction.length >= 3);
   }
+  assert.equal(getProductRealismSpec("rug-living-concept-240x240")?.confidence, "verified");
+  assert.match(getProductRealismSpec("rug-living-concept-240x240")?.sourceLabel ?? "", /607199740937372/);
   assert.equal(getProductRealismSpec("sofa-aliexpress-142")?.confidence, "verified");
   assert.match(getProductRealismSpec("sofa-aliexpress-142-open")?.dimensions ?? "", /172 cm/);
   assert.equal(getProductRealismSpec("bed-bliss-120")?.confidence, "verified");

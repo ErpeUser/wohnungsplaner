@@ -133,6 +133,7 @@ const RECIPES: Record<string, MaterialRecipe> = {
   "rug-rabbit-pile": { color: "#eee7da", roughness: 1 },
   "rug-temu-rabbit-highlight": { color: "#fffaf0", roughness: 1 },
   "rug-temu-rabbit-shadow": { color: "#d4c9b8", roughness: 1 },
+  "rug-temu-vintage-cream": { color: "#ffffff", roughness: 1 },
   "rug-living-ivory-greige": { color: "#ded5c7", roughness: 1 },
   "rug-living-relief": { color: "#eee8de", roughness: 1 },
   "metal-dark": { color: "#343b3b", roughness: 0.36, metalness: 0.78 },
@@ -198,6 +199,7 @@ const TEXTURES: Record<string, string> = {
   "rug-temu-rabbit-ivory": "/planner-assets/textures/fabric/temu-rabbit-ivory.svg",
   "rug-temu-rabbit-highlight": "/planner-assets/textures/fabric/temu-rabbit-ivory.svg",
   "rug-temu-rabbit-shadow": "/planner-assets/textures/fabric/temu-rabbit-ivory.svg",
+  "rug-temu-vintage-cream": "/planner-assets/textures/fabric/temu-vintage-rug-607199740937372.svg",
   "rug-living-ivory-greige": "/planner-assets/textures/fabric/rug.svg",
   "rug-living-relief": "/planner-assets/textures/fabric/rug.svg",
 };
@@ -843,7 +845,7 @@ function loadPlannerTexture(path: string) {
   texture.colorSpace = SRGBColorSpace;
   texture.wrapS = RepeatWrapping;
   texture.wrapT = RepeatWrapping;
-  if (path.includes("temu-easy-line-colorblock-rug") || path.includes("hall-rug-") || path.includes("temu-bath-rug-")) {
+  if (path.includes("temu-easy-line-colorblock-rug") || path.includes("hall-rug-") || path.includes("temu-bath-rug-") || path.includes("temu-vintage-rug-")) {
     texture.repeat.set(1, 1);
   } else {
     texture.repeat.set(path.includes("oak-blonde") ? 3.6 : 2.4, path.includes("oak-blonde") ? 1.45 : 2.4);

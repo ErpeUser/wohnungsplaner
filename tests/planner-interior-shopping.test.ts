@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { SHOPPING_ITEMS } from '../app/planner/workspace/shopping-items.ts';
-const existingIds = ['kitchen-fridge-60cm','kitchen-oven-60cm','kitchen-induction-hob-60cm','kitchen-hood-60cm','kitchen-sink-60cm','184900692R','184900692G','1005012515662602','601104051124011','601100062257123','607039887632432','800001233737','601099532250952','607246280935328','601100249492431','606121368598635','606296522765554','1005013379584796','2778003504','2858001801','1634004202','601099691023748','601104781298502','601099526356869','z1-deko-bilder','z1-deko-vorhang','z1-deko-licht','z1-deko-wandregal-set-schminkecke','z1-deko-nische','z1-deko-wandleuchten','z1-deko-schrankboxen','z1-deko-pflanze','z1-deko-textilien','z1-deko-kleinteile','z1-deko-pendelleuchte'];
+const existingIds = ['kitchen-fridge-60cm','kitchen-oven-60cm','kitchen-induction-hob-60cm','kitchen-hood-60cm','kitchen-sink-60cm','184900692R','184900692G','1005012515662602','601104051124011','601100062257123','607039887632432','800001233737','601099532250952','607246280935328','601100249492431','606121368598635','606296522765554','1005013379584796','607199740937372','2778003504','2858001801','1634004202','601099691023748','601104781298502','601099526356869','z1-deko-bilder','z1-deko-vorhang','z1-deko-licht','z1-deko-wandregal-set-schminkecke','z1-deko-nische','z1-deko-wandleuchten','z1-deko-schrankboxen','z1-deko-pflanze','z1-deko-textilien','z1-deko-kleinteile','z1-deko-pendelleuchte'];
 const item=(id:string)=>{const found=SHOPPING_ITEMS.find(i=>i.id===id);assert.ok(found,id);return found;};
 test('preserves every existing shopping article without duplicate identities',()=>{
  for(const id of existingIds)assert.equal(SHOPPING_ITEMS.filter(i=>i.id===id).length,1,id);
@@ -36,8 +36,18 @@ test('replaces the Chicago shopping item with the specified AliExpress sofa',()=
  assert.equal(item('1634004202').quantity,3);
  assert.match(item('2858001801').dimensions,/110.*76/);
 });
-test('unpriced hall additions do not change the existing priced subtotal',()=>{
+test('includes the exact selected Temu A8447 180 x 250 cm vintage rug',()=>{
+ const rug=item('607199740937372');
+ assert.equal(rug.room,'Wohnküche');
+ assert.equal(rug.price,68.63);
+ assert.equal(rug.quantity,1);
+ assert.match(rug.dimensions,/180.*250.*850/);
+ assert.match(rug.amountLabel??'',/A8447.*106769800014188/);
+ assert.match(rug.url??'',/goods_id=607199740937372&sku_id=106769800014188/);
+ assert.match(rug.imageUrl??'',/temu-vintage-rug-607199740937372/);
+});
+test('adds the purchased living room rug to the known-priced subtotal',()=>{
  const total=SHOPPING_ITEMS.reduce((sum,i)=>sum+(i.price??0)*(i.quantity??1),0);
- assert.equal(Math.round(total*100),200725);
- assert.equal(SHOPPING_ITEMS.filter(i=>i.url).length,19);
+ assert.equal(Math.round(total*100),207588);
+ assert.equal(SHOPPING_ITEMS.filter(i=>i.url).length,20);
 });

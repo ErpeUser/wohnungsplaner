@@ -720,29 +720,30 @@ function TemuIvoryRabbitRug() {
   );
 }
 
+/** Flat, metric product with one complete ornament pattern (not a repeated fabric swatch).
+ * Width/depth are scaled by the scene placement to exactly 250 × 180 cm.
+ * The 20 mm representation is a visualization allowance, not manufacturer thickness. */
 function LivingIvoryGreigeRug() {
-  const base = getPlannerMaterial("rug-living-relief");
-  const relief = getPlannerMaterial("rug-living-relief");
-  const bands = [-0.38, -0.19, 0, 0.19, 0.38];
-
+  const top = getPlannerMaterial("rug-temu-vintage-cream");
+  const edge = getPlannerMaterial("rug-living-ivory-greige");
   return (
     <group>
-      <RoundedBox args={[1, 0.82, 1]} radius={0.045} smoothness={8} position={[0, 0.41, 0]} castShadow receiveShadow>
-        <primitive object={base} attach="material" />
+      <RoundedBox args={[1, 0.55, 1]} radius={0.008} smoothness={4} position={[0, 0.275, 0]} receiveShadow>
+        <primitive object={edge} attach="material" />
       </RoundedBox>
-      {bands.map((z, index) => (
-        <RoundedBox
-          key={`living-rug-relief-${z}`}
-          args={[0.82 - (index % 2) * 0.12, 0.11, 0.055]}
-          radius={0.025}
-          smoothness={6}
-          position={[index % 2 === 0 ? -0.04 : 0.06, 0.88, z]}
-          rotation={[0, index % 2 === 0 ? -0.08 : 0.08, 0]}
-          castShadow
-          receiveShadow
-        >
-          <primitive object={relief} attach="material" />
-        </RoundedBox>
+      <mesh position={[0, 0.557, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <planeGeometry args={[0.99, 0.99]} />
+        <primitive object={top} attach="material" />
+      </mesh>
+      {[-0.495, 0.495].map((z) => (
+        <mesh key={`vintage-rug-hem-z-${z}`} position={[0, 0.558, z]} scale={[0.99, 0.008, 0.007]} geometry={SHARED_BOX} receiveShadow>
+          <meshStandardMaterial color="#f0e9df" roughness={1} />
+        </mesh>
+      ))}
+      {[-0.495, 0.495].map((x) => (
+        <mesh key={`vintage-rug-hem-x-${x}`} position={[x, 0.558, 0]} scale={[0.007, 0.008, 0.99]} geometry={SHARED_BOX} receiveShadow>
+          <meshStandardMaterial color="#f0e9df" roughness={1} />
+        </mesh>
       ))}
     </group>
   );

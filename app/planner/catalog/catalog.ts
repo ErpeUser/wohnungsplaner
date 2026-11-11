@@ -81,7 +81,7 @@ const TEMU_RABBIT_IVORY = [
   { id: "rug-temu-rabbit-ivory", label: "Elfenbein", color: "#eee7da" },
 ];
 const LIVING_RUG_IVORY_GREIGE = [
-  { id: "rug-living-ivory-greige", label: "Warmes Elfenbein / Greige", color: "#ded5c7" },
+  { id: "rug-temu-vintage-cream", label: "Vintage-Creme/Taupe · florales Ornament", color: "#eee8df" },
 ];
 const ZIMMER1_PLANT = [
   { id: "leaf-olive", label: "Olivgrün mit mattem Beigetopf", color: "#667358" },
@@ -194,10 +194,10 @@ const PRODUCT_REALISM: Record<string, ProductRealismSpec> = {
     construction: ["beige-taupe Streifen", "Hochflorstruktur", "weicher textile Kantenabschluss"],
   },
   "rug-living-concept-240x240": {
-    sourceLabel: "Wohnküchen-Fotoreferenz / Entwurfsgröße",
-    dimensions: "250 × 180 cm · niedriger bis mittlerer Flor",
-    confidence: "estimated",
-    construction: ["warmes Elfenbein-Greige", "dezente Hoch-Tief-Struktur", "flache Kante für die Relaxmechanik"],
+    sourceLabel: "Temu Art. 607199740937372 · SKU 106769800014188 · Variante A8447 / 180 × 250 cm",
+    dimensions: "180 × 250 cm · 850 g/m² laut Händler · tatsächliche Florhöhe unbekannt",
+    confidence: "verified",
+    construction: ["cremefarbener Samt-Kurzflor", "verblasste florale Ranken in warmem Taupe", "umlaufende mehrfach gerahmte Ornamentbordüre", "Nutzerreferenz vom 11.11.2026; das 2D/3D-Muster ist eine fotoähnliche Rekonstruktion"],
   },
   "plant-zimmer1-olive": {
     sourceLabel: "Zimmer-1-Fotoreferenz / vorhandene Deko",
@@ -250,7 +250,7 @@ export const FURNITURE_CATALOG: FurnitureCatalogItem[] = [
   item("rug-temu-easy-line-120x180", "Easy-Line Color-Block-Teppich", "Licht/Deko", "Flacher Samtteppich mit abstrakten Color-Block-Flächen in Creme, Salbeigrün und warmem Beige", [1.2, 1.8, 0.025], "fixed", "rug", "rug", TEMU_EASY_LINE_COLORBLOCK),
   item("rug-temu-easy-line-140x200", "Vorraumteppich Taupe-Kreisbögen 140 × 200", "Licht/Deko", "Derselbe gewählte Vorraumteppich als größere Vergleichsgröße", [1.4, 2, 0.025], "fixed", "rug", "rug", TEMU_EASY_LINE_COLORBLOCK),
   item("rug-temu-rabbit-ivory-100x180", "Kunstkaninchen-Plüschteppich Elfenbein", "Licht/Deko", "Einfarbiger elfenbeinfarbener Teppich mit dichter, weicher Kunstkaninchen-Plüschoberfläche", [1, 1.8, 0.04], "fixed", "rug", "rug", TEMU_RABBIT_IVORY),
-  item("rug-living-concept-240x240", "Wohnteppich Konzept 250 × 180", "Licht/Deko", "Unverbindlicher rechteckiger Entwurf in warmem Elfenbein-Greige mit dezenter Hoch-Tief-Struktur", [2.5, 1.8, 0.02], "fixed", "rug", "rug", LIVING_RUG_IVORY_GREIGE),
+  item("rug-living-concept-240x240", "Temu Vintage-Samtteppich A8447 · 180 × 250", "Licht/Deko", "Cremefarbener flacher Samtteppich mit zartem Blumenornament in Taupe und breiter antiker Bordüre", [2.5, 1.8, 0.02], "fixed", "rug", "rug", LIVING_RUG_IVORY_GREIGE),
   item("floor-lamp", "Stehleuchte", "Licht/Deko", "Schlanke Leselampe", [0.38, 0.38, 1.65], "fixed", "light", "lamp", WOOD),
   item("plant-medium", "Pflanze", "Licht/Deko", "Mittelgroße Zimmerpflanze", [0.55, 0.55, 1.15], "uniform", "plant", "plant", WOOD),
   item("plant-zimmer1-olive", "Olivpflanze Zimmer 1", "Licht/Deko", "Schlanke 110-cm-Pflanze im matten beigefarbenen Topf", [0.42, 0.42, 1.1], "fixed", "plant", "plant", ZIMMER1_PLANT),

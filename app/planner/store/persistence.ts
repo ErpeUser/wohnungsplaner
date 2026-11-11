@@ -130,7 +130,7 @@ const BASELINE_VISUAL_PLACEMENT_REFRESH_IDS = new Set([
   "zimmer1-bliss-bed",
   "zimmer1-wardrobe",
   "zimmer1-temu-shaggy-rug",
-  "living-rug-concept",
+  // The rug gets a targeted material migration so customized coordinates survive.
   "zimmer1-desk",
   "zimmer1-chair",
   "zimmer1-led-nightstand",
@@ -283,18 +283,21 @@ function readStoredValue(raw: string): MigrationResult {
     try {
       const normalized = normalizeLegacyV3Aliases(value);
       const parsed = parsePlannerDocument(normalized.document);
-      if (isOlderBaselineModel(parsed)) {
+      const withRug = upgradeLivingRugMaterial(parsed);
+      if (isOlderBaselineModel(withRug)) {
         return {
-          document: rebaseBaselineModel(parsed),
+          document: rebaseBaselineModel(withRug),
           warnings: ["Das gespeicherte Möbel-Layout und die Bad-/WC-Materialien wurden auf den aktuellen Stand aktualisiert."],
           legacyBackupJson: raw,
           unmapped: [],
         };
       }
-      if (normalized.changed) {
+      if (normalized.changed || withRug !== parsed) {
         return {
-          document: parsed,
-          warnings: ["Das gespeicherte Dokument wurde auf die zusammengeführte Balkon-/Loggia-Struktur aktualisiert."],
+          document: withRug,
+          warnings: [normalized.changed
+            ? "Das gespeicherte Dokument wurde auf die zusammengeführte Balkon-/Loggia-Struktur aktualisiert."
+            : "Der vorhandene Wohnzimmerteppich wurde auf das neue Temu-Design aktualisiert; Position und Drehung bleiben erhalten."],
           legacyBackupJson: raw,
           unmapped: [],
         };
@@ -371,6 +374,26 @@ function normalizeLegacyV3Aliases(value: object): { document: object; changed: b
     viewPreferences: preferences ? { ...preferences, activeRoomId: activeRoomId ? "balkon" : preferences.activeRoomId } : record.viewPreferences,
   };
   return { document: normalized, changed: true };
+}
+
+/** Migrate the retired concept fabric without resetting the user's rug placement. */
+export function upgradeLivingRugMaterial(document: PlannerDocumentV3): PlannerDocumentV3 {
+  if (document.id !== DEFAULT_APARTMENT_DOCUMENT.id) return document;
+  const old = document.placements.find((item) => item.id === "living-rug-concept");
+  if (!old || old.catalogId !== "rug-living-concept-240x240") return document;
+  if (old.materialVariants?.main === "rug-temu-vintage-cream") return document;
+  const chosen = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "living-rug-concept");
+  if (!chosen) return document;
+  return parsePlannerDocument({
+    ...document,
+    placements: document.placements.map((item) => (
+      item.id === "living-rug-concept" ? {
+        ...item,
+        materialVariants: chosen.materialVariants,
+        metadata: chosen.metadata,
+      } : item
+    )),
+  });
 }
 
 function isOlderBaselineModel(document: PlannerDocumentV3) {

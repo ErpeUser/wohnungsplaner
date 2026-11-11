@@ -1,7 +1,7 @@
 "use client";
 
 import Konva from "konva";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Circle, Group, Layer, Line, Path, Rect, Text, Transformer } from "react-konva";
 
 import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
@@ -574,65 +574,7 @@ function FurnitureSymbol({
   }
 
   if (placement.catalogId === "rug-living-concept-240x240") {
-    const bands = [-0.4, -0.2, 0, 0.2, 0.4];
-    return (
-      <Group data-testid="plan-graphic-rug-living-concept-240x240">
-        <Rect
-          {...common}
-          fill="#ded5c7"
-          stroke="#a8937b"
-          strokeWidth={0.022}
-          cornerRadius={0.06}
-          shadowColor="#6d5b49"
-          shadowBlur={0.055}
-          shadowOpacity={0.25}
-          shadowOffsetY={0.022}
-        />
-        <Rect
-          x={-width / 2 + 0.035}
-          y={-depth / 2 + 0.035}
-          width={width - 0.07}
-          height={depth - 0.07}
-          stroke="#f4eee5"
-          strokeWidth={0.018}
-          cornerRadius={0.045}
-          opacity={0.9}
-          listening={false}
-        />
-        {bands.map((ratio, index) => (
-          <Line
-            key={`living-rug-plan-relief-${ratio}`}
-            points={[
-              -width * 0.38,
-              depth * ratio,
-              -width * 0.08,
-              depth * ratio + (index % 2 === 0 ? -0.045 : 0.045),
-              width * 0.36,
-              depth * ratio,
-            ]}
-            stroke="#f0e9df"
-            strokeWidth={0.055}
-            lineCap="round"
-            lineJoin="round"
-            opacity={0.95}
-            listening={false}
-          />
-        ))}
-        <Text
-          x={-width / 2}
-          y={depth / 2 - 0.12}
-          width={width}
-          align="center"
-          text="Wohninsel · Elfenbein-Greige · 240 × 240 cm"
-          fontFamily="Arial"
-          fontStyle="bold"
-          fontSize={0.075}
-          fill="#625749"
-          opacity={0.88}
-          listening={false}
-        />
-      </Group>
-    );
+    return <TemuVintageRugPlan width={width} depth={depth} />;
   }
 
   if (placement.catalogId === "rug-temu-shaggy-white-120x200") {
@@ -797,6 +739,42 @@ function FurnitureSymbol({
         fill="#30383a"
         listening={false}
       />
+    </Group>
+  );
+}
+
+/** Uses the same ornament artwork as the 3D surface; no repeating pattern or stock placeholder. */
+function TemuVintageRugPlan({ width, depth }: { width: number; depth: number }) {
+  const [art, setArt] = useState<HTMLImageElement | null>(null);
+  useEffect(() => {
+    const image = new window.Image();
+    image.onload = () => setArt(image);
+    image.onerror = () => setArt(null);
+    image.src = "/planner-assets/textures/fabric/temu-vintage-rug-607199740937372.svg";
+    return () => { image.onload = null; image.onerror = null; };
+  }, []);
+  return (
+    <Group data-testid="plan-graphic-rug-living-concept-240x240">
+      <Rect
+        x={-width / 2}
+        y={-depth / 2}
+        width={width}
+        height={depth}
+        fill="#eee8df"
+        fillPatternImage={art ?? undefined}
+        fillPatternRepeat="no-repeat"
+        fillPatternScaleX={art ? width / art.naturalWidth : 1}
+        fillPatternScaleY={art ? depth / art.naturalHeight : 1}
+        stroke="#c5b6a5"
+        strokeWidth={0.016}
+        cornerRadius={0.012}
+        shadowColor="#695749"
+        shadowBlur={0.045}
+        shadowOpacity={0.18}
+        shadowOffsetY={0.012}
+        listening={false}
+      />
+      <Rect x={-width / 2 + 0.016} y={-depth / 2 + 0.016} width={width - 0.032} height={depth - 0.032} stroke="#faf5eb" strokeWidth={0.01} listening={false} />
     </Group>
   );
 }
