@@ -158,6 +158,7 @@ function ParametricFurniture({ fallback, materialId, catalogId }: { fallback: st
   if (catalogId === "sofa-chicago-206") return <ChicagoSofa />;
   if (catalogId === "hallway-tejo-115") return <TejoHallway />;
   if (catalogId === "dining-table-bozan-110") return <BozanDiningTable />;
+  if (catalogId.startsWith("dining-table-")) return <ComparisonDiningTable materialId={materialId} />;
   if (catalogId === "chair-kaleo-chenille-beige") return <KaleoArmchair />;
   if (catalogId === "nightstand-led-2drawer-white") return <LedChargingNightstand />;
   if (catalogId === "rug-temu-easy-line-120x180" || catalogId === "rug-temu-easy-line-140x200") return <TemuEasyLineRug materialId={materialId} />;
@@ -1053,6 +1054,31 @@ function DetailedTable({ materialId }: { materialId: string }) {
       <RoundedBox args={[1, 0.12, 1]} radius={0.04} smoothness={3} position={[0, 0.91, 0]} castShadow receiveShadow><primitive object={top} attach="material" /></RoundedBox>
       {[[-0.39, -0.39], [0.39, -0.39], [-0.39, 0.39], [0.39, 0.39]].map(([x, z], index) => (
         <mesh key={index} position={[x, 0.43, z]} scale={[0.075, 0.84, 0.075]} geometry={SHARED_BOX} castShadow><primitive object={getPlannerMaterial("metal-dark")} attach="material" /></mesh>
+      ))}
+    </group>
+  );
+}
+
+function ComparisonDiningTable({ materialId }: { materialId: string }) {
+  const top = getPlannerMaterial(materialId);
+  const edge = getPlannerMaterial("oak-artisan-edge");
+  const dark = getPlannerMaterial("metal-dark");
+  // Content spans y=0..1 so the placement height remains the measured tabletop height.
+  return (
+    <group>
+      <mesh position={[0, 0.94, 0]} scale={[1, 0.12, 1]} geometry={SHARED_CYLINDER} castShadow receiveShadow>
+        <primitive object={top} attach="material" />
+      </mesh>
+      <mesh position={[0, 0.87, 0]} scale={[0.7, 0.08, 0.7]} geometry={SHARED_CYLINDER} castShadow>
+        <primitive object={edge} attach="material" />
+      </mesh>
+      <mesh position={[0, 0.46, 0]} scale={[0.12, 0.82, 0.12]} geometry={SHARED_CYLINDER} castShadow>
+        <primitive object={dark} attach="material" />
+      </mesh>
+      {[[-0.24, -0.24], [0.24, -0.24], [-0.24, 0.24], [0.24, 0.24]].map(([x, z], index) => (
+        <mesh key={index} position={[x, 0.08, z]} scale={[0.06, 0.12, 0.06]} geometry={SHARED_CYLINDER} castShadow>
+          <primitive object={dark} attach="material" />
+        </mesh>
       ))}
     </group>
   );

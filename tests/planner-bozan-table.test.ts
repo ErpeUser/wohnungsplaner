@@ -35,7 +35,7 @@ test("balances the Bozan table between fridge and sofa while keeping the kitchen
   assert.deepEqual(inspectPlacement(DEFAULT_APARTMENT_DOCUMENT, table, { ignorePlacementIds: diningGroupIds }).hard, []);
 });
 
-test("places three Kaleo armchairs while keeping the refrigerator side clear", () => {
+test("places four Kaleo armchairs while keeping the refrigerator side clear", () => {
   const catalogItem = getFurnitureCatalogItem("chair-kaleo-chenille-beige");
   const table = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "living-bozan-table");
   const chairs = DEFAULT_APARTMENT_DOCUMENT.placements
@@ -47,7 +47,7 @@ test("places three Kaleo armchairs while keeping the refrigerator side clear", (
   assert.equal(catalogItem.resize, "fixed");
   assert.ok(table);
   assert.equal(table.groupId, "living-dining-group");
-  assert.equal(chairs.length, 3);
+  assert.equal(chairs.length, 4);
   assert.deepEqual(chairs.map((chair) => ({
     id: chair.id,
     position: chair.position,
@@ -59,6 +59,13 @@ test("places three Kaleo armchairs while keeping the refrigerator side clear", (
       id: "living-kaleo-chair-east",
       position: { x: 2.9, z: 5.7 },
       rotation: 90,
+      size: { width: 0.63, depth: 0.64, height: 0.87 },
+      groupId: "living-dining-group",
+    },
+    {
+      id: "living-kaleo-chair-north",
+      position: { x: 2.2, z: 6.4 },
+      rotation: 180,
       size: { width: 0.63, depth: 0.64, height: 0.87 },
       groupId: "living-dining-group",
     },

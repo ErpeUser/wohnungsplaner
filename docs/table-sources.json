@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-11-11T23:00:00Z",
+  "crawler": "Firecrawl scrape/search with repository manifest fallback",
+  "sources": [
+    {
+      "id": "aliexpress-100-140",
+      "url": "https://de.aliexpress.com/item/1005013489223528.html?gatewayAdapt=glo2deu",
+      "redirectUrl": "https://www.aliexpress.com/item/3256813302908776.html",
+      "status": "mirror",
+      "dimensions": ["100 × 100 × 75 cm", "140 × 100 × 75 cm"],
+      "confidence": "estimated",
+      "imageUrls": [
+        "https://ae-pic-a1.aliexpress-media.com/kf/S005657650b73487a92a7edecc2eecde9I.jpg",
+        "https://www.rathwood.com/cdn/shop/files/092de11d5b818b283f67d5fea393c448.jpg?v=1763777978&width=1280"
+      ],
+      "notes": "Direct page partly blocked; OG title and comparable measurement image retained. Height remains estimated."
+    },
+    {
+      "id": "temu-606997-120-160",
+      "url": "https://www.temu.com/at/g-606997911062061.html",
+      "canonicalUrl": "https://www.temu.com/at/ausziehbarer-runder-esstisch-eichenende-erweiterbare-tischplatte-mit-aufbewahrungsschrank-und-schiebeturen-und-verstellbaren-regalen-esszimmer-wohnzimmer-120-160x120x75-5cm-g-606997911062061.html",
+      "status": "mirror",
+      "dimensions": ["120 × 120 × 75,5 cm", "160 × 120 × 75,5 cm"],
+      "confidence": "estimated",
+      "imageUrls": [
+        "https://m.media-amazon.com/images/I/512a-E4UDpL._AC_.jpg",
+        "https://m.media-amazon.com/images/I/91ZoI9Z++PL._AC_SY355_.jpg",
+        "https://media.reshift.nl/catalog/284CDF47AC16C2CFB50687190C6BE52E35516992?h=336"
+      ],
+      "notes": "Live page blocked by login/captcha; canonical slug and dimensions-matching mirror retained."
+    },
+    {
+      "id": "kaufland-567080013-120-160",
+      "url": "https://www.kaufland.at/product/567080013/",
+      "status": "confirmed",
+      "dimensions": ["120 × 80 × 75,5 cm", "160 × 80 × 75,5 cm"],
+      "confidence": "confirmed",
+      "imageUrls": [
+        "https://media.cdn.kaufland.de/product-images/1024x1024/2c09f4a51cf7bed6ced460303926ce94.webp",
+        "https://media.cdn.kaufland.de/product-images/1024x1024/61cf380b40ec7435a6a8ad6bc9438b0a.webp",
+        "https://media.cdn.kaufland.de/product-images/1024x1024/1ba5bfb0650b9ba6cf1c37211f406643.webp"
+      ],
+      "notes": "Product gallery includes measurement graphic with 1,8-cm top, 60-cm end pieces and 40-cm center leaf."
+    },
+    {
+      "id": "temu-609726-unknown",
+      "url": "https://www.temu.com/at/g-609726356120319.html",
+      "status": "blocked",
+      "dimensions": [],
+      "confidence": "unknown",
+      "imageUrls": [],
+      "notes": "Only login/security response available; no geometry is persisted."
+    }
+  ]
+}

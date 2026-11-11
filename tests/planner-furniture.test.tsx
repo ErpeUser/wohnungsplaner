@@ -7,13 +7,14 @@ import { describe, expect, test, vi } from "vitest";
 vi.mock("react-konva", () => {
   const node = (name: string) => {
     function KonvaNode({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) {
-      return <div data-konva-node={name} data-object-id={String(props.id ?? "")} data-testid={String(props["data-testid"] ?? "")}>{children}</div>;
+      return <div data-konva-node={name} data-object-id={String(props.id ?? "")} data-testid={String(props["data-testid"] ?? "")}>{children}{typeof props.text === "string" ? props.text : null}</div>;
     }
     KonvaNode.displayName = `Konva${name}`;
     return KonvaNode;
   };
   return {
     Circle: node("Circle"),
+    Ellipse: node("Ellipse"),
     Group: node("Group"),
     Line: node("Line"),
     Path: node("Path"),
@@ -185,13 +186,35 @@ describe("furniture interactions", () => {
     for (const id of [
       "plant-zimmer1-olive",
       "bed-bliss-120",
-      "sofa-chicago-206",
       "hallway-tejo-115",
       "vanity-vicco-sherry-120",
       "chair-temu-executive-ivory",
       "nightstand-led-2drawer-white",
       "rug-living-concept-240x240",
     ]) expect(screen.getByTestId(`plan-graphic-${id}`)).toBeTruthy();
+  });
+
+  test("renders comparison tables from their current round or oval footprint", () => {
+    const table = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "living-bozan-table")!;
+    render(
+      <FurnitureLayer
+        document={{
+          ...DEFAULT_APARTMENT_DOCUMENT,
+          placements: [{ ...table, catalogId: "dining-table-kaufland-567080013-120-160", size: { width: 1.6, depth: 0.8, height: 0.755 } }],
+        }}
+        activeRoomId={null}
+        selectionId={null}
+        onSelect={vi.fn()}
+        onMove={vi.fn()}
+        onResize={vi.fn()}
+        onRotate={vi.fn()}
+      />,
+    );
+    expect(screen.getByTestId("plan-graphic-table-comparison")).toBeTruthy();
+    expect(screen.getByText("160 × 80 cm")).toBeTruthy();
+    const graphic = screen.getByTestId("plan-graphic-table-comparison");
+    expect(graphic.querySelector('[data-konva-node="Ellipse"]')).toBeTruthy();
+    expect(graphic.querySelectorAll('[data-konva-node="Line"]').length).toBe(2);
   });
 
   test("rejects hard collisions and preserves undo/redo history", () => {

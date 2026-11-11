@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // This file is a crawled vendor payload, not application source.
+    "goods.js",
   ]),
 ]);
 
