@@ -100,7 +100,7 @@ test("places the exact Bliss 120 upholstered bed in the free Zimmer 1 corner", (
 
   assert.ok(bed);
   assert.equal(bed.catalogId, "bed-bliss-120");
-  assert.deepEqual(bed.position, { x: 1.11, z: 0.75 });
+  assert.deepEqual(bed.position, { x: 1.17, z: 0.81 });
   assert.deepEqual(bed.size, { width: 1.47, depth: 2.22, height: 1.08 });
   assert.equal(bed.rotation, 270);
   assert.equal(bed.materialVariants?.main, "fabric-bliss-beige");

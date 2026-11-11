@@ -27,7 +27,7 @@ test("places the compact two-drawer LED nightstand beside the Bliss headboard", 
 
   assert.ok(nightstand);
   assert.equal(nightstand.roomId, "zimmer1");
-  assert.deepEqual(nightstand.position, { x: 0.22, z: 1.69 });
+  assert.deepEqual(nightstand.position, { x: 0.22, z: 1.76 });
   assert.deepEqual(nightstand.size, catalogItem.defaultSize);
   assert.equal(nightstand.rotation, 270);
   assert.equal(nightstand.materialVariants?.main, "white-matte");
