@@ -408,13 +408,29 @@ function FurnitureSymbol({
     );
   }
 
-  if (placement.catalogId === "chair-kaleo-chenille-beige") {
-    const footRadius = 0.25;
+  if ([
+    "chair-kaleo-chenille-beige",
+    "chair-temu-swivel-upholstered",
+    "chair-temu-faux-leather-metal",
+    "chair-temu-velvet-swivel-arm",
+    "chair-amber-chenille-beige",
+  ].includes(placement.catalogId)) {
+    const isAmber = placement.catalogId === "chair-amber-chenille-beige";
+    const isMetalLeg = placement.catalogId === "chair-temu-faux-leather-metal";
+    const isVelvet = placement.catalogId === "chair-temu-velvet-swivel-arm";
+    const footRadius = isAmber ? 0.325 : isMetalLeg ? 0.04 : isVelvet ? 0.28 : 0.25;
+    const label = isAmber ? "Amber" : isMetalLeg ? "Kunstleder" : isVelvet ? "Samt" : placement.catalogId === "chair-temu-swivel-upholstered" ? "Temu" : "Kaleo";
     return (
-      <Group>
-        <Circle radius={footRadius} fill="#171a1a" stroke="#050606" strokeWidth={0.025} />
-        <Rect {...common} fill="#ddd2c2" cornerRadius={0.15} />
-        <Rect x={-width * 0.43} y={-depth * 0.34} width={width * 0.86} height={depth * 0.25} fill="#d1c3b0" cornerRadius={0.08} />
+      <Group data-testid={`plan-graphic-chair-${label.toLowerCase()}`}>
+        {isMetalLeg ? (
+          <>
+            {[-1, 1].flatMap((x) => [-1, 1].map((y) => (
+              <Line key={`${x}-${y}`} points={[x * width * 0.34, y * depth * 0.2, x * width * 0.47, y * depth * 0.5]} stroke="#202525" strokeWidth={0.035} lineCap="round" />
+            )))}
+          </>
+        ) : <Circle radius={footRadius} fill="#171a1a" stroke="#050606" strokeWidth={0.025} />}
+        <Rect {...common} fill={isMetalLeg ? "#e9dfd2" : isVelvet ? "#cdbba9" : isAmber ? "#d6c4ad" : "#ddd2c2"} cornerRadius={0.15} />
+        <Rect x={-width * 0.43} y={-depth * 0.34} width={width * 0.86} height={depth * 0.25} fill={isMetalLeg ? "#e1d4c5" : isVelvet ? "#c1ae9b" : isAmber ? "#ccb99f" : "#d1c3b0"} cornerRadius={0.08} />
         <Line points={[-width * 0.28, -depth * 0.3, -width * 0.28, -depth * 0.12]} stroke="#aa9a86" strokeWidth={0.012} />
         <Line points={[0, -depth * 0.3, 0, -depth * 0.12]} stroke="#aa9a86" strokeWidth={0.012} />
         <Line points={[width * 0.28, -depth * 0.3, width * 0.28, -depth * 0.12]} stroke="#aa9a86" strokeWidth={0.012} />
@@ -423,7 +439,7 @@ function FurnitureSymbol({
           y={-0.045}
           width={width}
           align="center"
-          text="Kaleo"
+          text={label}
           fontFamily="Arial"
           fontSize={0.085}
           fill="#30383a"

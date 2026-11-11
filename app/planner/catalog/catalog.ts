@@ -67,6 +67,18 @@ const TABLE_ALI_OAK = [
 const KALEO_BEIGE = [
   { id: "fabric-kaleo-beige", label: "Chenille Beige in Leinenoptik", color: "#ddd2c2" },
 ];
+const TEMU_SWIVEL_SAND = [
+  { id: "fabric-temu-sand", label: "Polsterstoff Sand", color: "#d5c7b6" },
+];
+const TEMU_LEATHER_CREAM = [
+  { id: "leather-temu-cream", label: "Kunstleder Creme", color: "#e9dfd2" },
+];
+const TEMU_VELVET_BEIGE = [
+  { id: "velvet-temu-beige", label: "Samt Beige", color: "#cdbba9" },
+];
+const AMBER_BEIGE = [
+  { id: "fabric-amber-beige", label: "Chenille Amber Beige", color: "#d6c4ad" },
+];
 const LED_NIGHTSTAND_WHITE = [
   { id: "white-matte", label: "Weiß matt", color: "#f4f2ec" },
 ];
@@ -178,6 +190,30 @@ const PRODUCT_REALISM: Record<string, ProductRealismSpec> = {
     confidence: "verified",
     construction: ["beiger Chenillebezug in Leinenoptik", "Sitzfläche 360° drehbar", "Sitzfläche ca. 46 × 46 cm", "schwarzer pulverbeschichteter Rundfuß, ca. 50 cm"],
   },
+  "chair-temu-swivel-upholstered": {
+    sourceLabel: "Temu goods_id 606097863765202",
+    dimensions: "ca. 58 × 58 × 76 cm · Sitz ca. 46 × 45 × 48 cm · Armlehne ca. 66 cm",
+    confidence: "estimated",
+    construction: ["gepolsterte Sitzschale", "360°-Drehfunktion laut Artikeltitel", "kompakte verdeckte Drehplatte", "Maße als bildbasierte Näherung markiert"],
+  },
+  "chair-temu-faux-leather-metal": {
+    sourceLabel: "Temu goods_id 601105793166093",
+    dimensions: "ca. 56 × 58 × 82 cm · Sitz ca. 46 × 44 × 48 cm · Armlehne ca. 66 cm",
+    confidence: "estimated",
+    construction: ["Kunstlederbezug", "gepolsterte Rückenlehne", "schlanke Metallbeine", "Maße mangels Händler-Maßgrafik geschätzt"],
+  },
+  "chair-temu-velvet-swivel-arm": {
+    sourceLabel: "Temu goods_id 601105624026260",
+    dimensions: "ca. 58 × 60 × 80 cm · Sitz ca. 46 × 45 × 48 cm · Armlehne ca. 67 cm",
+    confidence: "estimated",
+    construction: ["Samtbezug", "Armlehnen", "360°-Drehfunktion laut Artikeltitel", "Metallbasis, Maße als konservative Näherung markiert"],
+  },
+  "chair-amber-chenille-beige": {
+    sourceLabel: "Möbelix / Livetastic Amber Art. 001125032251",
+    dimensions: "56 × 61 × 90 cm · Sitzhöhe 49 cm · Sitzfläche 42 × 43 cm · Armlehne 66 cm · Sternfuß 65 × 65 cm",
+    confidence: "verified",
+    construction: ["Chenillebezug Lappi-03", "Schaumstoffpolsterung", "drehbare Sitzfläche", "schwarzer pulverbeschichteter Eisen-Sternfuß"],
+  },
   "vanity-vicco-sherry-120": {
     sourceLabel: "Vicco Sherry / vorhandene Nutzerreferenz",
     dimensions: "Tisch ca. 120 × 55 × 75 cm · integrierter LED-Spiegel ca. 110 × 70 cm",
@@ -239,7 +275,7 @@ const PRODUCT_REALISM: Record<string, ProductRealismSpec> = {
 // Generic catalog items stay on the local GLB path automatically.
 export const PHOTO_FIRST_IDS: ReadonlySet<string> = new Set([
   "bed-bliss-120", "wardrobe-225", "vanity-vicco-sherry-120",
-  "chair-temu-executive-ivory", "chair-kaleo-chenille-beige", "sofa-sectional-photo",
+  "chair-temu-executive-ivory", "chair-kaleo-chenille-beige", "chair-temu-swivel-upholstered", "chair-temu-faux-leather-metal", "chair-temu-velvet-swivel-arm", "chair-amber-chenille-beige", "sofa-sectional-photo",
   "sofa-chicago-206", "sofa-aliexpress-142", "sofa-aliexpress-142-open", "dining-table-bozan-110", "nightstand-led-2drawer-white",
   "hallway-tejo-115", "dining-table-aliexpress-100-140", "dining-table-temu-606997-120-160", "dining-table-kaufland-567080013-120-160", "rug-gala-shaggy-2505-100x200", "rug-temu-shaggy-white-120x200",
   "rug-temu-easy-line-120x180", "rug-temu-easy-line-140x200", "rug-temu-rabbit-ivory-100x180",
@@ -259,6 +295,10 @@ export const FURNITURE_CATALOG: FurnitureCatalogItem[] = [
   item("sofa-sectional-photo", "Ecksofa Grau", "Sitzen", "Fotobelegtes graues Ecksofa der Wohnküche", [2.35, 1.42, 0.84], "free", "sofa", "sofa", FABRIC),
   item("chair-dining", "Stuhl", "Sitzen", "Esszimmerstuhl", [0.5, 0.55, 0.84], "fixed", "chair", "chair", [...WOOD, ...FABRIC]),
   item("chair-kaleo-chenille-beige", "Armlehnstuhl Kaleo", "Sitzen", "Drehbarer Chenille-Armlehnstuhl in Beige mit schwarzem 50-cm-Rundfuß", [0.63, 0.64, 0.87], "fixed", "chair", "chair", KALEO_BEIGE),
+  item("chair-temu-swivel-upholstered", "Temu Drehstuhl gepolstert", "Sitzen", "Gepolsterter 360°-Drehstuhl mit kompakter Sitzschale", [0.58, 0.58, 0.76], "fixed", "chair", "chair", TEMU_SWIVEL_SAND),
+  item("chair-temu-faux-leather-metal", "Temu Kunstlederstuhl", "Sitzen", "Kunstlederstuhl mit Rückenlehne und Metallbeinen", [0.56, 0.58, 0.82], "fixed", "chair", "chair", TEMU_LEATHER_CREAM),
+  item("chair-temu-velvet-swivel-arm", "Temu Samt-Drehstuhl", "Sitzen", "Samtbezogener Drehstuhl mit Armlehnen und Metallbasis", [0.58, 0.6, 0.8], "fixed", "chair", "chair", TEMU_VELVET_BEIGE),
+  item("chair-amber-chenille-beige", "Armlehnstuhl Amber", "Sitzen", "Drehbarer Chenille-Armlehnstuhl mit schwarzem Sternfuß", [0.56, 0.61, 0.9], "fixed", "chair", "chair", AMBER_BEIGE),
   item("desk-standard", "Schreibtisch", "Arbeiten", "Gerader Arbeitstisch", [1.3, 0.65, 0.75], "free", "desk", "desk", WOOD),
   item("vanity-vicco-sherry-120", "Schminktisch Sherry mit LED-Spiegel", "Arbeiten", "Vorhandener Vicco Sherry in Weiß/Gold mit fünf Schubladen und 110 × 70 cm LED-Spiegel", [1.2, 0.55, 1.45], "fixed", "desk", "desk", SHERRY_WHITE_GOLD),
   item("chair-temu-executive-ivory", "Chefsessel Creme mit Fußstütze", "Arbeiten", "Hoch gepolsterter cremefarbener Drehstuhl mit Kopfstütze, ausziehbarer Fußstütze, gepolsterten Armlehnen und verchromtem Fünfsternfuß", [0.64, 0.51, 1.14], "fixed", "chair", "office-chair", TEMU_EXECUTIVE_IVORY),

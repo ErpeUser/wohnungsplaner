@@ -160,6 +160,10 @@ function ParametricFurniture({ fallback, materialId, catalogId }: { fallback: st
   if (catalogId === "dining-table-bozan-110") return <BozanDiningTable />;
   if (catalogId.startsWith("dining-table-")) return <ComparisonDiningTable materialId={materialId} />;
   if (catalogId === "chair-kaleo-chenille-beige") return <KaleoArmchair />;
+  if (catalogId === "chair-temu-swivel-upholstered") return <ComparisonChair variant="temu-swivel" materialId={materialId} />;
+  if (catalogId === "chair-temu-faux-leather-metal") return <ComparisonChair variant="faux-leather" materialId={materialId} />;
+  if (catalogId === "chair-temu-velvet-swivel-arm") return <ComparisonChair variant="velvet-swivel" materialId={materialId} />;
+  if (catalogId === "chair-amber-chenille-beige") return <ComparisonChair variant="amber" materialId={materialId} />;
   if (catalogId === "nightstand-led-2drawer-white") return <LedChargingNightstand />;
   if (catalogId === "rug-temu-easy-line-120x180" || catalogId === "rug-temu-easy-line-140x200") return <TemuEasyLineRug materialId={materialId} />;
   if (catalogId === "rug-temu-rabbit-ivory-100x180") return <TemuIvoryRabbitRug />;
@@ -1172,6 +1176,80 @@ function KaleoArmchair() {
       <mesh position={[0, 0.54, 0]} scale={[0.2, 0.012, 0.2]} geometry={SHARED_CYLINDER} castShadow>
         <primitive object={metal} attach="material" />
       </mesh>
+    </group>
+  );
+}
+
+function ComparisonChair({ variant, materialId }: { variant: "temu-swivel" | "faux-leather" | "velvet-swivel" | "amber"; materialId: string }) {
+  const fabric = getPlannerMaterial(materialId);
+  const dark = getPlannerMaterial("metal-black");
+  const seam = getPlannerMaterial(variant === "velvet-swivel" ? "velvet-temu-beige" : "fabric-sand");
+  const isLegged = variant === "faux-leather" || variant === "velvet-swivel";
+  const isAmber = variant === "amber";
+  const isVelvet = variant === "velvet-swivel";
+
+  return (
+    <group>
+      {isLegged ? (
+        <group>
+          {[-1, 1].flatMap((x) => [-1, 1].map((z) => (
+            <mesh key={`${x}-${z}`} position={[x * 0.25, 0.34, z * 0.2]} rotation={[0, 0, x * -0.12]} scale={[0.035, 0.68, 0.035]} geometry={SHARED_BOX} castShadow>
+              <primitive object={dark} attach="material" />
+            </mesh>
+          )))}
+          {isVelvet ? (
+            <mesh position={[0, 0.11, 0]} scale={[0.36, 0.035, 0.36]} geometry={SHARED_CYLINDER} castShadow>
+              <primitive object={dark} attach="material" />
+            </mesh>
+          ) : null}
+        </group>
+      ) : isAmber ? (
+        <group>
+          <mesh position={[0, 0.05, 0]} scale={[0.9, 0.075, 0.9]} geometry={SHARED_CYLINDER} castShadow>
+            <primitive object={dark} attach="material" />
+          </mesh>
+          {[0, 1, 2, 3, 4].map((index) => (
+            <mesh key={index} position={[Math.cos(index * (Math.PI * 2 / 5)) * 0.3, 0.18, Math.sin(index * (Math.PI * 2 / 5)) * 0.3]} rotation={[0, index * (Math.PI * 2 / 5), 0]} scale={[0.07, 0.05, 0.34]} geometry={SHARED_BOX} castShadow>
+              <primitive object={dark} attach="material" />
+            </mesh>
+          ))}
+          <mesh position={[0, 0.38, 0]} scale={[0.13, 0.44, 0.13]} geometry={SHARED_CYLINDER} castShadow>
+            <primitive object={dark} attach="material" />
+          </mesh>
+        </group>
+      ) : (
+        <group>
+          <mesh position={[0, 0.05, 0]} scale={[isVelvet ? 0.82 : 0.74, 0.065, isVelvet ? 0.82 : 0.74]} geometry={SHARED_CYLINDER} castShadow>
+            <primitive object={dark} attach="material" />
+          </mesh>
+          <mesh position={[0, 0.29, 0]} scale={[0.13, 0.44, 0.13]} geometry={SHARED_CYLINDER} castShadow>
+            <primitive object={dark} attach="material" />
+          </mesh>
+          <mesh position={[0, 0.51, 0]} scale={[0.29, 0.06, 0.29]} geometry={SHARED_CYLINDER} castShadow>
+            <primitive object={dark} attach="material" />
+          </mesh>
+        </group>
+      )}
+
+      <RoundedBox args={[isAmber ? 0.78 : isVelvet ? 0.76 : 0.7, 0.16, isAmber ? 0.65 : isVelvet ? 0.68 : 0.62]} radius={0.08} smoothness={6} position={[0, 0.64, 0.04]} castShadow receiveShadow>
+        <primitive object={fabric} attach="material" />
+      </RoundedBox>
+      <RoundedBox args={[isAmber ? 0.76 : isVelvet ? 0.74 : 0.68, 0.1, 0.12]} radius={0.04} smoothness={5} position={[0, 0.77, -0.23]} rotation={[-0.12, 0, 0]} castShadow receiveShadow>
+        <primitive object={fabric} attach="material" />
+      </RoundedBox>
+      <RoundedBox args={[isAmber ? 0.78 : isVelvet ? 0.76 : 0.7, 0.34, 0.13]} radius={0.065} smoothness={6} position={[0, 0.82, -0.28]} rotation={[-0.12, 0, 0]} castShadow receiveShadow>
+        <primitive object={fabric} attach="material" />
+      </RoundedBox>
+      {(isVelvet || isAmber) ? (
+        [-1, 1].map((x) => (
+          <RoundedBox key={x} args={[0.1, 0.26, 0.55]} radius={0.045} smoothness={5} position={[x * 0.38, 0.72, 0.02]} rotation={[0, 0, x * 0.04]} castShadow receiveShadow>
+            <primitive object={fabric} attach="material" />
+          </RoundedBox>
+        ))
+      ) : null}
+      <RoundedBox args={[isAmber ? 0.64 : isVelvet ? 0.62 : 0.58, 0.012, 0.018]} radius={0.006} smoothness={3} position={[0, 0.72, 0.36]} castShadow>
+        <primitive object={seam} attach="material" />
+      </RoundedBox>
     </group>
   );
 }

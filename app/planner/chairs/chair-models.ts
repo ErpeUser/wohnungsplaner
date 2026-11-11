@@ -1,0 +1,180 @@
+import type { PlannerPlacement, Point2, Size3 } from "../domain/types.ts";
+
+export type ChairModelId =
+  | "temu-swivel-upholstered"
+  | "temu-faux-leather-metal"
+  | "temu-velvet-swivel-arm"
+  | "moebelix-amber-chenille";
+
+export type ChairSourceStatus = "confirmed" | "estimated";
+export type ChairBaseStyle = "swivel-disc" | "metal-legs" | "swivel-metal-legs" | "star-base";
+
+export type ChairModel = {
+  id: ChairModelId;
+  name: string;
+  shortName: string;
+  catalogId: string;
+  sourceUrl: string;
+  mirrorUrl?: string;
+  sourceLabel: string;
+  sourceStatus: ChairSourceStatus;
+  confidence: "confirmed" | "estimated";
+  imageUrls: readonly string[];
+  sizeCm: { width: number; depth: number; height: number };
+  seatCm: { width: number; depth: number; height: number };
+  armHeightCm?: number;
+  baseStyle: ChairBaseStyle;
+  swivel: boolean;
+  materialId: string;
+  sourceNotes: readonly string[];
+};
+
+export const CHAIR_MODELS: readonly ChairModel[] = [
+  {
+    id: "temu-swivel-upholstered",
+    name: "Temu · gepolsterter 360°-Drehstuhl",
+    shortName: "Temu Drehstuhl",
+    catalogId: "chair-temu-swivel-upholstered",
+    sourceUrl: "https://www.temu.com/goods.html?_bg_fs=1&goods_id=606097863765202&sku_id=93416948027298&_oak_page_source=501&page_source=10037&top_gallery_url=https%3A%2F%2Fimg.kwcdn.com%2Fproduct%2Ffancy%2F53b253e1-a9b1-4517-b392-efa473b51af4.jpg",
+    mirrorUrl: "https://www.woltu.eu/en/p/woltu-swivel-dining-chairs-set-of-2-with-armrests-backrest-with-faux-leather-cover",
+    sourceLabel: "Temu goods_id 606097863765202 · identisches WOLTU BH366br-2 Maßblatt",
+    sourceStatus: "estimated",
+    confidence: "estimated",
+    imageUrls: [
+      "https://img.kwcdn.com/product/fancy/53b253e1-a9b1-4517-b392-efa473b51af4.jpg?imageView2/2/w/300/q/70/format/avif",
+      "https://www.woltu.eu/media/image/1b/81/0b/Esszimmerst-hle-drehbar-2er-Set-mit-Armlehnen-R-ckenlehne-mit-Kunstlederbezug-BH366br-2-Braun1_600x600.jpg",
+      "https://www.woltu.eu/media/image/5b/a0/b4/BH366br-9_1280x1280.jpg",
+    ],
+    sizeCm: { width: 56, depth: 55, height: 81.5 },
+    seatCm: { width: 42, depth: 41, height: 40 },
+    armHeightCm: undefined,
+    baseStyle: "swivel-disc",
+    swivel: true,
+    materialId: "fabric-temu-sand",
+    sourceNotes: [
+      "Temu nennt die 360°-Drehfunktion; die öffentlich erreichbare Temu-Seite ist durch CAPTCHA geschützt.",
+      "Das Temu/Shopcaddy-Thumbnail entspricht WOLTU BH366br-2 / Order W0ATT0029-2; die aktuelle WOLTU-Galerie und ein WOLTU-Kaufland-Seller-Eintrag bestätigen 56 × 55 × 81,5 cm, Sitz 42 × 41 cm und Sitzhöhe 40 cm.",
+      "Ältere Händler-Mirrors nennen abweichend 58,5 × 54,5 × 82,5 cm, Sitzhöhe 48 cm und Armlehne 62,5 cm; dieser Datenkonflikt bleibt sichtbar und die aktuelle EAN-Spezifikation wird verwendet.",
+    ],
+  },
+  {
+    id: "temu-faux-leather-metal",
+    name: "Temu · Kunstlederstuhl mit Metallbeinen",
+    shortName: "Temu Kunstleder",
+    catalogId: "chair-temu-faux-leather-metal",
+    sourceUrl: "https://www.temu.com/goods.html?_bg_fs=1&goods_id=601105793166093&sku_id=17621190185196&_oak_page_source=501&page_source=10037&top_gallery_url=https%3A%2F%2Fimg.kwcdn.com%2Fproduct%2Ffancy%2Fbd83d8ec-4435-40da-a864-c9030213bed8.jpg",
+    mirrorUrl: "https://www.wayfair.com/furniture/pdp/george-oliver-unfinished-side-chair-w100836954.html",
+    sourceLabel: "Temu goods_id 601105793166093 · dimensionsgleicher Wayfair-Mirror",
+    sourceStatus: "estimated",
+    confidence: "estimated",
+    imageUrls: [
+      "https://img.kwcdn.com/product/fancy/bd83d8ec-4435-40da-a864-c9030213bed8.jpg?imageView2/2/w/300/q/70/format/avif",
+      "https://assets.wfcdn.com/im/96790214/resize-h800-w800%5Ecompr-r85/2602/260299784/Joviah+18.5+%22+H+Faux+Leather+Upholstered+Side+Chair.jpg",
+      "https://assets.wfcdn.com/im/93235194/resize-h600-w600%5Ecompr-r85/2602/260299784/default_name.jpg",
+    ],
+    sizeCm: { width: 58, depth: 50.98, height: 79.99 },
+    seatCm: { width: 50.98, depth: 44, height: 46.99 },
+    armHeightCm: undefined,
+    baseStyle: "metal-legs",
+    swivel: false,
+    materialId: "leather-temu-cream",
+    sourceNotes: [
+      "Der Artikeltitel belegt Kunstlederbezug, Rückenlehne und Metallbeine; die Temu-Seite ist durch Login/Sicherheitsprüfung blockiert.",
+      "Dimensionsgleicher Wayfair-Mirror: 58 × 50,98 × 79,99 cm gesamt, Sitzhöhe 46,99 cm, Sitzbreite 50,98 cm, Sitztiefe 44 cm. Die Zuordnung zur Temu-ID bleibt als Mirrorbeleg markiert.",
+    ],
+  },
+  {
+    id: "temu-velvet-swivel-arm",
+    name: "Temu · Samt-Drehstuhl mit Armlehnen",
+    shortName: "Temu Samt-Drehstuhl",
+    catalogId: "chair-temu-velvet-swivel-arm",
+    sourceUrl: "https://www.temu.com/goods.html?_bg_fs=1&goods_id=601105624026260&sku_id=17620367356026&_oak_page_source=501&page_source=10037&top_gallery_url=https%3A%2F%2Fimg.kwcdn.com%2Fproduct%2Ffancy%2F83234f53-a1c7-491b-98fd-79d55723b961.jpg",
+    sourceLabel: "Temu goods_id 601105624026260 · identisches WOLTU W0ATT0178 Maßblatt",
+    mirrorUrl: "https://www.woltu.eu/p/woltu-esszimmerstuhl-drehbar-2er-set-polsterstuhl-mit-armlehnen-samt-metallbeine",
+    sourceStatus: "estimated",
+    confidence: "estimated",
+    imageUrls: [
+      "https://img.kwcdn.com/product/fancy/83234f53-a1c7-491b-98fd-79d55723b961.jpg?imageView2/2/w/300/q/70/format/avif",
+      "https://www.woltu.eu/media/image/3d/07/ec/Esszimmerstuhl-drehbar-2er-Set-Polsterstuhl-Armlehnen-Samt-Metallbeine-W0ATT0178-2-Creme5.jpg",
+      "https://www.woltu.eu/media/image/53/ab/18/Esszimmerstuhl-drehbar-4er-Set-Polsterstuhl-Armlehnen-Samt-Metallbeine-W0ATT0178-4-Creme9.jpg",
+    ],
+    sizeCm: { width: 58, depth: 63.5, height: 86 },
+    seatCm: { width: 41, depth: 45, height: 47 },
+    armHeightCm: undefined,
+    baseStyle: "swivel-metal-legs",
+    swivel: true,
+    materialId: "velvet-temu-beige",
+    sourceNotes: [
+      "Der Artikeltitel belegt Samtbezug, Armlehnen, Metallbeine und Drehfunktion; die Live-Seite war beim Crawl ausverkauft.",
+      "Identisches Motiv/Titel auf WOLTU W0ATT0178: 58 × 63,5 × 86 cm, Sitz 41 × 45 cm, Sitzhöhe 47 cm; vier pyramidenförmige Metallbeine mit 360°-Drehplatte.",
+    ],
+  },
+  {
+    id: "moebelix-amber-chenille",
+    name: "Möbelix · Amber Chenille Beige",
+    shortName: "Möbelix Amber",
+    catalogId: "chair-amber-chenille-beige",
+    sourceUrl: "https://www.moebelix.at/p/livetastic-armlehnstuhl-amber-chenille-beige-b-56-cm-001125032251",
+    sourceLabel: "Möbelix / Livetastic Amber Art. 001125032251",
+    sourceStatus: "confirmed",
+    confidence: "confirmed",
+    imageUrls: [
+      "https://media.moebelix.com/i/moebelix/PIhgrtLSTrngcIuajEUkHINw/?fmt=auto&%24hq%24=&w=1200",
+      "https://media.moebelix.com/i/moebelix/PInY2WmCYwWZne-9WABrgt0g/?fmt=auto&%24hq%24=&w=1200",
+      "https://media.moebelix.com/i/moebelix/PI-d4kSew-SCFF_b-PIZtphw/?fmt=auto&%24hq%24=&w=1200",
+    ],
+    sizeCm: { width: 56, depth: 61, height: 90 },
+    seatCm: { width: 42, depth: 43, height: 49 },
+    armHeightCm: 66,
+    baseStyle: "star-base",
+    swivel: true,
+    materialId: "fabric-amber-beige",
+    sourceNotes: [
+      "Möbelix-Maßblatt: B × H × T 56 × 90 × 61 cm, Sitzhöhe 49 cm, Sitztiefe 43 cm, Sitzbreite 42 cm, Armlehnenoberkante 66 cm.",
+      "Drehbare Sitzfläche und schwarzer Sternfuß; Fußbreite/-tiefe jeweils ca. 65 cm.",
+    ],
+  },
+];
+
+export function getChairModel(id: string | undefined) {
+  return CHAIR_MODELS.find((model) => model.id === id);
+}
+
+export function getChairModelForCatalogId(catalogId: string | undefined) {
+  return CHAIR_MODELS.find((model) => model.catalogId === catalogId);
+}
+
+export function metresFromCentimetres(sizeCm: ChairModel["sizeCm"]): Size3 {
+  return {
+    width: Number((sizeCm.width / 100).toFixed(4)),
+    depth: Number((sizeCm.depth / 100).toFixed(4)),
+    height: Number((sizeCm.height / 100).toFixed(4)),
+  };
+}
+
+export function chairModelHasGeometry(model: ChairModel) {
+  return Boolean(model.catalogId && model.sizeCm.width > 0 && model.sizeCm.depth > 0 && model.sizeCm.height > 0);
+}
+
+export type ChairSeatLayout = {
+  id: string;
+  position: Point2;
+  rotation: number;
+};
+
+/**
+ * Places the four seats around the currently selected dining table.  The
+ * perpendicular offset uses the largest real footprint (chair depth or a
+ * star/swivel base), so changing models never hides a foot under the table.
+ */
+export function chairSeatLayout(table: PlannerPlacement, model: ChairModel): ChairSeatLayout[] {
+  const baseDepth = model.baseStyle === "star-base" ? Math.max(model.sizeCm.depth / 100, 0.65) : model.sizeCm.depth / 100;
+  const sideOffset = table.size.width / 2 + baseDepth / 2 + 0.04;
+  const endOffset = table.size.depth / 2 + model.sizeCm.depth / 200 + 0.04;
+  return [
+    { id: "living-kaleo-chair-west", position: { x: table.position.x, z: table.position.z - endOffset }, rotation: 0 },
+    { id: "living-kaleo-chair-east", position: { x: table.position.x + sideOffset, z: table.position.z }, rotation: 90 },
+    { id: "living-kaleo-chair-south", position: { x: table.position.x - sideOffset, z: table.position.z }, rotation: 270 },
+    { id: "living-kaleo-chair-north", position: { x: table.position.x, z: table.position.z + endOffset }, rotation: 180 },
+  ];
+}
