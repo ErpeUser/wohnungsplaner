@@ -132,6 +132,22 @@ describe("PlannerWorkspace", () => {
     assert.equal(unknown.getAttribute("aria-disabled"), "true");
   });
 
+  test("switches the four measured chair models and applies their footprints", async () => {
+    const user = userEvent.setup();
+    const store = createPlannerStore({ initialDocument: DEFAULT_APARTMENT_DOCUMENT });
+    render(<PlannerWorkspace store={store} />);
+
+    const amber = screen.getByRole("tab", { name: /Möbelix Amber/ });
+    await user.click(amber);
+    expect(screen.getByText("56 × 61 × 90 cm")).toBeTruthy();
+    expect(screen.getByRole("link", { name: /Originalquelle.*Möbelix Amber/i }).getAttribute("href")).toBe("https://www.moebelix.at/p/livetastic-armlehnstuhl-amber-chenille-beige-b-56-cm-001125032251");
+    await user.click(screen.getByRole("button", { name: "Vier Stühle im Grundriss anwenden" }));
+    const chairs = store.getState().document.placements.filter((item) => item.id.includes("living-kaleo-chair-"));
+    assert.equal(chairs.length, 4);
+    assert.ok(chairs.every((item) => item.catalogId === "chair-amber-chenille-beige"));
+    assert.ok(chairs.every((item) => item.size.width === 0.56 && item.size.depth === 0.61 && item.size.height === 0.9));
+  });
+
   test("groups seven interior rooms and one connected outdoor area", () => {
     const store = createPlannerStore({ initialDocument: DEFAULT_APARTMENT_DOCUMENT });
     render(<PlannerWorkspace store={store} />);

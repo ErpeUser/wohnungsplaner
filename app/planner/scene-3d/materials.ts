@@ -112,6 +112,10 @@ const RECIPES: Record<string, MaterialRecipe> = {
   "fabric-chicago-chenille": { color: "#d8d5cc", roughness: 0.99 },
   "fabric-kaleo-beige": { color: "#ddd2c2", roughness: 0.98 },
   "fabric-kaleo-chenille": { color: "#ddd2c2", roughness: 0.99 },
+  "fabric-temu-sand": { color: "#d5c7b6", roughness: 0.98 },
+  "leather-temu-cream": { color: "#e9dfd2", roughness: 0.5, clearcoat: 0.18, clearcoatRoughness: 0.42 },
+  "velvet-temu-beige": { color: "#cdbba9", roughness: 0.98 },
+  "fabric-amber-beige": { color: "#d6c4ad", roughness: 0.98 },
   "tejo-cashmere": { color: "#cbc2b6", roughness: 0.58 },
   "tejo-cashmere-grain": { color: "#cbc2b6", roughness: 0.62 },
   "tejo-panel-greige": { color: "#b8afa5", roughness: 0.93 },
@@ -258,7 +262,7 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
     material.bumpMap = worktopTexture;
     material.bumpScale = 0.008;
     material.needsUpdate = true;
-  } else if (["fabric-bliss-weave", "fabric-chicago-chenille", "fabric-kaleo-chenille"].includes(materialId)) {
+  } else if (["fabric-bliss-weave", "fabric-chicago-chenille", "fabric-kaleo-chenille", "fabric-temu-sand", "velvet-temu-beige", "fabric-amber-beige"].includes(materialId)) {
     const weave = loadProductWeaveTexture(materialId);
     material.map = weave;
     material.bumpMap = weave;

@@ -2,6 +2,7 @@ import { inspectPlacement, type CollisionHit } from "./collisions.ts";
 import { getTableModelForCatalogId, metresFromCentimetres } from "../tables/table-models.ts";
 import { isKnownMaterialId } from "./material-registry.ts";
 import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
+import { chairSeatLayout, getChairModel, metresFromCentimetres as chairMetresFromCentimetres } from "../chairs/chair-models.ts";
 import type {
   PlannerAssetRecord,
   PlannerDocumentV3,
@@ -24,6 +25,7 @@ export type PlannerCommand =
       materialId?: string;
       metadata?: PlannerPlacement["metadata"];
     }
+  | { type: "setDiningChairModel"; modelId: string }
   | { type: "rotatePlacement"; placementId: string; rotation: number }
   | { type: "setPlacementMaterial"; placementId: string; slot: string; materialId: string }
   | { type: "removePlacement"; placementId: string }
@@ -156,6 +158,75 @@ export function applyPlannerCommand(
         updatedAt: timestamp(),
         placements: document.placements.map((item) => item.id === placement.id ? placement : item),
       }), ignorePlacementIds);
+    }
+
+    case "setDiningChairModel": {
+      const model = getChairModel(command.modelId);
+      if (!model) return reject(document, "invalid", `Das Stuhlmodell ${command.modelId} ist nicht im Vergleichskatalog vorhanden.`);
+      const table = document.placements.find((item) => item.id === "living-bozan-table");
+      if (!table) return reject(document, "not-found", "Der Esstisch für die vierteilige Stuhlgruppe wurde nicht gefunden.");
+      const chairIds = new Set([
+        "living-kaleo-chair-west",
+        "living-kaleo-chair-east",
+        "living-kaleo-chair-south",
+        "living-kaleo-chair-north",
+      ]);
+      const chairs = document.placements.filter((item) => chairIds.has(item.id));
+      if (chairs.length !== chairIds.size) {
+        return reject(document, "invalid", "Die vier Sitzplätze der Essgruppe sind nicht vollständig vorhanden.");
+      }
+      const catalogItem = getFurnitureCatalogItem(model.catalogId);
+      if (!catalogItem) return reject(document, "invalid", `Das Produkt ${model.catalogId} ist im Katalog nicht vorhanden.`);
+      const size = chairMetresFromCentimetres(model.sizeCm);
+      const layout = chairSeatLayout(table, model);
+      const layoutById = new Map(layout.map((seat) => [seat.id, seat]));
+      const candidates = chairs.map((chair) => {
+        const seat = layoutById.get(chair.id)!;
+        return {
+          ...chair,
+          catalogId: model.catalogId,
+          size: { ...size },
+          position: { ...seat.position },
+          rotation: seat.rotation,
+          materialVariants: { ...chair.materialVariants, main: model.materialId },
+          metadata: {
+            source: model.sourceLabel,
+            confidence: model.confidence,
+            notes: [
+              ...model.sourceNotes,
+              `Stuhlvergleich ${model.id} · ${model.sizeCm.width} × ${model.sizeCm.depth} × ${model.sizeCm.height} cm.`,
+              `Vier Plätze automatisch am Tisch ausgerichtet; Basis ${model.baseStyle}${model.swivel ? ", 360° drehbar" : ""}.`,
+            ],
+          },
+        } satisfies PlannerPlacement;
+      });
+      if (candidates.some((candidate) => !validPlacement(candidate))) {
+        return reject(document, "invalid", "Das gewählte Stuhlmodell enthält ungültige Maße oder Koordinaten.");
+      }
+      const ignorePlacementIds = new Set([
+        ...document.placements.filter((item) => item.groupId === table.groupId).map((item) => item.id),
+        ...chairs.map((item) => item.id),
+      ]);
+      const reports = candidates.map((candidate) => inspectPlacement(document, candidate, { ignorePlacementIds }));
+      const hard = reports.flatMap((report) => report.hard);
+      const warnings = reports.flatMap((report) => report.warnings);
+      if (hard.length > 0) {
+        return {
+          document,
+          warnings,
+          error: {
+            code: "collision",
+            message: hard[0].message,
+            collisions: hard,
+          },
+        };
+      }
+      const candidateById = new Map(candidates.map((candidate) => [candidate.id, candidate]));
+      return accept({
+        ...document,
+        updatedAt: timestamp(),
+        placements: document.placements.map((item) => candidateById.get(item.id) ?? item),
+      }, warnings);
     }
 
     case "rotatePlacement":
