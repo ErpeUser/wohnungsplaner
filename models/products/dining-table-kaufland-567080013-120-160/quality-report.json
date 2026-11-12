@@ -12,12 +12,26 @@
   },
   "referenceSources": {
     "manifestSourceUrls": [
+      "https://www.kaufland.at/product/567080010/",
       "https://www.kaufland.at/product/567080013/"
     ],
     "linkEntries": [
+      "https://www.kaufland.at/product/567080010/",
       "https://www.kaufland.at/product/567080013/"
     ],
-    "status": "documented"
+    "status": "documented",
+    "verification": [
+      {
+        "url": "https://www.kaufland.at/product/567080010/",
+        "status": "verified",
+        "notes": "Current listing matches the modeled Flieks table, 120–160 × 80 × 75.5 cm, MDF with vertical structure."
+      },
+      {
+        "url": "https://www.kaufland.at/product/567080013/",
+        "status": "historical-unverified",
+        "notes": "Retained from the existing canonical metadata; inaccessible during the 2026-11-12 source check."
+      }
+    ]
   },
   "dimensions": {
     "status": "verified-from-source-alias",
@@ -70,7 +84,8 @@
     "No mesh asset is present in this model folder; existing runtime GLBs remain outside models/** and are not copied into this folder.",
     "No repository PBR texture set is present; material fidelity remains runtime-defined.",
     "Exact dimensions and product identity require source-specific verification before a photorealistic asset can be claimed.",
-    "This canonical runtime folder inherits source metadata from a retained short-name alias; the viewer still uses the parametric renderer."
+    "This canonical runtime folder inherits source metadata from a retained short-name alias; the viewer still uses the parametric renderer.",
+    "The current matching Kaufland listing is /product/567080010/; the prior /product/567080013/ URL is retained as historical source metadata because it was present before verification."
   ],
   "auditedAt": "2026-11-12"
 }
