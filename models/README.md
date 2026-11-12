@@ -4,7 +4,7 @@ Die Ablage ist nach Herkunft getrennt:
 
 ```text
 models/
-  <model-id>/    # kaufbare/recherchierte Möbel und Deko
+  products/<model-id>/ # kaufbare/recherchierte Möbel und Deko
       manifest.json
       link.txt       # Produktquelle(n) oder Quellenstatus
       README.md
