@@ -6,7 +6,7 @@ import { INTERIOR_UPDATES, refineRoomLayout } from '../domain/room-refinement.ts
 import { parsePlannerDocument } from '../domain/schema.ts';
 import type { PlannerDocumentV3 } from '../domain/types.ts';
 import { createPlannerStore, type PlannerStore } from '../store/planner-store.ts';
-import { createLocalStoragePlannerRepository, PLANNER_STORAGE_KEY, PLANNER_BACKUP_KEY, type PlannerRepository } from '../store/persistence.ts';
+import { createLocalStoragePlannerRepository, ensureCurrentDiningGroupFourChairs, PLANNER_STORAGE_KEY, PLANNER_BACKUP_KEY, type PlannerRepository, upgradeLivingSofaRugGroup, upgradeRetiredDiningGroup } from '../store/persistence.ts';
 import { readRefinedInterior } from '../store/interior-upgrade.ts';
 
 function prepare(document: PlannerDocumentV3): PlannerDocumentV3 {
@@ -54,7 +54,15 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
   }));
   useEffect(() => {
     if (providedStore) return;
-    try { store.getState().hydrate(); }
+    try {
+      store.getState().hydrate();
+      const current = store.getState().document;
+      const upgraded = upgradeLivingSofaRugGroup(upgradeRetiredDiningGroup(ensureCurrentDiningGroupFourChairs(current)));
+      if (upgraded !== current) {
+        store.getState().replaceDocument(upgraded);
+        store.getState().scheduleSave();
+      }
+    }
     catch { store.getState().setAutosaveStatus('error'); }
   }, [providedStore, store]);
   return <Workspace store={providedStore ?? store} />;
