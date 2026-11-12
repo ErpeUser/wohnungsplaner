@@ -217,9 +217,13 @@ export function upgradeLivingSofaRugGroup(document: PlannerDocumentV3): PlannerD
     && Math.abs(sofa.position.x - 2.2) < 0.001
     && Math.abs(sofa.position.z - 7.82) < 0.001;
   const currentSofa = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === sofa.id);
-  const legacySofaModel = legacyDefault && sofa.catalogId !== currentSofa?.catalogId;
+  // The Chicago placeholder was replaced by the sourced AliExpress sofa.
+  // Upgrade it even when the user has already moved the old sofa, while
+  // preserving that user's position, rotation and grouping.
+  const legacySofaModel = sofa.catalogId === "sofa-chicago-206"
+    && Boolean(currentSofa && sofa.catalogId !== currentSofa.catalogId);
   const needsUnlink = legacyDefault || Boolean(rug.groupId) || Boolean(sofa.groupId);
-  if (!needsUnlink) return document;
+  if (!needsUnlink && !legacySofaModel) return document;
   const next = document.placements.map((item) => {
     if (item.id === rug.id) {
       return {
