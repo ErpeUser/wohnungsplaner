@@ -216,6 +216,8 @@ export function upgradeLivingSofaRugGroup(document: PlannerDocumentV3): PlannerD
     && Math.abs(rug.position.z - 7.75) < 0.001
     && Math.abs(sofa.position.x - 2.2) < 0.001
     && Math.abs(sofa.position.z - 7.82) < 0.001;
+  const currentSofa = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === sofa.id);
+  const legacySofaModel = legacyDefault && sofa.catalogId !== currentSofa?.catalogId;
   const needsUnlink = legacyDefault || Boolean(rug.groupId) || Boolean(sofa.groupId);
   if (!needsUnlink) return document;
   const next = document.placements.map((item) => {
@@ -229,6 +231,12 @@ export function upgradeLivingSofaRugGroup(document: PlannerDocumentV3): PlannerD
     if (item.id === sofa.id) {
       return {
         ...item,
+        ...(legacySofaModel && currentSofa ? {
+          catalogId: currentSofa.catalogId,
+          size: currentSofa.size,
+          materialVariants: currentSofa.materialVariants,
+          metadata: currentSofa.metadata,
+        } : {}),
         groupId: undefined,
         position: legacyDefault ? { x: 2.2, z: 8.06 } : item.position,
       };
