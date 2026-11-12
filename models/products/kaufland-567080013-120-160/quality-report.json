@@ -52,7 +52,7 @@
       "walnut-mdf",
       "vertical-fluting"
     ],
-    "pbrTexturesPresent": true,
+    "pbrTexturesPresent": false,
     "textureFiles": []
   },
   "runtime": {
@@ -65,14 +65,15 @@
     "manifestJson": "passed",
     "linkManifestConsistency": "source-only-alias",
     "geometry": "not-run-no-mesh",
-    "materials": "pending-review",
+    "materials": "not-run-no-pbr-textures",
     "viewerIntegration": "parametric-fallback-preserved"
   },
   "limitations": [
     "No repository mesh asset is present; geometry remains runtime-parametric.",
     "Exact dimensions and product identity require source-specific verification before a photorealistic asset can be claimed.",
     "This folder is a retained source alias; runtime catalog resolution points to the canonical dining-table folder.",
-    "The source URL is intentionally stored on this retained alias; the canonical runtime folder carries the synchronized URL."
+    "The source URL is intentionally stored on this retained alias; the canonical runtime folder carries the synchronized URL.",
+    "The existing references/normal.png is a reference image, not a verified PBR normal texture."
   ],
   "auditedAt": "2026-11-12"
 }
