@@ -2,7 +2,9 @@
 
 Dieser Ordner bleibt als Quell-Alias erhalten. Die Laufzeit löst die stabile ID über `dining-table-kaufland-567080013-120-160` auf; mögliche gespeicherte Platzierungen behalten dadurch ihre bisherige Referenz.
 
-- Quelle: `manifest.json.sourceUrls`; `link.txt` kennzeichnet den Alias ohne zusätzliche URL-Zeile
+- Verifizierte aktuelle Quelle: `https://www.kaufland.at/product/567080010/`
+- Historische Alias-Quelle bleibt im Manifest erhalten: `https://www.kaufland.at/product/567080013/` (beim Check am 2026-11-12 nicht erreichbar)
+- `link.txt` kennzeichnet den Alias ohne zusätzliche URL-Zeile; die kanonische URL-Liste liegt im Runtime-Ordner
 - Verifizierte Varianten: geschlossen 120 × 80 × 75,5 cm, ausgezogen 160 × 80 × 75,5 cm
 - Zusätzliche Maßangaben: Plattenstärke 1,8 cm, Endstücke 60 cm, Mittelauszug 40 cm
 - Materialhinweise: `walnut-mdf`, `vertical-fluting`
