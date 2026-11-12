@@ -1,7 +1,7 @@
 "use client";
 
 import Konva from "konva";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { Stage } from "react-konva";
 
 import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
@@ -38,6 +38,9 @@ type PlanCanvasProps = {
 
 const INITIAL_SIZE = { width: 960, height: 640 };
 const PLAN_CONTROL_INSET = 82;
+const subscribeToClientReady = () => () => {};
+const getClientReadySnapshot = () => true;
+const getServerReadySnapshot = () => false;
 
 function fitCanvasViewport(scene: Pick<ReturnType<typeof createPlanScene>, "bounds">, size: typeof INITIAL_SIZE) {
   return fitPlanViewport(scene, {
@@ -244,8 +247,12 @@ function InteractivePlanStage({
   // Keep the first client render identical to the server render. Initializing
   // from `window` made SSR return the empty form while the browser immediately
   // returned the interactive stage, triggering React hydration recovery.
-  const [clientReady, setClientReady] = useState(false);
-  const [layersReady, setLayersReady] = useState(false);
+  const clientReady = useSyncExternalStore(
+    subscribeToClientReady,
+    getClientReadySnapshot,
+    getServerReadySnapshot,
+  );
+  const layersReady = clientReady;
   const [canvasReady, setCanvasReady] = useState(false);
   const [previewGuides, setPreviewGuides] = useState<SnapGuide[]>([]);
   const [previewMessage, setPreviewMessage] = useState<string | null>(null);
@@ -256,11 +263,6 @@ function InteractivePlanStage({
       .filter((guide) => guide.kind !== "grid")
       .map((guide, index) => ({ id: `drag-guide-${index}`, axis: guide.axis, value: guide.value })),
   }), [previewGuides, scene]);
-
-  useEffect(() => {
-    setClientReady(true);
-    setLayersReady(true);
-  }, []);
 
   useEffect(() => {
     if (!layersReady) return;
