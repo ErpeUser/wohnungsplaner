@@ -210,6 +210,7 @@ function selectionForPlacement(placement: PlannerDocumentV3["placements"][number
 
 function tableConstructionLabel(profile: ReturnType<typeof tableVisualProfile>) {
   if (profile === "fluted-extension-pedestal") return "Geriffeltes Holzpodest · sichtbarer Mittelauszug";
+  if (profile === "fluted-round-pedestal") return "Geriffelter Rundsockel · versteckte Auszugsplatten";
   if (profile === "storage-pedestal") return "Runder Stauraumkorpus · Schiebetüren unter der Platte";
   return "Runde Platte · schlanker Metallrahmen";
 }

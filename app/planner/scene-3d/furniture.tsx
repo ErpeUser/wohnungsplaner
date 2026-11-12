@@ -1096,9 +1096,27 @@ function ComparisonDiningTable({ materialId, catalogId, size }: { materialId: st
         <RoundedBox args={[0.72, 0.64, 0.72]} radius={0.055} smoothness={5} position={[0, 0.58, 0]} castShadow receiveShadow>
           <primitive object={getPlannerMaterial("oak-natural")} attach="material" />
         </RoundedBox>
-        <RoundedBox args={[0.68, 0.27, 0.025]} radius={0.012} smoothness={3} position={[0, 0.57, 0.365]} castShadow>
+        <mesh position={[0, 0.58, 0.372]} scale={[0.52, 0.38, 0.012]} geometry={SHARED_BOX} castShadow>
+          <primitive object={getPlannerMaterial("glass-frosted")} attach="material" />
+        </mesh>
+        <mesh position={[-0.27, 0.58, 0.39]} scale={[0.028, 0.48, 0.035]} geometry={SHARED_BOX} castShadow>
           <primitive object={edge} attach="material" />
-        </RoundedBox>
+        </mesh>
+        <mesh position={[0.27, 0.58, 0.39]} scale={[0.028, 0.48, 0.035]} geometry={SHARED_BOX} castShadow>
+          <primitive object={edge} attach="material" />
+        </mesh>
+        <mesh position={[0, 0.58, 0.39]} scale={[0.022, 0.48, 0.035]} geometry={SHARED_BOX} castShadow>
+          <primitive object={edge} attach="material" />
+        </mesh>
+        <mesh position={[0, 0.78, 0.39]} scale={[0.58, 0.028, 0.035]} geometry={SHARED_BOX} castShadow>
+          <primitive object={edge} attach="material" />
+        </mesh>
+        <mesh position={[0, 0.38, 0.39]} scale={[0.58, 0.028, 0.035]} geometry={SHARED_BOX} castShadow>
+          <primitive object={edge} attach="material" />
+        </mesh>
+        <mesh position={[0, 0.58, 0.365]} scale={[0.54, 0.018, 0.54]} geometry={SHARED_BOX} castShadow>
+          <primitive object={edge} attach="material" />
+        </mesh>
         {[-0.18, 0.18].map((x) => (
           <group key={x} position={[x, 0.57, 0.39]}>
             <RoundedBox args={[0.13, 0.18, 0.028]} radius={0.01} smoothness={3} castShadow>
@@ -1120,6 +1138,10 @@ function ComparisonDiningTable({ materialId, catalogId, size }: { materialId: st
     return <FlutedExtensionTable top={top} edge={edge} extended={extended} />;
   }
 
+  if (profile === "fluted-round-pedestal") {
+    return <FlutedRoundPedestalTable top={top} edge={edge} extended={extended} />;
+  }
+
   return (
     <group>
       <mesh position={[0, 0.94, 0]} scale={[1, 0.12, 1]} geometry={SHARED_CYLINDER} castShadow receiveShadow>
@@ -1136,6 +1158,33 @@ function ComparisonDiningTable({ materialId, catalogId, size }: { materialId: st
       <mesh position={[0, 0.08, 0]} scale={[0.72, 0.08, 0.72]} geometry={SHARED_CYLINDER} castShadow>
         <primitive object={dark} attach="material" />
       </mesh>
+    </group>
+  );
+}
+
+function FlutedRoundPedestalTable({ top, edge, extended }: { top: ReturnType<typeof getPlannerMaterial>; edge: ReturnType<typeof getPlannerMaterial>; extended: boolean }) {
+  const pedestal = getPlannerMaterial("oak-natural");
+  const flute = getPlannerMaterial("oak-artisan-edge");
+  const angles = Array.from({ length: 28 }, (_, index) => (index / 28) * Math.PI * 2);
+  return (
+    <group>
+      {extended ? (
+        <group>
+          <RoundedBox args={[0.62, 0.09, 1.04]} radius={0.16} smoothness={8} position={[-0.44, 0.95, 0]} castShadow receiveShadow><primitive object={top} attach="material" /></RoundedBox>
+          <RoundedBox args={[0.62, 0.09, 1.04]} radius={0.16} smoothness={8} position={[0.44, 0.95, 0]} castShadow receiveShadow><primitive object={top} attach="material" /></RoundedBox>
+          <RoundedBox args={[0.36, 0.09, 1.04]} radius={0.11} smoothness={8} position={[0, 0.95, 0]} castShadow receiveShadow><primitive object={top} attach="material" /></RoundedBox>
+          <DetailStrip position={[0, 0.998, 0]} scale={[0.012, 0.006, 0.98]} materialId="oak-artisan-edge" />
+        </group>
+      ) : (
+        <mesh position={[0, 0.95, 0]} scale={[0.55, 0.09, 0.55]} geometry={SHARED_CYLINDER} castShadow receiveShadow><primitive object={top} attach="material" /></mesh>
+      )}
+      <mesh position={[0, 0.90, 0]} scale={[0.56, 0.025, 0.56]} geometry={SHARED_CYLINDER} castShadow>
+        <primitive object={edge} attach="material" />
+      </mesh>
+      <mesh position={[0, 0.49, 0]} scale={[0.31, 0.71, 0.31]} geometry={SHARED_CYLINDER} castShadow receiveShadow><primitive object={pedestal} attach="material" /></mesh>
+      {angles.map((angle) => <mesh key={angle} position={[Math.cos(angle) * 0.315, 0.49, Math.sin(angle) * 0.315]} scale={[0.012, 0.66, 0.012]} geometry={SHARED_CYLINDER} castShadow><primitive object={flute} attach="material" /></mesh>)}
+      <mesh position={[0, 0.08, 0]} scale={[0.38, 0.08, 0.38]} geometry={SHARED_CYLINDER} castShadow><primitive object={pedestal} attach="material" /></mesh>
+      {!extended ? <DetailStrip position={[0, 0.944, 0]} scale={[0.012, 0.014, 0.48]} materialId="oak-artisan-edge" /> : null}
     </group>
   );
 }

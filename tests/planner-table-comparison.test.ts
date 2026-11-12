@@ -45,17 +45,17 @@ test("konvertiert Zentimeter ohne Rundungsfehler für die Planungsgeometrie", ()
   });
 });
 
-test("zeigt die blockierte Temu-Quelle ohne erfundene Maße an", () => {
+test("zeigt die jetzt belegte Temu-Quelle mit den sichtbaren Maßen an", () => {
   const unknown = getTableModel("temu-609726-unknown");
   assert.ok(unknown);
-  assert.equal(unknown?.sourceStatus, "blocked");
-  assert.equal(unknown?.variants.length, 0);
-  assert.equal(tableModelHasGeometry(unknown!), false);
+  assert.equal(unknown?.sourceStatus, "confirmed");
+  assert.deepEqual(getTableVariant(unknown!, "extended")?.sizeCm, { width: 150, depth: 110, height: 75 });
+  assert.equal(tableModelHasGeometry(unknown!), true);
   assert.equal(unknown?.sourceUrl, "https://www.temu.com/at/g-609726356120319.html");
 });
 
 test("ordnet den belegten Tischmodellen unterschiedliche sichtbare Bauformen zu", () => {
   const profiles = TABLE_MODELS.filter(tableModelHasGeometry).map((model) => tableVisualProfile(model.catalogId!));
-  assert.deepEqual(profiles, ["round-metal-frame", "storage-pedestal", "fluted-extension-pedestal"]);
+  assert.deepEqual(profiles, ["round-metal-frame", "storage-pedestal", "fluted-extension-pedestal", "fluted-round-pedestal"]);
   assert.equal(tableVisualProfile("dining-table-does-not-exist"), "round-metal-frame");
 });

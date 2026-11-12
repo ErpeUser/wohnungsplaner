@@ -133,7 +133,9 @@ export function isWalkPositionValid(
     .map((room) => deriveRoomPolygon(document, room.id));
   const doorwayPolygons = document.openings
     .filter((opening) => (
-      (opening.kind === "passage" || document.doorStates[opening.id] === "open")
+      (opening.kind === "passage"
+        || (opening.kind === "door" && (opening.roomIds?.length ?? 0) > 1)
+        || document.doorStates[opening.id] === "open")
       && opening.sill <= 0.05
       && (opening.roomIds?.length ?? 0) > 1
     ))
@@ -149,7 +151,8 @@ export function isWalkPositionValid(
   ))) return false;
 
   const scene = createCollisionScene(document, radius);
-  if (scene.wallSegments.some((segment) => circleIntersectsWall(point, radius, segment))) return false;
+  const atInteriorDoorway = doorwayPolygons.some((polygon) => pointInOrNearPolygon(point, polygon, radius));
+  if (!atInteriorDoorway && scene.wallSegments.some((segment) => circleIntersectsWall(point, radius, segment))) return false;
   if (document.builtIns.some((item) => isWalkBlockingBuiltIn(item) && circleIntersectsPlacement(point, radius, item))) return false;
   if (document.placements.some((item) => isWalkBlockingPlacement(item) && !isFloorCovering(item) && circleIntersectsPlacement(point, radius, item))) return false;
   return true;
@@ -448,7 +451,8 @@ function createCollisionScene(document: PlannerDocumentV3, clearanceRadius = 0) 
 export function createSceneWallSegments(document: PlannerDocumentV3, clearanceRadius = 0) {
   const openingsByWall = new Map<string, Array<{ from: number; to: number; sill: number }>>();
   for (const opening of document.openings) {
-    const isPassable = opening.kind === "passage" || document.doorStates[opening.id] === "open";
+    const isInteriorDoorway = opening.kind === "door" && (opening.roomIds?.length ?? 0) > 1;
+    const isPassable = opening.kind === "passage" || isInteriorDoorway || document.doorStates[opening.id] === "open";
     if (opening.sill <= 0.05 && !isPassable) continue;
     for (const wall of document.walls) {
       const slice = openingSliceOnWall(document, opening, wall);

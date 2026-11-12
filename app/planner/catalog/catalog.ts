@@ -184,6 +184,12 @@ const PRODUCT_REALISM: Record<string, ProductRealismSpec> = {
     confidence: "verified",
     construction: ["MDF/Holzdekor in Braun", "vertikal strukturierter Sockel", "1,8 cm starke Tischplatte", "40-cm-Mittelblatt und 60-cm-Endstücke"],
   },
+  "dining-table-temu-609726-110-150": {
+    sourceLabel: "Temu g-609726356120319 · sichtbare Produkt- und Maßgrafik",
+    dimensions: "geschlossen rund 110 × 110 × 75 cm · ausgezogen oval 150 × 110 × 75 cm",
+    confidence: "verified",
+    construction: ["geriffelter zylindrischer Mittelsockel", "versteckte Auszugsplatten", "warme Holzdekoroberfläche", "50 kg Belastbarkeit laut Produktgrafik"],
+  },
   "chair-kaleo-chenille-beige": {
     sourceLabel: "Möbelix / Kaleo Art. 1634004202",
     dimensions: "ca. 63 × 64 × 87 cm · Sitzhöhe 50 cm · Armlehne 66 cm",
@@ -314,6 +320,7 @@ export const FURNITURE_CATALOG: FurnitureCatalogItem[] = [
   item("dining-table-aliexpress-100-140", "AliExpress Tisch 100 → 140", "Tische", "Runder Ausziehtisch mit ovaler 140-cm-Auszugstellung", [1, 1, 0.75], "fixed", "table", "table", TABLE_ALI_OAK),
   item("dining-table-temu-606997-120-160", "Temu Tisch 120 → 160 mit Stauraum", "Tische", "Runder Eiche-Dekor-Tisch mit Stauraumkorpus und ovaler 160-cm-Auszugstellung", [1.2, 1.2, 0.755], "fixed", "table", "table", TABLE_TEMU_OAK),
   item("dining-table-kaufland-567080013-120-160", "Flieks Tisch 120 → 160", "Tische", "Ovaler MDF-Tisch mit strukturiertem Sockel und 40-cm-Mittelblatt", [1.2, 0.8, 0.755], "fixed", "table", "table", TABLE_KAUFLAND_WALNUT),
+  item("dining-table-temu-609726-110-150", "Temu Tisch 110 → 150 mit Riffsockel", "Tische", "Runder FAUMRTA-Tisch mit versteckten Auszugsplatten und geriffeltem Mittelsockel", [1.1, 1.1, 0.75], "fixed", "table", "table", TABLE_TEMU_OAK),
   item("rug-200", "Teppich", "Licht/Deko", "Flach gewebter Teppich", [2, 1.4, 0.02], "free", "rug", "rug", FABRIC),
   item("rug-gala-shaggy-2505-100x200", "Hochflor-Teppich Gala Shaggy 2505", "Licht/Deko", "Beige-taupe gestreifter Hochflor-Teppich mit 30-mm-Flor", [2, 1, 0.03], "fixed", "rug", "rug", ZIMMER1_RUG),
   item("rug-temu-shaggy-white-120x200", "Flauschiger Zottelteppich Weiß", "Licht/Deko", "Weißer, weicher Hochflor-Teppich in der gewählten Temu-Ausführung", [1.2, 2, 0.04], "fixed", "rug", "rug", TEMU_SHAGGY_WHITE),

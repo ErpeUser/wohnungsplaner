@@ -10,7 +10,7 @@ export type TableVariantId = "closed" | "extended";
 export type TableShape = "round" | "oval";
 export type TableConfidence = "confirmed" | "estimated" | "unknown";
 export type TableSourceStatus = "confirmed" | "mirror" | "blocked";
-export type TableVisualProfile = "round-metal-frame" | "storage-pedestal" | "fluted-extension-pedestal";
+export type TableVisualProfile = "round-metal-frame" | "storage-pedestal" | "fluted-extension-pedestal" | "fluted-round-pedestal";
 
 export type TableVariant = {
   id: TableVariantId;
@@ -96,9 +96,7 @@ export const TABLE_MODELS: readonly TableModel[] = [
       "Stauraum unter der Platte mit Schiebetüren und verstellbaren Regalböden ist als Produktmerkmal dokumentiert.",
     ],
     imageUrls: [
-      "https://m.media-amazon.com/images/I/512a-E4UDpL._AC_.jpg",
-      "https://m.media-amazon.com/images/I/91ZoI9Z++PL._AC_SY355_.jpg",
-      "https://media.reshift.nl/catalog/284CDF47AC16C2CFB50687190C6BE52E35516992?h=336",
+      "/planner-assets/references/tables/temu-606997/normal.png",
     ],
     materialId: "oak-natural",
     variants: [
@@ -135,9 +133,8 @@ export const TABLE_MODELS: readonly TableModel[] = [
       "Das Produkt ist ein ovaler MDF-/Holzdekor-Tisch mit vertikal strukturierter Sockelform und 60 kg Belastbarkeit.",
     ],
     imageUrls: [
-      "https://media.cdn.kaufland.de/product-images/1024x1024/2c09f4a51cf7bed6ced460303926ce94.webp",
-      "https://media.cdn.kaufland.de/product-images/1024x1024/61cf380b40ec7435a6a8ad6bc9438b0a.webp",
-      "https://media.cdn.kaufland.de/product-images/1024x1024/1ba5bfb0650b9ba6cf1c37211f406643.webp",
+      "/planner-assets/references/tables/kaufland-567080013/normal.png",
+      "/planner-assets/references/tables/kaufland-567080013/dimensions.jpg",
     ],
     materialId: "walnut",
     variants: [
@@ -163,18 +160,38 @@ export const TABLE_MODELS: readonly TableModel[] = [
   },
   {
     id: "temu-609726-unknown",
-    name: "Temu · Quelle noch ungeklärt",
-    shortName: "Temu 609726 · offen",
+    name: "Temu · FAUMRTA Rund-/Ovaltisch",
+    shortName: "Temu 110 → 150",
+    catalogId: "dining-table-temu-609726-110-150",
     sourceUrl: TEMU_UNKNOWN_URL,
-    sourceStatus: "blocked",
-    sourceLabel: "Temu g-609726356120319 · keine belastbare Maßquelle",
+    sourceStatus: "confirmed",
+    sourceLabel: "Temu g-609726356120319 · sichtbare Maßgrafik und Produktansicht",
     sourceNotes: [
-      "Die Seite liefert nur eine Login-/Sicherheitsseite; es gibt keinen belastbaren, dimensionsgleichen Spiegel.",
-      "Der Reiter bleibt sichtbar, damit die Quelle später nachgetragen werden kann, wird aber nicht als Platzierung angeboten.",
+      "Die angemeldete Produktseite zeigt 110 cm rund, 150 × 110 cm oval und 75 cm Höhe.",
+      "Die Maßgrafik zeigt einen geriffelten zylindrischen Mittelsockel, versteckte Auszugsplatten und 50 kg Belastbarkeit.",
     ],
     imageUrls: [],
     materialId: "oak-natural",
-    variants: [],
+    variants: [
+      {
+        id: "closed",
+        label: "geschlossen · rund",
+        shape: "round",
+        sizeCm: { width: 110, depth: 110, height: 75 },
+        seatCount: 6,
+        confidence: "confirmed",
+        notes: ["Sichtbare Maßgrafik: runde 110-cm-Stellung."],
+      },
+      {
+        id: "extended",
+        label: "1 Auszug · oval",
+        shape: "oval",
+        sizeCm: { width: 150, depth: 110, height: 75 },
+        seatCount: 8,
+        confidence: "confirmed",
+        notes: ["Sichtbare Maßgrafik: 150 × 110 cm mit versteckten Auszugsplatten."],
+      },
+    ],
   },
 ];
 
@@ -203,6 +220,7 @@ export function tableModelHasGeometry(model: TableModel) {
 export function tableVisualProfile(catalogId: string | undefined): TableVisualProfile {
   if (catalogId === "dining-table-temu-606997-120-160") return "storage-pedestal";
   if (catalogId === "dining-table-kaufland-567080013-120-160") return "fluted-extension-pedestal";
+  if (catalogId === "dining-table-temu-609726-110-150") return "fluted-round-pedestal";
   return "round-metal-frame";
 }
 

@@ -127,9 +127,11 @@ describe("PlannerWorkspace", () => {
     assert.equal(store.getState().document.placements.find((item) => item.id === "living-bozan-table")?.catalogId, "dining-table-kaufland-567080013-120-160");
     assert.deepEqual(store.getState().document.placements.find((item) => item.id === "living-bozan-table")?.size, { width: 1.6, depth: 0.8, height: 0.755 });
 
-    const unknown = screen.getByRole("tab", { name: /Temu 609726/ });
-    assert.equal((unknown as HTMLButtonElement).disabled, true);
-    assert.equal(unknown.getAttribute("aria-disabled"), "true");
+    const temu609726 = screen.getByRole("tab", { name: /Temu 110 → 150/ });
+    await user.click(temu609726);
+    expect(screen.getByText("110 × 110 × 75 cm")).toBeTruthy();
+    await user.click(screen.getByRole("tab", { name: "1 Auszug · oval" }));
+    expect(screen.getByText("150 × 110 × 75 cm")).toBeTruthy();
   });
 
   test("switches the four measured chair models and applies their footprints", async () => {
