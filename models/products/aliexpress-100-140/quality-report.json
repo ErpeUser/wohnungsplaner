@@ -1,0 +1,72 @@
+{
+  "modelId": "aliexpress-100-140",
+  "assetType": "product",
+  "status": "reference-only",
+  "identity": {
+    "displayName": "AliExpress Tisch 100 → 140",
+    "category": "table",
+    "sourceConfidence": "source-linked",
+    "canonicalId": "dining-table-aliexpress-100-140"
+  },
+  "referenceSources": {
+    "manifestSourceUrls": [
+      "https://de.aliexpress.com/item/1005013489223528.html?gatewayAdapt=glo2deu"
+    ],
+    "linkEntries": [
+      "# Keine externe Produktquelle im Datensatz hinterlegt."
+    ],
+    "status": "documented"
+  },
+  "dimensions": {
+    "status": "verified-in-alias-manifest",
+    "verified": [
+      {
+        "closedCm": {
+          "width": 100,
+          "depth": 100,
+          "height": 75
+        },
+        "extendedCm": {
+          "width": 140,
+          "depth": 100,
+          "height": 75
+        }
+      }
+    ],
+    "estimated": []
+  },
+  "assetFiles": [],
+  "reconstruction": {
+    "method": "parametric-runtime-preserved",
+    "meshPresent": false,
+    "meshFiles": []
+  },
+  "materials": {
+    "declared": [
+      "oak-top",
+      "dark-metal-frame"
+    ],
+    "pbrTexturesPresent": false,
+    "textureFiles": []
+  },
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "dining-table-aliexpress-100-140",
+    "profile": "round-metal-frame",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  },
+  "checks": {
+    "manifestJson": "passed",
+    "linkManifestConsistency": "no-url-to-synchronize",
+    "geometry": "not-run-no-mesh",
+    "materials": "not-run-no-pbr-textures",
+    "viewerIntegration": "parametric-fallback-preserved"
+  },
+  "limitations": [
+    "No repository mesh asset is present; geometry remains runtime-parametric.",
+    "No repository PBR texture set is present; material fidelity remains runtime-defined.",
+    "Exact dimensions and product identity require source-specific verification before a photorealistic asset can be claimed.",
+    "This folder is a retained source alias; runtime catalog resolution points to the canonical dining-table folder."
+  ],
+  "auditedAt": "2026-11-12"
+}

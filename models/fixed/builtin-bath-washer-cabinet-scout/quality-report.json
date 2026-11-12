@@ -1,0 +1,53 @@
+{
+  "modelId": "builtin-bath-washer-cabinet-scout",
+  "assetType": "fixed",
+  "status": "reference-only",
+  "identity": {
+    "displayName": "Scout Waschmaschinenschrank · 63 × 191 × 24 cm",
+    "category": "fixed-interior",
+    "sourceConfidence": "source-linked"
+  },
+  "referenceSources": {
+    "manifestSourceUrls": [
+      "https://www.moebelix.at/p/mid-you-waschmaschinenschrank-scout-kaschmir-naturfarben-b-63-cm-00184900692R"
+    ],
+    "linkEntries": [
+      "https://www.moebelix.at/p/mid-you-waschmaschinenschrank-scout-kaschmir-naturfarben-b-63-cm-00184900692R"
+    ],
+    "status": "documented"
+  },
+  "dimensions": {
+    "status": "not-verified-in-repository",
+    "verified": [],
+    "estimated": []
+  },
+  "assetFiles": [],
+  "reconstruction": {
+    "method": "parametric-runtime-preserved",
+    "meshPresent": false,
+    "meshFiles": []
+  },
+  "materials": {
+    "declared": [],
+    "pbrTexturesPresent": false,
+    "textureFiles": []
+  },
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "bath-washer-cabinet-scout",
+    "sourceFile": "app/planner/scene-3d"
+  },
+  "checks": {
+    "manifestJson": "passed",
+    "linkManifestConsistency": "synchronized",
+    "geometry": "not-run-no-mesh",
+    "materials": "not-run-no-pbr-textures",
+    "viewerIntegration": "parametric-fallback-preserved"
+  },
+  "limitations": [
+    "No repository mesh asset is present; geometry remains runtime-parametric.",
+    "No repository PBR texture set is present; material fidelity remains runtime-defined.",
+    "Exact dimensions and product identity require source-specific verification before a photorealistic asset can be claimed."
+  ],
+  "auditedAt": "2026-11-12"
+}

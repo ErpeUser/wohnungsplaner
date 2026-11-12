@@ -3,14 +3,40 @@
   "displayName": "Temu Tisch 110 → 150 mit Riffsockel",
   "category": "table",
   "status": "reference-only",
-  "sourceUrls": [],
-  "materials": [],
+  "sourceUrls": [
+    "https://www.temu.com/at/g-609726356120319.html"
+  ],
+  "materials": [
+    "natural-oak",
+    "fluted-pedestal"
+  ],
   "variants": [
-    "default"
+    "closed",
+    "extended"
   ],
   "runtime": {
     "renderer": "parametric",
     "catalogId": "dining-table-temu-609726-110-150",
-    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+    "sourceFile": "app/planner/scene-3d/furniture.tsx",
+    "profile": "fluted-round-pedestal"
+  },
+  "aliasIds": [
+    "temu-609726-110-150"
+  ],
+  "metadataSource": {
+    "folder": "temu-609726-110-150",
+    "reason": "preserve verified alias metadata"
+  },
+  "dimensions": {
+    "closedCm": {
+      "width": 110,
+      "depth": 110,
+      "height": 75
+    },
+    "extendedCm": {
+      "width": 150,
+      "depth": 110,
+      "height": 75
+    }
   }
 }

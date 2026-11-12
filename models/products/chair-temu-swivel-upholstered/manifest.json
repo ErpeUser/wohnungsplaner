@@ -3,7 +3,10 @@
   "displayName": "Temu Drehstuhl gepolstert",
   "category": "chair",
   "status": "reference-only",
-  "sourceUrls": [],
+  "sourceUrls": [
+    "https://www.temu.com/goods.html?_bg_fs=1&goods_id=606097863765202&sku_id=93416948027298&_oak_page_source=501&page_source=10037&top_gallery_url=https%3A%2F%2Fimg.kwcdn.com%2Fproduct%2Ffancy%2F53b253e1-a9b1-4517-b392-efa473b51af4.jpg",
+    "https://www.woltu.eu/en/p/woltu-swivel-dining-chairs-set-of-2-with-armrests-backrest-with-faux-leather-cover"
+  ],
   "materials": [],
   "variants": [
     "default"

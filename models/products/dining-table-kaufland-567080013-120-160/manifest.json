@@ -3,14 +3,43 @@
   "displayName": "Flieks Tisch 120 → 160",
   "category": "table",
   "status": "reference-only",
-  "sourceUrls": [],
-  "materials": [],
+  "sourceUrls": [
+    "https://www.kaufland.at/product/567080013/"
+  ],
+  "materials": [
+    "walnut-mdf",
+    "vertical-fluting"
+  ],
   "variants": [
-    "default"
+    "closed",
+    "extended"
   ],
   "runtime": {
     "renderer": "parametric",
     "catalogId": "dining-table-kaufland-567080013-120-160",
-    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+    "sourceFile": "app/planner/scene-3d/furniture.tsx",
+    "profile": "fluted-extension-pedestal"
+  },
+  "aliasIds": [
+    "kaufland-567080013-120-160"
+  ],
+  "metadataSource": {
+    "folder": "kaufland-567080013-120-160",
+    "reason": "preserve verified alias metadata"
+  },
+  "dimensions": {
+    "closedCm": {
+      "width": 120,
+      "depth": 80,
+      "height": 75.5
+    },
+    "extendedCm": {
+      "width": 160,
+      "depth": 80,
+      "height": 75.5
+    },
+    "topThicknessCm": 1.8,
+    "endPiecesCm": 60,
+    "middleLeafCm": 40
   }
 }

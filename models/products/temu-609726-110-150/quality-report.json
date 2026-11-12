@@ -1,0 +1,72 @@
+{
+  "modelId": "temu-609726-110-150",
+  "assetType": "product",
+  "status": "reference-captured",
+  "identity": {
+    "displayName": "Temu FAUMRTA Rund-/Ovaltisch 110 → 150",
+    "category": "table",
+    "sourceConfidence": "source-linked",
+    "canonicalId": "dining-table-temu-609726-110-150"
+  },
+  "referenceSources": {
+    "manifestSourceUrls": [
+      "https://www.temu.com/at/g-609726356120319.html"
+    ],
+    "linkEntries": [
+      "# Keine externe Produktquelle im Datensatz hinterlegt."
+    ],
+    "status": "documented"
+  },
+  "dimensions": {
+    "status": "verified-in-alias-manifest",
+    "verified": [
+      {
+        "closedCm": {
+          "width": 110,
+          "depth": 110,
+          "height": 75
+        },
+        "extendedCm": {
+          "width": 150,
+          "depth": 110,
+          "height": 75
+        }
+      }
+    ],
+    "estimated": []
+  },
+  "assetFiles": [],
+  "reconstruction": {
+    "method": "parametric-runtime-preserved",
+    "meshPresent": false,
+    "meshFiles": []
+  },
+  "materials": {
+    "declared": [
+      "natural-oak",
+      "fluted-pedestal"
+    ],
+    "pbrTexturesPresent": false,
+    "textureFiles": []
+  },
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "dining-table-temu-609726-110-150",
+    "profile": "fluted-round-pedestal",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  },
+  "checks": {
+    "manifestJson": "passed",
+    "linkManifestConsistency": "no-url-to-synchronize",
+    "geometry": "not-run-no-mesh",
+    "materials": "not-run-no-pbr-textures",
+    "viewerIntegration": "parametric-fallback-preserved"
+  },
+  "limitations": [
+    "No repository mesh asset is present; geometry remains runtime-parametric.",
+    "No repository PBR texture set is present; material fidelity remains runtime-defined.",
+    "Exact dimensions and product identity require source-specific verification before a photorealistic asset can be claimed.",
+    "This folder is a retained source alias; runtime catalog resolution points to the canonical dining-table folder."
+  ],
+  "auditedAt": "2026-11-12"
+}

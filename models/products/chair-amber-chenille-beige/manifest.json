@@ -3,7 +3,9 @@
   "displayName": "Armlehnstuhl Amber",
   "category": "chair",
   "status": "reference-only",
-  "sourceUrls": [],
+  "sourceUrls": [
+    "https://www.moebelix.at/p/livetastic-armlehnstuhl-amber-chenille-beige-b-56-cm-001125032251"
+  ],
   "materials": [],
   "variants": [
     "default"

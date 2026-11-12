@@ -2,9 +2,35 @@
   "id": "temu-609726-110-150",
   "displayName": "Temu FAUMRTA Rund-/Ovaltisch 110 → 150",
   "status": "reference-captured",
-  "sourceUrls": ["https://www.temu.com/at/g-609726356120319.html"],
-  "dimensions": {"closedCm": {"width": 110, "depth": 110, "height": 75}, "extendedCm": {"width": 150, "depth": 110, "height": 75}},
-  "materials": ["natural-oak", "fluted-pedestal"],
-  "variants": ["closed", "extended"],
-  "runtime": {"renderer": "parametric", "catalogId": "dining-table-temu-609726-110-150", "profile": "fluted-round-pedestal", "sourceFile": "app/planner/scene-3d/furniture.tsx"}
+  "sourceUrls": [
+    "https://www.temu.com/at/g-609726356120319.html"
+  ],
+  "dimensions": {
+    "closedCm": {
+      "width": 110,
+      "depth": 110,
+      "height": 75
+    },
+    "extendedCm": {
+      "width": 150,
+      "depth": 110,
+      "height": 75
+    }
+  },
+  "materials": [
+    "natural-oak",
+    "fluted-pedestal"
+  ],
+  "variants": [
+    "closed",
+    "extended"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "dining-table-temu-609726-110-150",
+    "profile": "fluted-round-pedestal",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  },
+  "canonicalId": "dining-table-temu-609726-110-150",
+  "metadataRole": "source-alias"
 }

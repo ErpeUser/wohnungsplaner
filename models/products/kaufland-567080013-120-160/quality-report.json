@@ -1,0 +1,77 @@
+{
+  "modelId": "kaufland-567080013-120-160",
+  "assetType": "product",
+  "status": "reference-captured",
+  "identity": {
+    "displayName": "Flieks Strukturfuß 120 → 160",
+    "category": "table",
+    "sourceConfidence": "source-linked",
+    "canonicalId": "dining-table-kaufland-567080013-120-160"
+  },
+  "referenceSources": {
+    "manifestSourceUrls": [
+      "https://www.kaufland.at/product/567080013/"
+    ],
+    "linkEntries": [
+      "# Keine externe Produktquelle im Datensatz hinterlegt."
+    ],
+    "status": "documented"
+  },
+  "dimensions": {
+    "status": "verified-in-alias-manifest",
+    "verified": [
+      {
+        "closedCm": {
+          "width": 120,
+          "depth": 80,
+          "height": 75.5
+        },
+        "extendedCm": {
+          "width": 160,
+          "depth": 80,
+          "height": 75.5
+        },
+        "topThicknessCm": 1.8,
+        "endPiecesCm": 60,
+        "middleLeafCm": 40
+      }
+    ],
+    "estimated": []
+  },
+  "assetFiles": [
+    "references/dimensions.jpg",
+    "references/normal.png"
+  ],
+  "reconstruction": {
+    "method": "parametric-runtime-preserved",
+    "meshPresent": false,
+    "meshFiles": []
+  },
+  "materials": {
+    "declared": [
+      "walnut-mdf",
+      "vertical-fluting"
+    ],
+    "pbrTexturesPresent": true,
+    "textureFiles": []
+  },
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "dining-table-kaufland-567080013-120-160",
+    "profile": "fluted-extension-pedestal",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  },
+  "checks": {
+    "manifestJson": "passed",
+    "linkManifestConsistency": "no-url-to-synchronize",
+    "geometry": "not-run-no-mesh",
+    "materials": "pending-review",
+    "viewerIntegration": "parametric-fallback-preserved"
+  },
+  "limitations": [
+    "No repository mesh asset is present; geometry remains runtime-parametric.",
+    "Exact dimensions and product identity require source-specific verification before a photorealistic asset can be claimed.",
+    "This folder is a retained source alias; runtime catalog resolution points to the canonical dining-table folder."
+  ],
+  "auditedAt": "2026-11-12"
+}

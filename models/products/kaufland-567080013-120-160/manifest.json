@@ -2,9 +2,38 @@
   "id": "kaufland-567080013-120-160",
   "displayName": "Flieks Strukturfuß 120 → 160",
   "status": "reference-captured",
-  "sourceUrls": ["https://www.kaufland.at/product/567080013/"],
-  "dimensions": {"closedCm": {"width": 120, "depth": 80, "height": 75.5}, "extendedCm": {"width": 160, "depth": 80, "height": 75.5}, "topThicknessCm": 1.8, "endPiecesCm": 60, "middleLeafCm": 40},
-  "materials": ["walnut-mdf", "vertical-fluting"],
-  "variants": ["closed", "extended"],
-  "runtime": {"renderer": "parametric", "catalogId": "dining-table-kaufland-567080013-120-160", "profile": "fluted-extension-pedestal", "sourceFile": "app/planner/scene-3d/furniture.tsx"}
+  "sourceUrls": [
+    "https://www.kaufland.at/product/567080013/"
+  ],
+  "dimensions": {
+    "closedCm": {
+      "width": 120,
+      "depth": 80,
+      "height": 75.5
+    },
+    "extendedCm": {
+      "width": 160,
+      "depth": 80,
+      "height": 75.5
+    },
+    "topThicknessCm": 1.8,
+    "endPiecesCm": 60,
+    "middleLeafCm": 40
+  },
+  "materials": [
+    "walnut-mdf",
+    "vertical-fluting"
+  ],
+  "variants": [
+    "closed",
+    "extended"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "dining-table-kaufland-567080013-120-160",
+    "profile": "fluted-extension-pedestal",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  },
+  "canonicalId": "dining-table-kaufland-567080013-120-160",
+  "metadataRole": "source-alias"
 }

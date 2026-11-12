@@ -3,7 +3,9 @@
   "displayName": "Armlehnstuhl Kaleo",
   "category": "chair",
   "status": "reference-only",
-  "sourceUrls": [],
+  "sourceUrls": [
+    "https://www.moebelix.at/p/livetastic-armlehnstuhl-kaleo-chenille-beige-b-63-cm-001634004202"
+  ],
   "materials": [],
   "variants": [
     "default"

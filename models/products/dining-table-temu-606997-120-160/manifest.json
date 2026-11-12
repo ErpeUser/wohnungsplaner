@@ -3,14 +3,42 @@
   "displayName": "Temu Tisch 120 → 160 mit Stauraum",
   "category": "table",
   "status": "reference-only",
-  "sourceUrls": [],
-  "materials": [],
+  "sourceUrls": [
+    "https://www.temu.com/at/g-606997911062061.html",
+    "https://www.temu.com/at/ausziehbarer-runder-esstisch-eichenende-erweiterbare-tischplatte-mit-aufbewahrungsschrank-und-schiebeturen-und-verstellbaren-regalen-esszimmer-wohnzimmer-120-160x120x75-5cm-g-606997911062061.html"
+  ],
+  "materials": [
+    "natural-oak",
+    "frosted-glass",
+    "warm-interior-shadow"
+  ],
   "variants": [
-    "default"
+    "closed",
+    "extended"
   ],
   "runtime": {
     "renderer": "parametric",
     "catalogId": "dining-table-temu-606997-120-160",
-    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+    "sourceFile": "app/planner/scene-3d/furniture.tsx",
+    "profile": "storage-pedestal"
+  },
+  "aliasIds": [
+    "temu-606997-120-160"
+  ],
+  "metadataSource": {
+    "folder": "temu-606997-120-160",
+    "reason": "preserve verified alias metadata"
+  },
+  "dimensions": {
+    "closedCm": {
+      "width": 120,
+      "depth": 120,
+      "height": 75.5
+    },
+    "extendedCm": {
+      "width": 160,
+      "depth": 120,
+      "height": 75.5
+    }
   }
 }

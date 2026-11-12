@@ -1,0 +1,53 @@
+{
+  "modelId": "chair-kaleo-chenille-beige",
+  "assetType": "product",
+  "status": "reference-only",
+  "identity": {
+    "displayName": "Armlehnstuhl Kaleo",
+    "category": "chair",
+    "sourceConfidence": "source-linked"
+  },
+  "referenceSources": {
+    "manifestSourceUrls": [
+      "https://www.moebelix.at/p/livetastic-armlehnstuhl-kaleo-chenille-beige-b-63-cm-001634004202"
+    ],
+    "linkEntries": [
+      "https://www.moebelix.at/p/livetastic-armlehnstuhl-kaleo-chenille-beige-b-63-cm-001634004202"
+    ],
+    "status": "documented"
+  },
+  "dimensions": {
+    "status": "not-verified-in-repository",
+    "verified": [],
+    "estimated": []
+  },
+  "assetFiles": [],
+  "reconstruction": {
+    "method": "parametric-runtime-preserved",
+    "meshPresent": false,
+    "meshFiles": []
+  },
+  "materials": {
+    "declared": [],
+    "pbrTexturesPresent": false,
+    "textureFiles": []
+  },
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "chair-kaleo-chenille-beige",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  },
+  "checks": {
+    "manifestJson": "passed",
+    "linkManifestConsistency": "synchronized",
+    "geometry": "not-run-no-mesh",
+    "materials": "not-run-no-pbr-textures",
+    "viewerIntegration": "parametric-fallback-preserved"
+  },
+  "limitations": [
+    "No repository mesh asset is present; geometry remains runtime-parametric.",
+    "No repository PBR texture set is present; material fidelity remains runtime-defined.",
+    "Exact dimensions and product identity require source-specific verification before a photorealistic asset can be claimed."
+  ],
+  "auditedAt": "2026-11-12"
+}

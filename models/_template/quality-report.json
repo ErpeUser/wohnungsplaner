@@ -1,0 +1,48 @@
+{
+  "modelId": "replace-with-model-id",
+  "assetType": "product",
+  "status": "reference-only",
+  "identity": {
+    "displayName": "Möbelname",
+    "category": null,
+    "sourceConfidence": "unverified"
+  },
+  "referenceSources": {
+    "manifestSourceUrls": [],
+    "linkEntries": [],
+    "status": "not-reviewed"
+  },
+  "dimensions": {
+    "status": "not-verified-in-repository",
+    "verified": [],
+    "estimated": []
+  },
+  "assetFiles": [],
+  "reconstruction": {
+    "method": "not-selected",
+    "meshPresent": false,
+    "meshFiles": []
+  },
+  "materials": {
+    "declared": [],
+    "pbrTexturesPresent": false,
+    "textureFiles": []
+  },
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": null,
+    "profile": null,
+    "sourceFile": null
+  },
+  "checks": {
+    "manifestJson": "pending",
+    "linkManifestConsistency": "pending",
+    "geometry": "pending",
+    "materials": "pending",
+    "viewerIntegration": "not-verified"
+  },
+  "limitations": [
+    "Replace this report with source-specific evidence before claiming photorealistic readiness."
+  ],
+  "auditedAt": null
+}

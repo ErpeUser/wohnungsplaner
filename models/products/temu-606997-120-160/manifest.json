@@ -2,9 +2,36 @@
   "id": "temu-606997-120-160",
   "displayName": "Temu Stauraumtisch 120 → 160",
   "status": "reference-captured",
-  "sourceUrls": ["https://www.temu.com/at/g-606997911062061.html"],
-  "dimensions": {"closedCm": {"width": 120, "depth": 120, "height": 75.5}, "extendedCm": {"width": 160, "depth": 120, "height": 75.5}},
-  "materials": ["natural-oak", "frosted-glass", "warm-interior-shadow"],
-  "variants": ["closed", "extended"],
-  "runtime": {"renderer": "parametric", "catalogId": "dining-table-temu-606997-120-160", "profile": "storage-pedestal", "sourceFile": "app/planner/scene-3d/furniture.tsx"}
+  "sourceUrls": [
+    "https://www.temu.com/at/g-606997911062061.html"
+  ],
+  "dimensions": {
+    "closedCm": {
+      "width": 120,
+      "depth": 120,
+      "height": 75.5
+    },
+    "extendedCm": {
+      "width": 160,
+      "depth": 120,
+      "height": 75.5
+    }
+  },
+  "materials": [
+    "natural-oak",
+    "frosted-glass",
+    "warm-interior-shadow"
+  ],
+  "variants": [
+    "closed",
+    "extended"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "dining-table-temu-606997-120-160",
+    "profile": "storage-pedestal",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  },
+  "canonicalId": "dining-table-temu-606997-120-160",
+  "metadataRole": "source-alias"
 }

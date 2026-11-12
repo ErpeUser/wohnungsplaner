@@ -5,7 +5,10 @@
   "sourceUrls": [],
   "dimensions": {},
   "materials": [],
-  "variants": ["closed", "extended"],
+  "variants": [
+    "closed",
+    "extended"
+  ],
   "runtime": {
     "renderer": "parametric",
     "catalogId": null,

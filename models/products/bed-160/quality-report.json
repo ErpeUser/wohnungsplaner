@@ -1,0 +1,51 @@
+{
+  "modelId": "bed-160",
+  "assetType": "product",
+  "status": "reference-only",
+  "identity": {
+    "displayName": "Doppelbett 160",
+    "category": "bed",
+    "sourceConfidence": "catalog-or-folder-id"
+  },
+  "referenceSources": {
+    "manifestSourceUrls": [],
+    "linkEntries": [
+      "# Keine externe Produktquelle im Datensatz hinterlegt."
+    ],
+    "status": "no-external-source-documented"
+  },
+  "dimensions": {
+    "status": "not-verified-in-repository",
+    "verified": [],
+    "estimated": []
+  },
+  "assetFiles": [],
+  "reconstruction": {
+    "method": "parametric-runtime-preserved",
+    "meshPresent": false,
+    "meshFiles": []
+  },
+  "materials": {
+    "declared": [],
+    "pbrTexturesPresent": false,
+    "textureFiles": []
+  },
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "bed-160",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  },
+  "checks": {
+    "manifestJson": "passed",
+    "linkManifestConsistency": "no-url-to-synchronize",
+    "geometry": "not-run-no-mesh",
+    "materials": "not-run-no-pbr-textures",
+    "viewerIntegration": "parametric-fallback-preserved"
+  },
+  "limitations": [
+    "No repository mesh asset is present; geometry remains runtime-parametric.",
+    "No repository PBR texture set is present; material fidelity remains runtime-defined.",
+    "Exact dimensions and product identity require source-specific verification before a photorealistic asset can be claimed."
+  ],
+  "auditedAt": "2026-11-12"
+}

@@ -1,0 +1,53 @@
+{
+  "modelId": "builtin-wc-paper-holder",
+  "assetType": "fixed",
+  "status": "reference-only",
+  "identity": {
+    "displayName": "Eiche-Eisen-Ablage mit Toilettenpapierhalter · Temu",
+    "category": "fixed-interior",
+    "sourceConfidence": "source-linked"
+  },
+  "referenceSources": {
+    "manifestSourceUrls": [
+      "https://www.temu.com/goods.html?_bg_fs=1&goods_id=601100249492431&sku_id=17595354506975"
+    ],
+    "linkEntries": [
+      "https://www.temu.com/goods.html?_bg_fs=1&goods_id=601100249492431&sku_id=17595354506975"
+    ],
+    "status": "documented"
+  },
+  "dimensions": {
+    "status": "not-verified-in-repository",
+    "verified": [],
+    "estimated": []
+  },
+  "assetFiles": [],
+  "reconstruction": {
+    "method": "parametric-runtime-preserved",
+    "meshPresent": false,
+    "meshFiles": []
+  },
+  "materials": {
+    "declared": [],
+    "pbrTexturesPresent": false,
+    "textureFiles": []
+  },
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "wc-paper-holder",
+    "sourceFile": "app/planner/scene-3d"
+  },
+  "checks": {
+    "manifestJson": "passed",
+    "linkManifestConsistency": "synchronized",
+    "geometry": "not-run-no-mesh",
+    "materials": "not-run-no-pbr-textures",
+    "viewerIntegration": "parametric-fallback-preserved"
+  },
+  "limitations": [
+    "No repository mesh asset is present; geometry remains runtime-parametric.",
+    "No repository PBR texture set is present; material fidelity remains runtime-defined.",
+    "Exact dimensions and product identity require source-specific verification before a photorealistic asset can be claimed."
+  ],
+  "auditedAt": "2026-11-12"
+}

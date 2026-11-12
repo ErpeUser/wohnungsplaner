@@ -1,0 +1,51 @@
+{
+  "modelId": "fixture-z1-outlets",
+  "assetType": "fixed",
+  "status": "reference-only",
+  "identity": {
+    "displayName": "Medien-Anschlussgruppe Südwand",
+    "category": "fixed-interior",
+    "sourceConfidence": "catalog-or-folder-id"
+  },
+  "referenceSources": {
+    "manifestSourceUrls": [],
+    "linkEntries": [
+      "# Wohnungselement ohne externe Produktquelle; Teil der festen Wohnung/Architektur."
+    ],
+    "status": "no-external-source-documented"
+  },
+  "dimensions": {
+    "status": "not-verified-in-repository",
+    "verified": [],
+    "estimated": []
+  },
+  "assetFiles": [],
+  "reconstruction": {
+    "method": "parametric-runtime-preserved",
+    "meshPresent": false,
+    "meshFiles": []
+  },
+  "materials": {
+    "declared": [],
+    "pbrTexturesPresent": false,
+    "textureFiles": []
+  },
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": null,
+    "sourceFile": "app/planner/scene-3d"
+  },
+  "checks": {
+    "manifestJson": "passed",
+    "linkManifestConsistency": "no-url-to-synchronize",
+    "geometry": "not-run-no-mesh",
+    "materials": "not-run-no-pbr-textures",
+    "viewerIntegration": "parametric-fallback-preserved"
+  },
+  "limitations": [
+    "No repository mesh asset is present; geometry remains runtime-parametric.",
+    "No repository PBR texture set is present; material fidelity remains runtime-defined.",
+    "Exact dimensions and product identity require source-specific verification before a photorealistic asset can be claimed."
+  ],
+  "auditedAt": "2026-11-12"
+}
