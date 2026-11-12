@@ -1,9 +1,9 @@
-# Modellordner
+# Flieks Tisch 120 → 160
 
-Dieser Ordner enthält Quellen, Referenzbilder, PBR-Texturen, Mesh-Dateien und Runtime-Zuordnung für dieses Innenausstattungsmodell.
+Diese Referenz bleibt als kanonischer Runtime-Ordner erhalten. Die kurze Quell-ID `kaufland-567080013-120-160` bleibt wegen möglicher gespeicherter Platzierungen bestehen.
 
-- source/ Rohbilder, Videos, URLs und HTML
-- references/ normale Ansichten, Maßgrafiken und Detailfotos
-- textures/ basecolor, roughness, normal, metallic, alpha
-- mesh/ GLB/GLTF/OBJ/FBX und Exportnotizen
-- runtime/ renderer- und Variantenhinweise
+- Quelle: `link.txt` und `manifest.json.sourceUrls`
+- Verifizierte Varianten: geschlossen 120 × 80 × 75,5 cm, ausgezogen 160 × 80 × 75,5 cm
+- Materialhinweise: `walnut-mdf`, `vertical-fluting`
+- Lokale Referenzen liegen im Aliasordner: `references/dimensions.jpg`, `references/normal.png`
+- Mesh/PBR: kein Mesh und kein vollständiges PBR-Set vorhanden; der parametrische Runtime-Fallback bleibt aktiv

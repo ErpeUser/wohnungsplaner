@@ -1,9 +1,9 @@
-# Modellordner
+# Temu FAUMRTA Tisch 110 → 150
 
-Dieser Ordner enthält Quellen, Referenzbilder, PBR-Texturen, Mesh-Dateien und Runtime-Zuordnung für dieses Innenausstattungsmodell.
+Diese Referenz bleibt als kanonischer Runtime-Ordner erhalten. Die kurze Quell-ID `temu-609726-110-150` bleibt wegen möglicher gespeicherter Platzierungen bestehen.
 
-- source/ Rohbilder, Videos, URLs und HTML
-- references/ normale Ansichten, Maßgrafiken und Detailfotos
-- textures/ basecolor, roughness, normal, metallic, alpha
-- mesh/ GLB/GLTF/OBJ/FBX und Exportnotizen
-- runtime/ renderer- und Variantenhinweise
+- Quelle: `link.txt` und `manifest.json.sourceUrls`
+- Verifizierte Varianten: geschlossen 110 × 110 × 75 cm, ausgezogen 150 × 110 × 75 cm
+- Materialhinweise: `natural-oak`, `fluted-pedestal`
+- Lokale Referenzbilder: keine
+- Mesh/PBR: nicht vorhanden; der parametrische Runtime-Fallback bleibt aktiv

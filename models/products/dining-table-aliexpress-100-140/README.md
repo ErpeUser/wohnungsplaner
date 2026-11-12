@@ -1,9 +1,9 @@
-# Modellordner
+# AliExpress Tisch 100 → 140
 
-Dieser Ordner enthält Quellen, Referenzbilder, PBR-Texturen, Mesh-Dateien und Runtime-Zuordnung für dieses Innenausstattungsmodell.
+Diese Referenz bleibt als eigener Modellordner erhalten und wird zur Laufzeit über `dining-table-aliexpress-100-140` aufgelöst.
 
-- source/ Rohbilder, Videos, URLs und HTML
-- references/ normale Ansichten, Maßgrafiken und Detailfotos
-- textures/ basecolor, roughness, normal, metallic, alpha
-- mesh/ GLB/GLTF/OBJ/FBX und Exportnotizen
-- runtime/ renderer- und Variantenhinweise
+- Quelle: `link.txt` und `manifest.json.sourceUrls`
+- Verifizierte Varianten: geschlossen 100 × 100 × 75 cm, ausgezogen 140 × 100 × 75 cm
+- Materialhinweise: `oak-top`, `dark-metal-frame`
+- Lokale Referenzbilder: keine
+- Mesh/PBR: nicht vorhanden; der parametrische Runtime-Fallback bleibt aktiv
