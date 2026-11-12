@@ -20,7 +20,7 @@ Die Prüfung des Default-Branches `main` am 2026-11-12 umfasst:
 - **0 GLB/GLTF/OBJ/FBX-Meshes innerhalb von `models/**`** (die 6 bestehenden Runtime-GLBs unter `public/planner-assets/models/` bleiben unverändert)
 - **0 importierte PBR-Textursets**
 - **3 lokale Referenzbilder** in den vorhandenen Tabellenordnern
-- **21 eindeutige externe URLs**, davon 17 Produkt-URLs und 4 Fixed-Element-URLs (26 manifestierte URL-Einträge; Alias- und kanonische Ordner können dieselbe Quelle wiederholen)
+- **22 eindeutige externe URLs**, davon 18 Produkt-URLs und 4 Fixed-Element-URLs (28 manifestierte URL-Einträge und 23 URL-Einträge in `link.txt`; Alias- und kanonische Ordner können dieselbe Quelle wiederholen)
 
 Die aktuelle Runtime-Zuordnung bleibt parametrisch. Die Auditberichte kennzeichnen deshalb Geometrie und Materialprüfung ohne Mesh beziehungsweise Textur als offen. Es wird keine Viewer-Integration behauptet, solange der zentrale Viewer unter `app/planner/scene-3d/` die Dateien nicht lädt.
 
