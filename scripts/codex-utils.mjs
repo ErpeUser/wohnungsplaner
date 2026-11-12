@@ -22,6 +22,9 @@ export async function command(command, args = [], options = {}) {
       env: { ...process.env, ...env },
       maxBuffer: 16 * 1024 * 1024,
       windowsHide: true,
+      // Windows exposes npm as a .cmd shim; Node cannot spawn that shim
+      // directly via execFile without a shell.
+      shell: process.platform === "win32" && /\.(?:cmd|bat)$/i.test(command),
     });
     return { command: display, stdout: result.stdout ?? "", stderr: result.stderr ?? "", code: 0 };
   } catch (error) {
