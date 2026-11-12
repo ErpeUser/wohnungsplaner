@@ -333,6 +333,17 @@ function movePlacement(
   }
   const selected = document.placements.find((item) => item.id === placementId);
   if (!selected) return reject(document, "not-found", `Das Objekt ${placementId} wurde nicht gefunden.`);
+  if (isDiningChairPlacement(selected)) {
+    const candidate = { ...selected, position: { ...position } };
+    const ignorePlacementIds = new Set(
+      document.placements.filter((item) => item.groupId === selected.groupId).map((item) => item.id),
+    );
+    return validatePlacement(document, candidate, (placement) => ({
+      ...document,
+      updatedAt: timestamp(),
+      placements: document.placements.map((item) => item.id === placement.id ? placement : item),
+    }), ignorePlacementIds);
+  }
   if (!selected.groupId) {
     return updatePlacement(document, placementId, (placement) => ({
       ...placement,
@@ -380,6 +391,10 @@ function movePlacement(
     updatedAt: timestamp(),
     placements: document.placements.map((item) => candidateById.get(item.id) ?? item),
   }, warnings);
+}
+
+function isDiningChairPlacement(placement: PlannerPlacement) {
+  return /^living-kaleo-chair-(west|east|south|north)$/.test(placement.id);
 }
 
 function updatePlacement(

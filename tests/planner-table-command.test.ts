@@ -85,3 +85,19 @@ test("lehnt Produktwechsel für eingebaute Elemente ab", () => {
   });
   assert.equal(result.error?.code, "locked");
 });
+
+test("verschiebt einen Esszimmerstuhl einzeln ohne Tischgruppe oder Tischkollision", () => {
+  const chair = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "living-kaleo-chair-west")!;
+  const table = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === tableId)!;
+  const otherChair = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "living-kaleo-chair-east")!;
+  const result = applyPlannerCommand(DEFAULT_APARTMENT_DOCUMENT, {
+    type: "movePlacement",
+    placementId: chair.id,
+    position: table.position,
+  });
+
+  assert.equal(result.error, undefined);
+  assert.deepEqual(result.document.placements.find((item) => item.id === chair.id)?.position, table.position);
+  assert.deepEqual(result.document.placements.find((item) => item.id === tableId)?.position, table.position);
+  assert.deepEqual(result.document.placements.find((item) => item.id === otherChair.id)?.position, otherChair.position);
+});
