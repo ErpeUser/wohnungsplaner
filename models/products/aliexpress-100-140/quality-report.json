@@ -57,17 +57,16 @@
   },
   "checks": {
     "manifestJson": "passed",
-    "linkManifestConsistency": "source-only-alias",
+    "linkManifestConsistency": "no-url-to-synchronize",
     "geometry": "not-run-no-mesh",
     "materials": "not-run-no-pbr-textures",
     "viewerIntegration": "parametric-fallback-preserved"
   },
   "limitations": [
-    "No repository mesh asset is present; geometry remains runtime-parametric.",
+    "No mesh asset is present in this model folder; existing runtime GLBs remain outside models/** and are not copied into this folder.",
     "No repository PBR texture set is present; material fidelity remains runtime-defined.",
     "Exact dimensions and product identity require source-specific verification before a photorealistic asset can be claimed.",
-    "This folder is a retained source alias; runtime catalog resolution points to the canonical dining-table folder.",
-    "The source URL is intentionally stored on this retained alias; the canonical runtime folder carries the synchronized URL."
+    "This folder is a retained source alias; runtime catalog resolution points to the canonical dining-table folder."
   ],
   "auditedAt": "2026-11-12"
 }
