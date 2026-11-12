@@ -336,7 +336,9 @@ function movePlacement(
   if (isDiningChairPlacement(selected)) {
     const candidate = { ...selected, position: { ...position } };
     const ignorePlacementIds = new Set(
-      document.placements.filter((item) => item.groupId === selected.groupId).map((item) => item.id),
+      document.placements
+        .filter((item) => item.id === "living-bozan-table" || isDiningChairPlacement(item))
+        .map((item) => item.id),
     );
     return validatePlacement(document, candidate, (placement) => ({
       ...document,
