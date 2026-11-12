@@ -49,7 +49,7 @@
       "frosted-glass",
       "warm-interior-shadow"
     ],
-    "pbrTexturesPresent": true,
+    "pbrTexturesPresent": false,
     "textureFiles": []
   },
   "runtime": {
@@ -60,15 +60,17 @@
   },
   "checks": {
     "manifestJson": "passed",
-    "linkManifestConsistency": "no-url-to-synchronize",
+    "linkManifestConsistency": "source-only-alias",
     "geometry": "not-run-no-mesh",
-    "materials": "pending-review",
+    "materials": "not-run-no-pbr-textures",
     "viewerIntegration": "parametric-fallback-preserved"
   },
   "limitations": [
     "No mesh asset is present in this model folder; existing runtime GLBs remain outside models/** and are not copied into this folder.",
     "Exact dimensions and product identity require source-specific verification before a photorealistic asset can be claimed.",
-    "This folder is a retained source alias; runtime catalog resolution points to the canonical dining-table folder."
+    "This folder is a retained source alias; runtime catalog resolution points to the canonical dining-table folder.",
+    "The source URL is intentionally stored on this retained alias; the canonical runtime folder carries the synchronized URL.",
+    "The existing references/normal.png is a reference image, not a verified PBR normal texture."
   ],
   "auditedAt": "2026-11-12"
 }
