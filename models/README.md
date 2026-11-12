@@ -1,16 +1,20 @@
-# Möbelmodell-Ablage
+# Innenausstattungsmodelle
 
-Jedes Modell lebt in einem eigenen Ordner. Rohmaterial bleibt unter `source/`, ausgewählte Referenzen unter `references/`, PBR-Texturen unter `textures/`, exportierte 3D-Dateien unter `mesh/` und modellbezogene Laufzeitnotizen unter `runtime/`.
+Die Ablage ist nach Herkunft getrennt:
 
 ```text
-models/<model-id>/
-  manifest.json
-  README.md
-  source/       # Crawled URLs, HTML, Videos, Rohbilder
-  references/   # normale Ansicht, Maßgrafik, Detailbilder
-  textures/     # basecolor, roughness, normal, metallic, alpha
-  mesh/         # .glb/.gltf/.obj/.fbx und Blend-Exportnotizen
-  runtime/      # Profil, Materialzuordnung, Variantenhinweise
+models/
+  <model-id>/    # kaufbare/recherchierte Möbel und Deko
+      manifest.json
+      link.txt       # Produktquelle(n) oder Quellenstatus
+      README.md
+      source/        # Crawled HTML, URLs, Videos, Rohbilder
+      references/    # normale Ansicht, Maßgrafik, Detailfotos
+      textures/      # basecolor, roughness, normal, metallic, alpha
+      mesh/          # GLB/GLTF/OBJ/FBX und Exportnotizen
+      runtime/       # Renderer, Materialprofil, Varianten
+  fixed/        # Wohnung selbst: Türen, Badewanne, WC, Küche, Spiegel, Steckdosen, Fixtures
+  _template/    # Vorlage für neue Modelle
 ```
 
-Der Viewer bleibt zentral unter `app/planner/scene-3d/`. Ein Modellordner beschreibt die Quelle und die Runtime-Zuordnung; der eigentliche Renderer kann schrittweise von parametrischer Geometrie auf GLB wechseln.
+Produktordner bekommen immer eine `link.txt`: mit einer oder mehreren URLs, wenn Quellen bekannt sind, oder mit einem klaren Quellenstatus. Bei wohnungsgebundenen Elementen beschreibt `fixed/<id>/link.txt`, dass das Objekt zur Wohnung/Architektur gehört und keine externe Produktquelle benötigt. Der Viewer bleibt zentral unter `app/planner/scene-3d/`; die Ordner bilden die Asset- und Quellenverwaltung.
