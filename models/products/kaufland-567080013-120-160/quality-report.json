@@ -63,7 +63,7 @@
   },
   "checks": {
     "manifestJson": "passed",
-    "linkManifestConsistency": "no-url-to-synchronize",
+    "linkManifestConsistency": "source-only-alias",
     "geometry": "not-run-no-mesh",
     "materials": "pending-review",
     "viewerIntegration": "parametric-fallback-preserved"
@@ -71,7 +71,8 @@
   "limitations": [
     "No repository mesh asset is present; geometry remains runtime-parametric.",
     "Exact dimensions and product identity require source-specific verification before a photorealistic asset can be claimed.",
-    "This folder is a retained source alias; runtime catalog resolution points to the canonical dining-table folder."
+    "This folder is a retained source alias; runtime catalog resolution points to the canonical dining-table folder.",
+    "The source URL is intentionally stored on this retained alias; the canonical runtime folder carries the synchronized URL."
   ],
   "auditedAt": "2026-11-12"
 }

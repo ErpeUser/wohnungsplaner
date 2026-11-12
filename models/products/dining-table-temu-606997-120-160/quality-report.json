@@ -70,7 +70,8 @@
     "No repository mesh asset is present; geometry remains runtime-parametric.",
     "No repository PBR texture set is present; material fidelity remains runtime-defined.",
     "Exact dimensions and product identity require source-specific verification before a photorealistic asset can be claimed.",
-    "This canonical runtime folder inherits source metadata from a retained short-name alias; the viewer still uses the parametric renderer."
+    "This canonical runtime folder inherits source metadata from a retained short-name alias; the viewer still uses the parametric renderer.",
+    "The existing references/normal.png is a reference image, not a verified PBR normal texture."
   ],
   "auditedAt": "2026-11-12"
 }
