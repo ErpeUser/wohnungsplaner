@@ -52,7 +52,9 @@ export function Furniture3D({
     <group>
       {scene.placements.filter((item) => !hiddenObjects.has(item.id)).map((item) => (
         <FurnitureInstance
-          key={item.id}
+          // Product switches must remount the parametric tree; keeping only the
+          // placement key can leave the previous table geometry behind in R3F.
+          key={`${item.id}:${item.catalogId}:${item.size.join(":")}`}
           item={item}
           selected={selectionId === item.id}
           onSelect={onSelect}
