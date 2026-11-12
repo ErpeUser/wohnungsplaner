@@ -20,13 +20,15 @@ Die Prüfung des Default-Branches `main` am 2026-11-12 umfasst:
 - **0 GLB/GLTF/OBJ/FBX-Meshes innerhalb von `models/**`** (die 6 bestehenden Runtime-GLBs unter `public/planner-assets/models/` bleiben unverändert)
 - **0 importierte PBR-Textursets**
 - **3 lokale Referenzbilder** in den vorhandenen Tabellenordnern
-- **17 dokumentierte externe Produkt-URLs**, davon 13 Produkte und 4 Fixed-Elemente
+- **21 eindeutige externe URLs**, davon 17 Produkt-URLs und 4 Fixed-Element-URLs (26 manifestierte URL-Einträge; Alias- und kanonische Ordner können dieselbe Quelle wiederholen)
 
 Die aktuelle Runtime-Zuordnung bleibt parametrisch. Die Auditberichte kennzeichnen deshalb Geometrie und Materialprüfung ohne Mesh beziehungsweise Textur als offen. Es wird keine Viewer-Integration behauptet, solange der zentrale Viewer unter `app/planner/scene-3d/` die Dateien nicht lädt.
 
 ## Quellen und Manifeste
 
 Produktordner verwenden `link.txt` für eine oder mehrere Quellen; Fixed-Elemente dokumentieren dort entweder eine konkrete Referenz oder, wenn das Element zur Wohnung gehört, den fehlenden externen Produktbezug. Jede als URL erkennbare Zeile wird im zugehörigen `manifest.json.sourceUrls` gespiegelt. Kommentare wie `Keine externe Produktquelle im Datensatz hinterlegt` werden nicht als URL erfunden.
+
+Retained source aliases können ihre verifizierte URL bewusst nur im Manifest führen; `quality-report.json` kennzeichnet diesen Fall als `source-only-alias`. Der kanonische Runtime-Ordner trägt die synchronisierte Quellenliste. So bleiben Alias-IDs und gespeicherte Platzierungen erhalten, ohne eine URL doppelt als neue Quelle zu behaupten.
 
 Die vier zuvor fehlenden Produktkategorien für die Tabellenordner sind als `table` ergänzt. Bestehende IDs, Katalogzuordnungen, Varianten und Runtime-Fallbacks bleiben erhalten. Die vier kurzen Tabellen-IDs bleiben als Quell-Aliase bestehen; ihre kanonischen `dining-table-*` Ordner übernehmen verifizierte Maße, Materialangaben und Varianten, ohne eine referenzierte ID zu löschen.
 
