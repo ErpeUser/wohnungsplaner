@@ -105,7 +105,9 @@ const RECIPES: Record<string, MaterialRecipe> = {
   "bath-hook-oak-natural": { color: "#d6b486", roughness: 0.83 },
   "bath-hook-black": { color: "#191918", roughness: 0.56, metalness: 0.14 },
   "fabric-taupe": { color: "#aa9684", roughness: 0.98 },
-  "fabric-ali-ivory": { color: "#eee9df", roughness: 0.99 },
+  // Warm beige fabric; the previous near-white value made the sofa read as
+  // white under the 3D tone mapping.
+  "fabric-ali-ivory": { color: "#d8c8b6", roughness: 0.99 },
   "fabric-ali-seam": { color: "#cdc4b7", roughness: 0.99 },
   "fabric-ali-shade": { color: "#dcd2c4", roughness: 0.99 },
   "fabric-chicago-beige": { color: "#d8d5cc", roughness: 0.98 },
@@ -137,7 +139,8 @@ const RECIPES: Record<string, MaterialRecipe> = {
   "rug-rabbit-pile": { color: "#eee7da", roughness: 1 },
   "rug-temu-rabbit-highlight": { color: "#fffaf0", roughness: 1 },
   "rug-temu-rabbit-shadow": { color: "#d4c9b8", roughness: 1 },
-  "rug-temu-vintage-cream": { color: "#ffffff", roughness: 1 },
+  // Tint the SVG pattern so the vintage rug remains visibly beige/taupe.
+  "rug-temu-vintage-cream": { color: "#d8c7ae", roughness: 1 },
   "rug-living-ivory-greige": { color: "#ded5c7", roughness: 1 },
   "rug-living-relief": { color: "#eee8de", roughness: 1 },
   "metal-dark": { color: "#343b3b", roughness: 0.36, metalness: 0.78 },

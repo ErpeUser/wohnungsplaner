@@ -202,6 +202,43 @@ export function upgradeRetiredDiningGroup(document: PlannerDocumentV3): PlannerD
   });
 }
 
+/**
+ * Unlinks the living sofa and rug so each can be dragged independently.
+ * Older default saves are still moved to the measured inner face of the
+ * 358-cm south wall while customized positions are preserved.
+ */
+export function upgradeLivingSofaRugGroup(document: PlannerDocumentV3): PlannerDocumentV3 {
+  const rug = document.placements.find((item) => item.id === "living-rug-concept");
+  const sofa = document.placements.find((item) => item.id === "living-chicago-sofa");
+  if (!rug || !sofa) return document;
+
+  const legacyDefault = Math.abs(rug.position.x - 1.55) < 0.001
+    && Math.abs(rug.position.z - 7.75) < 0.001
+    && Math.abs(sofa.position.x - 2.2) < 0.001
+    && Math.abs(sofa.position.z - 7.82) < 0.001;
+  const needsUnlink = legacyDefault || Boolean(rug.groupId) || Boolean(sofa.groupId);
+  if (!needsUnlink) return document;
+  const next = document.placements.map((item) => {
+    if (item.id === rug.id) {
+      return {
+        ...item,
+        groupId: undefined,
+        position: legacyDefault ? { x: 1.55, z: 7.99 } : item.position,
+      };
+    }
+    if (item.id === sofa.id) {
+      return {
+        ...item,
+        groupId: undefined,
+        position: legacyDefault ? { x: 2.2, z: 8.06 } : item.position,
+      };
+    }
+    return item;
+  });
+  const changed = next.some((item, index) => item !== document.placements[index]);
+  return changed ? parsePlannerDocument({ ...document, placements: next }) : document;
+}
+
 export type PlannerRepository = {
   load(): MigrationResult;
   save(document: PlannerDocumentV3): PlannerDocumentV3;

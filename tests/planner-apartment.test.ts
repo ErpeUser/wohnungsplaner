@@ -95,11 +95,12 @@ test("stores the fixed kitchen and sanitary inventory separately from movable fu
   assert.ok(DEFAULT_APARTMENT_DOCUMENT.placements.some((item) => item.roomId === "vorraum"));
 });
 
-test("places the 142 cm AliExpress sofa on the original sofa spot", () => {
+test("places the 142 cm AliExpress sofa at the wall-side living position", () => {
   const sofa = DEFAULT_APARTMENT_DOCUMENT.placements.find(item=>item.id==="living-chicago-sofa");
   assert.ok(sofa);
   assert.equal(sofa.catalogId,"sofa-aliexpress-142");
-  assert.deepEqual(sofa.position,{x:2.2,z:7.82});
+  assert.deepEqual(sofa.position,{x:2.2,z:8.06});
+  assert.equal(sofa.groupId, undefined);
   assert.deepEqual(sofa.size,{width:1.42,depth:0.9,height:0.865});
   assert.equal(sofa.rotation,90);
 });
@@ -183,11 +184,12 @@ test("places the supplied woven rugs in the bathroom and WC at measured sizes", 
   assert.ok(wcMat.metadata?.notes?.some((note) => /77.*46 cm/i.test(note)));
 });
 
-test("keeps the chosen 180 x 250 cm Temu vintage rug in the previous living room spot", () => {
+test("keeps the chosen 180 x 250 cm Temu vintage rug at the 358 cm wall", () => {
   const rug = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "living-rug-concept");
 
   assert.ok(rug);
-  assert.deepEqual(rug.position, { x: 1.55, z: 7.75 });
+  assert.deepEqual(rug.position, { x: 1.55, z: 7.99 });
+  assert.equal(rug.groupId, undefined);
   assert.equal(rug.rotation, 0);
   assert.equal(rug.materialVariants?.main, "rug-temu-vintage-cream");
   assert.equal(rug.metadata?.confidence, "confirmed");

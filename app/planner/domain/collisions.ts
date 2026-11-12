@@ -133,7 +133,8 @@ function inspectPlacementInternal(
       .map((entry) => entry.source as PlannerBuiltIn)
     : document.builtIns.filter((item) => item.roomId === placement.roomId);
   for (const builtIn of builtIns.filter((item) => (
-    item.catalogId !== "floor-zone-kitchen"
+    !isFloorCovering(placement)
+    && item.catalogId !== "floor-zone-kitchen"
     && item.collision !== "decorative"
     && item.size.height > 0.03
   ))) {
@@ -152,6 +153,10 @@ function inspectPlacementInternal(
     : document.placements.filter((item) => item.roomId === placement.roomId);
   for (const other of otherPlacements.filter(
     (item) => item.id !== placement.id
+      // A rug is intentionally allowed to sit under sofas, tables and chairs.
+      // This also keeps a rug independently draggable when furniture remains
+      // on top of it.
+      && !isFloorCovering(placement)
       && !isFloorCovering(item)
       && !options.ignorePlacementIds?.has(item.id),
   )) {

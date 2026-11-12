@@ -282,7 +282,7 @@ function FurnitureSymbol({
     const extended = placement.catalogId === "sofa-aliexpress-142-open";
     return (
       <Group data-testid="plan-graphic-sofa-aliexpress-142">
-        <Rect {...common} fill="#eee9df" stroke="#a49b8f" strokeWidth={0.02} cornerRadius={0.1} shadowColor="#706454" shadowBlur={0.05} shadowOpacity={0.2} />
+        <Rect {...common} fill="#d8c8b6" stroke="#a49b8f" strokeWidth={0.02} cornerRadius={0.1} shadowColor="#706454" shadowBlur={0.05} shadowOpacity={0.2} />
         <Rect x={-width * 0.41} y={-depth * 0.45} width={width * 0.82} height={depth * 0.20} fill="#ded5c8" cornerRadius={0.055} />
         {[-0.25, 0.25].map((x, index) => (
           <Group key={index} x={x * width}>
@@ -785,12 +785,21 @@ function TemuVintageRugPlan({ width, depth }: { width: number; depth: number }) 
   }, []);
   return (
     <Group data-testid="plan-graphic-rug-living-concept-240x240">
+      {/* The artwork is intentionally non-listening; keep a real hit area so
+          the rug can still be selected and dragged in the 2D plan. */}
       <Rect
         x={-width / 2}
         y={-depth / 2}
         width={width}
         height={depth}
-        fill="#eee8df"
+        fill="rgba(0,0,0,0.001)"
+      />
+      <Rect
+        x={-width / 2}
+        y={-depth / 2}
+        width={width}
+        height={depth}
+        fill="#d8c7ae"
         fillPatternImage={art ?? undefined}
         fillPatternRepeat="no-repeat"
         fillPatternScaleX={art ? width / art.naturalWidth : 1}

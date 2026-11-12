@@ -45,7 +45,7 @@ const FABRIC = [
 const BLISS_BEIGE = [
   { id: "fabric-bliss-beige", label: "Polsterstoff Beige", color: "#d8c9af" },
 ];
-const ALI_SOFA_IVORY = [{ id: "fabric-ali-ivory", label: "Creme-Elfenbein", color: "#eee9df" }];
+const ALI_SOFA_IVORY = [{ id: "fabric-ali-ivory", label: "Beige / warmes Elfenbein", color: "#d8c8b6" }];
 const CHICAGO_BEIGE = [
   { id: "fabric-chicago-beige", label: "Chenille Beige", color: "#d8d5cc" },
 ];
@@ -102,7 +102,7 @@ const TEMU_RABBIT_IVORY = [
   { id: "rug-temu-rabbit-ivory", label: "Elfenbein", color: "#eee7da" },
 ];
 const LIVING_RUG_IVORY_GREIGE = [
-  { id: "rug-temu-vintage-cream", label: "Vintage-Creme/Taupe · florales Ornament", color: "#eee8df" },
+  { id: "rug-temu-vintage-cream", label: "Vintage-Beige/Taupe · florales Ornament", color: "#d8c7ae" },
 ];
 const ZIMMER1_PLANT = [
   { id: "leaf-olive", label: "Olivgrün mit mattem Beigetopf", color: "#667358" },

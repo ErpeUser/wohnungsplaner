@@ -241,8 +241,11 @@ function InteractivePlanStage({
   onToggleDoor,
   onStageChange,
 }: InteractivePlanStageProps) {
-  const [clientReady] = useState(() => typeof window !== "undefined");
-  const [layersReady] = useState(() => typeof window !== "undefined");
+  // Keep the first client render identical to the server render. Initializing
+  // from `window` made SSR return the empty form while the browser immediately
+  // returned the interactive stage, triggering React hydration recovery.
+  const [clientReady, setClientReady] = useState(false);
+  const [layersReady, setLayersReady] = useState(false);
   const [canvasReady, setCanvasReady] = useState(false);
   const [previewGuides, setPreviewGuides] = useState<SnapGuide[]>([]);
   const [previewMessage, setPreviewMessage] = useState<string | null>(null);
@@ -253,6 +256,11 @@ function InteractivePlanStage({
       .filter((guide) => guide.kind !== "grid")
       .map((guide, index) => ({ id: `drag-guide-${index}`, axis: guide.axis, value: guide.value })),
   }), [previewGuides, scene]);
+
+  useEffect(() => {
+    setClientReady(true);
+    setLayersReady(true);
+  }, []);
 
   useEffect(() => {
     if (!layersReady) return;

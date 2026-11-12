@@ -494,8 +494,12 @@ function createWindow(document: PlannerDocumentV3, opening: PlannerOpening): Sce
 }
 
 function objectDescriptor<T extends PlannerBuiltIn | PlannerPlacement>(item: T, catalogId: string, asset?: PlannerAssetRecord): SceneObject<T> {
-  // Lift the plush Zimmer-1 rug slightly so its pile does not clip into the floor.
-  const visualLift = catalogId === "rug-temu-rabbit-ivory-100x180" ? 0.012 : 0;
+  // Floor meshes are rendered at y=0.012. Parametric rugs are intentionally
+  // very thin in the document (their height is only the visualization
+  // thickness), so without a small lift their scaled geometry ends up below
+  // the floor and is completely occluded. Keep every rug just above the floor
+  // while preserving its documented footprint and height.
+  const visualLift = catalogId.startsWith("rug-") ? 0.012 : 0;
   return {
     id: item.id,
     roomId: item.roomId,
