@@ -6,7 +6,7 @@
 import { OrbitControls, PointerLockControls } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { Vector3, type PerspectiveCamera } from "three";
+import { MOUSE, TOUCH, Vector3, type PerspectiveCamera } from "three";
 
 import { doorPassagePolygon, pointInPolygon } from "../domain/geometry.ts";
 import type { PlannerDocumentV3, Point2 } from "../domain/types.ts";
@@ -90,8 +90,8 @@ export function createWalkStartPose(
     center,
     ...polygon.map((point) => ({ x: center.x * 0.72 + point.x * 0.28, z: center.z * 0.72 + point.z * 0.28 })),
   ];
-  const position = candidates.find((point) => isWalkPositionValid(document, point, WALK_RADIUS))
-    ?? findValidGridPoint(document, polygon)
+  const position = candidates.find((point) => isWalkPositionValid(document, point, WALK_RADIUS, activeRoomId))
+    ?? findValidGridPoint(document, polygon, activeRoomId)
     ?? { x: scene.center[0], z: scene.center[2] };
   const lookAt = bestWalkLookAt(document, position);
   return {
@@ -122,15 +122,27 @@ function bestWalkLookAt(document: PlannerDocumentV3, position: Point2) {
   };
 }
 
-export function isWalkPositionValid(document: PlannerDocumentV3, point: Point2, radius = WALK_RADIUS) {
-  const roomPolygons = document.rooms.map((room) => deriveRoomPolygon(document, room.id));
+export function isWalkPositionValid(
+  document: PlannerDocumentV3,
+  point: Point2,
+  radius = WALK_RADIUS,
+  activeRoomId: string | null = null,
+) {
+  const roomPolygons = document.rooms
+    .filter((room) => !activeRoomId || room.id === activeRoomId)
+    .map((room) => deriveRoomPolygon(document, room.id));
   const doorwayPolygons = document.openings
-    .filter((opening) => opening.kind === "door" && opening.sill <= 0.05 && (opening.roomIds?.length ?? 0) > 1)
+    .filter((opening) => (
+      (opening.kind === "passage" || document.doorStates[opening.id] === "open")
+      && opening.sill <= 0.05
+      && (opening.roomIds?.length ?? 0) > 1
+    ))
     .map((opening) => doorPassagePolygon(document, opening.id));
   const samples = [point, ...Array.from({ length: 12 }, (_, index) => {
     const angle = index / 12 * Math.PI * 2;
     return { x: point.x + Math.cos(angle) * radius, z: point.z + Math.sin(angle) * radius };
   })];
+  if (activeRoomId && !pointInPolygon(point, deriveRoomPolygon(document, activeRoomId))) return false;
   if (!samples.every((sample) => (
     roomPolygons.some((polygon) => pointInPolygon(sample, polygon))
     || doorwayPolygons.some((polygon) => pointInOrNearPolygon(sample, polygon, radius))
@@ -156,6 +168,7 @@ export function moveWalkPosition(
   from: Point2,
   to: Point2,
   radius = WALK_RADIUS,
+  activeRoomId: string | null = null,
 ) {
   const distance = Math.hypot(to.x - from.x, to.z - from.z);
   const steps = Math.max(1, Math.ceil(distance / Math.max(0.035, radius * 0.28)));
@@ -165,7 +178,7 @@ export function moveWalkPosition(
       x: from.x + (to.x - from.x) * index / steps,
       z: from.z + (to.z - from.z) * index / steps,
     };
-    if (!isWalkPositionValid(document, candidate, radius)) break;
+    if (!isWalkPositionValid(document, candidate, radius, activeRoomId)) break;
     accepted = candidate;
   }
   return accepted;
@@ -264,10 +277,11 @@ export function CameraController({
       { x: camera.position.x, z: camera.position.z },
       { x: camera.position.x + direction.x * distance, z: camera.position.z + direction.z * distance },
       WALK_RADIUS,
+      activeRoomId,
     );
     camera.position.set(next.x, EYE_HEIGHT, next.z);
     invalidate();
-  }, [camera, document, invalidate]);
+  }, [activeRoomId, camera, document, invalidate]);
 
   const zoomCamera = useCallback((command: "zoom-in" | "zoom-out") => {
     if (mode === "walk") {
@@ -294,6 +308,14 @@ export function CameraController({
   }, [camera, invalidate, mode, reportOrbitCamera, sceneCenterX, sceneCenterY, sceneCenterZ, sceneSpan]);
 
   useEffect(() => resetCamera(), [resetCamera]);
+
+  useEffect(() => {
+    if (mode === "walk") return;
+    keys.current.clear();
+    if (globalThis.document.pointerLockElement === gl.domElement) {
+      globalThis.document.exitPointerLock?.();
+    }
+  }, [gl.domElement, mode]);
 
   useEffect(() => {
     const command = (event: Event) => {
@@ -349,6 +371,24 @@ export function CameraController({
     <OrbitControls
       makeDefault
       target={orbitTarget}
+      /*
+       * Keep the interaction contract explicit instead of relying on Drei's
+       * browser-dependent defaults.  In particular, some touchpads report a
+       * middle-button gesture as a secondary pointer and the old defaults
+       * made the canvas appear frozen in embedded Chromium views.  Left drag
+       * always orbits, the wheel zooms, and the secondary button pans.
+       */
+      enabled
+      enableRotate
+      enableZoom
+      enablePan
+      screenSpacePanning
+      zoomToCursor
+      mouseButtons={{ LEFT: MOUSE.ROTATE, MIDDLE: MOUSE.DOLLY, RIGHT: MOUSE.PAN }}
+      touches={{ ONE: TOUCH.ROTATE, TWO: TOUCH.DOLLY_PAN }}
+      rotateSpeed={0.72}
+      panSpeed={0.8}
+      zoomSpeed={0.9}
       enableDamping={!reducedMotion}
       dampingFactor={0.08}
       minDistance={1.4}
@@ -385,7 +425,7 @@ function SafePointerLockControls() {
   return <PointerLockControls makeDefault selector="#planner-pointer-lock-trigger-disabled" />;
 }
 
-function findValidGridPoint(document: PlannerDocumentV3, polygon: Point2[]) {
+function findValidGridPoint(document: PlannerDocumentV3, polygon: Point2[], activeRoomId: string | null) {
   if (polygon.length === 0) return null;
   const minX = Math.min(...polygon.map((point) => point.x));
   const maxX = Math.max(...polygon.map((point) => point.x));
@@ -394,7 +434,7 @@ function findValidGridPoint(document: PlannerDocumentV3, polygon: Point2[]) {
   for (let z = minZ + 0.35; z <= maxZ - 0.35; z += 0.25) {
     for (let x = minX + 0.35; x <= maxX - 0.35; x += 0.25) {
       const point = { x, z };
-      if (isWalkPositionValid(document, point, WALK_RADIUS)) return point;
+      if (isWalkPositionValid(document, point, WALK_RADIUS, activeRoomId)) return point;
     }
   }
   return null;
@@ -408,6 +448,8 @@ function createCollisionScene(document: PlannerDocumentV3, clearanceRadius = 0) 
 export function createSceneWallSegments(document: PlannerDocumentV3, clearanceRadius = 0) {
   const openingsByWall = new Map<string, Array<{ from: number; to: number; sill: number }>>();
   for (const opening of document.openings) {
+    const isPassable = opening.kind === "passage" || document.doorStates[opening.id] === "open";
+    if (opening.sill <= 0.05 && !isPassable) continue;
     for (const wall of document.walls) {
       const slice = openingSliceOnWall(document, opening, wall);
       if (!slice) continue;

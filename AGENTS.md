@@ -14,3 +14,10 @@ Vor jeder neuen Aufgabe im Repository zuerst die Codex-Pipeline ausführen. GitH
 
 Verwende dafür mindestens `npm run codex:pipeline -- --mode=check --dry-run`; für einen vollständig autorisierten Lauf `npm run codex:pipeline -- --mode=full`. Die Alias-Einstiegspunkte `npm run codex:update` und `npm run codex:release` verwenden dieselben Guard-Stufen. Wenn keine lokale Git-Authentifizierung vorhanden ist, nutze die autorisierte GitHub-Schnittstelle und dokumentiere die Blockade statt einen unbestätigten Push zu behaupten.
 
+## Planner-Regeln
+
+- `modelRevision` migriert Katalog- und Materialdefaults. Bei Migrationen bleiben stabile Platzierungs-IDs, Position, Rotation, Raum-/Wandbezug, Gruppen und Nutzermetadaten erhalten; neue Defaults dürfen nur erkannte Legacy-Signaturen ersetzen.
+- Möbelbefehle verwenden stabile Platzierungs-IDs und Katalog-IDs aus `app/planner/catalog/catalog.ts`. Änderungen laufen über `applyPlannerCommand` und dessen Undo-/Redo-Historie; Rohdaten werden nicht direkt mutiert.
+- Referenzfotos und private Quellen gehören nicht unter `public/planner-assets/`; Exporte entfernen Laufzeit- und Quell-URLs, und der lokale Adapter muss private Referenzpfade mit 404 sperren.
+- Vor einem Push sind Diff, Typecheck, Lint, Asset-Checks, Planner-/UI-Tests, Build und Cutover zu prüfen. Ohne eine neue ausdrückliche Freigabe wird nicht gepusht.
+
