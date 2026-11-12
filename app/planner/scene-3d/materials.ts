@@ -5,6 +5,7 @@ import {
   LinearMipmapLinearFilter,
   MeshPhysicalMaterial,
   MeshStandardMaterial,
+  NoColorSpace,
   RGBAFormat,
   RepeatWrapping,
   SRGBColorSpace,
@@ -50,7 +51,9 @@ const RECIPES: Record<string, MaterialRecipe> = {
   // materials.  Their finish is matte, lightly fibrous and removable rather
   // than glossy paint or a flat RGB swatch.
   "wallpaper-milk-coffee-macaron": { color: "#d6bea6", roughness: 0.97 },
-  "wallpaper-vintage-brown-fabric": { color: "#a8876b", roughness: 0.98 },
+  // Zimmer 1 uses the supplied textile pattern in a sand-beige tint; the
+  // historical ID remains an alias so saved plans do not lose their surface.
+  "wallpaper-vintage-brown-fabric": { color: "#d8c7ae", roughness: 0.98 },
   "paint-white": { color: "#f7f6f2", roughness: 0.9 },
   "tile-white-rect": { color: "#f0efeb", roughness: 0.58 },
   "tile-white-square": { color: "#efeeea", roughness: 0.6 },
@@ -77,8 +80,8 @@ const RECIPES: Record<string, MaterialRecipe> = {
   "wc-holder-black-iron": { color: "#20211f", roughness: 0.46, metalness: 0.78 },
   "wc-paper-white": { color: "#f5f2e9", roughness: 0.98 },
   "wc-paper-core": { color: "#ad9981", roughness: 0.95 },
-  "oak-artisan": { color: "#b78352", roughness: 0.58, clearcoat: 0.08, clearcoatRoughness: 0.68 },
-  "oak-artisan-edge": { color: "#8d603c", roughness: 0.66 },
+  "oak-artisan": { color: "#d0a66b", roughness: 0.58, clearcoat: 0.08, clearcoatRoughness: 0.68 },
+  "oak-artisan-edge": { color: "#9e6b3f", roughness: 0.66 },
   "oak-bozan-directional": { color: "#b78352", roughness: 0.62, clearcoat: 0.08, clearcoatRoughness: 0.7 },
   "oak-bozan-edge": { color: "#8d603c", roughness: 0.68 },
   "oak-light": { color: "#c99d68", roughness: 0.7, clearcoat: 0.04, clearcoatRoughness: 0.78 },
@@ -167,6 +170,17 @@ const RECIPES: Record<string, MaterialRecipe> = {
 const cache = new Map<string, MeshStandardMaterial>();
 const textureCache = new Map<string, Texture>();
 export const PLANNER_TEXTURE_READY_EVENT = "planner:texture-ready";
+
+function asBumpMap(texture: Texture | null) {
+  if (!texture) return null;
+  // Color maps stay in sRGB; normal/height sampling must remain linear.  A
+  // clone keeps both sampling contracts without mutating the shared color map.
+  const bump = texture.clone();
+  bump.colorSpace = NoColorSpace;
+  bump.needsUpdate = true;
+  return bump;
+}
+
 const TEXTURES: Record<string, string> = {
   "parquet-oak": "/planner-assets/textures/wood/oak.svg",
   "parquet-oak-narrow": "/planner-assets/textures/wood/oak-narrow.svg",
@@ -250,50 +264,61 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
   const texturePath = TEXTURES[materialId];
   if (tileTexture) {
     material.map = loadPlannerTileTexture(materialId, tileTexture);
-    material.bumpMap = material.map;
+    material.bumpMap = asBumpMap(material.map);
     material.bumpScale = 0.035;
     material.needsUpdate = true;
   } else if (materialId === "oak-backsplash") {
     const backsplashTexture = loadKitchenWalnutBacksplashTexture();
     material.map = backsplashTexture;
-    material.bumpMap = backsplashTexture;
+    material.bumpMap = asBumpMap(backsplashTexture);
     material.bumpScale = 0.004;
     material.needsUpdate = true;
   } else if (materialId === "kitchen-worktop-black") {
     const worktopTexture = loadKitchenWorktopTexture();
     material.map = worktopTexture;
-    material.bumpMap = worktopTexture;
+    material.bumpMap = asBumpMap(worktopTexture);
     material.bumpScale = 0.008;
     material.needsUpdate = true;
   } else if (["fabric-bliss-weave", "fabric-chicago-chenille", "fabric-kaleo-chenille", "fabric-temu-sand", "velvet-temu-beige", "fabric-amber-beige"].includes(materialId)) {
     const weave = loadProductWeaveTexture(materialId);
     material.map = weave;
-    material.bumpMap = weave;
+    material.bumpMap = asBumpMap(weave);
     material.bumpScale = materialId === "fabric-chicago-chenille" ? 0.022 : 0.018;
     material.needsUpdate = true;
   } else if (materialId === "tejo-cashmere-grain") {
     const grain = loadProductGrainTexture(materialId, [203, 194, 182], 0.76, 0.018);
     material.map = grain;
-    material.bumpMap = grain;
+    material.bumpMap = asBumpMap(grain);
     material.bumpScale = 0.012;
     material.needsUpdate = true;
   } else if (materialId === "wc-holder-solid-oak" || materialId === "wc-holder-oak-edge") {
     const oak = loadWcShelfOakTexture(materialId === "wc-holder-oak-edge");
     material.map = oak;
-    material.bumpMap = oak;
+    material.bumpMap = asBumpMap(oak);
     material.bumpScale = 0.009;
     material.color.set("#ffffff");
     material.needsUpdate = true;
   } else if (materialId === "oak-bozan-directional" || materialId === "oak-bozan-edge") {
     const oak = loadProductWoodTexture(materialId);
     material.map = oak;
-    material.bumpMap = oak;
+    material.bumpMap = asBumpMap(oak);
     material.bumpScale = 0.014;
+    material.needsUpdate = true;
+  } else if (["oak-natural", "oak-artisan", "oak-artisan-edge", "walnut"].includes(materialId)) {
+    // Comparison furniture must remain recognizably different in the 3D
+    // view.  The old shared SVG swatch flattened oak, artisan oak and walnut
+    // into almost the same brown under tone mapping.  Use local procedural
+    // grain with a per-finish base colour so no merchant/private image is
+    // required and each material keeps a real PBR bump response.
+    const wood = loadComparisonWoodTexture(materialId);
+    material.map = wood;
+    material.bumpMap = asBumpMap(wood);
+    material.bumpScale = materialId === "walnut" ? 0.018 : 0.014;
     material.needsUpdate = true;
   } else if (materialId === "leather-ivory-pebble") {
     const leather = loadProductPebbleTexture();
     material.map = leather;
-    material.bumpMap = leather;
+    material.bumpMap = asBumpMap(leather);
     material.bumpScale = 0.008;
     material.needsUpdate = true;
   } else if (materialId === "white-lacquer") {
@@ -302,7 +327,7 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
   } else if (materialId === "rug-rabbit-pile" || materialId === "rug-living-relief") {
     const pile = loadProductPileTexture(materialId);
     material.map = pile;
-    material.bumpMap = pile;
+    material.bumpMap = asBumpMap(pile);
     material.bumpScale = materialId === "rug-rabbit-pile" ? 0.024 : 0.014;
     material.needsUpdate = true;
   } else if (materialId === "temu-bath-rug-woven") {
@@ -310,7 +335,7 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
     waffle.repeat.set(7.6, 3.8);
     material.color.set("#ffffff");
     material.map = waffle;
-    material.bumpMap = waffle;
+    material.bumpMap = asBumpMap(waffle);
     material.bumpScale = 0.010;
     material.needsUpdate = true;
   } else if (materialId === "temu-shower-curtain-beige") {
@@ -318,20 +343,20 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
     linen.repeat.set(2.8, 5.0);
     material.color.set("#ffffff");
     material.map = linen;
-    material.bumpMap = linen;
+    material.bumpMap = asBumpMap(linen);
     material.bumpScale = 0.003;
     material.needsUpdate = true;
   } else if (materialId === "bath-hook-oak-natural") {
     const oak = loadProductWoodTexture("oak-bozan-directional");
     material.color.set("#ffffff");
     material.map = oak;
-    material.bumpMap = oak;
+    material.bumpMap = asBumpMap(oak);
     material.bumpScale = 0.003;
     material.needsUpdate = true;
   } else if (materialId === "leaf-olive-soft") {
     const leaves = loadProductLeafTexture();
     material.map = leaves;
-    material.bumpMap = leaves;
+    material.bumpMap = asBumpMap(leaves);
     material.bumpScale = 0.006;
     material.needsUpdate = true;
   } else if (materialId === "ceramic-pot-glazed") {
@@ -343,19 +368,19 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
   } else if (materialId === "wallpaper-vintage-beige-fabric") {
     const wallpaperTexture = loadVintageBeigeFabricWallpaperTexture();
     material.map = wallpaperTexture;
-    material.bumpMap = wallpaperTexture;
+    material.bumpMap = asBumpMap(wallpaperTexture);
     material.bumpScale = 0.006;
     material.needsUpdate = true;
   } else if (materialId === "wallpaper-milk-coffee-macaron") {
     const wallpaperTexture = loadMacaronMilkCoffeeWallpaperTexture();
     material.map = wallpaperTexture;
-    material.bumpMap = wallpaperTexture;
+    material.bumpMap = asBumpMap(wallpaperTexture);
     material.bumpScale = 0.005;
     material.needsUpdate = true;
   } else if (materialId === "wallpaper-vintage-brown-fabric") {
     const wallpaperTexture = loadVintageBrownFabricWallpaperTexture();
     material.map = wallpaperTexture;
-    material.bumpMap = wallpaperTexture;
+    material.bumpMap = asBumpMap(wallpaperTexture);
     material.bumpScale = 0.008;
     material.needsUpdate = true;
   } else if (materialId === "outdoor-concrete") {
@@ -364,7 +389,7 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
   } else if (materialId === "epoxy-grey") {
     const epoxyTexture = loadEpoxyFloorTexture();
     material.map = epoxyTexture;
-    material.bumpMap = epoxyTexture;
+    material.bumpMap = asBumpMap(epoxyTexture);
     material.bumpScale = 0.006;
     material.needsUpdate = true;
   } else if (materialId === "balcony-floor-beige") {
@@ -373,7 +398,7 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
   } else if (texturePath && typeof document !== "undefined") {
     material.map = loadPlannerTexture(texturePath);
     if (materialId.startsWith("parquet-") || materialId.startsWith("floor-") || materialId.startsWith("oak-")) {
-      material.bumpMap = material.map;
+      material.bumpMap = asBumpMap(material.map);
       material.bumpScale = materialId.startsWith("floor-") ? 0.035 : 0.018;
     }
     material.needsUpdate = true;
@@ -473,6 +498,22 @@ function loadProductWoodTexture(materialId: string) {
     const grain = Math.sin(x * 0.18 + Math.sin(y * 0.08) * 2.5) * 8 + Math.sin(x * 0.047 + y * 0.12) * 3;
     const base = edge ? [141, 96, 60] : [183, 131, 82];
     return [base[0] + grain, base[1] + grain * 0.76, base[2] + grain * 0.55];
+  });
+}
+
+function loadComparisonWoodTexture(materialId: string) {
+  const base: [number, number, number] = materialId === "walnut"
+    ? [111, 73, 49]
+    : materialId === "oak-artisan-edge"
+      ? [142, 94, 55]
+      : materialId === "oak-artisan"
+        ? [211, 170, 108]
+        : [201, 157, 101];
+  return createProductDataTexture(`generated:comparison-wood-${materialId}`, 192, (x, y) => {
+    const broad = Math.sin(x * 0.052 + Math.sin(y * 0.018) * 2.4) * (materialId === "walnut" ? 11 : 9);
+    const pore = Math.sin(x * 0.42 + y * 0.03) * 2.8 + Math.sin(x * 0.11 + y * 0.14) * 2.2;
+    const knot = Math.sin(x * 0.018 + y * 0.07) * 4.4;
+    return [base[0] + broad + pore + knot, base[1] + broad * 0.72 + pore * 0.68 + knot * 0.82, base[2] + broad * 0.48 + pore * 0.42 + knot * 0.62];
   });
 }
 
@@ -663,9 +704,9 @@ function loadMacaronMilkCoffeeWallpaperTexture() {
 }
 
 /**
- * Slightly deeper brown textile wallpaper from the second supplied Temu
- * reference (10 m × 44.96 cm).  The broad fibers are intentionally subtle so
- * the seam spacing remains believable when a whole wall is covered.
+ * Sand-beige textile wallpaper from the supplied reference (10 m × 44.96 cm).
+ * The broad fibers are intentionally subtle so the seam spacing remains
+ * believable when a whole wall is covered.
  */
 function loadVintageBrownFabricWallpaperTexture() {
   const key = "generated:wallpaper-vintage-brown-fabric";
@@ -681,9 +722,9 @@ function loadVintageBrownFabricWallpaperTexture() {
       const irregular = ((x * 29 + y * 17 + x * y * 5) % 13) - 6;
       const weave = horizontal + vertical + broad + irregular * 0.36;
       const offset = (y * size + x) * 4;
-      data[offset] = Math.max(0, Math.min(255, 169 + weave));
-      data[offset + 1] = Math.max(0, Math.min(255, 139 + weave * 0.92));
-      data[offset + 2] = Math.max(0, Math.min(255, 112 + weave * 0.78));
+      data[offset] = Math.max(0, Math.min(255, 216 + weave));
+      data[offset + 1] = Math.max(0, Math.min(255, 199 + weave * 0.92));
+      data[offset + 2] = Math.max(0, Math.min(255, 174 + weave * 0.78));
       data[offset + 3] = 255;
     }
   }

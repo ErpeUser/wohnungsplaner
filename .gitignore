@@ -50,6 +50,7 @@ next-env.d.ts
 /.local/
 /tmp/
 /output/
+/git-meta/
 .superpowers/
 *.log
 tsconfig.tsbuildinfo

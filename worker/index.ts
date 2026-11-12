@@ -37,6 +37,9 @@ const worker = {
           if (!assetPath.startsWith("/planner-assets/") && !assetPath.startsWith("/assets/")) {
             return Promise.resolve(new Response("Asset path not allowed", { status: 400 }));
           }
+          if (assetPath.startsWith("/planner-assets/private-reference/")) {
+            return Promise.resolve(new Response("Asset path not allowed", { status: 404 }));
+          }
           if (assetPath.includes("..")) return Promise.resolve(new Response("Asset path not allowed", { status: 400 }));
           return env.ASSETS!.fetch(new Request(new URL(assetPath, request.url)));
         },

@@ -565,13 +565,35 @@
   text-align: left;
 }
 .planner-table-compare__tab { min-width: 150px; padding: 8px 10px; display: grid; gap: 3px; }
+.planner-table-compare__tab[data-visual-profile="round-metal-frame"] { background: linear-gradient(145deg, #f9f7f2, #e7e9e4); }
+.planner-table-compare__tab[data-visual-profile="storage-pedestal"] { background: linear-gradient(145deg, #f2e5d4, #d4b58b); }
+.planner-table-compare__tab[data-visual-profile="fluted-extension-pedestal"] { background: linear-gradient(145deg, #f2dfc2, #b9804f); }
 .planner-table-compare__tab span { font-size: 11px; font-weight: 720; }
 .planner-table-compare__tab small { color: #6a7774; font: 600 9px/1.2 var(--font-geist-mono), monospace; }
+.planner-table-compare__swatch {
+  width: 100%;
+  height: 24px;
+  border-radius: 5px;
+  border: 1px solid rgba(55, 73, 76, 0.24);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.46);
+}
+.planner-table-compare__tab[data-visual-profile="round-metal-frame"] .planner-table-compare__swatch {
+  background: radial-gradient(ellipse at 38% 35%, #d9ddd9 0 18%, #8c9590 20% 38%, #3f4848 40% 100%);
+}
+.planner-table-compare__tab[data-visual-profile="storage-pedestal"] .planner-table-compare__swatch {
+  background: repeating-linear-gradient(90deg, #8a5a37 0 4px, #c49360 4px 9px, #70452e 9px 12px);
+}
+.planner-table-compare__tab[data-visual-profile="fluted-extension-pedestal"] .planner-table-compare__swatch {
+  background: repeating-linear-gradient(90deg, #b77942 0 3px, #e3bd7d 3px 7px, #8f532e 7px 9px);
+}
 .planner-table-compare__blocked-source { margin: 0; padding: 7px 9px; color: #6b635b; background: #f4eee7; border-left: 2px solid #a89580; font-size: 10px; line-height: 1.4; }
 .planner-table-compare__blocked-source a { color: var(--accent); font-weight: 720; text-decoration: underline; text-underline-offset: 2px; }
 .planner-table-compare__variant { padding: 7px 10px; font-size: 11px; }
 .planner-table-compare__tab[aria-selected="true"],
 .planner-table-compare__variant[aria-selected="true"] { border-color: var(--accent); background: #f7ede5; box-shadow: inset 0 -2px 0 var(--accent); }
+.planner-table-compare__tab[aria-selected="true"][data-visual-profile="round-metal-frame"] { background: linear-gradient(145deg, #f9f7f2, #e7e9e4); }
+.planner-table-compare__tab[aria-selected="true"][data-visual-profile="storage-pedestal"] { background: linear-gradient(145deg, #f2e5d4, #d4b58b); }
+.planner-table-compare__tab[aria-selected="true"][data-visual-profile="fluted-extension-pedestal"] { background: linear-gradient(145deg, #f2dfc2, #b9804f); }
 .planner-table-compare__tab:disabled { opacity: 0.55; cursor: not-allowed; background: #efede8; }
 .planner-table-compare__tab:focus-visible,
 .planner-table-compare__variant:focus-visible,
@@ -581,6 +603,11 @@
 .planner-table-compare__header { display: flex; align-items: start; justify-content: space-between; gap: 10px; }
 .planner-table-compare__header h3 { margin: 0; font-size: 14px; }
 .planner-table-compare__header p { margin: 3px 0 0; color: #687674; font-size: 10px; }
+.planner-table-compare__construction { display: flex; align-items: center; gap: 7px; margin: -2px 0 0; color: #536461; font-size: 10px; font-weight: 650; }
+.planner-table-compare__construction-swatch { width: 34px; height: 14px; border-radius: 4px; border: 1px solid rgba(55, 73, 76, 0.22); }
+.planner-table-compare__construction-swatch--round-metal-frame { background: linear-gradient(135deg, #d7dbd7, #4d5755); }
+.planner-table-compare__construction-swatch--storage-pedestal { background: repeating-linear-gradient(90deg, #98613d 0 4px, #d1a16c 4px 8px); }
+.planner-table-compare__construction-swatch--fluted-extension-pedestal { background: repeating-linear-gradient(90deg, #a66638 0 3px, #e5bd7d 3px 7px); }
 .planner-table-compare__status { flex: 0 0 auto; padding: 4px 7px; border-radius: 999px; background: #e9eee8; color: #46624c; font: 700 9px/1.1 var(--font-geist-mono), monospace; }
 .planner-table-compare__status--mirror { background: #f5eadf; color: #895430; }
 .planner-table-compare__status--blocked { background: #ece9e4; color: #6a6b65; }
@@ -690,6 +717,11 @@
   width: 100% !important;
   height: 100% !important;
   cursor: grab;
+  /* R3F controls own the gesture stream; prevent the page from stealing a
+     drag or turning a two-finger pan into browser scroll/navigation. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .planner-3d canvas:active {
@@ -763,6 +795,13 @@
   grid-auto-flow: column;
   align-items: center;
   padding: 7px;
+}
+
+.planner-3d__camera-help {
+  color: #d5e1dc;
+  white-space: nowrap;
+  font-size: 9px;
+  font-weight: 560;
 }
 
 .planner-3d-loading,

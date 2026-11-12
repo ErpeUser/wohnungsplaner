@@ -53,7 +53,7 @@ const TEJO_CASHMERE = [
   { id: "tejo-cashmere", label: "Kaschmir Beige", color: "#cbc2b6" },
 ];
 const BOZAN_ARTISAN = [
-  { id: "oak-artisan", label: "Artisan Eiche", color: "#b78352" },
+  { id: "oak-artisan", label: "Artisan Eiche hell", color: "#d0a66b" },
 ];
 const TABLE_KAUFLAND_WALNUT = [
   { id: "walnut", label: "Walnussbraun", color: "#76513b" },
@@ -62,7 +62,7 @@ const TABLE_TEMU_OAK = [
   { id: "oak-natural", label: "Eiche natur", color: "#b98a5e" },
 ];
 const TABLE_ALI_OAK = [
-  { id: "oak-artisan", label: "Artisan Eiche", color: "#b78352" },
+  { id: "oak-artisan", label: "Artisan Eiche hell", color: "#d0a66b" },
 ];
 const KALEO_BEIGE = [
   { id: "fabric-kaleo-beige", label: "Chenille Beige in Leinenoptik", color: "#ddd2c2" },

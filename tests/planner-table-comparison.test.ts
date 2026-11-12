@@ -7,6 +7,7 @@ import {
   getTableVariant,
   metresFromCentimetres,
   tableModelHasGeometry,
+  tableVisualProfile,
 } from "../app/planner/tables/table-models.ts";
 
 test("führt alle vier gecrawlten Tischquellen mit belegten Größenständen", () => {
@@ -51,4 +52,10 @@ test("zeigt die blockierte Temu-Quelle ohne erfundene Maße an", () => {
   assert.equal(unknown?.variants.length, 0);
   assert.equal(tableModelHasGeometry(unknown!), false);
   assert.equal(unknown?.sourceUrl, "https://www.temu.com/at/g-609726356120319.html");
+});
+
+test("ordnet den belegten Tischmodellen unterschiedliche sichtbare Bauformen zu", () => {
+  const profiles = TABLE_MODELS.filter(tableModelHasGeometry).map((model) => tableVisualProfile(model.catalogId!));
+  assert.deepEqual(profiles, ["round-metal-frame", "storage-pedestal", "fluted-extension-pedestal"]);
+  assert.equal(tableVisualProfile("dining-table-does-not-exist"), "round-metal-frame");
 });

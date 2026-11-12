@@ -10,6 +10,7 @@ export type TableVariantId = "closed" | "extended";
 export type TableShape = "round" | "oval";
 export type TableConfidence = "confirmed" | "estimated" | "unknown";
 export type TableSourceStatus = "confirmed" | "mirror" | "blocked";
+export type TableVisualProfile = "round-metal-frame" | "storage-pedestal" | "fluted-extension-pedestal";
 
 export type TableVariant = {
   id: TableVariantId;
@@ -191,6 +192,18 @@ export function getTableVariant(model: TableModel, id: string | undefined) {
 
 export function tableModelHasGeometry(model: TableModel) {
   return model.variants.length > 0 && Boolean(model.catalogId);
+}
+
+/**
+ * Keeps the product comparison visually honest: each measured source has its
+ * own construction instead of falling back to one generic brown cylinder.
+ * The profile is deliberately derived from the stable catalog id so saved
+ * placements and AI commands remain portable.
+ */
+export function tableVisualProfile(catalogId: string | undefined): TableVisualProfile {
+  if (catalogId === "dining-table-temu-606997-120-160") return "storage-pedestal";
+  if (catalogId === "dining-table-kaufland-567080013-120-160") return "fluted-extension-pedestal";
+  return "round-metal-frame";
 }
 
 export function metresFromCentimetres(sizeCm: { width: number; depth: number; height: number }): Size3 {

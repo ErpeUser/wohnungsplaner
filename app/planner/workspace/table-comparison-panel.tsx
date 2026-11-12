@@ -11,6 +11,7 @@ import {
   getTableVariant,
   metresFromCentimetres,
   tableModelHasGeometry,
+  tableVisualProfile,
   type TableModelId,
   type TableVariantId,
 } from "../tables/table-models.ts";
@@ -107,8 +108,11 @@ export function TableComparisonPanel({
                 disabled={!available}
                 tabIndex={item.id === activeModelId ? 0 : -1}
                 className="planner-table-compare__tab"
+                data-material={item.materialId}
+                data-visual-profile={tableVisualProfile(item.catalogId)}
                 onClick={() => chooseModel(item.id)}
               >
+                <span className="planner-table-compare__swatch" aria-hidden="true" />
                 <span>{item.shortName}</span>
                 <small id={!available ? "table-tab-status-blocked" : undefined}>{item.sourceStatus === "blocked" ? "Quelle blockiert" : item.sourceStatus === "confirmed" ? "Maßgrafik" : "Spiegelbeleg"}</small>
               </button>
@@ -128,6 +132,11 @@ export function TableComparisonPanel({
             </div>
             <span className={`planner-table-compare__status planner-table-compare__status--${model.sourceStatus}`}>{model.sourceStatus === "confirmed" ? "Maßgrafik bestätigt" : "Maße aus Spiegelbeleg"}</span>
           </div>
+
+          <p className="planner-table-compare__construction">
+            <span className={`planner-table-compare__construction-swatch planner-table-compare__construction-swatch--${tableVisualProfile(model.catalogId)}`} aria-hidden="true" />
+            <span>{tableConstructionLabel(tableVisualProfile(model.catalogId))}</span>
+          </p>
 
           {model.imageUrls.length ? (
             <div className="planner-table-compare__evidence" aria-label={`Produktbilder ${model.name}`}>
@@ -197,4 +206,10 @@ function selectionForPlacement(placement: PlannerDocumentV3["placements"][number
       && Math.abs(size.height - placement.size.height) < 0.0001;
   });
   return variant ? { modelId: model.id, variantId: variant.id } : { modelId: model.id, variantId: model.variants[0]?.id ?? "closed" };
+}
+
+function tableConstructionLabel(profile: ReturnType<typeof tableVisualProfile>) {
+  if (profile === "fluted-extension-pedestal") return "Geriffeltes Holzpodest · sichtbarer Mittelauszug";
+  if (profile === "storage-pedestal") return "Runder Stauraumkorpus · Schiebetüren unter der Platte";
+  return "Runde Platte · schlanker Metallrahmen";
 }

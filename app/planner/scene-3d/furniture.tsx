@@ -10,6 +10,7 @@ import { resolvePlannerAsset } from "../catalog/asset-resolver.ts";
 import { getPlannerMaterial } from "./materials.ts";
 import { furnitureRenderTransform, furnitureWorldPosition, type SceneModel, type SceneObject } from "./scene-model.ts";
 import type { PlannerPlacement } from "../domain/types.ts";
+import { tableVisualProfile } from "../tables/table-models.ts";
 
 const SHARED_BOX = new BoxGeometry(1, 1, 1);
 const SHARED_CYLINDER = new CylinderGeometry(0.5, 0.5, 1, 24);
@@ -92,18 +93,18 @@ function FurnitureInstance({
     useAssetDimensions: importedGlb || catalogGlb,
   });
   const content = importedGlb ? (
-    <FurnitureAssetBoundary fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} />}>
-      <Suspense fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} />}>
+    <FurnitureAssetBoundary fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} size={item.size} />}>
+      <Suspense fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} size={item.size} />}>
         <GltfFurniture path={importedResolution.url} />
       </Suspense>
     </FurnitureAssetBoundary>
   ) : catalogGlb ? (
-    <FurnitureAssetBoundary fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} />}>
-      <Suspense fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} />}>
+    <FurnitureAssetBoundary fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} size={item.size} />}>
+      <Suspense fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} size={item.size} />}>
         <GltfFurniture path={resolution.asset.path} />
       </Suspense>
     </FurnitureAssetBoundary>
-  ) : <ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} />;
+  ) : <ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} size={item.size} />;
 
   return (
     <group
@@ -151,14 +152,14 @@ function GltfFurniture({ path }: { path: string }) {
   return <primitive object={object} />;
 }
 
-function ParametricFurniture({ fallback, materialId, catalogId }: { fallback: string; materialId: string; catalogId: string }) {
+function ParametricFurniture({ fallback, materialId, catalogId, size }: { fallback: string; materialId: string; catalogId: string; size?: [number, number, number] }) {
   const material = getPlannerMaterial(materialId);
   if (catalogId === "bed-bliss-120") return <BlissBed />;
   if (catalogId === "sofa-aliexpress-142" || catalogId === "sofa-aliexpress-142-open") return <IvoryPulloutSofa extended={catalogId === "sofa-aliexpress-142-open"} />;
   if (catalogId === "sofa-chicago-206") return <ChicagoSofa />;
   if (catalogId === "hallway-tejo-115") return <TejoHallway />;
   if (catalogId === "dining-table-bozan-110") return <BozanDiningTable />;
-  if (catalogId.startsWith("dining-table-")) return <ComparisonDiningTable materialId={materialId} />;
+  if (catalogId.startsWith("dining-table-")) return <ComparisonDiningTable materialId={materialId} catalogId={catalogId} size={size} />;
   if (catalogId === "chair-kaleo-chenille-beige") return <KaleoArmchair />;
   if (catalogId === "chair-temu-swivel-upholstered") return <ComparisonChair variant="temu-swivel" materialId={materialId} />;
   if (catalogId === "chair-temu-faux-leather-metal") return <ComparisonChair variant="faux-leather" materialId={materialId} />;
@@ -1063,11 +1064,62 @@ function DetailedTable({ materialId }: { materialId: string }) {
   );
 }
 
-function ComparisonDiningTable({ materialId }: { materialId: string }) {
+function ComparisonDiningTable({ materialId, catalogId, size }: { materialId: string; catalogId: string; size?: [number, number, number] }) {
   const top = getPlannerMaterial(materialId);
   const edge = getPlannerMaterial("oak-artisan-edge");
   const dark = getPlannerMaterial("metal-dark");
-  // Content spans y=0..1 so the placement height remains the measured tabletop height.
+  const profile = tableVisualProfile(catalogId);
+  const extended = catalogId === "dining-table-aliexpress-100-140"
+    ? (size?.[0] ?? 1) > 1.01
+    : (size?.[0] ?? 1.2) > 1.21;
+
+  // Content spans y=0..1 so the placement height remains the measured
+  // tabletop height. The three construction profiles intentionally differ:
+  // metal-frame, storage pedestal and fluted extension pedestal.
+  if (profile === "storage-pedestal") {
+    return (
+      <group>
+        {extended ? (
+          <group>
+            {[-0.3, 0, 0.3].map((x, index) => (
+              <RoundedBox key={x} args={[index === 1 ? 0.23 : 0.36, 0.1, 0.98]} radius={index === 1 ? 0.025 : 0.08} smoothness={6} position={[x, 0.95, 0]} castShadow receiveShadow>
+                <primitive object={top} attach="material" />
+              </RoundedBox>
+            ))}
+            {[-0.13, 0.13].map((x) => <DetailStrip key={x} position={[x, 1.004, 0]} scale={[0.012, 0.006, 0.92]} materialId="oak-artisan-edge" />)}
+          </group>
+        ) : (
+          <RoundedBox args={[0.98, 0.1, 0.98]} radius={0.08} smoothness={6} position={[0, 0.95, 0]} castShadow receiveShadow>
+            <primitive object={top} attach="material" />
+          </RoundedBox>
+        )}
+        <RoundedBox args={[0.72, 0.64, 0.72]} radius={0.055} smoothness={5} position={[0, 0.58, 0]} castShadow receiveShadow>
+          <primitive object={getPlannerMaterial("oak-natural")} attach="material" />
+        </RoundedBox>
+        <RoundedBox args={[0.68, 0.27, 0.025]} radius={0.012} smoothness={3} position={[0, 0.57, 0.365]} castShadow>
+          <primitive object={edge} attach="material" />
+        </RoundedBox>
+        {[-0.18, 0.18].map((x) => (
+          <group key={x} position={[x, 0.57, 0.39]}>
+            <RoundedBox args={[0.13, 0.18, 0.028]} radius={0.01} smoothness={3} castShadow>
+              <primitive object={getPlannerMaterial("oak-artisan-edge")} attach="material" />
+            </RoundedBox>
+            <mesh position={[0, 0, 0.024]} scale={[0.012, 0.065, 0.012]} geometry={SHARED_CYLINDER} castShadow>
+              <primitive object={dark} attach="material" />
+            </mesh>
+          </group>
+        ))}
+        <mesh position={[0, 0.14, 0]} scale={[0.78, 0.09, 0.78]} geometry={SHARED_CYLINDER} castShadow>
+          <primitive object={dark} attach="material" />
+        </mesh>
+      </group>
+    );
+  }
+
+  if (profile === "fluted-extension-pedestal") {
+    return <FlutedExtensionTable top={top} edge={edge} extended={extended} />;
+  }
+
   return (
     <group>
       <mesh position={[0, 0.94, 0]} scale={[1, 0.12, 1]} geometry={SHARED_CYLINDER} castShadow receiveShadow>
@@ -1076,14 +1128,62 @@ function ComparisonDiningTable({ materialId }: { materialId: string }) {
       <mesh position={[0, 0.87, 0]} scale={[0.7, 0.08, 0.7]} geometry={SHARED_CYLINDER} castShadow>
         <primitive object={edge} attach="material" />
       </mesh>
-      <mesh position={[0, 0.46, 0]} scale={[0.12, 0.82, 0.12]} geometry={SHARED_CYLINDER} castShadow>
-        <primitive object={dark} attach="material" />
-      </mesh>
-      {[[-0.24, -0.24], [0.24, -0.24], [-0.24, 0.24], [0.24, 0.24]].map(([x, z], index) => (
-        <mesh key={index} position={[x, 0.08, z]} scale={[0.06, 0.12, 0.06]} geometry={SHARED_CYLINDER} castShadow>
+      {[-1, 1].flatMap((x) => [-1, 1].map((z) => (
+        <mesh key={`${x}-${z}`} position={[x * 0.28, 0.43, z * 0.28]} rotation={[0, 0, x * z * 0.12]} scale={[0.055, 0.82, 0.055]} geometry={SHARED_BOX} castShadow>
           <primitive object={dark} attach="material" />
         </mesh>
+      )))}
+      <mesh position={[0, 0.08, 0]} scale={[0.72, 0.08, 0.72]} geometry={SHARED_CYLINDER} castShadow>
+        <primitive object={dark} attach="material" />
+      </mesh>
+    </group>
+  );
+}
+
+function FlutedExtensionTable({ top, edge, extended }: { top: ReturnType<typeof getPlannerMaterial>; edge: ReturnType<typeof getPlannerMaterial>; extended: boolean }) {
+  const pedestal = getPlannerMaterial("oak-artisan");
+  const seam = getPlannerMaterial("oak-artisan-edge");
+  const flutes = Array.from({ length: 18 }, (_, index) => (index / 18) * Math.PI * 2);
+  return (
+    <group>
+      {extended ? (
+        <group>
+          {[-0.3, 0, 0.3].map((x, index) => (
+            <RoundedBox key={x} args={[index === 1 ? 0.23 : 0.36, 0.09, 0.86]} radius={index === 1 ? 0.025 : 0.11} smoothness={8} position={[x, 0.95, 0]} castShadow receiveShadow>
+              <primitive object={top} attach="material" />
+            </RoundedBox>
+          ))}
+          {[-0.13, 0.13].map((x) => <DetailStrip key={x} position={[x, 0.998, 0]} scale={[0.012, 0.006, 0.8]} materialId="oak-artisan-edge" />)}
+        </group>
+      ) : (
+        <RoundedBox args={[1, 0.09, 0.86]} radius={0.11} smoothness={8} position={[0, 0.95, 0]} castShadow receiveShadow>
+          <primitive object={top} attach="material" />
+        </RoundedBox>
+      )}
+      <RoundedBox args={[0.98, 0.025, 0.018]} radius={0.007} smoothness={2} position={[0, 0.992, 0]} castShadow>
+        <primitive object={edge} attach="material" />
+      </RoundedBox>
+      <RoundedBox args={[0.44, 0.72, 0.44]} radius={0.12} smoothness={8} position={[0, 0.48, 0]} castShadow receiveShadow>
+        <primitive object={pedestal} attach="material" />
+      </RoundedBox>
+      {flutes.map((angle) => (
+        <mesh key={angle} position={[Math.cos(angle) * 0.235, 0.48, Math.sin(angle) * 0.235]} scale={[0.018, 0.68, 0.018]} geometry={SHARED_CYLINDER} castShadow>
+          <primitive object={getPlannerMaterial("oak-artisan-edge")} attach="material" />
+        </mesh>
       ))}
+      <mesh position={[0, 0.08, 0]} scale={[0.52, 0.08, 0.52]} geometry={SHARED_CYLINDER} castShadow>
+        <primitive object={pedestal} attach="material" />
+      </mesh>
+      {extended ? null : (
+        <>
+          <mesh position={[0, 0.944, 0]} scale={[0.016, 0.014, 0.41]} geometry={SHARED_BOX} castShadow>
+            <primitive object={seam} attach="material" />
+          </mesh>
+          <mesh position={[0, 0.944, 0]} scale={[0.41, 0.014, 0.016]} geometry={SHARED_BOX} castShadow>
+            <primitive object={seam} attach="material" />
+          </mesh>
+        </>
+      )}
     </group>
   );
 }
