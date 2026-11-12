@@ -202,6 +202,37 @@ export function upgradeRetiredDiningGroup(document: PlannerDocumentV3): PlannerD
   });
 }
 
+/** Keep the live dining group complete even when an older save contains only three chairs. */
+export function ensureCurrentDiningGroupFourChairs(document: PlannerDocumentV3): PlannerDocumentV3 {
+  const table = document.placements.find((item) => item.id === "living-bozan-table");
+  if (!table) return document;
+  const missing = DEFAULT_APARTMENT_DOCUMENT.placements.filter((item) => (
+    item.id.startsWith("living-kaleo-chair-")
+      && !document.placements.some((candidate) => candidate.id === item.id)
+  ));
+  if (!missing.length) return document;
+  const baselineTable = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "living-bozan-table")!;
+  const referenceChair = document.placements.find((item) => item.id.startsWith("living-kaleo-chair-"));
+  const delta = { x: table.position.x - baselineTable.position.x, z: table.position.z - baselineTable.position.z };
+  return parsePlannerDocument({
+    ...document,
+    placements: [
+      ...document.placements,
+      ...missing.map((item) => ({
+        ...item,
+        position: { x: item.position.x + delta.x, z: item.position.z + delta.z },
+        ...(referenceChair ? {
+          catalogId: referenceChair.catalogId,
+          size: referenceChair.size,
+          materialVariants: referenceChair.materialVariants,
+          metadata: referenceChair.metadata,
+          groupId: table.groupId,
+        } : {}),
+      })),
+    ],
+  });
+}
+
 /**
  * Unlinks the living sofa and rug so each can be dragged independently.
  * Older default saves are still moved to the measured inner face of the

@@ -11,7 +11,7 @@ import { ExportDialog } from "../export/export-dialog.tsx";
 import { PlanCanvas } from "../plan-2d/plan-canvas.tsx";
 import { createPlanScene } from "../plan-2d/plan-scene.ts";
 import { usePlanInteractions } from "../plan-2d/use-plan-interactions.ts";
-import { createLocalStoragePlannerRepository, upgradeLivingSofaRugGroup, upgradeRetiredDiningGroup } from "../store/persistence.ts";
+import { createLocalStoragePlannerRepository, ensureCurrentDiningGroupFourChairs, upgradeLivingSofaRugGroup, upgradeRetiredDiningGroup } from "../store/persistence.ts";
 import { createPlannerStore, type PlannerStore } from "../store/planner-store.ts";
 import { CatalogPanel } from "./catalog-panel.tsx";
 import { DetailsDrawer } from "./details-drawer.tsx";
@@ -70,7 +70,7 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
   useEffect(() => {
     if (providedStore) return;
     const current = store.getState().document;
-    const upgraded = upgradeLivingSofaRugGroup(upgradeRetiredDiningGroup(current));
+    const upgraded = upgradeLivingSofaRugGroup(upgradeRetiredDiningGroup(ensureCurrentDiningGroupFourChairs(current)));
     if (upgraded === current) return;
     store.getState().replaceDocument(upgraded);
     store.getState().scheduleSave();
