@@ -1,0 +1,16 @@
+{
+  "id": "builtin-wc-flush",
+  "displayName": "WC-Betätigungsplatte",
+  "category": "fixed-interior",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "wc-flush-plate",
+    "sourceFile": "app/planner/scene-3d"
+  }
+}

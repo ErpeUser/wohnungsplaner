@@ -1,0 +1,16 @@
+{
+  "id": "builtin-bath-tub-apron",
+  "displayName": "Geflieste Wannenverkleidung",
+  "category": "fixed-interior",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "bath-tub-apron",
+    "sourceFile": "app/planner/scene-3d"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "rug-gala-shaggy-2505-100x200",
+  "displayName": "Hochflor-Teppich Gala Shaggy 2505",
+  "category": "rug",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "rug-gala-shaggy-2505-100x200",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

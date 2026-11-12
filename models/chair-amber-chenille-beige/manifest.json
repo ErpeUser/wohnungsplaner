@@ -1,0 +1,16 @@
+{
+  "id": "chair-amber-chenille-beige",
+  "displayName": "Armlehnstuhl Amber",
+  "category": "chair",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "chair-amber-chenille-beige",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

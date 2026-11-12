@@ -1,0 +1,16 @@
+{
+  "id": "sofa-3seat",
+  "displayName": "Sofa",
+  "category": "sofa",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "sofa-3seat",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

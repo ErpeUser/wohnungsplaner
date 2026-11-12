@@ -1,0 +1,16 @@
+{
+  "id": "sofa-aliexpress-142-open",
+  "displayName": "Creme-Relaxsofa · ausgezogen 172 cm",
+  "category": "sofa",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "sofa-aliexpress-142-open",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

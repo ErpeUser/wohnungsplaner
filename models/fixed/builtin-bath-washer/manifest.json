@@ -1,0 +1,16 @@
+{
+  "id": "builtin-bath-washer",
+  "displayName": "Waschmaschine",
+  "category": "fixed-interior",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "appliance-washer",
+    "sourceFile": "app/planner/scene-3d"
+  }
+}

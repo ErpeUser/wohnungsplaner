@@ -1,0 +1,16 @@
+{
+  "id": "nightstand",
+  "displayName": "Nachttisch",
+  "category": "storage",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "nightstand",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "dining-table",
+  "displayName": "Esstisch",
+  "category": "table",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "dining-table",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

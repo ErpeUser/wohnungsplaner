@@ -1,0 +1,16 @@
+{
+  "id": "sofa-chicago-206",
+  "displayName": "Sofa Chicago 206",
+  "category": "sofa",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "sofa-chicago-206",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

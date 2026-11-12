@@ -1,0 +1,16 @@
+{
+  "id": "chair-kaleo-chenille-beige",
+  "displayName": "Armlehnstuhl Kaleo",
+  "category": "chair",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "chair-kaleo-chenille-beige",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

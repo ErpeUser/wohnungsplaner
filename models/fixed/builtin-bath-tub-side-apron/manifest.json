@@ -1,0 +1,16 @@
+{
+  "id": "builtin-bath-tub-side-apron",
+  "displayName": "Vollständig gefliester Wandabschluss neben der Badewanne",
+  "category": "fixed-interior",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "bath-tub-side-apron",
+    "sourceFile": "app/planner/scene-3d"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "rug-temu-easy-line-140x200",
+  "displayName": "Vorraumteppich Taupe-Kreisbögen 140 × 200",
+  "category": "rug",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "rug-temu-easy-line-140x200",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

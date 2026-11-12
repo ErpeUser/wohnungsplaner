@@ -1,0 +1,16 @@
+{
+  "id": "bed-160",
+  "displayName": "Doppelbett 160",
+  "category": "bed",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "bed-160",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

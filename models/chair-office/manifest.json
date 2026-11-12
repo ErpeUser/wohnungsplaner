@@ -1,0 +1,16 @@
+{
+  "id": "chair-office",
+  "displayName": "Bürostuhl",
+  "category": "chair",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "chair-office",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

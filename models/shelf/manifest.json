@@ -1,0 +1,16 @@
+{
+  "id": "shelf",
+  "displayName": "Regal",
+  "category": "storage",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "shelf",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "builtin-z1-vanity-shelf-side-upper",
+  "displayName": "Eck-Wandregal Natur-Eiche · ca. 36 × 16 × 4 cm",
+  "category": "fixed-interior",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "zimmer1-desk-shelf-side-upper",
+    "sourceFile": "app/planner/scene-3d"
+  }
+}

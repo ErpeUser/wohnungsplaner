@@ -1,0 +1,16 @@
+{
+  "id": "fixture-z1-switch",
+  "displayName": "Lichtschalter Eingang",
+  "category": "fixed-interior",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": null,
+    "sourceFile": "app/planner/scene-3d"
+  }
+}

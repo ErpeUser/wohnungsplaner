@@ -1,0 +1,16 @@
+{
+  "id": "builtin-z1-headboard-led",
+  "displayName": "Indirektes warmweißes Licht hinter dem Kopfteil",
+  "category": "fixed-interior",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "zimmer1-headboard-led",
+    "sourceFile": "app/planner/scene-3d"
+  }
+}

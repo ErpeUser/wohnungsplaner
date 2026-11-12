@@ -1,0 +1,16 @@
+{
+  "id": "rug-temu-easy-line-120x180",
+  "displayName": "Easy-Line Color-Block-Teppich",
+  "category": "rug",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "rug-temu-easy-line-120x180",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

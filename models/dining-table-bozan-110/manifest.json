@@ -1,0 +1,16 @@
+{
+  "id": "dining-table-bozan-110",
+  "displayName": "Ausziehtisch Bozan 110",
+  "category": "table",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "dining-table-bozan-110",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

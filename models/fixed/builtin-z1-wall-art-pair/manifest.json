@@ -1,0 +1,16 @@
+{
+  "id": "builtin-z1-wall-art-pair",
+  "displayName": "Zwei botanisch-abstrakte Bilder über dem Kopfteil · je 60 × 80 cm",
+  "category": "fixed-interior",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "zimmer1-wall-art-pair",
+    "sourceFile": "app/planner/scene-3d"
+  }
+}

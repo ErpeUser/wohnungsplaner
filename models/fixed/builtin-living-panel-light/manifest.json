@@ -1,0 +1,16 @@
+{
+  "id": "builtin-living-panel-light",
+  "displayName": "Wandleuchte über Moosfeld",
+  "category": "fixed-interior",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "living-wall-light",
+    "sourceFile": "app/planner/scene-3d"
+  }
+}

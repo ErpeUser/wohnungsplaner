@@ -1,0 +1,16 @@
+{
+  "id": "builtin-wc-paper-holder",
+  "displayName": "Eiche-Eisen-Ablage mit Toilettenpapierhalter · Temu",
+  "category": "fixed-interior",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "wc-paper-holder",
+    "sourceFile": "app/planner/scene-3d"
+  }
+}

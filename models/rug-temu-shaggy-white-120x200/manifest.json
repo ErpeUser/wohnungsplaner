@@ -1,0 +1,16 @@
+{
+  "id": "rug-temu-shaggy-white-120x200",
+  "displayName": "Flauschiger Zottelteppich Weiß",
+  "category": "rug",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "rug-temu-shaggy-white-120x200",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

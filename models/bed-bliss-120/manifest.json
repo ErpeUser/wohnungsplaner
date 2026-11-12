@@ -1,0 +1,16 @@
+{
+  "id": "bed-bliss-120",
+  "displayName": "Polsterbett Bliss 120",
+  "category": "bed",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "bed-bliss-120",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

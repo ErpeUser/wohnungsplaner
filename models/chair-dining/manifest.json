@@ -1,0 +1,16 @@
+{
+  "id": "chair-dining",
+  "displayName": "Stuhl",
+  "category": "chair",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "chair-dining",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

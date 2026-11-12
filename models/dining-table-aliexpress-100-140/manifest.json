@@ -1,0 +1,16 @@
+{
+  "id": "dining-table-aliexpress-100-140",
+  "displayName": "AliExpress Tisch 100 → 140",
+  "category": "table",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "dining-table-aliexpress-100-140",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

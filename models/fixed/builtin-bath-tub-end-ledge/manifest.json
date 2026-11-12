@@ -1,0 +1,16 @@
+{
+  "id": "builtin-bath-tub-end-ledge",
+  "displayName": "Gefliester Wannenkopf mit Ablage",
+  "category": "fixed-interior",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "bath-tub-end-ledge",
+    "sourceFile": "app/planner/scene-3d"
+  }
+}

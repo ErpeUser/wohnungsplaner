@@ -1,0 +1,16 @@
+{
+  "id": "chair-temu-velvet-swivel-arm",
+  "displayName": "Temu Samt-Drehstuhl",
+  "category": "chair",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "chair-temu-velvet-swivel-arm",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

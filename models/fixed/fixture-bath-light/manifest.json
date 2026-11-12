@@ -1,0 +1,16 @@
+{
+  "id": "fixture-bath-light",
+  "displayName": "Lichtauslass Decke",
+  "category": "fixed-interior",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": null,
+    "sourceFile": "app/planner/scene-3d"
+  }
+}

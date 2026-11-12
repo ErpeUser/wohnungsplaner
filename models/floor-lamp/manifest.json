@@ -1,0 +1,16 @@
+{
+  "id": "floor-lamp",
+  "displayName": "Stehleuchte",
+  "category": "light",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "floor-lamp",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

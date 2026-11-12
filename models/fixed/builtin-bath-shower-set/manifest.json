@@ -1,0 +1,16 @@
+{
+  "id": "builtin-bath-shower-set",
+  "displayName": "Chrom-Wannenarmatur und Handbrause links an der langen Fliesenwand",
+  "category": "fixed-interior",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "bath-shower-set",
+    "sourceFile": "app/planner/scene-3d"
+  }
+}

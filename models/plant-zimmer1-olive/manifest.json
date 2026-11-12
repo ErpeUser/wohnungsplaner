@@ -1,0 +1,16 @@
+{
+  "id": "plant-zimmer1-olive",
+  "displayName": "Olivpflanze Zimmer 1",
+  "category": "plant",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "plant-zimmer1-olive",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

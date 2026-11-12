@@ -1,0 +1,16 @@
+{
+  "id": "nightstand-led-2drawer-white",
+  "displayName": "LED-Nachttisch mit Ladestation",
+  "category": "storage",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "nightstand-led-2drawer-white",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

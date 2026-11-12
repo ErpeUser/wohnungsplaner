@@ -1,0 +1,10 @@
+{
+  "id": "aliexpress-100-140",
+  "displayName": "AliExpress Tisch 100 → 140",
+  "status": "reference-only",
+  "sourceUrls": ["https://de.aliexpress.com/item/1005013489223528.html?gatewayAdapt=glo2deu"],
+  "dimensions": {"closedCm": {"width": 100, "depth": 100, "height": 75}, "extendedCm": {"width": 140, "depth": 100, "height": 75}},
+  "materials": ["oak-top", "dark-metal-frame"],
+  "variants": ["closed", "extended"],
+  "runtime": {"renderer": "parametric", "catalogId": "dining-table-aliexpress-100-140", "profile": "round-metal-frame", "sourceFile": "app/planner/scene-3d/furniture.tsx"}
+}

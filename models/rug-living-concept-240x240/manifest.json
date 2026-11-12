@@ -1,0 +1,16 @@
+{
+  "id": "rug-living-concept-240x240",
+  "displayName": "Temu Vintage-Samtteppich A8447 · 180 × 250",
+  "category": "rug",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "rug-living-concept-240x240",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "sofa-sectional-photo",
+  "displayName": "Ecksofa Grau",
+  "category": "sofa",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "sofa-sectional-photo",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

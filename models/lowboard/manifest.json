@@ -1,0 +1,16 @@
+{
+  "id": "lowboard",
+  "displayName": "Lowboard",
+  "category": "storage",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "lowboard",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

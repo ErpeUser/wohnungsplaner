@@ -1,0 +1,16 @@
+{
+  "id": "builtin-hall-wall-decor",
+  "displayName": "Vorraum-Deko: größeres Bild und rundes Wandpflanzgefäß",
+  "category": "fixed-interior",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "vorraum-wall-decor",
+    "sourceFile": "app/planner/scene-3d"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "builtin-z1-wardrobe-top-decor",
+  "displayName": "Geflochtene Aufbewahrungsboxen auf dem Schrank",
+  "category": "fixed-interior",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "zimmer1-wardrobe-top-decor",
+    "sourceFile": "app/planner/scene-3d"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "builtin-z1-layered-curtain",
+  "displayName": "Deckenhoher Vorhang · Ecru transparent + Taupe",
+  "category": "fixed-interior",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "zimmer1-layered-curtain",
+    "sourceFile": "app/planner/scene-3d"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "builtin-z1-vanity-shelf-main",
+  "displayName": "Haupt-Wandregal Natur-Eiche · ca. 112 × 19 × 4,5 cm",
+  "category": "fixed-interior",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "zimmer1-desk-shelf-main",
+    "sourceFile": "app/planner/scene-3d"
+  }
+}

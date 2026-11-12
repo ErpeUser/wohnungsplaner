@@ -1,0 +1,16 @@
+{
+  "id": "hallway-tejo-115",
+  "displayName": "Garderobe Tejo Beige/Kaschmir",
+  "category": "storage",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "hallway-tejo-115",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

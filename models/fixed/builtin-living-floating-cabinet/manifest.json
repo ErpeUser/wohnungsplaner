@@ -1,0 +1,16 @@
+{
+  "id": "builtin-living-floating-cabinet",
+  "displayName": "Schwarzer Hängeschrank · Wunschplanung",
+  "category": "fixed-interior",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "living-floating-cabinet",
+    "sourceFile": "app/planner/scene-3d"
+  }
+}

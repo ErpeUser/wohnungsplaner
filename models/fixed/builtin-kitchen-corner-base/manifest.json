@@ -1,0 +1,16 @@
+{
+  "id": "builtin-kitchen-corner-base",
+  "displayName": "65-cm-Kücheneckschrank gemäß Küchenplan",
+  "category": "fixed-interior",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "kitchen-corner-base",
+    "sourceFile": "app/planner/scene-3d"
+  }
+}

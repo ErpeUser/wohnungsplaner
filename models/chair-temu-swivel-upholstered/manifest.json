@@ -1,0 +1,16 @@
+{
+  "id": "chair-temu-swivel-upholstered",
+  "displayName": "Temu Drehstuhl gepolstert",
+  "category": "chair",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "chair-temu-swivel-upholstered",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

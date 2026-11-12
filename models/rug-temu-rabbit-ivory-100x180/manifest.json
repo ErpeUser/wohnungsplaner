@@ -1,0 +1,16 @@
+{
+  "id": "rug-temu-rabbit-ivory-100x180",
+  "displayName": "Kunstkaninchen-Plüschteppich Elfenbein",
+  "category": "rug",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "rug-temu-rabbit-ivory-100x180",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

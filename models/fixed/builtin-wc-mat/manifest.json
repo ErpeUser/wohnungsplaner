@@ -1,0 +1,16 @@
+{
+  "id": "builtin-wc-mat",
+  "displayName": "WC-Teppich · beige Baumwoll-Waffelstruktur · 77 × 46 cm",
+  "category": "fixed-interior",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "wc-mat",
+    "sourceFile": "app/planner/scene-3d"
+  }
+}

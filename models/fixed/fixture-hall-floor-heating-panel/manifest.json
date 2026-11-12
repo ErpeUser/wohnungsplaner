@@ -1,0 +1,16 @@
+{
+  "id": "fixture-hall-floor-heating-panel",
+  "displayName": "Fußbodenheizungsverteiler / untere Revisionsklappe",
+  "category": "fixed-interior",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": null,
+    "sourceFile": "app/planner/scene-3d"
+  }
+}

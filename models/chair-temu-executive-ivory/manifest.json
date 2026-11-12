@@ -1,0 +1,16 @@
+{
+  "id": "chair-temu-executive-ivory",
+  "displayName": "Chefsessel Creme mit Fußstütze",
+  "category": "chair",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "chair-temu-executive-ivory",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

@@ -46,6 +46,8 @@ next-env.d.ts
 
 # local QA output and recoverable legacy archive
 /legacy-archive/
+/artifacts/product-references/*
+!/artifacts/product-references/source-manifest.json
 /.runtime/
 /.local/
 /tmp/

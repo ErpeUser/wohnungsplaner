@@ -1,0 +1,16 @@
+{
+  "id": "dining-table-temu-606997-120-160",
+  "displayName": "Temu Tisch 120 → 160 mit Stauraum",
+  "category": "table",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "dining-table-temu-606997-120-160",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

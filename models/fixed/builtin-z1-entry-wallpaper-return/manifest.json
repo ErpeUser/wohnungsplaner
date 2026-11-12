@@ -1,0 +1,16 @@
+{
+  "id": "builtin-z1-entry-wallpaper-return",
+  "displayName": "Tapetenwand direkt neben der Zimmer-1-Tür",
+  "category": "fixed-interior",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "wall-finish-vintage-fabric-wallpaper",
+    "sourceFile": "app/planner/scene-3d"
+  }
+}

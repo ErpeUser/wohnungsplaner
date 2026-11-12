@@ -1,0 +1,16 @@
+{
+  "id": "chair-temu-faux-leather-metal",
+  "displayName": "Temu Kunstlederstuhl",
+  "category": "chair",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "chair-temu-faux-leather-metal",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

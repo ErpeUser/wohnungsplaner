@@ -1,0 +1,16 @@
+{
+  "id": "dresser",
+  "displayName": "Kommode",
+  "category": "storage",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "dresser",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

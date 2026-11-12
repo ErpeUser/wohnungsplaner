@@ -1,0 +1,16 @@
+{
+  "id": "builtin-bath-towel-hook-rail",
+  "displayName": "4 einzelne Rundhaken · Eiche natur / Schwarz · 2 × 2",
+  "category": "fixed-interior",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "bath-towel-hooks-wood-black",
+    "sourceFile": "app/planner/scene-3d"
+  }
+}

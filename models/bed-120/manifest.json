@@ -1,0 +1,16 @@
+{
+  "id": "bed-120",
+  "displayName": "Bett 120",
+  "category": "bed",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "bed-120",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

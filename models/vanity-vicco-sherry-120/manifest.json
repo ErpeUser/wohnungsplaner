@@ -1,0 +1,16 @@
+{
+  "id": "vanity-vicco-sherry-120",
+  "displayName": "Schminktisch Sherry mit LED-Spiegel",
+  "category": "desk",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "vanity-vicco-sherry-120",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

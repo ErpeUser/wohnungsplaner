@@ -1,0 +1,16 @@
+{
+  "id": "rug-200",
+  "displayName": "Teppich",
+  "category": "rug",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "rug-200",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

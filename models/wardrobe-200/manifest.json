@@ -1,0 +1,16 @@
+{
+  "id": "wardrobe-200",
+  "displayName": "Kleiderschrank",
+  "category": "storage",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "wardrobe-200",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}

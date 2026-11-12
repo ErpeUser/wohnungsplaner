@@ -1,0 +1,16 @@
+{
+  "id": "builtin-kitchen-tile-north",
+  "displayName": "L-förmige lichtgraue Fliesenzone vor Spüle und Kühlschrank",
+  "category": "fixed-interior",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "floor-zone-kitchen",
+    "sourceFile": "app/planner/scene-3d"
+  }
+}

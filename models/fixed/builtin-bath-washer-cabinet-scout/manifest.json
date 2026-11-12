@@ -1,0 +1,16 @@
+{
+  "id": "builtin-bath-washer-cabinet-scout",
+  "displayName": "Scout Waschmaschinenschrank · 63 × 191 × 24 cm",
+  "category": "fixed-interior",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "bath-washer-cabinet-scout",
+    "sourceFile": "app/planner/scene-3d"
+  }
+}

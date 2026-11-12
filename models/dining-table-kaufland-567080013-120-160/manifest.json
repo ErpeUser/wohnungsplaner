@@ -1,0 +1,16 @@
+{
+  "id": "dining-table-kaufland-567080013-120-160",
+  "displayName": "Flieks Tisch 120 → 160",
+  "category": "table",
+  "status": "reference-only",
+  "sourceUrls": [],
+  "materials": [],
+  "variants": [
+    "default"
+  ],
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "dining-table-kaufland-567080013-120-160",
+    "sourceFile": "app/planner/scene-3d/furniture.tsx"
+  }
+}
