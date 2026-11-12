@@ -242,6 +242,7 @@ export function upgradeLivingSofaRugGroup(document: PlannerDocumentV3): PlannerD
   const rug = document.placements.find((item) => item.id === "living-rug-concept");
   const sofa = document.placements.find((item) => item.id === "living-chicago-sofa");
   if (!rug || !sofa) return document;
+  const targetRug = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "living-rug-concept") ?? rug;
 
   const legacyDefault = Math.abs(rug.position.x - 1.55) < 0.001
     && Math.abs(rug.position.z - 7.75) < 0.001
@@ -253,8 +254,10 @@ export function upgradeLivingSofaRugGroup(document: PlannerDocumentV3): PlannerD
   // preserving that user's position, rotation and grouping.
   const legacySofaModel = sofa.catalogId === "sofa-chicago-206"
     && Boolean(currentSofa && sofa.catalogId !== currentSofa.catalogId);
+  const needsCenter = Math.abs(sofa.position.x - targetRug.position.x) > 0.001
+    || Math.abs(sofa.position.z - targetRug.position.z) > 0.001;
   const needsUnlink = legacyDefault || Boolean(rug.groupId) || Boolean(sofa.groupId);
-  if (!needsUnlink && !legacySofaModel) return document;
+  if (!needsUnlink && !legacySofaModel && !needsCenter) return document;
   const next = document.placements.map((item) => {
     if (item.id === rug.id) {
       return {
@@ -273,7 +276,7 @@ export function upgradeLivingSofaRugGroup(document: PlannerDocumentV3): PlannerD
           metadata: currentSofa.metadata,
         } : {}),
         groupId: undefined,
-        position: legacyDefault ? { x: 2.2, z: 8.06 } : item.position,
+        position: needsCenter ? { ...targetRug.position } : legacyDefault ? { x: targetRug.position.x, z: targetRug.position.z } : item.position,
       };
     }
     return item;

@@ -99,7 +99,7 @@ test("places the 142 cm AliExpress sofa at the wall-side living position", () =>
   const sofa = DEFAULT_APARTMENT_DOCUMENT.placements.find(item=>item.id==="living-chicago-sofa");
   assert.ok(sofa);
   assert.equal(sofa.catalogId,"sofa-aliexpress-142");
-  assert.deepEqual(sofa.position,{x:2.2,z:8.06});
+  assert.deepEqual(sofa.position,{x:1.55,z:7.99});
   assert.equal(sofa.groupId, undefined);
   assert.deepEqual(sofa.size,{width:1.42,depth:0.9,height:0.865});
   assert.equal(sofa.rotation,90);
