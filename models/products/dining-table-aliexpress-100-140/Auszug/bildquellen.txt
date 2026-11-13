@@ -1,0 +1,9 @@
+https://ae-pic-a1.aliexpress-media.com/kf/S005657650b73487a92a7edecc2eecde9I.jpg
+https://assets.alicdn.com/g/alilog/??aplus_plugin_aefront/index.js,mlog/aplus_v2.js
+https://assets.alicdn.com/g/lzd_sec/LWSC-G/index.js
+https://assets.aliexpress-media.com/g/ae-fe/cosmos/0.0.454/pc/index.js
+https://assets.aliexpress-media.com/g/ae-fe/global/0.0.3/index.js
+https://assets.aliexpress-media.com/g/ae-fe/page-header-ui/0.0.97/js/index.js
+https://assets.aliexpress-media.com/g/ae-fe/pdp-pc/0.2.142/js/index.js
+https://assets.aliexpress-media.com/g/code/npm/@alife/nano-cross-page-loader/0.0.53/_cross_page_loader_.js
+https://s.click.aliexpress.com/direct_landing.htm

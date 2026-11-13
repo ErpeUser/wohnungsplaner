@@ -1,0 +1,981 @@
+{
+  "assets": [
+    {
+      "contentType": "image/avif",
+      "id": "c961232f4396efaa",
+      "kind": "image",
+      "name": "PIo4oZh4itc7aWZusN1eO58g",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/c961232f4396efaa",
+      "url": "https://media.moebelix.com/i/moebelix/PIo4oZh4itc7aWZusN1eO58g/?fmt=auto&%24dq%24=&w=200&h=200"
+    },
+    {
+      "contentType": "image/avif",
+      "id": "2763ae1e7763e4db",
+      "kind": "image",
+      "name": "PInSM-QSHNo3cMcY3rhK12QA",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/2763ae1e7763e4db",
+      "url": "https://media.moebelix.com/i/moebelix/PInSM-QSHNo3cMcY3rhK12QA/?fmt=auto&%24dq%24=&w=200&h=200"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "951ce254f4353ddc",
+      "kind": "image",
+      "name": "midyou.png",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/951ce254f4353ddc.png",
+      "url": "https://media.moebelix.com/i/moebelix/NCA2dvBUu8SqWsu8Gi25Xviw/midyou.png?fmt=auto&%24dq%24=&w=332"
+    },
+    {
+      "contentType": "image/avif",
+      "id": "21cb43e64a4ee178",
+      "kind": "image",
+      "name": "PIJJ7b3mo94BGi_HxmEChKhQ",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/21cb43e64a4ee178",
+      "url": "https://media.moebelix.com/i/moebelix/PIJJ7b3mo94BGi_HxmEChKhQ/?fmt=auto&%24dq%24=&w=200&h=200"
+    },
+    {
+      "contentType": "image/avif",
+      "id": "0bbc15a56a41ce53",
+      "kind": "image",
+      "name": "PIJJ7b3mo94BGi_HxmEChKhQ",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/0bbc15a56a41ce53",
+      "url": "https://media.moebelix.com/i/moebelix/PIJJ7b3mo94BGi_HxmEChKhQ/?fmt=auto&%24hq%24=&w=1200"
+    },
+    {
+      "contentType": "image/avif",
+      "id": "8263a63303a9dc06",
+      "kind": "image",
+      "name": "PIUUwW1lswk67wyYW-_V-bJQ",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/8263a63303a9dc06",
+      "url": "https://media.moebelix.com/i/moebelix/PIUUwW1lswk67wyYW-_V-bJQ/?fmt=auto&%24hq%24=&w=1000"
+    },
+    {
+      "contentType": "image/avif",
+      "id": "2e8d0c146304ebd9",
+      "kind": "image",
+      "name": "PIibKT4V2w-TRL-Ely3loN7w",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/2e8d0c146304ebd9",
+      "url": "https://media.moebelix.com/i/moebelix/PIibKT4V2w-TRL-Ely3loN7w/?fmt=auto&%24dq%24=&w=420"
+    },
+    {
+      "contentType": "image/avif",
+      "id": "3784d03247dac481",
+      "kind": "image",
+      "name": "PIFIdRboyzvkXZeg3g4rdV3w",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/3784d03247dac481",
+      "url": "https://media.moebelix.com/i/moebelix/PIFIdRboyzvkXZeg3g4rdV3w/?fmt=auto&%24dq%24=&w=420"
+    },
+    {
+      "contentType": "image/avif",
+      "id": "2c470d2c164bf8a9",
+      "kind": "image",
+      "name": "PInfo6SzrYBNxvYzSpPX10zQ",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/2c470d2c164bf8a9",
+      "url": "https://media.moebelix.com/i/moebelix/PInfo6SzrYBNxvYzSpPX10zQ/?fmt=auto&%24dq%24=&w=420"
+    },
+    {
+      "contentType": "image/avif",
+      "id": "54eaf40b1b8c7e44",
+      "kind": "image",
+      "name": "PIXh_JxgPoxjYiNOsfIE9TUQ",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/54eaf40b1b8c7e44",
+      "url": "https://media.moebelix.com/i/moebelix/PIXh_JxgPoxjYiNOsfIE9TUQ/?fmt=auto&%24dq%24=&w=420"
+    },
+    {
+      "contentType": "image/avif",
+      "id": "a84fb28920381786",
+      "kind": "image",
+      "name": "PIfzuN-d6Ax669zkyOoWnDMA",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/a84fb28920381786",
+      "url": "https://media.moebelix.com/i/moebelix/PIfzuN-d6Ax669zkyOoWnDMA/?fmt=auto&%24dq%24=&w=420"
+    },
+    {
+      "contentType": "image/avif",
+      "id": "00653060a473f79e",
+      "kind": "image",
+      "name": "PINPMDLgwTfPweTDYBqQTn8g",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/00653060a473f79e",
+      "url": "https://media.moebelix.com/i/moebelix/PINPMDLgwTfPweTDYBqQTn8g/?fmt=auto&%24dq%24=&w=90&h=90"
+    },
+    {
+      "contentType": "image/avif",
+      "id": "b60a49eb7be6a1fe",
+      "kind": "image",
+      "name": "PI8G2UDTF4PEh9RgOPyVK2uQ",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/b60a49eb7be6a1fe",
+      "url": "https://media.moebelix.com/i/moebelix/PI8G2UDTF4PEh9RgOPyVK2uQ/?fmt=auto&%24dq%24=&w=90&h=90"
+    },
+    {
+      "contentType": "image/avif",
+      "id": "1f0fb5dd87e56be1",
+      "kind": "image",
+      "name": "PINw_Q_-23Q6pj762Fnxs3GA",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/1f0fb5dd87e56be1",
+      "url": "https://media.moebelix.com/i/moebelix/PINw_Q_-23Q6pj762Fnxs3GA/?fmt=auto&%24dq%24=&w=90&h=90"
+    },
+    {
+      "contentType": "image/avif",
+      "id": "fb2b3472ab94f618",
+      "kind": "image",
+      "name": "PIJJ7b3mo94BGi_HxmEChKhQ",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/fb2b3472ab94f618",
+      "url": "https://media.moebelix.com/i/moebelix/PIJJ7b3mo94BGi_HxmEChKhQ/?fmt=auto&%24dq%24=&w=90&h=90"
+    },
+    {
+      "contentType": "image/avif",
+      "id": "2f5e57e4e48af351",
+      "kind": "image",
+      "name": "PItpnUjHieCUEIC5DjA7A6lg",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/2f5e57e4e48af351",
+      "url": "https://media.moebelix.com/i/moebelix/PItpnUjHieCUEIC5DjA7A6lg/?fmt=auto&%24dq%24=&w=200&h=200"
+    },
+    {
+      "contentType": "image/avif",
+      "id": "23953b9ad87e78d3",
+      "kind": "image",
+      "name": "PIdPA1nQ1X4Z5XXfPQtd9HbQ",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/23953b9ad87e78d3",
+      "url": "https://media.moebelix.com/i/moebelix/PIdPA1nQ1X4Z5XXfPQtd9HbQ/?fmt=auto&%24dq%24=&w=200&h=200"
+    },
+    {
+      "contentType": "image/avif",
+      "id": "87e150fd8e8cec4d",
+      "kind": "image",
+      "name": "PIr3dc2FdBIWNmNYjZv38U6A",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/87e150fd8e8cec4d",
+      "url": "https://media.moebelix.com/i/moebelix/PIr3dc2FdBIWNmNYjZv38U6A/?fmt=auto&%24dq%24=&w=200&h=200"
+    },
+    {
+      "contentType": "image/avif",
+      "id": "c1226298404c5e5f",
+      "kind": "image",
+      "name": "PI9HKAHXejK14y1unj69zkbw",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/c1226298404c5e5f",
+      "url": "https://media.moebelix.com/i/moebelix/PI9HKAHXejK14y1unj69zkbw/?fmt=auto&%24dq%24=&w=200&h=200"
+    },
+    {
+      "contentType": "image/avif",
+      "id": "8e8c5ace0268bd41",
+      "kind": "image",
+      "name": "PInY2WmCYwWZne-9WABrgt0g",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/8e8c5ace0268bd41",
+      "url": "https://media.moebelix.com/i/moebelix/PInY2WmCYwWZne-9WABrgt0g/?fmt=auto&%24dq%24=&w=200&h=200"
+    },
+    {
+      "contentType": "image/avif",
+      "id": "8c5317edd6a2cb86",
+      "kind": "image",
+      "name": "PISDMej9uJx1uv76o6am1Rtw",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/8c5317edd6a2cb86",
+      "url": "https://media.moebelix.com/i/moebelix/PISDMej9uJx1uv76o6am1Rtw/?fmt=auto&%24dq%24=&w=200&h=200"
+    },
+    {
+      "contentType": "image/avif",
+      "id": "a2b13dfecbe7242d",
+      "kind": "image",
+      "name": "PIS2_SDci3BPhpQMwzMK3IJg",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/a2b13dfecbe7242d",
+      "url": "https://media.moebelix.com/i/moebelix/PIS2_SDci3BPhpQMwzMK3IJg/?fmt=auto&%24dq%24=&w=200&h=200"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "6f9b88314deabd5c",
+      "kind": "image",
+      "name": "svg-1",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/6f9b88314deabd5c.svg",
+      "url": "inline-svg:6f9b88314deabd5c"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "7286041828909687",
+      "kind": "image",
+      "name": "svg-2",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/7286041828909687.svg",
+      "url": "inline-svg:7286041828909687"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "761b6200431070eb",
+      "kind": "image",
+      "name": "svg-3",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/761b6200431070eb.svg",
+      "url": "inline-svg:761b6200431070eb"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "3b85064988a22dfb",
+      "kind": "image",
+      "name": "svg-4",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/3b85064988a22dfb.svg",
+      "url": "inline-svg:3b85064988a22dfb"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "0dc5e34c9fbd3b23",
+      "kind": "image",
+      "name": "svg-5",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/0dc5e34c9fbd3b23.svg",
+      "url": "inline-svg:0dc5e34c9fbd3b23"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "1ae4f8ad1ff3e206",
+      "kind": "image",
+      "name": "svg-6",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/1ae4f8ad1ff3e206.svg",
+      "url": "inline-svg:1ae4f8ad1ff3e206"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "370181cceb2c26ae",
+      "kind": "image",
+      "name": "svg-7",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/370181cceb2c26ae.svg",
+      "url": "inline-svg:370181cceb2c26ae"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "e488a4b7c75eecd0",
+      "kind": "image",
+      "name": "svg-8",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/e488a4b7c75eecd0.svg",
+      "url": "inline-svg:e488a4b7c75eecd0"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "b49ee2c5c54737ce",
+      "kind": "image",
+      "name": "svg-9",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/b49ee2c5c54737ce.svg",
+      "url": "inline-svg:b49ee2c5c54737ce"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "3b94dbbc217c547c",
+      "kind": "image",
+      "name": "svg-10",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/3b94dbbc217c547c.svg",
+      "url": "inline-svg:3b94dbbc217c547c"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "3b8d61c193055a70",
+      "kind": "image",
+      "name": "svg-11",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/3b8d61c193055a70.svg",
+      "url": "inline-svg:3b8d61c193055a70"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "da6f49ac4ce93057",
+      "kind": "image",
+      "name": "svg-12",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/da6f49ac4ce93057.svg",
+      "url": "inline-svg:da6f49ac4ce93057"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "1696f21eaa29a1ac",
+      "kind": "image",
+      "name": "svg-13",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/1696f21eaa29a1ac.svg",
+      "url": "inline-svg:1696f21eaa29a1ac"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "d54b28fd35c26555",
+      "kind": "image",
+      "name": "svg-14",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/d54b28fd35c26555.svg",
+      "url": "inline-svg:d54b28fd35c26555"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "1d4b4074c8cefbd9",
+      "kind": "image",
+      "name": "svg-15",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/1d4b4074c8cefbd9.svg",
+      "url": "inline-svg:1d4b4074c8cefbd9"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "fda1914e649ffd0f",
+      "kind": "image",
+      "name": "svg-16",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/fda1914e649ffd0f.svg",
+      "url": "inline-svg:fda1914e649ffd0f"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "9ccdbbb2934cb2d8",
+      "kind": "image",
+      "name": "svg-17",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/9ccdbbb2934cb2d8.svg",
+      "url": "inline-svg:9ccdbbb2934cb2d8"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "b7bd07efdb188717",
+      "kind": "image",
+      "name": "svg-18",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/b7bd07efdb188717.svg",
+      "url": "inline-svg:b7bd07efdb188717"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "07d7544a896a7b87",
+      "kind": "image",
+      "name": "svg-19",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/07d7544a896a7b87.svg",
+      "url": "inline-svg:07d7544a896a7b87"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "88a1bc7558163b3b",
+      "kind": "image",
+      "name": "svg-20",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/88a1bc7558163b3b.svg",
+      "url": "inline-svg:88a1bc7558163b3b"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "1537046064084939",
+      "kind": "image",
+      "name": "svg-21",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/1537046064084939.svg",
+      "url": "inline-svg:1537046064084939"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "da6b694e171bd4b7",
+      "kind": "image",
+      "name": "svg-22",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/da6b694e171bd4b7.svg",
+      "url": "inline-svg:da6b694e171bd4b7"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "920467d0e28af58a",
+      "kind": "image",
+      "name": "svg-23",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/920467d0e28af58a.svg",
+      "url": "inline-svg:920467d0e28af58a"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "8ac943e573bb1e20",
+      "kind": "image",
+      "name": "svg-24",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/8ac943e573bb1e20.svg",
+      "url": "inline-svg:8ac943e573bb1e20"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "c3dc0c004b7d7121",
+      "kind": "image",
+      "name": "svg-25",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/c3dc0c004b7d7121.svg",
+      "url": "inline-svg:c3dc0c004b7d7121"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "ac54eefd6c41e562",
+      "kind": "image",
+      "name": "svg-26",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/ac54eefd6c41e562.svg",
+      "url": "inline-svg:ac54eefd6c41e562"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "e33e36781011b0ec",
+      "kind": "image",
+      "name": "svg-27",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/e33e36781011b0ec.svg",
+      "url": "inline-svg:e33e36781011b0ec"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "8e5e75998e406906",
+      "kind": "image",
+      "name": "svg-28",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/8e5e75998e406906.svg",
+      "url": "inline-svg:8e5e75998e406906"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "c595719be2ce1a86",
+      "kind": "image",
+      "name": "svg-29",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/c595719be2ce1a86.svg",
+      "url": "inline-svg:c595719be2ce1a86"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "c31d7caed35d87a0",
+      "kind": "image",
+      "name": "svg-30",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/c31d7caed35d87a0.svg",
+      "url": "inline-svg:c31d7caed35d87a0"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "b8e34314886f1578",
+      "kind": "image",
+      "name": "svg-31",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/b8e34314886f1578.svg",
+      "url": "inline-svg:b8e34314886f1578"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "068bb128a13ba99c",
+      "kind": "image",
+      "name": "svg-32",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/068bb128a13ba99c.svg",
+      "url": "inline-svg:068bb128a13ba99c"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "20bb07fa00e24811",
+      "kind": "image",
+      "name": "svg-33",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/20bb07fa00e24811.svg",
+      "url": "inline-svg:20bb07fa00e24811"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "cfe38b4a56c49250",
+      "kind": "image",
+      "name": "svg-34",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/cfe38b4a56c49250.svg",
+      "url": "inline-svg:cfe38b4a56c49250"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "b19d54ca780b8c92",
+      "kind": "image",
+      "name": "svg-35",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/b19d54ca780b8c92.svg",
+      "url": "inline-svg:b19d54ca780b8c92"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "e16cbbdb6b100172",
+      "kind": "image",
+      "name": "svg-36",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/e16cbbdb6b100172.svg",
+      "url": "inline-svg:e16cbbdb6b100172"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "89e96bd49fc9285a",
+      "kind": "image",
+      "name": "svg-37",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/89e96bd49fc9285a.svg",
+      "url": "inline-svg:89e96bd49fc9285a"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "ce0bb0ff1fa44623",
+      "kind": "image",
+      "name": "svg-38",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/ce0bb0ff1fa44623.svg",
+      "url": "inline-svg:ce0bb0ff1fa44623"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "69a9d658a8b5e0a2",
+      "kind": "image",
+      "name": "svg-39",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/69a9d658a8b5e0a2.svg",
+      "url": "inline-svg:69a9d658a8b5e0a2"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "75a4e3a3de366ce4",
+      "kind": "image",
+      "name": "svg-40",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/75a4e3a3de366ce4.svg",
+      "url": "inline-svg:75a4e3a3de366ce4"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "bc306e4ac5f24023",
+      "kind": "image",
+      "name": "svg-41",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/bc306e4ac5f24023.svg",
+      "url": "inline-svg:bc306e4ac5f24023"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "ae9127af345e32fd",
+      "kind": "image",
+      "name": "svg-42",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/ae9127af345e32fd.svg",
+      "url": "inline-svg:ae9127af345e32fd"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "3d1685d2ad7cb552",
+      "kind": "image",
+      "name": "svg-43",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/3d1685d2ad7cb552.svg",
+      "url": "inline-svg:3d1685d2ad7cb552"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "4319381a8b6e4a7d",
+      "kind": "image",
+      "name": "svg-44",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/4319381a8b6e4a7d.svg",
+      "url": "inline-svg:4319381a8b6e4a7d"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "5eaed5b882975fcf",
+      "kind": "image",
+      "name": "svg-45",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/5eaed5b882975fcf.svg",
+      "url": "inline-svg:5eaed5b882975fcf"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "8bd0a98c6f4f728e",
+      "kind": "image",
+      "name": "svg-46",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/8bd0a98c6f4f728e.svg",
+      "url": "inline-svg:8bd0a98c6f4f728e"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "be1287146c615ead",
+      "kind": "image",
+      "name": "svg-47",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/be1287146c615ead.svg",
+      "url": "inline-svg:be1287146c615ead"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "481bfd5bf9290b69",
+      "kind": "image",
+      "name": "svg-48",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/481bfd5bf9290b69.svg",
+      "url": "inline-svg:481bfd5bf9290b69"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "82d5a3e52086e22b",
+      "kind": "image",
+      "name": "svg-49",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/82d5a3e52086e22b.svg",
+      "url": "inline-svg:82d5a3e52086e22b"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "5845a13bf3522bc2",
+      "kind": "image",
+      "name": "svg-50",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/5845a13bf3522bc2.svg",
+      "url": "inline-svg:5845a13bf3522bc2"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "558f6b11dd5f9b81",
+      "kind": "image",
+      "name": "svg-51",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/558f6b11dd5f9b81.svg",
+      "url": "inline-svg:558f6b11dd5f9b81"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "a7dd0b052208bd81",
+      "kind": "image",
+      "name": "svg-52",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/a7dd0b052208bd81.svg",
+      "url": "inline-svg:a7dd0b052208bd81"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "6500271efc84ef0a",
+      "kind": "image",
+      "name": "svg-53",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/6500271efc84ef0a.svg",
+      "url": "inline-svg:6500271efc84ef0a"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "c3d37a98a78693fa",
+      "kind": "image",
+      "name": "svg-54",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/c3d37a98a78693fa.svg",
+      "url": "inline-svg:c3d37a98a78693fa"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "35b9f321d5a047d8",
+      "kind": "image",
+      "name": "svg-55",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/35b9f321d5a047d8.svg",
+      "url": "inline-svg:35b9f321d5a047d8"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "8fbad5c821279ebc",
+      "kind": "image",
+      "name": "svg-56",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/8fbad5c821279ebc.svg",
+      "url": "inline-svg:8fbad5c821279ebc"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "6bc8f8200a1b09b4",
+      "kind": "image",
+      "name": "svg-57",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/6bc8f8200a1b09b4.svg",
+      "url": "inline-svg:6bc8f8200a1b09b4"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "efa3f2fb737f2912",
+      "kind": "image",
+      "name": "svg-58",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/efa3f2fb737f2912.svg",
+      "url": "inline-svg:efa3f2fb737f2912"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "1b0047aba7a97a91",
+      "kind": "image",
+      "name": "svg-59",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/1b0047aba7a97a91.svg",
+      "url": "inline-svg:1b0047aba7a97a91"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "a60c170f389def6b",
+      "kind": "image",
+      "name": "svg-60",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/a60c170f389def6b.svg",
+      "url": "inline-svg:a60c170f389def6b"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "db721a1e53c78dd4",
+      "kind": "image",
+      "name": "svg-61",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/db721a1e53c78dd4.svg",
+      "url": "inline-svg:db721a1e53c78dd4"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "d0b4ab54804c83d9",
+      "kind": "image",
+      "name": "svg-62",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/d0b4ab54804c83d9.svg",
+      "url": "inline-svg:d0b4ab54804c83d9"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "cdb2f5c6f134d453",
+      "kind": "image",
+      "name": "svg-63",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/cdb2f5c6f134d453.svg",
+      "url": "inline-svg:cdb2f5c6f134d453"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "a2c59d2e0a7453d2",
+      "kind": "image",
+      "name": "svg-64",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/a2c59d2e0a7453d2.svg",
+      "url": "inline-svg:a2c59d2e0a7453d2"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "39cef0ac336d6ad4",
+      "kind": "image",
+      "name": "svg-65",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/39cef0ac336d6ad4.svg",
+      "url": "inline-svg:39cef0ac336d6ad4"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "78257943a24bd005",
+      "kind": "image",
+      "name": "svg-66",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/78257943a24bd005.svg",
+      "url": "inline-svg:78257943a24bd005"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "f0a13738ee714166",
+      "kind": "image",
+      "name": "svg-67",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/f0a13738ee714166.svg",
+      "url": "inline-svg:f0a13738ee714166"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "9898a341c6a681f7",
+      "kind": "image",
+      "name": "svg-68",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/9898a341c6a681f7.svg",
+      "url": "inline-svg:9898a341c6a681f7"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "8a77497a1f4a7d7d",
+      "kind": "image",
+      "name": "svg-69",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/8a77497a1f4a7d7d.svg",
+      "url": "inline-svg:8a77497a1f4a7d7d"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "dbe4138bf2376ca3",
+      "kind": "image",
+      "name": "svg-70",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/dbe4138bf2376ca3.svg",
+      "url": "inline-svg:dbe4138bf2376ca3"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "485dbb3649c4bc4a",
+      "kind": "image",
+      "name": "svg-71",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/485dbb3649c4bc4a.svg",
+      "url": "inline-svg:485dbb3649c4bc4a"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "8f9b310c27d7f9c8",
+      "kind": "image",
+      "name": "svg-72",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/8f9b310c27d7f9c8.svg",
+      "url": "inline-svg:8f9b310c27d7f9c8"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "ab012ead7215ada4",
+      "kind": "image",
+      "name": "svg-73",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/ab012ead7215ada4.svg",
+      "url": "inline-svg:ab012ead7215ada4"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "cbd3febe3ab0411a",
+      "kind": "image",
+      "name": "svg-74",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/cbd3febe3ab0411a.svg",
+      "url": "inline-svg:cbd3febe3ab0411a"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "608f6de97ba294bb",
+      "kind": "image",
+      "name": "svg-75",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/608f6de97ba294bb.svg",
+      "url": "inline-svg:608f6de97ba294bb"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "ed79b255ad9368e7",
+      "kind": "image",
+      "name": "svg-76",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/ed79b255ad9368e7.svg",
+      "url": "inline-svg:ed79b255ad9368e7"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "32196666ec51b29c",
+      "kind": "image",
+      "name": "svg-77",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/32196666ec51b29c.svg",
+      "url": "inline-svg:32196666ec51b29c"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "42335b0ba39da023",
+      "kind": "image",
+      "name": "svg-78",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/42335b0ba39da023.svg",
+      "url": "inline-svg:42335b0ba39da023"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "d0f41643faebac12",
+      "kind": "image",
+      "name": "svg-79",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/d0f41643faebac12.svg",
+      "url": "inline-svg:d0f41643faebac12"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "48acdccb8202e619",
+      "kind": "image",
+      "name": "svg-80",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/48acdccb8202e619.svg",
+      "url": "inline-svg:48acdccb8202e619"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "ac0919a609b0dc0a",
+      "kind": "image",
+      "name": "svg-81",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/ac0919a609b0dc0a.svg",
+      "url": "inline-svg:ac0919a609b0dc0a"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "95f63c3ce6ba5f25",
+      "kind": "image",
+      "name": "svg-82",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/95f63c3ce6ba5f25.svg",
+      "url": "inline-svg:95f63c3ce6ba5f25"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "fca24e0304281929",
+      "kind": "image",
+      "name": "svg-83",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/fca24e0304281929.svg",
+      "url": "inline-svg:fca24e0304281929"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "ed2bf820da585727",
+      "kind": "image",
+      "name": "svg-84",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/ed2bf820da585727.svg",
+      "url": "inline-svg:ed2bf820da585727"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "35f3cb193b192008",
+      "kind": "image",
+      "name": "svg-85",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/35f3cb193b192008.svg",
+      "url": "inline-svg:35f3cb193b192008"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "0af7a497b32fa17c",
+      "kind": "image",
+      "name": "svg-86",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/0af7a497b32fa17c.svg",
+      "url": "inline-svg:0af7a497b32fa17c"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "5406c43e6e4f6edc",
+      "kind": "image",
+      "name": "svg-87",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/5406c43e6e4f6edc.svg",
+      "url": "inline-svg:5406c43e6e4f6edc"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "04639c6d9f1f6f97",
+      "kind": "image",
+      "name": "svg-88",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/04639c6d9f1f6f97.svg",
+      "url": "inline-svg:04639c6d9f1f6f97"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "2cf09f88c2df45a1",
+      "kind": "image",
+      "name": "svg-89",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/2cf09f88c2df45a1.svg",
+      "url": "inline-svg:2cf09f88c2df45a1"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "aba5c831beb907b0",
+      "kind": "image",
+      "name": "svg-90",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/aba5c831beb907b0.svg",
+      "url": "inline-svg:aba5c831beb907b0"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "c9670073b273c054",
+      "kind": "image",
+      "name": "svg-91",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/c9670073b273c054.svg",
+      "url": "inline-svg:c9670073b273c054"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "a709ad60acc20c74",
+      "kind": "image",
+      "name": "svg-92",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/a709ad60acc20c74.svg",
+      "url": "inline-svg:a709ad60acc20c74"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "06d0c7ebc68c2f0b",
+      "kind": "image",
+      "name": "svg-93",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/06d0c7ebc68c2f0b.svg",
+      "url": "inline-svg:06d0c7ebc68c2f0b"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "f1362172e1b4f518",
+      "kind": "image",
+      "name": "svg-94",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/f1362172e1b4f518.svg",
+      "url": "inline-svg:f1362172e1b4f518"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "dc0b7e6c3dee5200",
+      "kind": "image",
+      "name": "svg-95",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/dc0b7e6c3dee5200.svg",
+      "url": "inline-svg:dc0b7e6c3dee5200"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "37d98a49ad8619b8",
+      "kind": "image",
+      "name": "svg-96",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/37d98a49ad8619b8.svg",
+      "url": "inline-svg:37d98a49ad8619b8"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "3e81d342a8f2e656",
+      "kind": "image",
+      "name": "svg-97",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/3e81d342a8f2e656.svg",
+      "url": "inline-svg:3e81d342a8f2e656"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "cd6bde1b3cede40c",
+      "kind": "image",
+      "name": "svg-98",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/cd6bde1b3cede40c.svg",
+      "url": "inline-svg:cd6bde1b3cede40c"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "f714500448a7b5d2",
+      "kind": "image",
+      "name": "svg-99",
+      "path": "C:\\Users\\User\\AppData\\Local\\Temp/browser-use/assets/28b4d2bf-2c41-4f31-8082-b2d3a0ea5a27/f714500448a7b5d2.svg",
+      "url": "inline-svg:f714500448a7b5d2"
+    }
+  ],
+  "failures": [
+    {
+      "contentType": null,
+      "id": "a2d2a2f4f18ee586",
+      "name": "icon_144x144.png",
+      "reason": "Loaded resource fetch failed: Asset bundling failed; page fetch failed: Browser Use encountered an error interacting with this webpage: TypeError: Failed to fetch\n    at C2e (<anonymous>:1:42)\n    at <anonymous>:1:355",
+      "url": "https://assets.moebelix.com/webshop/mbx/assets/chrome/icon_144x144.png"
+    }
+  ]
+}

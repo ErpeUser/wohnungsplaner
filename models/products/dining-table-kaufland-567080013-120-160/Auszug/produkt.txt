@@ -1,0 +1,17 @@
+Quelle 01
+URL: https://www.kaufland.at/product/567080010/
+FEHLER: Response status code does not indicate success: 403 (Forbidden).
+
+
+Quelle 02
+URL: https://www.kaufland.at/product/567080013/
+FEHLER: Response status code does not indicate success: 403 (Forbidden).
+
+
+Quellen: 2
+Bilder: 0
+
+
+SICHTBARER EDGE-AUSZUG
+Titel: Flieks Ausziehbarer Esstisch 120-160 cm
+Maße: Maße 120-160 x 80 x 75,5 cm; Höhe 75,5 cm; Breite/Tiefe 80 cm; Länge 120 cm; Gewicht 34,95 kg; MDF; oval; ausziehbar.
