@@ -11,7 +11,7 @@ import { ExportDialog } from "../export/export-dialog.tsx";
 import { PlanCanvas } from "../plan-2d/plan-canvas.tsx";
 import { createPlanScene } from "../plan-2d/plan-scene.ts";
 import { usePlanInteractions } from "../plan-2d/use-plan-interactions.ts";
-import { createLocalStoragePlannerRepository, ensureCurrentDiningGroupFourChairs, upgradeLivingSofaRugGroup, upgradeRetiredDiningGroup } from "../store/persistence.ts";
+import { createLocalStoragePlannerRepository, upgradeLivingSofaRugGroup, upgradeRetiredDiningGroup } from "../store/persistence.ts";
 import { createPlannerStore, type PlannerStore } from "../store/planner-store.ts";
 import { CatalogPanel } from "./catalog-panel.tsx";
 import { DetailsDrawer } from "./details-drawer.tsx";
@@ -70,7 +70,7 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
   useEffect(() => {
     if (providedStore) return;
     const current = store.getState().document;
-    const upgraded = upgradeLivingSofaRugGroup(upgradeRetiredDiningGroup(ensureCurrentDiningGroupFourChairs(current)));
+    const upgraded = upgradeLivingSofaRugGroup(upgradeRetiredDiningGroup(current));
     if (upgraded === current) return;
     store.getState().replaceDocument(upgraded);
     store.getState().scheduleSave();
@@ -99,18 +99,7 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
     const dialog = document.querySelector<HTMLElement>("#planner-details, #planner-shopping-list");
     const focusable = dialog?.querySelector<HTMLElement>("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])");
     (focusable ?? dialog)?.focus();
-    const trapFocus = (event: KeyboardEvent) => {
-      if (event.key !== "Tab" || !dialog) return;
-      const elements = [...dialog.querySelectorAll<HTMLElement>("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])")]
-        .filter((element) => !element.hasAttribute("disabled") && element.offsetParent !== null);
-      if (elements.length === 0) { event.preventDefault(); dialog.focus(); return; }
-      const first = elements[0];
-      const last = elements[elements.length - 1];
-      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
-    };
-    window.addEventListener("keydown", trapFocus);
-    return () => window.removeEventListener("keydown", trapFocus);
+
   }, [drawerOpen]);
 
   useEffect(() => {
@@ -156,7 +145,14 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
     const polygon = deriveRoomPolygon(store.getState().document, roomId);
     const center = polygon.reduce((result, point) => ({ x: result.x + point.x, z: result.z + point.z }), { x: 0, z: 0 });
     const position = polygon.length ? { x: center.x / polygon.length, z: center.z / polygon.length } : { x: 0, z: 0 };
-    const placementId = `asset-placeholder-${asset.assetId}`;
+    const basePlacementId = `asset-placeholder-${asset.assetId}`;
+    const existingPlacementIds = new Set(store.getState().document.placements.map((item) => item.id));
+    let placementId = basePlacementId;
+    let suffix = 2;
+    while (existingPlacementIds.has(placementId)) {
+      placementId = `${basePlacementId}-${suffix}`;
+      suffix += 1;
+    }
     const placed = store.getState().dispatch({
       type: "addPlacement",
       placement: {
@@ -213,7 +209,7 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
         onExport={openExport}
       />
 
-      <div className="planner-workspace__body" inert={drawerOpen ? true : undefined} data-catalog-open={state.panels.catalog} data-inspector-open={state.panels.inspector}>
+      <div className="planner-workspace__body" data-catalog-open={state.panels.catalog} data-inspector-open={state.panels.inspector}>
         {(state.panels.catalog || state.panels.inspector || state.panels.details || shoppingOpen) ? (
           <button
             type="button"

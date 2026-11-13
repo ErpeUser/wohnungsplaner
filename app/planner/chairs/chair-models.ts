@@ -4,7 +4,8 @@ export type ChairModelId =
   | "temu-swivel-upholstered"
   | "temu-faux-leather-metal"
   | "temu-velvet-swivel-arm"
-  | "moebelix-amber-chenille";
+  | "moebelix-amber-chenille"
+  | "chair-kaleo-chenille-beige";
 
 export type ChairSourceStatus = "confirmed" | "estimated";
 export type ChairBaseStyle = "swivel-disc" | "metal-legs" | "swivel-metal-legs" | "star-base";
@@ -110,6 +111,31 @@ export const CHAIR_MODELS: readonly ChairModel[] = [
     ],
   },
   {
+    id: "chair-kaleo-chenille-beige",
+    name: "Möbelix · Kaleo Chenille Beige",
+    shortName: "Möbelix Kaleo",
+    catalogId: "chair-kaleo-chenille-beige",
+    sourceUrl: "https://www.moebelix.at/p/livetastic-armlehnstuhl-kaleo-chenille-beige-b-63-cm-001634004202",
+    sourceLabel: "Möbelix / Kaleo Art. 1634004202",
+    sourceStatus: "confirmed",
+    confidence: "confirmed",
+    imageUrls: [
+      "https://media.moebelix.com/i/moebelix/PIQghM0TEt8Rkf_BHvYMmetg/?fmt=auto&%24hq%24=&w=1200",
+      "https://media.moebelix.com/i/moebelix/PImnOsAgav9T4GaqxVL4bRDA/?fmt=auto&%24hq%24=&w=1000",
+      "https://media.moebelix.com/i/moebelix/PInY2WmCYwWZne-9WABrgt0g/?fmt=auto&%24dq%24=&w=200&h=200",
+    ],
+    sizeCm: { width: 63, depth: 64, height: 87 },
+    seatCm: { width: 46, depth: 46, height: 50 },
+    armHeightCm: 66,
+    baseStyle: "swivel-disc",
+    swivel: true,
+    materialId: "fabric-kaleo-beige",
+    sourceNotes: [
+      "Möbelix-Maße: 63 × 64 × 87 cm, Sitzhöhe 50 cm, Armlehnenoberkante 66 cm.",
+      "Chenille in Beige/Leinenoptik, 360° drehbar, schwarzer Rundfuß.",
+    ],
+  },
+  {
     id: "moebelix-amber-chenille",
     name: "Möbelix · Amber Chenille Beige",
     shortName: "Möbelix Amber",
@@ -171,10 +197,20 @@ export function chairSeatLayout(table: PlannerPlacement, model: ChairModel): Cha
   const baseDepth = model.baseStyle === "star-base" ? Math.max(model.sizeCm.depth / 100, 0.65) : model.sizeCm.depth / 100;
   const sideOffset = table.size.width / 2 + baseDepth / 2 + 0.04;
   const endOffset = table.size.depth / 2 + model.sizeCm.depth / 200 + 0.04;
-  return [
-    { id: "living-kaleo-chair-west", position: { x: table.position.x, z: table.position.z - endOffset }, rotation: 0 },
-    { id: "living-kaleo-chair-east", position: { x: table.position.x + sideOffset, z: table.position.z }, rotation: 90 },
-    { id: "living-kaleo-chair-south", position: { x: table.position.x - sideOffset, z: table.position.z }, rotation: 270 },
-    { id: "living-kaleo-chair-north", position: { x: table.position.x, z: table.position.z + endOffset }, rotation: 180 },
+  const radians = (table.rotation * Math.PI) / 180;
+  const rotateOffset = (dx: number, dz: number): Point2 => ({
+    x: table.position.x + dx * Math.cos(radians) - dz * Math.sin(radians),
+    z: table.position.z + dx * Math.sin(radians) + dz * Math.cos(radians),
+  });
+  const localSeats = [
+    { id: "living-kaleo-chair-west", dx: 0, dz: -endOffset, rotation: 0 },
+    { id: "living-kaleo-chair-east", dx: sideOffset, dz: 0, rotation: 90 },
+    { id: "living-kaleo-chair-south", dx: -sideOffset, dz: 0, rotation: 270 },
+    { id: "living-kaleo-chair-north", dx: 0, dz: endOffset, rotation: 180 },
   ];
+  return localSeats.map((seat) => ({
+    id: seat.id,
+    position: rotateOffset(seat.dx, seat.dz),
+    rotation: (seat.rotation + table.rotation + 360) % 360,
+  }));
 }

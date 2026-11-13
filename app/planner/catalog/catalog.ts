@@ -283,7 +283,7 @@ export const PHOTO_FIRST_IDS: ReadonlySet<string> = new Set([
   "bed-bliss-120", "wardrobe-225", "vanity-vicco-sherry-120",
   "chair-temu-executive-ivory", "chair-kaleo-chenille-beige", "chair-temu-swivel-upholstered", "chair-temu-faux-leather-metal", "chair-temu-velvet-swivel-arm", "chair-amber-chenille-beige", "sofa-sectional-photo",
   "sofa-chicago-206", "sofa-aliexpress-142", "sofa-aliexpress-142-open", "dining-table-bozan-110", "nightstand-led-2drawer-white",
-  "hallway-tejo-115", "dining-table-aliexpress-100-140", "dining-table-temu-606997-120-160", "dining-table-kaufland-567080013-120-160", "rug-gala-shaggy-2505-100x200", "rug-temu-shaggy-white-120x200",
+  "hallway-tejo-115", "dining-table-aliexpress-100-140", "dining-table-temu-606997-120-160", "dining-table-temu-609726-110-150", "dining-table-kaufland-567080013-120-160", "rug-gala-shaggy-2505-100x200", "rug-temu-shaggy-white-120x200",
   "rug-temu-easy-line-120x180", "rug-temu-easy-line-140x200", "rug-temu-rabbit-ivory-100x180",
   "rug-living-concept-240x240", "plant-zimmer1-olive",
 ]);

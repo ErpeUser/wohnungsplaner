@@ -40,9 +40,10 @@
     "codex:postflight": "node scripts/codex-postflight.mjs",
     "codex:pipeline": "node scripts/codex-pipeline.mjs",
     "pipeline": "npm run codex:pipeline -- --mode=full",
-    "validate": "npm run typecheck && npm run lint && npm run assets:check && npm run test:planner && npm run test:ui && npm run test:cutover",
+    "validate": "npm run typecheck && npm run lint && npm run assets:check && npm run test:planner && npm run test:ui && npm run test:cutover && npm run reference:check",
     "codex:update": "node scripts/codex-update.mjs",
-    "codex:release": "node scripts/codex-release.mjs"
+    "codex:release": "node scripts/codex-release.mjs",
+    "reference:check": "node scripts/check-reference-exports.mjs"
   },
   "dependencies": {
     "@react-three/drei": "10.7.9",

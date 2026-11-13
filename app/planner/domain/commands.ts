@@ -203,11 +203,15 @@ export function applyPlannerCommand(
       if (candidates.some((candidate) => !validPlacement(candidate))) {
         return reject(document, "invalid", "Das gewählte Stuhlmodell enthält ungültige Maße oder Koordinaten.");
       }
-      const ignorePlacementIds = new Set([
-        ...document.placements.filter((item) => item.groupId === table.groupId).map((item) => item.id),
-        ...chairs.map((item) => item.id),
-      ]);
-      const reports = candidates.map((candidate) => inspectPlacement(document, candidate, { ignorePlacementIds }));
+      const candidateById = new Map(candidates.map((candidate) => [candidate.id, candidate]));
+      const projectedDocument = {
+        ...document,
+        placements: document.placements.map((item) => candidateById.get(item.id) ?? item),
+      };
+      // The table is the only intentional overlap target. Other chairs must
+      // still be checked against the projected four-chair layout.
+      const ignorePlacementIds = new Set([table.id]);
+      const reports = candidates.map((candidate) => inspectPlacement(projectedDocument, candidate, { ignorePlacementIds }));
       const hard = reports.flatMap((report) => report.hard);
       const warnings = reports.flatMap((report) => report.warnings);
       if (hard.length > 0) {
@@ -221,7 +225,6 @@ export function applyPlannerCommand(
           },
         };
       }
-      const candidateById = new Map(candidates.map((candidate) => [candidate.id, candidate]));
       return accept({
         ...document,
         updatedAt: timestamp(),
@@ -335,11 +338,7 @@ function movePlacement(
   if (!selected) return reject(document, "not-found", `Das Objekt ${placementId} wurde nicht gefunden.`);
   if (isDiningChairPlacement(selected)) {
     const candidate = { ...selected, position: { ...position } };
-    const ignorePlacementIds = new Set(
-      document.placements
-        .filter((item) => item.id === "living-bozan-table" || isDiningChairPlacement(item))
-        .map((item) => item.id),
-    );
+    const ignorePlacementIds = new Set(["living-bozan-table"]);
     return validatePlacement(document, candidate, (placement) => ({
       ...document,
       updatedAt: timestamp(),

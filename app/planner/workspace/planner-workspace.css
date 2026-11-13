@@ -783,7 +783,8 @@
 .planner-3d__camera button:focus-visible {
   border-color: #e9b28c;
   background: rgba(233, 178, 140, 0.18);
-  outline: none;
+  outline: 2px solid #f2c8aa;
+  outline-offset: 2px;
 }
 
 .planner-3d__camera button[aria-pressed="true"] {

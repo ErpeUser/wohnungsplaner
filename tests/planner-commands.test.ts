@@ -1,10 +1,27 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { DEFAULT_APARTMENT_DOCUMENT } from "../app/planner/domain/apartment-v3.ts";
 import { applyPlannerCommand } from "../app/planner/domain/commands.ts";
 import { createPlannerHistory } from "../app/planner/store/history.ts";
 import { createPlannerStore } from "../app/planner/store/planner-store.ts";
 import type { PlannerAssetRecord, PlannerDocumentV3, PlannerPlacement } from "../app/planner/domain/types.ts";
+
+
+test("blocks moving one dining chair onto another chair", () => {
+  const west = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "living-kaleo-chair-west")!;
+  const east = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "living-kaleo-chair-east")!;
+
+  const moved = applyPlannerCommand(DEFAULT_APARTMENT_DOCUMENT, {
+    type: "movePlacement",
+    placementId: west.id,
+    position: east.position,
+  });
+
+  assert.equal(moved.document, DEFAULT_APARTMENT_DOCUMENT);
+  assert.equal(moved.error?.code, "collision");
+  assert.ok(moved.error?.collisions?.some((hit) => hit.entityId === east.id));
+});
 
 test("applies placement commands immutably and rejects hard collisions", () => {
   const original = commandDocument();

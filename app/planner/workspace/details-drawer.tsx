@@ -13,7 +13,7 @@ export function DetailsDrawer({ document, onClose }: DetailsDrawerProps) {
   const wnf = getDocumentWnfArea(document);
 
   return (
-    <aside id="planner-details" className="planner-details" role="dialog" aria-modal="true" aria-labelledby="planner-details-title" tabIndex={-1}>
+    <aside id="planner-details" className="planner-details" role="complementary" aria-labelledby="planner-details-title" tabIndex={-1}>
       <header>
         <div><span className="planner-kicker">Dokument</span><h2 id="planner-details-title">Plandetails</h2></div>
         <button type="button" aria-label="Details schließen" onClick={onClose}>×</button>

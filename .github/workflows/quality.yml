@@ -54,5 +54,8 @@ jobs:
       - name: Asset manifest validation
         run: npm run assets:check
 
+      - name: Reference export validation
+        run: npm run reference:check
+
       - name: Dependency audit
         run: npm audit --audit-level=high --json

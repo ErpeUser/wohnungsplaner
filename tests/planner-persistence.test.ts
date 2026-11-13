@@ -11,6 +11,7 @@ import {
   createLocalStoragePlannerRepository,
   upgradeRetiredDiningGroup,
   upgradeLivingRugMaterial,
+  upgradeLivingSofaRugGroup,
   type PlannerRepository,
 } from "../app/planner/store/persistence.ts";
 import { createPlannerStore } from "../app/planner/store/planner-store.ts";
@@ -191,6 +192,24 @@ test("upgrades a previous living room rug material without moving a customized r
   const loaded = createLocalStoragePlannerRepository(storage, fixedClock).load();
   assert.deepEqual(loaded.document.placements.find((item) => item.id === rug.id)?.position, { x: 1.6, z: 7.72 });
   assert.equal(loaded.document.placements.find((item) => item.id === rug.id)?.materialVariants?.main, "rug-temu-vintage-cream");
+});
+
+
+test("preserves a moved sofa while unlinking it from the living rug group", () => {
+  const moved = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
+  const rug = moved.placements.find((item) => item.id === "living-rug-concept")!;
+  const sofa = moved.placements.find((item) => item.id === "living-chicago-sofa")!;
+  rug.groupId = "living-sofa-rug-group";
+  sofa.groupId = "living-sofa-rug-group";
+  sofa.position = { x: 2.8, z: 7.3 };
+
+  const upgraded = upgradeLivingSofaRugGroup(moved);
+  const upgradedRug = upgraded.placements.find((item) => item.id === rug.id)!;
+  const upgradedSofa = upgraded.placements.find((item) => item.id === sofa.id)!;
+
+  assert.deepEqual(upgradedSofa.position, { x: 2.8, z: 7.3 });
+  assert.equal(upgradedSofa.groupId, undefined);
+  assert.equal(upgradedRug.groupId, undefined);
 });
 
 test("rebases an older Wohnung save onto corrected architecture without losing user furniture", () => {
