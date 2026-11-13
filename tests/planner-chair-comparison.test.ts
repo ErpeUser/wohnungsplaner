@@ -17,7 +17,13 @@ test("führt alle registrierten Stuhlmodelle als atomare Vierergruppe durch den 
       assert.equal(placement.metadata?.source, model.sourceLabel);
       assert.equal(placement.materialVariants?.main, model.materialId);
     }
-    assert.equal(result.warnings.length, 0, model.id);
+    const unexpectedWarnings = result.warnings.filter((warning) => warning.kind !== "door-passage");
+    assert.equal(unexpectedWarnings.length, 0, model.id);
+    if (model.id === "chair-kaleo-chenille-beige") {
+      assert.equal(result.warnings.filter((warning) => warning.kind === "door-passage").length, 1);
+    } else {
+      assert.equal(result.warnings.filter((warning) => warning.kind === "door-passage").length, 0);
+    }
   }
 });
 

@@ -204,17 +204,17 @@ describe("PlannerWorkspace", () => {
 
     const trigger = screen.getByRole("button", { name: "Details öffnen" });
     await user.click(trigger);
-    const details = screen.getByRole("dialog", { name: "Plandetails" });
+    const details = screen.getByRole("complementary", { name: "Plandetails" });
     assert.match(details.textContent ?? "", /Innenräume7/);
     assert.match(details.textContent ?? "", /Außenbereiche1/);
     assert.match(details.textContent ?? "", /Wohnküche.*21,82 m²/);
     await user.click(screen.getByRole("button", { name: "Details schließen" }));
-    assert.equal(screen.queryByRole("dialog", { name: "Plandetails" }), null);
+    assert.equal(screen.queryByRole("complementary", { name: "Plandetails" }), null);
     assert.equal(document.activeElement, trigger);
 
     await user.click(trigger);
     await user.keyboard("{Escape}");
-    assert.equal(screen.queryByRole("dialog", { name: "Plandetails" }), null);
+    assert.equal(screen.queryByRole("complementary", { name: "Plandetails" }), null);
     assert.equal(document.activeElement, trigger);
   });
 
