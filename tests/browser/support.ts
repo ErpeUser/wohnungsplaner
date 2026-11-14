@@ -68,7 +68,13 @@ export async function screenshot(page: Page, info: TestInfo, name: string, kind 
 
 export async function assertRendered(page: Page, canvas: Locator, gallery = false) {
   await expect(canvas).toBeVisible();
-  const pixels = await canvas.screenshot({ animations: 'disabled', timeout: 60_000 });
+  const box = await canvas.boundingBox();
+  expect(box, 'Canvas must have a measurable browser surface').not.toBeNull();
+  const pixels = await page.screenshot({
+    animations: 'disabled',
+    timeout: 60_000,
+    clip: box!,
+  });
   const stats = await page.evaluate(async (data) => {
     const image = new Image();
     image.src = `data:image/png;base64,${data}`;

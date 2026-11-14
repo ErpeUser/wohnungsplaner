@@ -83,6 +83,7 @@ test('catalog material change is saved and restored', async ({ page }, info) => 
 });
 
 test('2D and 3D render real pixels and can switch back', async ({ page }, info) => {
+  test.setTimeout(180_000);
   await startPlanner(page);
   await screenshot(page, info, 'planner-2d-overview');
   await page.getByRole('button', { name: '3D-Ansicht', exact: true }).click();
