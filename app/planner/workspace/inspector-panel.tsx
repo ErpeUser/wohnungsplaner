@@ -236,9 +236,11 @@ function ModelSwitcher({
 }
 function referenceForPlacement(catalogId: string) {
   const chair = getChairModelForCatalogId(catalogId);
-  if (chair?.imageUrls[0]) return chair.imageUrls[0];
+  const chairReference = chair?.imageUrls[0];
+  if (chairReference?.startsWith("/planner-assets/")) return chairReference;
   const table = getTableModel(catalogId);
-  if (table?.imageUrls[0]) return table.imageUrls[0];
+  const tableReference = table?.imageUrls[0];
+  if (tableReference?.startsWith("/planner-assets/")) return tableReference;
   return null;
 }
 
