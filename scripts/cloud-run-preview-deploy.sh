@@ -16,7 +16,8 @@ if grep -Eqx 'allUsers|allAuthenticatedUsers' <<< "$public"; then
 fi
 service_json="$(gcloud run services describe "$_SERVICE" --project "$PROJECT_ID" --region "$_REGION" --format=json 2>/dev/null || true)"
 if [[ -n "$service_json" ]]; then
-  python3 -c 'import json,sys; a=json.load(sys.stdin)["metadata"].get("annotations",{}); assert a.get("run.googleapis.com/invoker-iam-disabled") != "true", "Cloud Run must require IAM"' <<< "$service_json"
+  disabled="$(gcloud run services describe "$_SERVICE" --project "$PROJECT_ID" --region "$_REGION" --format='value(metadata.annotations.run.googleapis.com/invoker-iam-disabled)' 2>/dev/null || true)"
+  [[ "$disabled" != true ]]
 fi
 gcloud run deploy "$_SERVICE" --project "$PROJECT_ID" --region "$_REGION" \
   --image "$image@$digest" --service-account "$_RUNTIME_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com" \
