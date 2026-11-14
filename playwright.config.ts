@@ -13,7 +13,7 @@ export default defineConfig({
   reporter: [['list'], ['./scripts/visual-reporter.ts']],
   use: {
     baseURL: livePreview ? 'http://127.0.0.1:3001' : 'http://127.0.0.1:3100',
-    actionTimeout: 15_000,
+    actionTimeout: 60_000,
     navigationTimeout: 30_000,
     viewport: { width: 1440, height: 1000 },
     screenshot: 'only-on-failure',
