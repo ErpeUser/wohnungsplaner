@@ -23,6 +23,32 @@ test("blocks moving one dining chair onto another chair", () => {
   assert.ok(moved.error?.collisions?.some((hit) => hit.entityId === east.id));
 });
 
+test("verschiebt einen einzelnen Essstuhl ohne Tisch oder Nachbarstühle", () => {
+  const originalChairIds = [
+    "living-kaleo-chair-west",
+    "living-kaleo-chair-east",
+    "living-kaleo-chair-south",
+    "living-kaleo-chair-north",
+  ];
+  const originalPositions = new Map(
+    DEFAULT_APARTMENT_DOCUMENT.placements
+      .filter((item) => originalChairIds.includes(item.id) || item.id === "living-bozan-table")
+      .map((item) => [item.id, item.position]),
+  );
+  const moved = applyPlannerCommand(DEFAULT_APARTMENT_DOCUMENT, {
+    type: "movePlacement",
+    placementId: "living-kaleo-chair-west",
+    position: { x: 1.9, z: 5 },
+  });
+
+  assert.equal(moved.error, undefined);
+  assert.deepEqual(moved.document.placements.find((item) => item.id === "living-kaleo-chair-west")?.position, { x: 1.9, z: 5 });
+  for (const id of originalChairIds.filter((item) => item !== "living-kaleo-chair-west")) {
+    assert.deepEqual(moved.document.placements.find((item) => item.id === id)?.position, originalPositions.get(id));
+  }
+  assert.deepEqual(moved.document.placements.find((item) => item.id === "living-bozan-table")?.position, originalPositions.get("living-bozan-table"));
+});
+
 test("applies placement commands immutably and rejects hard collisions", () => {
   const original = commandDocument();
   const moved = applyPlannerCommand(original, {
