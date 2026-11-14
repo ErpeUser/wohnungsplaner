@@ -7,6 +7,7 @@ import type { CommandResult, PlannerCommand } from "../domain/commands.ts";
 import type { PlannerDocumentV3, PlannerPlacement } from "../domain/types.ts";
 import { ChairComparisonPanel } from "./chair-comparison-panel.tsx";
 import { TableComparisonPanel } from "./table-comparison-panel.tsx";
+import "./model-switcher.css";
 
 type InspectorPanelProps = {
   document: PlannerDocumentV3;
