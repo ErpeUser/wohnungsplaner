@@ -65,6 +65,20 @@ test('chair comparison replaces four seats and leaves table unchanged', async ({
   await screenshot(page, info, 'four-temu-chairs-applied');
 });
 
+test('model switcher tabs keep keyboard focus and inspector scrolling local', async ({ page }, info) => {
+  await startPlanner(page);
+  await page.getByLabel('Planobjekt auswählen').selectOption(chairId);
+  const chairTab = page.getByRole('tab', { name: 'Stuhlmodell ändern', exact: true });
+  const tableTab = page.getByRole('tab', { name: 'Tischmodell ändern', exact: true });
+  await expect(chairTab).toHaveAttribute('aria-selected', 'true');
+  await chairTab.press('ArrowRight');
+  await expect(tableTab).toHaveAttribute('aria-selected', 'true');
+  await expect(tableTab).toHaveAttribute('tabindex', '0');
+  await expect(page.locator('#planner-table-model-panel')).toHaveAttribute('aria-labelledby', 'planner-table-model-tab');
+  await expect(page.locator('.planner-panel--inspector')).toHaveCSS('overflow-y', 'auto');
+  await screenshot(page, info, 'model-switcher-keyboard-scroll');
+});
+
 test('catalog material change is saved and restored', async ({ page }, info) => {
   await startPlanner(page);
   await page.getByRole('combobox', { name: 'Raum', exact: true }).selectOption('wohnkueche');
