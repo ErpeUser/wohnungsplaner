@@ -152,3 +152,40 @@ test('mobile inspector and catalog remain usable without horizontal overflow', a
   await screenshot(page, info, 'mobile-catalog-panel');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
+
+test('every room renders in 2D and in the real 3D canvas', async ({ page }, info) => {
+  test.setTimeout(18 * 60_000);
+  await startPlanner(page);
+  const selector = page.getByRole('combobox', { name: 'Raum', exact: true });
+  const rooms = await selector.locator('option[value]').evaluateAll((items) =>
+    items.map((item) => (item as HTMLOptionElement).value).filter(Boolean));
+  expect(rooms.length).toBeGreaterThanOrEqual(8);
+  for (const roomId of rooms) {
+    await page.getByRole('button', { name: '2D-Ansicht', exact: true }).click();
+    await selector.selectOption(roomId);
+    await expect(selector).toHaveValue(roomId);
+    await screenshot(page, info, `room-${roomId}-2d`);
+    await page.getByRole('button', { name: '3D-Ansicht', exact: true }).click();
+    const canvas = page.locator('canvas[aria-label="3D-Planungsfläche"]');
+    await expect(canvas).toHaveAttribute('data-render-ready', 'true', { timeout: 120_000 });
+    await assertRendered(page, canvas);
+    await screenshot(page, info, `room-${roomId}-3d`);
+  }
+});
+
+test('JSON export and import round trip is isolated from user storage', async ({ page }, info) => {
+  await startPlanner(page);
+  const before = await savedDocument(page);
+  await page.getByRole('button', { name: 'Export & Import' }).click();
+  const ready = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'JSON-Sicherung', exact: true }).click();
+  const download = await ready;
+  const file = info.outputPath('plan-export.json');
+  await download.saveAs(file);
+  await page.locator('input[type="file"][accept="application/json,.json"]').setInputFiles(file);
+  await expect(page.getByRole('heading', { name: 'Importvorschau' })).toBeVisible();
+  await screenshot(page, info, 'json-import-preview');
+  await page.getByRole('button', { name: 'Plan ersetzen' }).click();
+  await expect.poll(async () => (await savedDocument(page)).placements).toEqual(before.placements);
+  await screenshot(page, info, 'json-import-confirmed');
+});

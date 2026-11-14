@@ -70,3 +70,12 @@ The headless Chromium renderer uses software WebGL for repeatability and
 does not substitute for performance testing on the user's GPU. Missing WebGL
 is a failure, never a skipped 3D check. Screenshots on different operating
 systems can differ because of font and rasterization differences.
+
+## Zusätzliche Cloud-Szenarien und Modelllücken
+
+- Jeder der acht Räume erhält eine echte 2D- und 3D-Aufnahme mit sichtbarer WebGL-Szenenpixelprüfung.
+- Der isolierte JSON-Sicherungsexport wird wieder importiert und auf dieselben Platzierungen geprüft.
+- Die Modellgalerie nimmt **jede auswählbare Größenvariante** aus vier standardisierten Perspektiven auf.
+- `report/manifest.json` katalogisiert die 137 Modellmanifeste, Bildreferenzen, Git-Commit und alle nicht individuell gemappten Modelle.
+- `report/webgl-probe.json` bestätigt mit tatsächlichen gelesenen Pixeln WebGL2 im Cloud-Browser.
+- Materialkombinationen, komplette freie Mausbewegungen und visuelle Produkttreue bleiben weiter getrennt zu kontrollieren.

@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -34,7 +34,21 @@ for (const relative of ['artifacts', 'artifacts/visual', 'artifacts/visual/lates
 }
 await fs.rm(output, { recursive: true, force: true });
 await fs.mkdir(path.join(output, 'report'), { recursive: true });
+if (process.env.VISUAL_BROWSER_CHANNEL) {
+  const result = spawnSync(process.execPath, ['scripts/visual-cloud-preflight.mjs'], { stdio: 'inherit', env: process.env });
+  if (result.error || result.status !== 0) {
+    console.error('Browser or WebGL preflight failed; no green visual review is possible.');
+    process.exit(1);
+  }
+}
 const selection = mode === 'all' ? [] : [mode === 'gui' ? 'planner.spec.ts' : 'models.spec.ts'];
 const child = spawn(process.execPath, ['node_modules/@playwright/test/cli.js', 'test', ...selection, ...forwarded], { stdio: 'inherit', env: process.env });
 child.once('error', (error) => { console.error(error.message); process.exitCode = 1; });
-child.once('exit', (code) => { process.exitCode = code ?? 1; });
+child.once('exit', (code) => {
+  // Inventory is generated even after test failures; every gap remains visible.
+  const inventory = spawnSync(process.execPath, ['--import', 'tsx', 'scripts/visual-cloud-inventory.mjs', mode], {
+    stdio: 'inherit', env: process.env,
+  });
+  if (inventory.error) console.error(inventory.error);
+  process.exitCode = (code ?? 1) || (inventory.status ?? 1);
+});

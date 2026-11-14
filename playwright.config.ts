@@ -1,6 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const livePreview = process.env.VISUAL_USE_LIVE_PREVIEW === '1';
+const cloudChannel = process.env.VISUAL_BROWSER_CHANNEL === 'chrome' || process.env.VISUAL_BROWSER_CHANNEL === 'msedge'
+  ? process.env.VISUAL_BROWSER_CHANNEL : undefined;
 
 export default defineConfig({
   testDir: './tests/browser',
@@ -20,7 +22,15 @@ export default defineConfig({
     trace: 'retain-on-failure',
     video: 'off',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 1000 }, launchOptions: { args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] } } }],
+  projects: [{
+    name: cloudChannel ?? 'chromium',
+    use: {
+      ...devices['Desktop Chrome'],
+      channel: cloudChannel,
+      viewport: { width: 1440, height: 1000 },
+      launchOptions: { args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] },
+    },
+  }],
   webServer: livePreview ? undefined : {
     command: 'node scripts/visual-server.mjs',
     url: 'http://127.0.0.1:3100',

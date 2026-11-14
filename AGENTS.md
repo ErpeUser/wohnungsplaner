@@ -1,5 +1,9 @@
 # Codex repository instructions
 
+## GitHub-only-Prüfung für ChatGPT- und GitHub-Agenten
+
+ChatGPT Web braucht keinen eigenen Chromium-/WebGL-Browser. Die echte Anwendung wird in GitHub Actions durch den im Ubuntu-Runner vorinstallierten Chrome (optional Edge) fotografiert. Voraussetzung für eine behauptete visuelle Abnahme ist das **Herunterladen und Öffnen konkreter PNG-Dateien** aus dem privaten Workflow-Artefakt. `report/models.html` und `report/manifest.json` dokumentieren auch nicht renderbare Modellordner; `webgl-probe.json` prüft Cloud-WebGL. Siehe `docs/VISUAL_CLOUD.md`. Es wird keine private Referenz in GitHub Pages veröffentlicht. Workflow-Trigger auf Review-Branches über `push`; `Run workflow` wird erst verfügbar, wenn die Workflowdatei im Standardbranch liegt.
+
 ## ZUERST LESEN: Verbindliche visuelle Prüfung für KI-Agenten
 
 Diese Regeln gelten für jeden Auftrag an Oberfläche, 2D/3D-Modellen, Materialien und Kamera:
