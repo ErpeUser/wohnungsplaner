@@ -177,7 +177,11 @@ function ParametricFurniture({ fallback, materialId, catalogId, size }: { fallba
   if (catalogId === "vanity-vicco-sherry-120") return <ViccoSherryVanity />;
   if (catalogId === "chair-temu-executive-ivory") return <TemuIvoryExecutiveChair />;
   if (catalogId.startsWith("bed-")) return <DetailedBed materialId={materialId} />;
+  if (catalogId === "wardrobe-200") return <StandardWardrobe materialId={materialId} />;
   if (catalogId === "wardrobe-225") return <PhotoWardrobe />;
+  if (catalogId === "dresser") return <DetailedDresser materialId={materialId} />;
+  if (catalogId === "shelf") return <DetailedShelf materialId={materialId} />;
+  if (catalogId === "lowboard") return <DetailedLowboard materialId={materialId} />;
   if (catalogId === "desk-standard") return <PhotoDesk />;
   if (catalogId === "chair-office") return <PhotoOfficeChair />;
   if (catalogId === "sofa-sectional-photo") return <PhotoSectionalSofa />;
@@ -1446,6 +1450,135 @@ function ComparisonChair({ variant, materialId }: { variant: "temu-swivel" | "fa
       <RoundedBox args={[isAmber ? 0.64 : isVelvet ? 0.62 : 0.58, 0.012, 0.018]} radius={0.006} smoothness={3} position={[0, 0.72, 0.36]} castShadow>
         <primitive object={seam} attach="material" />
       </RoundedBox>
+    </group>
+  );
+}
+
+
+function StandardWardrobe({ materialId }: { materialId: string }) {
+  const shell = getPlannerMaterial(materialId);
+  const frame = getPlannerMaterial("wardrobe-frame-silver");
+  const handle = getPlannerMaterial("metal-satin");
+  const doors = [-0.375, -0.125, 0.125, 0.375];
+
+  return (
+    <group>
+      <RoundedBox args={[0.98, 0.98, 0.92]} radius={0.018} smoothness={3} position={[0, 0.5, 0]} castShadow receiveShadow>
+        <primitive object={shell} attach="material" />
+      </RoundedBox>
+      <RoundedBox args={[1.02, 0.045, 0.96]} radius={0.012} smoothness={3} position={[0, 0.985, 0]} castShadow receiveShadow>
+        <primitive object={shell} attach="material" />
+      </RoundedBox>
+      {doors.map((x, index) => (
+        <group key={x}>
+          <RoundedBox args={[0.238, 0.91, 0.028]} radius={0.008} smoothness={2} position={[x, 0.505, 0.468]} castShadow receiveShadow>
+            <primitive object={shell} attach="material" />
+          </RoundedBox>
+          {index < doors.length - 1 ? (
+            <mesh position={[x + 0.125, 0.505, 0.486]} scale={[0.006, 0.91, 0.012]} geometry={SHARED_BOX}>
+              <primitive object={frame} attach="material" />
+            </mesh>
+          ) : null}
+          <mesh position={[x + (index % 2 === 0 ? 0.082 : -0.082), 0.505, 0.492]} scale={[0.012, 0.16, 0.012]} geometry={SHARED_CYLINDER} castShadow>
+            <primitive object={handle} attach="material" />
+          </mesh>
+        </group>
+      ))}
+      <mesh position={[0, 0.03, 0.02]} scale={[1.01, 0.05, 0.94]} geometry={SHARED_BOX} castShadow receiveShadow>
+        <primitive object={shell} attach="material" />
+      </mesh>
+    </group>
+  );
+}
+
+function DetailedDresser({ materialId }: { materialId: string }) {
+  const shell = getPlannerMaterial(materialId);
+  const handle = getPlannerMaterial("metal-satin");
+  const drawerYs = [0.2, 0.43, 0.66];
+
+  return (
+    <group>
+      <RoundedBox args={[0.98, 0.82, 0.84]} radius={0.025} smoothness={3} position={[0, 0.43, 0]} castShadow receiveShadow>
+        <primitive object={shell} attach="material" />
+      </RoundedBox>
+      <RoundedBox args={[1.02, 0.07, 0.88]} radius={0.02} smoothness={4} position={[0, 0.87, 0]} castShadow receiveShadow>
+        <primitive object={shell} attach="material" />
+      </RoundedBox>
+      {drawerYs.map((y) => (
+        <group key={y}>
+          <RoundedBox args={[0.88, 0.19, 0.028]} radius={0.01} smoothness={3} position={[0, y, 0.434]} castShadow receiveShadow>
+            <primitive object={shell} attach="material" />
+          </RoundedBox>
+          <mesh position={[0, y + 0.012, 0.454]} rotation={[0, 0, Math.PI / 2]} scale={[0.012, 0.14, 0.012]} geometry={SHARED_CYLINDER} castShadow>
+            <primitive object={handle} attach="material" />
+          </mesh>
+        </group>
+      ))}
+      {[-0.38, 0.38].map((x) => (
+        <mesh key={x} position={[x, 0.035, 0]} scale={[0.07, 0.06, 0.07]} geometry={SHARED_CYLINDER} castShadow>
+          <primitive object={handle} attach="material" />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function DetailedShelf({ materialId }: { materialId: string }) {
+  const shelf = getPlannerMaterial(materialId);
+  const back = getPlannerMaterial("drawer-charcoal");
+  const levels = [0.17, 0.39, 0.61, 0.83];
+
+  return (
+    <group>
+      <mesh position={[0, 0.5, -0.42]} scale={[0.98, 0.96, 0.035]} geometry={SHARED_BOX} castShadow receiveShadow>
+        <primitive object={back} attach="material" />
+      </mesh>
+      {[-0.47, 0.47].map((x) => (
+        <mesh key={x} position={[x, 0.5, 0]} scale={[0.055, 0.98, 0.78]} geometry={SHARED_BOX} castShadow receiveShadow>
+          <primitive object={shelf} attach="material" />
+        </mesh>
+      ))}
+      {levels.map((y) => (
+        <mesh key={y} position={[0, y, 0]} scale={[0.94, 0.055, 0.78]} geometry={SHARED_BOX} castShadow receiveShadow>
+          <primitive object={shelf} attach="material" />
+        </mesh>
+      ))}
+      <mesh position={[0, 0.04, 0]} scale={[1.02, 0.07, 0.84]} geometry={SHARED_BOX} castShadow receiveShadow>
+        <primitive object={shelf} attach="material" />
+      </mesh>
+    </group>
+  );
+}
+
+function DetailedLowboard({ materialId }: { materialId: string }) {
+  const shell = getPlannerMaterial(materialId);
+  const handle = getPlannerMaterial("metal-satin");
+
+  return (
+    <group>
+      <RoundedBox args={[1, 0.42, 0.86]} radius={0.025} smoothness={3} position={[0, 0.25, 0]} castShadow receiveShadow>
+        <primitive object={shell} attach="material" />
+      </RoundedBox>
+      <RoundedBox args={[1.03, 0.06, 0.9]} radius={0.02} smoothness={4} position={[0, 0.48, 0]} castShadow receiveShadow>
+        <primitive object={shell} attach="material" />
+      </RoundedBox>
+      {[-0.33, 0, 0.33].map((x, index) => (
+        <group key={x}>
+          <RoundedBox args={[0.29, 0.32, 0.028]} radius={0.008} smoothness={2} position={[x, 0.25, 0.444]} castShadow receiveShadow>
+            <primitive object={shell} attach="material" />
+          </RoundedBox>
+          {index < 2 ? (
+            <mesh position={[x, 0.25, 0.466]} scale={[0.1, 0.018, 0.012]} geometry={SHARED_BOX} castShadow>
+              <primitive object={handle} attach="material" />
+            </mesh>
+          ) : null}
+        </group>
+      ))}
+      {[-0.38, 0.38].map((x) => (
+        <mesh key={x} position={[x, 0.055, 0]} scale={[0.06, 0.1, 0.06]} geometry={SHARED_CYLINDER} castShadow>
+          <primitive object={handle} attach="material" />
+        </mesh>
+      ))}
     </group>
   );
 }
