@@ -17,6 +17,7 @@ const eslintConfig = defineConfig([
     ".wrangler/**",
     ".local/**",
     "artifacts/visual/**",
+    "dist/**",
     // This file is a crawled vendor payload, not application source.
     "goods.js",
   ]),

@@ -206,7 +206,12 @@ function ModelSwitcher({
       </div>
       <div className="planner-model-switcher__current">
         <span className="planner-model-switcher__thumb">
-          {referenceUrl ? <img src={referenceUrl} alt={`Gespeicherter Referenzbeleg für ${catalogItem?.name ?? placement.catalogId}`} loading="lazy" /> : referenceLink ? <a href={referenceLink} target="_blank" rel="noreferrer">Beleg ↗</a> : <span aria-hidden="true">∎</span>}
+          {referenceUrl ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={referenceUrl} alt={`Gespeicherter Referenzbeleg für ${catalogItem?.name ?? placement.catalogId}`} loading="lazy" />
+            </>
+          ) : referenceLink ? <a href={referenceLink} target="_blank" rel="noreferrer">Beleg ↗</a> : <span aria-hidden="true">∎</span>}
         </span>
         <span>
           <strong>{catalogItem?.name ?? placement.catalogId}</strong>

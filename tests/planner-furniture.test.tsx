@@ -256,6 +256,7 @@ describe("furniture inspector", () => {
         document={DEFAULT_APARTMENT_DOCUMENT}
         selectionId="zimmer1-chair"
         dispatch={(command) => applyPlannerCommand(DEFAULT_APARTMENT_DOCUMENT, command)}
+        select={vi.fn()}
       />,
     );
     for (const label of [
@@ -270,7 +271,7 @@ describe("furniture inspector", () => {
   });
 
   test("explains that built-ins are locked", () => {
-    render(<InspectorPanel document={DEFAULT_APARTMENT_DOCUMENT} selectionId="builtin-kitchen-upper-west-end" dispatch={vi.fn()} />);
+    render(<InspectorPanel document={DEFAULT_APARTMENT_DOCUMENT} selectionId="builtin-kitchen-upper-west-end" dispatch={vi.fn()} select={vi.fn()} />);
     expect(screen.getByText(/gegen Verschieben und Entfernen geschützt/)).toBeTruthy();
   });
 });
