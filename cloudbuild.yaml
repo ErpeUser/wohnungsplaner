@@ -50,9 +50,9 @@ steps:
     args:
       - -euc
       - |
-        if [[ -n "${REPORT_BUCKET:-}" && -s artifacts/visual/latest/report/results.json ]]; then
+        if [[ -n "$${REPORT_BUCKET:-}" && -s artifacts/visual/latest/report/results.json ]]; then
           tar -C artifacts/visual/latest -czf /tmp/browser-report.tar.gz .
-          gcloud storage cp /tmp/browser-report.tar.gz "gs://${REPORT_BUCKET}/$COMMIT_SHA/$BUILD_ID/browser-report.tar.gz"
+          gcloud storage cp /tmp/browser-report.tar.gz "gs://$${REPORT_BUCKET}/$COMMIT_SHA/$BUILD_ID/browser-report.tar.gz"
         fi
         exit "$$(cat /workspace/.browser-exit-code)"
 
