@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { DataTexture, Texture, TextureLoader } from "three";
+import { DataTexture, NoColorSpace, SRGBColorSpace, Texture, TextureLoader } from "three";
 import { describe, expect, test, vi } from "vitest";
 
 vi.mock("@react-three/fiber", () => ({
@@ -41,6 +41,23 @@ describe("createSceneModel", () => {
     expect(taupe.map).toBeInstanceOf(DataTexture);
     expect(square.color.getHexString()).toBe("efeeea");
   });
+  test("keeps generated outdoor surfaces in sRGB with linear bump relief", () => {
+    const concrete = getPlannerMaterial("outdoor-concrete");
+    const balcony = getPlannerMaterial("balcony-floor-beige");
+
+    expect(concrete.map).toBeInstanceOf(DataTexture);
+    expect(concrete.bumpMap).toBeInstanceOf(Texture);
+    expect(concrete.map?.colorSpace).toBe(SRGBColorSpace);
+    expect(concrete.bumpMap?.colorSpace).toBe(NoColorSpace);
+    expect(concrete.bumpScale).toBeCloseTo(0.012);
+
+    expect(balcony.map).toBeInstanceOf(DataTexture);
+    expect(balcony.bumpMap).toBeInstanceOf(Texture);
+    expect(balcony.map?.colorSpace).toBe(SRGBColorSpace);
+    expect(balcony.bumpMap?.colorSpace).toBe(NoColorSpace);
+    expect(balcony.bumpScale).toBeCloseTo(0.01);
+  });
+
   test("redraws demand-rendered 3D after a newly selected rug texture finishes loading", async () => {
     const texture = new Texture(document.createElement("img"));
     const load = vi.spyOn(TextureLoader.prototype, "load").mockImplementation((_url, onLoad) => {
