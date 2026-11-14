@@ -1,0 +1,81 @@
+timeout: 9000s
+options:
+  machineType: E2_STANDARD_2
+  logging: CLOUD_LOGGING_ONLY
+  automapSubstitutions: true
+substitutions:
+  _REGION: europe-west1
+  _SERVICE: wohnungsplaner
+  _REGISTRY: wohnungsplaner
+  _RUNTIME_ACCOUNT: wohnungsplaner-runtime
+  _REPORT_BUCKET: ''
+  _DEPLOY: 'false'
+  _FULL_GALLERY: 'false'
+  _CONNECTION: wohnungsplaner-github
+  _REPOSITORY: wohnungsplaner
+steps:
+  - id: build-and-validate
+    name: node:22.22.2-bookworm
+    env: ['CI=true']
+    entrypoint: bash
+    args:
+      - -euc
+      - |
+        # npm 10 misresolves the locked fflate overrides; match the lockfile toolchain.
+        npx --yes npm@12.1.0 ci --ignore-scripts --no-audit --no-fund
+        npm run build
+        npm run validate
+        npm audit --audit-level=high
+
+  - id: browser
+    name: node:22.22.2-bookworm
+    env: ['CI=true']
+    entrypoint: bash
+    args:
+      - -euc
+      - |
+        export VISUAL_SKIP_BUILD=1 VISUAL_COMMIT="$COMMIT_SHA" VISUAL_BRANCH="$BRANCH_NAME"
+        status=0
+        if [[ "$${_FULL_GALLERY:-false}" == true ]]; then
+          (npx playwright install --with-deps chromium && npm run visual:check) || status=$$?
+        else
+          (npx playwright install --with-deps chromium && npm run test:browser) || status=$$?
+        fi
+        printf '%s\n' "$$status" > /workspace/.browser-exit-code
+
+  - id: store-browser-evidence
+    name: gcr.io/google.com/cloudsdktool/google-cloud-cli:slim
+    env: ['REPORT_BUCKET=${_REPORT_BUCKET}']
+    entrypoint: bash
+    args:
+      - -euc
+      - |
+        if [[ -n "$${REPORT_BUCKET:-}" && -s artifacts/visual/latest/report/results.json ]]; then
+          tar -C artifacts/visual/latest -czf /tmp/browser-report.tar.gz .
+          gcloud storage cp /tmp/browser-report.tar.gz "gs://$${REPORT_BUCKET}/$COMMIT_SHA/$BUILD_ID/browser-report.tar.gz"
+        fi
+        exit "$$(cat /workspace/.browser-exit-code)"
+
+  - id: package-and-deploy
+    name: gcr.io/google.com/cloudsdktool/google-cloud-cli:slim
+    env:
+      - 'PROJECT_ID=$PROJECT_ID'
+      - 'COMMIT_SHA=$COMMIT_SHA'
+      - 'BUILD_ID=$BUILD_ID'
+      - 'BRANCH_NAME=$BRANCH_NAME'
+      - '_REGION=${_REGION}'
+      - '_SERVICE=${_SERVICE}'
+      - '_REGISTRY=${_REGISTRY}'
+      - '_RUNTIME_ACCOUNT=${_RUNTIME_ACCOUNT}'
+      - '_CONNECTION=${_CONNECTION}'
+      - '_REPOSITORY=${_REPOSITORY}'
+      - '_DEPLOY=${_DEPLOY}'
+    entrypoint: bash
+    args:
+      - -euc
+      - |
+        if [[ "$$_DEPLOY" == true ]]; then
+          apt-get update -qq
+          apt-get install -y -qq --no-install-recommends docker.io
+          bash scripts/cloud-run-release.sh
+        fi

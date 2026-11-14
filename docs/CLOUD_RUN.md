@@ -4,7 +4,7 @@ GitHub ist das private Quellarchiv. Google Cloud Build ist mit
 `ErpeUser/wohnungsplaner` verbunden und startet bei jedem Push auf `main`.
 GitHub Actions wird für diese Veröffentlichung nicht verwendet.
 
-## Was bei einem Push passiert
+## Schnelle Preview bei jedem main-Push`n`nDer Trigger `wohnungsplaner-main` verwendet `cloudbuild.yaml`. Er installiert`n`die Abhängigkeiten, baut den aktuellen Commit und veröffentlicht ihn ohne die`n`vollständige GUI-/3D-Pipeline auf dem privaten Dienst `wohnungsplaner-preview`.`n`Die Preview-URL wird nach dem ersten erfolgreichen Lauf in der Cloud-Run-`n`Servicebeschreibung sichtbar. Auch diese Preview ist ein neu gebautes Containerimage;`n`Cloud Run lädt keine Quelldateien live.`n`n## Was bei einem Push passiert
 
 1. Google lädt den exakten Commit, installiert den Lockfile-Stand und führt
    Produktionsbuild, `npm run validate` und Dependency-Audit aus.
