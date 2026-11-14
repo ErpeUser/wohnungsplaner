@@ -53,4 +53,4 @@ Jeder Browserlauf ersetzt ausschließlich `artifacts/visual/latest`. Ergebnisse 
 
 ## Cloud
 
-Siehe [CLOUD_RUN.md](CLOUD_RUN.md). Nur geprüfte Pushes auf `main` können den optional aktivierten Deployjob starten. Der Browser der KI muss die Zieladresse erreichen und bei privatem Cloud Run die nötige Authentifizierung besitzen. Ein GitHub-Connector allein führt keinen Browser aus.
+Siehe [CLOUD_RUN.md](CLOUD_RUN.md). Google Cloud Build verarbeitet Änderungen an `main` direkt aus dem GitHub-Repository. Erst nach den Prüfungen wird der neue Stand privat auf Cloud Run veröffentlicht. Die Live-Vorschau bleibt für die sofortige Kontrolle erhalten.

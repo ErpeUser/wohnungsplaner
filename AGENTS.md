@@ -10,7 +10,7 @@ Diese Regeln gelten für jeden Auftrag an Oberfläche, 2D/3D-Modellen, Materiali
 4. Auf `canvas[data-render-ready="true"]` und den passenden `data-render-key` warten. Screenshots tatsächlich öffnen und betrachten. Ein Canvas, ein Screenshot-Dateiname oder ein grüner Test allein belegt keine richtige Darstellung.
 5. Nach gezielten Änderungen am laufenden Entwicklungsserver `npm run visual:models -- --live --model <Katalog-ID>`; bei GUI-Änderungen `npm run test:browser`. Ergebnisse: `artifacts/visual/latest/report/index.html` und `results.json`.
 6. Bei sichtbaren Abweichungen korrigieren und erneut aufnehmen. Baselines niemals ungeprüft ersetzen. Vor Abschluss Browserfehler, defekte Ressourcen und ausstehende Prüfschritte benennen.
-7. Vor Integration Produktionsbuild, `npm run validate` und `npm run visual:check` ausführen. GitHub `Quality` führt die Browsertests zusätzlich aus und bewahrt Berichte pro Commit auf.
+7. Vor Integration Produktionsbuild, `npm run validate` und `npm run visual:check` ausführen. Google Cloud Build prüft Pushes auf `main` und speichert Browserberichte pro Commit. Der GitHub-Lauf startet nur manuell.
 8. Keine visuelle Fertigstellung ohne tatsächliche Bildkontrolle behaupten. Falls Browser, WebGL oder Referenzen fehlen, genau diesen Teil als offen melden. Screenshot-Prüfung ersetzt keine fachliche Produkt-/Maßprüfung.
 
 Verbindlicher Ablauf und Abdeckung: [docs/VISUAL_WORKFLOW.md](docs/VISUAL_WORKFLOW.md), [tests/browser/COVERAGE.md](tests/browser/COVERAGE.md).

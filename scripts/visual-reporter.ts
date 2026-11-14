@@ -21,7 +21,9 @@ export default class VisualReporter implements Reporter {
   }
 
   async onEnd(result: FullResult) {
-    const report = { startedAt: this.startedAt, finishedAt: new Date().toISOString(), commit: git('rev-parse', 'HEAD'), branch: git('branch', '--show-current'), dirty: git('status', '--porcelain').length > 0, status: result.status, errors: this.errors, tests: this.tests };
+    const cloudCommit = process.env.VISUAL_COMMIT;
+    const sourceStatus = git('status', '--porcelain');
+    const report = { startedAt: this.startedAt, finishedAt: new Date().toISOString(), commit: cloudCommit || git('rev-parse', 'HEAD'), branch: process.env.VISUAL_BRANCH || git('branch', '--show-current'), dirty: sourceStatus === 'unknown' ? null : sourceStatus.length > 0, status: result.status, errors: this.errors, tests: this.tests };
     await fs.mkdir(path.join(output, 'report'), { recursive: true });
     await fs.writeFile(path.join(output, 'report/results.json'), `${JSON.stringify(report, null, 2)}\n`);
     const sections = this.tests.map((item) => `<section><h2>${escape(item.name)}</h2><p class="${item.status}">${escape(item.status)} · ${(item.durationMs / 1000).toFixed(1)}s</p>${item.screenshots.map((shot) => `<figure><a href="../${escape(shot.path)}"><img loading="lazy" src="../${escape(shot.path)}" alt="${escape(shot.name)}"></a><figcaption>${escape(shot.name)}</figcaption></figure>`).join('')}${item.failures.map((failure) => `<pre>${escape(failure)}</pre>`).join('')}</section>`).join('');
