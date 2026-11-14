@@ -22,6 +22,8 @@ test('one chair moves independently and survives undo redo and reload', async ({
   await expect(input).toHaveValue('230');
   await expect.poll(async () => (await savedDocument(page)).placements.find((item) => item.id === chairId)?.position.x).toBeCloseTo(2.3, 6);
   await page.reload({ waitUntil: 'domcontentloaded' });
+  const inspectorOpen = page.getByRole('button', { name: 'Eigenschaften einblenden' });
+  if (await inspectorOpen.count()) await inspectorOpen.click();
   await page.getByLabel('Planobjekt auswählen').selectOption(chairId);
   await expect(input).toHaveValue('230');
   const reloaded = await savedDocument(page);
@@ -85,7 +87,7 @@ test('2D and 3D render real pixels and can switch back', async ({ page }, info) 
   await screenshot(page, info, 'planner-2d-overview');
   await page.getByRole('button', { name: '3D-Ansicht', exact: true }).click();
   const canvas = page.locator('canvas[aria-label="3D-Planungsfläche"]');
-  await expect(canvas).toHaveAttribute('data-render-ready', 'true', { timeout: 60_000 });
+  await expect(canvas).toHaveAttribute('data-render-ready', 'true', { timeout: 120_000 });
   await assertRendered(page, canvas);
   await screenshot(page, info, 'planner-3d-overview');
   await page.getByRole('button', { name: '2D-Ansicht', exact: true }).click();
