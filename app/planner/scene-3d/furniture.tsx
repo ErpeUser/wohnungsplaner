@@ -201,7 +201,7 @@ function ParametricFurniture({ fallback, materialId, catalogId, size }: { fallba
       </group>
     );
   }
-  if (fallback === "table") return <DetailedTable materialId={materialId} />;
+  if (fallback === "sofa") return <StandardSofa />;\n  if (fallback === "table") return <DetailedTable materialId={materialId} />;
   if (fallback === "cabinet") return <DetailedCabinet materialId={materialId} />;
   return (
     <RoundedBox args={[0.96, 0.96, 0.96]} radius={0.035} smoothness={2} position={[0, 0.5, 0]} castShadow receiveShadow>
@@ -1050,6 +1050,50 @@ function TemuIvoryExecutiveChair() {
       <mesh position={[0, 0.39, 0.31]} scale={[0.48, 0.035, 0.42]} geometry={SHARED_BOX} castShadow><primitive object={chrome} attach="material" /></mesh>
       <RoundedBox args={[0.58, 0.105, 0.35]} radius={0.055} smoothness={5} position={[0, 0.42, 0.33]} castShadow><primitive object={leather} attach="material" /></RoundedBox>
       <mesh position={[0, 0.43, 0.51]} scale={[0.02, 0.02, 0.02]} geometry={SHARED_SPHERE} castShadow><primitive object={chrome} attach="material" /></mesh>
+    </group>
+  );
+}
+
+function StandardSofa() {
+  const fabric = getPlannerMaterial("fabric-sand");
+  const seam = getPlannerMaterial("fabric-light-grey");
+  const dark = getPlannerMaterial("metal-black");
+  const seatCenters = [-0.32, 0, 0.32];
+
+  return (
+    <group>
+      <RoundedBox args={[0.96, 0.18, 0.72]} radius={0.055} smoothness={6} position={[0, 0.24, 0.02]} castShadow receiveShadow>
+        <primitive object={fabric} attach="material" />
+      </RoundedBox>
+      {seatCenters.map((x) => (
+        <group key={`standard-sofa-seat-${x}`}>
+          <RoundedBox args={[0.29, 0.17, 0.53]} radius={0.065} smoothness={6} position={[x, 0.4, 0.08]} castShadow receiveShadow>
+            <primitive object={fabric} attach="material" />
+          </RoundedBox>
+          <RoundedBox args={[0.285, 0.32, 0.16]} radius={0.06} smoothness={6} position={[x, 0.64, -0.27]} rotation={[-0.08, 0, 0]} castShadow receiveShadow>
+            <primitive object={fabric} attach="material" />
+          </RoundedBox>
+          <DetailStrip position={[x, 0.485, 0.36]} scale={[0.22, 0.01, 0.014]} materialId="fabric-light-grey" />
+        </group>
+      ))}
+      {[-0.48, 0.48].map((x) => (
+        <RoundedBox key={`standard-sofa-arm-${x}`} args={[0.12, 0.5, 0.72]} radius={0.06} smoothness={6} position={[x, 0.5, 0.02]} castShadow receiveShadow>
+          <primitive object={fabric} attach="material" />
+        </RoundedBox>
+      ))}
+      <RoundedBox args={[0.88, 0.11, 0.12]} radius={0.03} smoothness={4} position={[0, 0.79, -0.31]} rotation={[-0.08, 0, 0]} castShadow>
+        <primitive object={seam} attach="material" />
+      </RoundedBox>
+      {[
+        [-0.37, -0.27],
+        [0.37, -0.27],
+        [-0.37, 0.31],
+        [0.37, 0.31],
+      ].map(([x, z], index) => (
+        <mesh key={`standard-sofa-foot-${index}`} position={[x, 0.08, z]} rotation={[0, 0, index % 2 === 0 ? -0.08 : 0.08]} scale={[0.055, 0.16, 0.055]} geometry={SHARED_CYLINDER} castShadow>
+          <primitive object={dark} attach="material" />
+        </mesh>
+      ))}
     </group>
   );
 }
