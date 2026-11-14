@@ -49,6 +49,18 @@ test("verschiebt einen einzelnen Essstuhl ohne Tisch oder Nachbarstühle", () =>
   assert.deepEqual(moved.document.placements.find((item) => item.id === "living-bozan-table")?.position, originalPositions.get("living-bozan-table"));
 });
 
+test("hält alle fest verbauten Apartmentelemente unveränderbar", () => {
+  for (const item of DEFAULT_APARTMENT_DOCUMENT.builtIns) {
+    const result = applyPlannerCommand(DEFAULT_APARTMENT_DOCUMENT, {
+      type: "movePlacement",
+      placementId: item.id,
+      position: { x: item.position.x + 0.1, z: item.position.z + 0.1 },
+    });
+    assert.equal(result.document, DEFAULT_APARTMENT_DOCUMENT, item.id);
+    assert.equal(result.error?.code, "locked", item.id);
+  }
+});
+
 test("applies placement commands immutably and rejects hard collisions", () => {
   const original = commandDocument();
   const moved = applyPlannerCommand(original, {
