@@ -6,6 +6,8 @@ import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
 import type { CommandResult, PlannerCommand } from "../domain/commands.ts";
 import type { PlannerDocumentV3, PlannerPlacement } from "../domain/types.ts";
 import { ChairComparisonPanel } from "./chair-comparison-panel.tsx";
+import { getChairModelForCatalogId } from "../chairs/chair-models.ts";
+import { getTableModel } from "../tables/table-models.ts";
 import { TableComparisonPanel } from "./table-comparison-panel.tsx";
 import "./model-switcher.css";
 
@@ -171,6 +173,7 @@ function ModelSwitcher({
   const catalogItem = getFurnitureCatalogItem(placement.catalogId);
   const size = placement.size;
   const confidence = placement.metadata?.confidence === "confirmed" ? "Beleg bestätigt" : "Beleg geschätzt";
+  const referenceUrl = referenceForPlacement(placement.catalogId);
 
   return (
     <section className="planner-model-switcher" aria-label="Modellwechsel">
@@ -201,7 +204,9 @@ function ModelSwitcher({
         </button>
       </div>
       <div className="planner-model-switcher__current">
-        <span className="planner-model-switcher__thumb" aria-hidden="true" />
+        <span className="planner-model-switcher__thumb">
+          {referenceUrl ? <img src={referenceUrl} alt={`Gespeicherter Referenzbeleg für ${catalogItem?.name ?? placement.catalogId}`} loading="lazy" /> : null}
+        </span>
         <span>
           <strong>{catalogItem?.name ?? placement.catalogId}</strong>
           <small>{Math.round(size.width * 100)} × {Math.round(size.depth * 100)} × {Math.round(size.height * 100)} cm · {confidence}</small>
@@ -229,6 +234,14 @@ function ModelSwitcher({
     </section>
   );
 }
+function referenceForPlacement(catalogId: string) {
+  const chair = getChairModelForCatalogId(catalogId);
+  if (chair?.imageUrls[0]) return chair.imageUrls[0];
+  const table = getTableModel(catalogId);
+  if (table?.imageUrls[0]) return table.imageUrls[0];
+  return null;
+}
+
 function NumericField({
   label,
   value,
