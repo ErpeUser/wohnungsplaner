@@ -32,7 +32,7 @@ jobs:
           cache: npm
 
       - name: Install locked dependencies
-        run: npm ci --ignore-scripts --no-audit --no-fund
+        run: npx --yes npm@12.1.0 ci --ignore-scripts --no-audit --no-fund
 
       - name: Typecheck
         run: npm run typecheck

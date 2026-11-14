@@ -21,7 +21,8 @@ steps:
     args:
       - -euc
       - |
-        npm ci --ignore-scripts --no-audit --no-fund
+        # npm 10 misresolves the locked fflate overrides; match the lockfile toolchain.
+        npx --yes npm@12.1.0 ci --ignore-scripts --no-audit --no-fund
         npm run build
         npm run validate
         npm audit --audit-level=high
