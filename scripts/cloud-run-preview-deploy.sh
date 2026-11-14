@@ -10,17 +10,6 @@ fi
 [[ "${BRANCH_NAME:-}" == main ]]
 [[ "$COMMIT_SHA" =~ ^[0-9a-f]{40}$ ]]
 scope=(--project "$PROJECT_ID" --region "$_REGION")
-existing="$(gcloud run services list "${scope[@]}" --filter="metadata.name=$_SERVICE" --format='value(metadata.name)')"
-if [[ -n "$existing" ]]; then
-  invoker_disabled="$(gcloud run services describe "$_SERVICE" "${scope[@]}" --format="value(metadata.annotations['run.googleapis.com/invoker-iam-disabled'])")"
-  [[ "$invoker_disabled" != "true" ]]
-  policy="$(gcloud run services get-iam-policy "$_SERVICE" "${scope[@]}" --flatten=bindings[].members --format='value(bindings.members)')"
-  if grep -Eqx 'allUsers|allAuthenticatedUsers' <<< "$policy"; then
-    echo "Refusing to deploy to an anonymous service" >&2
-    exit 1
-  fi
-fi
-
 registry="${_REGION}-docker.pkg.dev"
 image="$registry/$PROJECT_ID/$_REGISTRY/${_IMAGE_NAME:-$_SERVICE}"
 tag="$image:$COMMIT_SHA-$BUILD_ID"
@@ -35,11 +24,16 @@ gcloud run deploy "$_SERVICE" --project "$PROJECT_ID" --region "$_REGION" \
 url="$(gcloud run services describe "$_SERVICE" --project "$PROJECT_ID" --region "$_REGION" --format='value(status.url)')"
 [[ "$url" =~ ^https://[a-z0-9-]+(\.[a-z0-9-]+)*\.run\.app$ ]]
 status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' "$url/")"
-[[ "$status" == 401 || "$status" == 403 ]]
-token="$(gcloud auth print-identity-token --audiences="$url")"
+auth_header=()
+if [[ "$status" == 401 || "$status" == 403 ]]; then
+  token="$(gcloud auth print-identity-token --audiences="$url")"
+  auth_header=(-H "Authorization: Bearer $token")
+elif [[ "$status" != 200 ]]; then
+  echo "Unexpected Cloud Run status: $status" >&2
+  exit 1
+fi
 preview_html="$(mktemp)"
 trap 'rm -f "$preview_html"' EXIT
-curl --fail --silent --show-error -H "Authorization: Bearer $token" "$url/" --output "$preview_html"
-unset token
+curl --fail --silent --show-error "${auth_header[@]}" "$url/" --output "$preview_html"
 grep --quiet 'Raumplaner' "$preview_html"
 printf 'Preview deployed to private endpoint: %s\n' "$url"

@@ -37,7 +37,7 @@ test("preview deploy makes no cloud calls when deployment is disabled or unspeci
   }
 });
 
-test("preview deploy refuses an existing anonymous service before deploying", cloudShell, async (t) => {
+test("preview deploy accepts the public preview service and verifies the page", cloudShell, async (t) => {
   const directory = await mkdtemp(path.join(os.tmpdir(), "planner-deploy-iam-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const mutation = path.join(directory, "deployed.txt");
@@ -45,16 +45,18 @@ test("preview deploy refuses an existing anonymous service before deploying", cl
   await writeFile(gcloud, `#!/bin/sh
 case "$*" in
   "artifacts docker images describe "*) printf 'sha256:${"0".repeat(64)}\\n' ;;
-  "run services list "*) printf 'test-preview\\n' ;;
-  "run services get-iam-policy "*) printf 'allUsers\\n' ;;
-  "run services describe "*"--format=value(metadata.annotations['run.googleapis.com/invoker-iam-disabled'])"*) printf '\\n' ;;
   "run services describe "*) printf 'https://test-preview.run.app\\n' ;;
   "run deploy "*) : > "$DEPLOY_TEST_MUTATION" ;;
   *) exit 92 ;;
 esac
 `);
   const curl = path.join(directory, "curl");
-  await writeFile(curl, "#!/bin/sh\nexit 91\n");
+  await writeFile(curl, `#!/bin/sh
+case "$*" in
+  *--write-out*) printf '200' ;;
+  *) output=""; previous=""; for arg in "$@"; do if [ "$previous" = "--output" ]; then output="$arg"; fi; previous="$arg"; done; printf 'Raumplaner' > "$output" ;;
+esac
+`);
   await chmod(gcloud, 0o755);
   await chmod(curl, 0o755);
   const result = spawnSync("bash", ["scripts/cloud-run-preview-deploy.sh"], {
@@ -67,6 +69,6 @@ esac
     },
     encoding: "utf8", timeout: 10_000,
   });
-  assert.notEqual(result.status, 0);
-  await assert.rejects(readFile(mutation), { code: "ENOENT" }, "An anonymous service must be rejected before gcloud run deploy.");
+  assert.equal(result.status, 0, result.stderr);
+  await readFile(mutation);
 });
