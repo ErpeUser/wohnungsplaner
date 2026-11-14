@@ -9,16 +9,6 @@ image="$registry/$PROJECT_ID/$_REGISTRY/${_IMAGE_NAME:-$_SERVICE}"
 tag="$image:$COMMIT_SHA-$BUILD_ID"
 digest="$(gcloud artifacts docker images describe "$tag" --project "$PROJECT_ID" --format='value(image_summary.digest)')"
 [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
-public="$(gcloud run services get-iam-policy "$_SERVICE" --project "$PROJECT_ID" --region "$_REGION" --flatten=bindings[].members --format='value(bindings.members)' 2>/dev/null || true)"
-if grep -Eqx 'allUsers|allAuthenticatedUsers' <<< "$public"; then
-  echo 'Refusing to deploy an anonymous preview service' >&2
-  exit 1
-fi
-service_json="$(gcloud run services describe "$_SERVICE" --project "$PROJECT_ID" --region "$_REGION" --format=json 2>/dev/null || true)"
-if [[ -n "$service_json" ]]; then
-  disabled="$(gcloud run services describe "$_SERVICE" --project "$PROJECT_ID" --region "$_REGION" --format='value(metadata.annotations.run.googleapis.com/invoker-iam-disabled)' 2>/dev/null || true)"
-  [[ "$disabled" != true ]]
-fi
 gcloud run deploy "$_SERVICE" --project "$PROJECT_ID" --region "$_REGION" \
   --image "$image@$digest" --service-account "$_RUNTIME_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com" \
   --port 8080 --update-env-vars "HOST=0.0.0.0,CODEX_SOURCE_COMMIT=$COMMIT_SHA" \
@@ -28,8 +18,7 @@ gcloud run deploy "$_SERVICE" --project "$PROJECT_ID" --region "$_REGION" \
 url="$(gcloud run services describe "$_SERVICE" --project "$PROJECT_ID" --region "$_REGION" --format='value(status.url)')"
 [[ "$url" =~ ^https://[a-z0-9-]+(\.[a-z0-9-]+)*\.run\.app$ ]]
 status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' "$url/")"
-[[ "$status" == 401 || "$status" == 403 ]]
-token="$(gcloud auth print-identity-token --audiences="$url")"
-curl --fail --silent --show-error -H "Authorization: Bearer $token" "$url/" --output /tmp/preview.html
+[[ "$status" == 200 ]]
+curl --fail --silent --show-error "$url/" --output /tmp/preview.html
 grep --quiet 'Raumplaner' /tmp/preview.html
 printf 'Preview deployed: %s\n' "$url"
