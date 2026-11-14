@@ -54,3 +54,7 @@ Jeder Browserlauf ersetzt ausschließlich `artifacts/visual/latest`. Ergebnisse 
 ## Cloud
 
 Siehe [CLOUD_RUN.md](CLOUD_RUN.md). Google Cloud Build verarbeitet Änderungen an `main` direkt aus dem GitHub-Repository. Erst nach den Prüfungen wird der neue Stand privat auf Cloud Run veröffentlicht. Die Live-Vorschau bleibt für die sofortige Kontrolle erhalten.
+
+## GitHub-only: ohne Browser in ChatGPT
+
+Der Cloud-Prüfablauf steht in [VISUAL_CLOUD.md](VISUAL_CLOUD.md). GitHub-hosted `ubuntu-24.04` stellt Chrome/Edge bereit; `VISUAL_BROWSER_CHANNEL=chrome` vermeidet den fehleranfälligen `playwright install`-Download. Nach dem Lauf laden GitHub-Agenten das ZIP aus **Actions Artifacts** und öffnen die PNGs wirklich. Ein gelungener WebGL-Probe-Test ist nötig, belegt aber noch keine Produkttreue. Der separate `report/models.html` zeigt Zuordnung aller Modellmanifeste und lokale Referenzbilder. Die GitHub-Workflowdatei wird vor einer Main-Freigabe auf dem Review-Branch per Push getestet.
