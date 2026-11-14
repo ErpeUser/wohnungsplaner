@@ -271,7 +271,7 @@ describe("createSceneModel", () => {
     }
   });
 
-  test("omits the removed Zimmer 1 wall pad and WC paper holder from rendered rooms", () => {
+  test("omits the removed Zimmer 1 wall pad and retains the moved WC paper holder", () => {
     const zimmer1 = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, "zimmer1");
     const wc = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, "wc");
 
