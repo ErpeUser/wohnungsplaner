@@ -19,8 +19,6 @@ import { InspectorPanel } from "./inspector-panel.tsx";
 import { PlannerStatus } from "./planner-status.tsx";
 import { PlannerToolbar } from "./planner-toolbar.tsx";
 import { ShoppingListDrawer } from "./shopping-list-drawer.tsx";
-import { TableComparisonPanel } from "./table-comparison-panel.tsx";
-import { ChairComparisonPanel } from "./chair-comparison-panel.tsx";
 import "./planner-workspace.css";
 
 const LazyPlanner3D = lazy(() => import("../scene-3d/planner-3d.tsx").then((module) => ({
@@ -237,8 +235,6 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
             <span>{state.activeRoomId ? state.document.rooms.find((room) => room.id === state.activeRoomId)?.name : "Gesamtwohnung"}</span>
             <span>{state.viewMode === "2d" ? "Grundriss · Nord oben" : state.cameraMode === "walk" ? "Begehbare Ansicht" : "3D-Übersicht"}</span>
           </div>
-          <TableComparisonPanel key={state.document.placements.find((item) => item.id === "living-bozan-table")?.catalogId ?? "dining-table-bozan-110"} document={state.document} dispatch={state.dispatch} select={state.select} />
-          <ChairComparisonPanel key={state.document.placements.find((item) => item.id === "living-kaleo-chair-west")?.catalogId ?? "chair-kaleo-chenille-beige"} document={state.document} dispatch={state.dispatch} select={state.select} />
           <div className="planner-canvas__stage">
             <div className="planner-canvas__ruler planner-canvas__ruler--top" aria-hidden="true" />
             <div className="planner-canvas__ruler planner-canvas__ruler--left" aria-hidden="true" />
@@ -276,7 +272,7 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
           {state.warnings.length ? <p className="planner-canvas__warning">Hinweis: {state.warnings[0].message}</p> : null}
         </section>
         {state.panels.inspector ? (
-          <InspectorPanel document={state.document} selectionId={state.selectionId} dispatch={state.dispatch} />
+          <InspectorPanel document={state.document} selectionId={state.selectionId} dispatch={state.dispatch} select={state.select} />
         ) : null}
       </div>
 
