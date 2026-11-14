@@ -14,7 +14,7 @@ import "./model-switcher.css";
 type InspectorPanelProps = {
   document: PlannerDocumentV3;
   selectionId: string | null;
-  dispatch(command: PlannerCommand): CommandResult | void;
+  dispatch(command: PlannerCommand): CommandResult;
   select(id: string | null): void;
 };
 
@@ -53,7 +53,7 @@ function PlacementFields({
 }: {
   document: PlannerDocumentV3;
   placement: PlannerPlacement;
-  dispatch(command: PlannerCommand): CommandResult | void;
+  dispatch(command: PlannerCommand): CommandResult;
   select(id: string | null): void;
 }) {
   const catalogItem = getFurnitureCatalogItem(placement.catalogId);
