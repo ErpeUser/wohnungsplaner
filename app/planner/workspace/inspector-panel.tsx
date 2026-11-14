@@ -12,9 +12,10 @@ type InspectorPanelProps = {
   document: PlannerDocumentV3;
   selectionId: string | null;
   dispatch(command: PlannerCommand): CommandResult | void;
+  select(id: string | null): void;
 };
 
-export function InspectorPanel({ document, selectionId, dispatch }: InspectorPanelProps) {
+export function InspectorPanel({ document, selectionId, dispatch, select }: InspectorPanelProps) {
   const selected = document.placements.find((placement) => placement.id === selectionId);
   const builtIn = document.builtIns.find((item) => item.id === selectionId);
 
@@ -25,7 +26,7 @@ export function InspectorPanel({ document, selectionId, dispatch }: InspectorPan
         <h2>Eigenschaften</h2>
         <p>{selected ? "Position und Maß präzise anpassen." : builtIn ? "Fest eingebautes Element." : "Element im Plan auswählen."}</p>
       </header>
-      {selected ? <PlacementFields placement={selected} dispatch={dispatch} /> : builtIn ? (
+      {selected ? <PlacementFields document={document} placement={selected} dispatch={dispatch} select={select} /> : builtIn ? (
         <div className="planner-locked-state">
           <span aria-hidden="true">◆</span>
           <div><strong>{builtIn.label}</strong><p>Bestand · gegen Verschieben und Entfernen geschützt</p></div>
@@ -42,11 +43,15 @@ export function InspectorPanel({ document, selectionId, dispatch }: InspectorPan
 }
 
 function PlacementFields({
+  document,
   placement,
   dispatch,
+  select,
 }: {
+  document: PlannerDocumentV3;
   placement: PlannerPlacement;
   dispatch(command: PlannerCommand): CommandResult | void;
+  select(id: string | null): void;
 }) {
   const catalogItem = getFurnitureCatalogItem(placement.catalogId);
   const send = (command: PlannerCommand) => dispatch(command)?.error?.message ?? null;
@@ -57,6 +62,7 @@ function PlacementFields({
         <span className="planner-selection-summary__swatch" aria-hidden="true" />
         <span><strong>{catalogItem?.name ?? placement.catalogId}</strong><small>{placement.roomId}</small></span>
       </div>
+      <ModelSwitcher document={document} placement={placement} dispatch={dispatch} select={select} />
       <fieldset>
         <legend>Position</legend>
         <div className="planner-field-grid">
