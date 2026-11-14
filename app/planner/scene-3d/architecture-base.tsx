@@ -713,6 +713,10 @@ function ParametricBuiltIn({ item }: { item: SceneObject<PlannerBuiltIn> }) {
       </group>
     );
   }
+  if (item.catalogId === "bath-tub-apron" || item.catalogId === "bath-tub-end-ledge" || item.catalogId === "bath-tub-side-apron") return <BathTiledFinish item={item} />;
+  if (item.catalogId === "wc-flush-plate") return <WcFlushPlate item={item} />;
+  if (item.catalogId === "wc-revision-panel") return <WcRevisionPanel item={item} />;
+  if (item.catalogId === "wall-finish-vintage-fabric-wallpaper") return <WallpaperFinish item={item} />;
   if (item.catalogId === "floor-zone-kitchen") return <KitchenFloorZone item={item} />;
   if (item.catalogId === "kitchen-worktop") return <KitchenWorktop item={item} />;
   if (item.catalogId === "kitchen-backsplash-oak") return <KitchenBacksplash item={item} />;
@@ -814,6 +818,97 @@ function VorraumWallDecor({ item }: { item: SceneObject<PlannerBuiltIn> }) {
           </mesh>
         ))}
       </group>
+    </group>
+  );
+}
+
+
+function BathTiledFinish({ item }: { item: SceneObject<PlannerBuiltIn> }) {
+  const [width, height, depth] = item.size;
+  const tile = getPlannerMaterial(item.materialId);
+  const grout = getPlannerMaterial("tile-grout");
+  const vertical = height > 0.06;
+  const joint = vertical ? Math.min(0.012, depth * 0.12) : Math.min(0.006, width * 0.02);
+  const jointCount = Math.max(1, Math.floor(width / 0.32));
+
+  return (
+    <group name={`bath-tiled-finish-${item.source.id}`}>
+      <mesh scale={[width, height, depth]} geometry={SHARED_BOX} castShadow receiveShadow>
+        <primitive object={tile} attach="material" />
+      </mesh>
+      <mesh position={[0, height / 2 + 0.002, 0]} scale={[Math.max(0.04, width - joint), 0.004, Math.max(0.04, depth - joint)]} geometry={SHARED_BOX} receiveShadow>
+        <primitive object={tile} attach="material" />
+      </mesh>
+      {Array.from({ length: jointCount }, (_, index) => {
+        const x = -width / 2 + (index + 1) * width / (jointCount + 1);
+        return (
+          <mesh key={`bath-joint-x-${index}`} position={[x, vertical ? 0 : height / 2 + 0.006, depth / 2 + 0.002]} scale={[0.006, vertical ? height : 0.004, 0.008]} geometry={SHARED_BOX}>
+            <primitive object={grout} attach="material" />
+          </mesh>
+        );
+      })}
+      {vertical ? (
+        <mesh position={[0, 0, depth / 2 + 0.003]} scale={[width, 0.006, 0.008]} geometry={SHARED_BOX}>
+          <primitive object={grout} attach="material" />
+        </mesh>
+      ) : null}
+    </group>
+  );
+}
+
+function WcFlushPlate({ item }: { item: SceneObject<PlannerBuiltIn> }) {
+  const [width, height, depth] = item.size;
+  const plate = getPlannerMaterial("metal-satin");
+  const button = getPlannerMaterial("screen-black");
+  return (
+    <group name={`wc-flush-plate-${item.source.id}`}>
+      <RoundedBox args={[width, height, depth]} radius={0.008} smoothness={3} castShadow receiveShadow>
+        <primitive object={plate} attach="material" />
+      </RoundedBox>
+      <mesh position={[-width * 0.2, 0, depth / 2 + 0.006]} scale={[width * 0.18, height * 0.24, 0.01]} geometry={SHARED_BOX}>
+        <primitive object={button} attach="material" />
+      </mesh>
+      <mesh position={[width * 0.2, 0, depth / 2 + 0.006]} scale={[width * 0.12, height * 0.24, 0.01]} geometry={SHARED_BOX}>
+        <primitive object={button} attach="material" />
+      </mesh>
+    </group>
+  );
+}
+
+function WcRevisionPanel({ item }: { item: SceneObject<PlannerBuiltIn> }) {
+  const [width, height, depth] = item.size;
+  const tile = getPlannerMaterial(item.materialId);
+  const frame = getPlannerMaterial("tile-grout");
+  return (
+    <group name={`wc-revision-panel-${item.source.id}`}>
+      <mesh scale={[width, height, depth]} geometry={SHARED_BOX} castShadow receiveShadow>
+        <primitive object={tile} attach="material" />
+      </mesh>
+      <mesh position={[0, 0, depth / 2 + 0.006]} scale={[Math.max(0.04, width - 0.028), Math.max(0.04, height - 0.028), 0.008]} geometry={SHARED_BOX}>
+        <primitive object={frame} attach="material" />
+      </mesh>
+    </group>
+  );
+}
+
+function WallpaperFinish({ item }: { item: SceneObject<PlannerBuiltIn> }) {
+  const [width, height, depth] = item.size;
+  const paper = getPlannerMaterial(item.materialId);
+  const seam = getPlannerMaterial("wallpaper-vintage-brown-fabric");
+  const slatCount = Math.max(1, Math.floor(width / 0.72));
+  return (
+    <group name={`wallpaper-finish-${item.source.id}`}>
+      <mesh scale={[width, height, depth]} geometry={SHARED_BOX} receiveShadow>
+        <primitive object={paper} attach="material" />
+      </mesh>
+      {Array.from({ length: slatCount - 1 }, (_, index) => {
+        const x = -width / 2 + (index + 1) * width / slatCount;
+        return (
+          <mesh key={`wallpaper-seam-${index}`} position={[x, 0, depth / 2 + 0.004]} scale={[0.006, height, 0.008]} geometry={SHARED_BOX}>
+            <primitive object={seam} attach="material" />
+          </mesh>
+        );
+      })}
     </group>
   );
 }
