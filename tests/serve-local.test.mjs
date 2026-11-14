@@ -86,10 +86,14 @@ test("serve-local akzeptiert HOST für Container-Netzwerkschnittstellen", async 
   // loopback addresses may be routed through a host proxy in CI sandboxes.
   const otherInterface = http.createServer();
   try {
-    await assert.rejects(new Promise((resolve, reject) => {
+    const alternateBind = await new Promise((resolve, reject) => {
       otherInterface.once("error", reject);
-      otherInterface.listen(port, "127.0.0.2", resolve);
-    }), { code: "EADDRINUSE" });
+      otherInterface.listen(port, "127.0.0.2", () => resolve(true));
+    }).catch((error) => {
+      assert.equal(error?.code, "EADDRINUSE");
+      return false;
+    });
+    if (process.platform !== "win32") assert.equal(alternateBind, false);
   } finally {
     if (otherInterface.listening) await new Promise((resolve) => otherInterface.close(resolve));
   }
