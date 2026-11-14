@@ -29,10 +29,10 @@ async function walk(directory) {
 for (const directory of privateRoots) await walk(directory);
 
 if (!findings.length) {
-  console.log("Private Referenzen: keine versionierten Produktions- oder Temp-Dateien gefunden.");
+  console.log("Private Referenzen: lokal keine Produktions- oder Temp-Dateien gefunden.");
 } else {
   console.warn(
-    "Private Referenzen gefunden. Sie dürfen weder unter public/ noch in Produktionsartefakte gelangen:\n" +
+    "Private Referenzen im Arbeitsbaum gefunden. Sie dürfen weder unter public/ noch in Produktionsartefakte gelangen:\n" +
       findings.map((file) => "- " + file).join("\n"),
   );
   if (strict) process.exitCode = 1;
