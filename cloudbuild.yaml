@@ -22,6 +22,14 @@ steps:
         npx --yes npm@12.1.0 ci --ignore-scripts --no-audit --no-fund
         npm run build
 
+  - id: image-build
+    name: gcr.io/cloud-builders/docker
+    args: ['build', '--platform', 'linux/amd64', '--tag', 'europe-west1-docker.pkg.dev/$PROJECT_ID/wohnungsplaner/wohnungsplaner:$COMMIT_SHA-$BUILD_ID', '.']
+
+  - id: image-push
+    name: gcr.io/cloud-builders/docker
+    args: ['push', 'europe-west1-docker.pkg.dev/$PROJECT_ID/wohnungsplaner/wohnungsplaner:$COMMIT_SHA-$BUILD_ID']
+
   - id: preview-deploy
     name: gcr.io/google.com/cloudsdktool/google-cloud-cli:slim
     env:
@@ -40,6 +48,4 @@ steps:
     args:
       - -euc
       - |
-        apt-get update -qq
-        apt-get install -y -qq --no-install-recommends docker.io
-        bash scripts/cloud-run-release.sh
+        bash scripts/cloud-run-preview-deploy.sh
