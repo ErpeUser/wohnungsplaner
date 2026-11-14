@@ -29,6 +29,10 @@ const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
+    if (url.pathname.startsWith("/planner-assets/private-reference/") || url.pathname.startsWith("/.codex-temp/")) {
+      return new Response("Not Found", { status: 404 });
+    }
+
     if (url.pathname === "/_vinext/image") {
       if (!env.ASSETS || !env.IMAGES) return new Response("Image optimization is not configured", { status: 501 });
       const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
