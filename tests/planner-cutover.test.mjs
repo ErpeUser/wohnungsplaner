@@ -46,6 +46,14 @@ test("the product root server-renders the V3 planner with a complete 2D fallback
   assert.doesNotMatch(html, /Bildstudie|Wand hinter dem Bett|Botanical Cocoon/);
 });
 
+test("does not expose private review references or private asset paths in the production worker", async () => {
+  const worker = await getWorker();
+  const review = await worker.fetch("http://localhost/dev/references/sofa-3seat/0");
+  assert.equal(review.status, 404);
+  const privateAsset = await worker.fetch("http://localhost/planner-assets/private-reference/wohnzimmer/reference.png");
+  assert.equal(privateAsset.status, 404);
+});
+
 test("the root is a thin V3 entry and no legacy renderer remains", async () => {
   const source = await readFile(new URL("app/page.tsx", projectRoot), "utf8");
   assert.match(source, /PlannerWorkspace/);
