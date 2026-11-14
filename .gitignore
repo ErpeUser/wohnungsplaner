@@ -57,3 +57,7 @@ next-env.d.ts
 .superpowers/
 *.log
 tsconfig.tsbuildinfo
+
+# private inspection media (never publish or package)
+/public/planner-assets/private-reference/
+/.codex-temp/
