@@ -174,6 +174,7 @@ function ModelSwitcher({
   const size = placement.size;
   const confidence = placement.metadata?.confidence === "confirmed" ? "Beleg bestätigt" : "Beleg geschätzt";
   const referenceUrl = referenceForPlacement(placement.catalogId);
+  const referenceLink = referenceLinkForPlacement(placement.catalogId);
 
   return (
     <section className="planner-model-switcher" aria-label="Modellwechsel">
@@ -205,7 +206,7 @@ function ModelSwitcher({
       </div>
       <div className="planner-model-switcher__current">
         <span className="planner-model-switcher__thumb">
-          {referenceUrl ? <img src={referenceUrl} alt={`Gespeicherter Referenzbeleg für ${catalogItem?.name ?? placement.catalogId}`} loading="lazy" /> : null}
+          {referenceUrl ? <img src={referenceUrl} alt={`Gespeicherter Referenzbeleg für ${catalogItem?.name ?? placement.catalogId}`} loading="lazy" /> : referenceLink ? <a href={referenceLink} target="_blank" rel="noreferrer">Beleg ↗</a> : <span aria-hidden="true">∎</span>}
         </span>
         <span>
           <strong>{catalogItem?.name ?? placement.catalogId}</strong>
@@ -242,6 +243,13 @@ function referenceForPlacement(catalogId: string) {
   const tableReference = table?.imageUrls[0];
   if (tableReference?.startsWith("/planner-assets/")) return tableReference;
   return null;
+}
+
+function referenceLinkForPlacement(catalogId: string) {
+  const chair = getChairModelForCatalogId(catalogId);
+  if (chair?.imageUrls[0]) return chair.imageUrls[0];
+  const table = getTableModel(catalogId);
+  return table?.imageUrls[0] ?? null;
 }
 
 function NumericField({
