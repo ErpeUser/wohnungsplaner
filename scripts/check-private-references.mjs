@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const privateRoots = [
   path.join(root, "public", "planner-assets", "private-reference"),
+  path.join(root, "public", "planner-assets", "reference"),
   path.join(root, ".codex-temp"),
 ];
 const strict = process.argv.includes("--strict");
