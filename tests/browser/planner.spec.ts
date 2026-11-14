@@ -33,7 +33,8 @@ test('one chair moves independently and survives undo redo and reload', async ({
 
 test('table model and extension can be applied through comparison controls', async ({ page }, info) => {
   await startPlanner(page);
-  await page.locator('details.planner-table-compare').first().locator('summary').click();
+  await page.getByLabel('Planobjekt auswählen').selectOption('living-bozan-table');
+  await page.getByRole('tab', { name: 'Tischmodell ändern', exact: true }).click();
   await page.getByRole('tab', { name: /Kaufland 120/ }).click();
   const dimensionImage = page.locator('img[src="/planner-assets/references/tables/kaufland-567080013/dimensions.jpg"]');
   await expect(dimensionImage).toBeVisible();
@@ -54,7 +55,8 @@ test('table model and extension can be applied through comparison controls', asy
 test('chair comparison replaces four seats and leaves table unchanged', async ({ page }, info) => {
   await startPlanner(page);
   const originalTable = (await savedDocument(page)).placements.find((item) => item.id === 'living-bozan-table');
-  await page.locator('details.planner-chair-compare summary').click();
+  await page.getByLabel('Planobjekt auswählen').selectOption(chairId);
+  await page.getByRole('tab', { name: 'Stuhlmodell ändern', exact: true }).click();
   await page.getByRole('tab', { name: /Temu Kunstleder/ }).click();
   await page.getByRole('button', { name: 'Vier Stühle im Grundriss anwenden' }).click();
   await expect.poll(async () => (await savedDocument(page)).placements.filter((item) => item.catalogId === 'chair-temu-faux-leather-metal').length).toBe(4);
