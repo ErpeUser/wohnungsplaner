@@ -47,7 +47,8 @@
     "test:browser": "node scripts/visual-run.mjs gui",
     "visual:models": "node scripts/visual-run.mjs models",
     "visual:check": "node scripts/visual-run.mjs all",
-    "dev:review": "node scripts/visual-dev.mjs"
+    "dev:review": "node scripts/visual-dev.mjs",
+    "privacy:check": "node scripts/check-private-references.mjs"
   },
   "dependencies": {
     "@react-three/drei": "10.7.9",
