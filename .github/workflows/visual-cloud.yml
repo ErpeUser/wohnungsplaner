@@ -1,7 +1,7 @@
 name: Visual Cloud Evidence
 on:
   push:
-    branches: ['qa/github-only-visual-*']
+    branches: ['main', 'qa/github-only-visual-*']
   workflow_dispatch:
     inputs:
       scope:

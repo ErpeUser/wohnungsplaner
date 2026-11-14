@@ -2,16 +2,15 @@
 
 GitHub ist das private Quellarchiv. Google Cloud Build ist mit
 `ErpeUser/wohnungsplaner` verbunden und startet bei jedem Push auf `main`.
-GitHub Actions wird für diese Veröffentlichung nicht verwendet.
+GitHub Actions übernimmt die visuellen Browser- und WebGL-Prüfungen separat.
 
 ## Geprüfte Preview bei jedem freigegebenen main-Push
 
 Der Trigger `wohnungsplaner-main` verwendet `cloudbuild.yaml`. Vor Image-Bau
 und Veröffentlichung führt er Produktionsbuild, Prüfung der privaten
-Build-Ausgabe, `npm run validate`, Dependency-Audit und `npm run test:browser`
-aus. Ein Fehler stoppt den Lauf. Eine vollständige Vier-Perspektiven-Prüfung
-aller Modelle ist damit nicht abgedeckt; sie bleibt eine eigene visuelle
-Abnahme. Der konfigurierte Preview-Build hat ein Zeitlimit von 45 Minuten.
+Build-Ausgabe, `npm run validate` und Dependency-Audit aus. Cloud Build lädt
+keinen Browser herunter und erzeugt keine visuellen Screenshots; diese Prüfung
+läuft im GitHub-Workflow `Visual Cloud Evidence`.
 
 `_DEPLOY` steht in dieser Preview-Konfiguration standardmäßig auf `true`.
 Für einen reinen Prüflauf ausdrücklich `_DEPLOY=false` übergeben: Dann
@@ -37,19 +36,17 @@ ausdrückliche Freigabe.
 
 1. Google lädt den exakten Commit, installiert den Lockfile-Stand und führt
    Produktionsbuild, `npm run validate` und Dependency-Audit aus.
-2. Playwright prüft die wichtigsten Bedienabläufe. Google speichert den
-   Browserbericht, Screenshots und gegebenenfalls Fehler-Traces privat pro
-   Commit und Build-ID. Fehler verhindern die Veröffentlichung.
-3. Google prüft das Produktionsimage lokal im Build. Galerie und private
+2. Google prüft das Produktionsimage lokal im Build. Galerie und private
    Planquellen bleiben aus dem Dienst ausgeschlossen. Der Build veröffentlicht
    das geprüfte Image anhand seines Digests in Cloud Run.
-4. Vor dem Deploy wird der aktuelle Stand von `main` kontrolliert. Nach dem
+3. Vor dem Deploy wird der aktuelle Stand von `main` kontrolliert. Nach dem
    Deploy muss die anonyme Anfrage abgewiesen werden und die authentifizierte
    Antwort den erwarteten Commit melden.
 
 `npm run dev:review` bleibt für die sofortige KI-Vorschau auf dem PC. Cloud Run
 zeigt den letzten erfolgreichen veröffentlichten Stand; er ist kein Editor.
-Die getesteten Browserabläufe stehen in [COVERAGE.md](../tests/browser/COVERAGE.md).
+Die getesteten Browserabläufe und Artefakte stehen in [VISUAL_CLOUD.md](VISUAL_CLOUD.md)
+und [COVERAGE.md](../tests/browser/COVERAGE.md).
 
 ## Google-Konfiguration
 
@@ -62,15 +59,13 @@ Die getesteten Browserabläufe stehen in [COVERAGE.md](../tests/browser/COVERAGE
 - In GitHub unter **Settings → Applications → Installed GitHub Apps** nur
   `ErpeUser/wohnungsplaner` für die Cloud-Build-App auswählen. Beim erneuten
   Einrichten dient Googles [Verbindungsanleitung](https://docs.cloud.google.com/build/docs/automating-builds/github/connect-repo-github?generation=2nd-gen).
-- Für den Produktionstrigger `_DEPLOY=true` und `_REPORT_BUCKET=<Name des
-  privaten Buckets>` setzen. Ohne diese explizite Deploy-Variable prüft der
-  Build nur. `_FULL_GALLERY=true` erfasst zusätzlich alle Modellansichten
-  und ist für gezielte Prüfläufe gedacht.
+- Für den Produktionstrigger `_DEPLOY=true` setzen. Ohne diese explizite
+  Deploy-Variable prüft der Build nur. Visuelle Modellaufnahmen und Reports
+  werden über GitHub Actions erzeugt und als private Artefakte gespeichert.
 
-Berichte nach Commit im privaten Bucket unter
-`gs://<Bucket>/<Commit>/<Build-ID>/browser-report.tar.gz` herunterladen und
-entpacken. `report/index.html` zeigt die Aufnahmen. Der Bucket entfernt die
-Berichte nach sieben Tagen. Build-Protokolle stehen in Cloud Logging.
+Visual-Berichte nach Commit im GitHub-Actions-Lauf unter **Artifacts** als
+`visual-cloud-<run-id>-<commit>` herunterladen. `report/index.html` zeigt die
+Aufnahmen; Build-Protokolle stehen weiterhin in Cloud Logging.
 
 Der Dienst verlangt Google-IAM-Authentifizierung. Zugang im Browser über den
 lokalen authentifizierten Proxy:

@@ -26,17 +26,6 @@ steps:
         npm run validate
         npm audit --audit-level=high
 
-  - id: browser
-    name: node:22.22.2-bookworm
-    env: ['CI=true']
-    entrypoint: bash
-    args:
-      - -euc
-      - |
-        export VISUAL_SKIP_BUILD=1 VISUAL_COMMIT="$COMMIT_SHA" VISUAL_BRANCH="$BRANCH_NAME"
-        npx playwright install --with-deps chromium
-        npm run test:browser
-
   - id: image-build
     name: gcr.io/cloud-builders/docker
     entrypoint: bash

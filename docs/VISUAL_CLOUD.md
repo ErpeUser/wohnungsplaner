@@ -10,9 +10,9 @@ Die Browserargumente `--use-gl=angle --use-angle=swiftshader --enable-unsafe-swi
 
 ## GitHub-Aufruf
 
-Ein Push auf `qa/github-only-visual-*` startet automatisch `.github/workflows/visual-cloud.yml`, einschließlich Build, Privacy-Check, kompletter Browserprüfung und Artefakt-Upload **auch bei Testfehlern**. Es werden keine Cloud-Run-, Deployment- oder IAM-Aktionen ausgeführt.
+Ein Push auf `main` oder `qa/github-only-visual-*` startet automatisch `.github/workflows/visual-cloud.yml`, einschließlich Build, Privacy-Check, kompletter Browserprüfung und Artefakt-Upload **auch bei Testfehlern**. Es werden keine Cloud-Run-, Deployment- oder IAM-Aktionen ausgeführt.
 
-Nach Aufnahme des Workflows in den GitHub-Standardbranch kann man zusätzlich über **GitHub > Actions > Visual Cloud Evidence > Run workflow** die Modi `all`, `gui` oder `models` wählen. GitHub stellt den manuellen `workflow_dispatch`-Start erst bereit, wenn die Workflowdatei im **Standardbranch** existiert; vorher dienen Branch-Pushes zum Test. Die aktuelle Code-Änderung ist absichtlich ein separater Review-Branch und kein Merge nach `main`.
+Über **GitHub > Actions > Visual Cloud Evidence > Run workflow** kann man zusätzlich die Modi `all`, `gui` oder `models` wählen. Der Workflow bleibt vollständig von Cloud Run und dem Cloud-Build-Deploy getrennt.
 
 ## Artefakte und KI-Bildkontrolle
 
