@@ -201,7 +201,8 @@ function ParametricFurniture({ fallback, materialId, catalogId, size }: { fallba
       </group>
     );
   }
-  if (fallback === "sofa") return <StandardSofa />;\n  if (fallback === "table") return <DetailedTable materialId={materialId} />;
+  if (fallback === "sofa") return <StandardSofa />;
+  if (fallback === "table") return <DetailedTable materialId={materialId} />;
   if (fallback === "cabinet") return <DetailedCabinet materialId={materialId} />;
   return (
     <RoundedBox args={[0.96, 0.96, 0.96]} radius={0.035} smoothness={2} position={[0, 0.5, 0]} castShadow receiveShadow>
