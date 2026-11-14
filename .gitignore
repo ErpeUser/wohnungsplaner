@@ -61,3 +61,4 @@ tsconfig.tsbuildinfo
 # private inspection media (never publish or package)
 /public/planner-assets/private-reference/
 /.codex-temp/
+/public/planner-assets/reference/
