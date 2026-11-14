@@ -34,7 +34,7 @@ steps:
     args:
       - -euc
       - |
-        export VISUAL_SKIP_BUILD=1 VISUAL_COMMIT="$$COMMIT_SHA" VISUAL_BRANCH="$$BRANCH_NAME"
+        export VISUAL_SKIP_BUILD=1 VISUAL_COMMIT="$COMMIT_SHA" VISUAL_BRANCH="$BRANCH_NAME"
         status=0
         if [[ "$$_FULL_GALLERY" == true ]]; then
           (npx playwright install --with-deps chromium && npm run visual:check) || status=$$?
