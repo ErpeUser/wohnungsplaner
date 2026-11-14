@@ -5,6 +5,8 @@ import { useId, useState } from "react";
 import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
 import type { CommandResult, PlannerCommand } from "../domain/commands.ts";
 import type { PlannerDocumentV3, PlannerPlacement } from "../domain/types.ts";
+import { ChairComparisonPanel } from "./chair-comparison-panel.tsx";
+import { TableComparisonPanel } from "./table-comparison-panel.tsx";
 
 type InspectorPanelProps = {
   document: PlannerDocumentV3;
