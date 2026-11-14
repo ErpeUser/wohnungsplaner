@@ -298,7 +298,7 @@ describe("PlanCanvas", () => {
     );
 
     assert.ok(screen.getByTestId("plan-stage"));
-    assert.equal(document.querySelectorAll('[data-konva-node="Layer"]').length, 6);
+    assert.ok(document.querySelectorAll('[data-konva-node="Layer"]').length <= 5, "Keep architecture, furniture and overlays within Konva's recommended layer budget");
     expect(screen.getByText(/8 Bereiche/)).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "Ansicht zurücksetzen" }));
     await user.click(screen.getByRole("button", { name: "Maße anzeigen" }));

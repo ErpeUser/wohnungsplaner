@@ -451,14 +451,10 @@ function FixtureMarker({ fixture }: { fixture: SceneFixture }) {
       ) : null}
       {fixture.kind === "intercom" ? (
         <group>
-          <mesh position={[-0.0685, 0, 0.041]} scale={[0.008, 0.185, 0.012]} geometry={SHARED_BOX} castShadow><primitive object={dark} attach="material" /></mesh>
-          <mesh position={[0.0685, 0, 0.041]} scale={[0.008, 0.185, 0.012]} geometry={SHARED_BOX} castShadow><primitive object={dark} attach="material" /></mesh>
-          <mesh position={[0, 0.0885, 0.041]} scale={[0.145, 0.008, 0.012]} geometry={SHARED_BOX} castShadow><primitive object={dark} attach="material" /></mesh>
-          <mesh position={[0, -0.0885, 0.041]} scale={[0.145, 0.008, 0.012]} geometry={SHARED_BOX} castShadow><primitive object={dark} attach="material" /></mesh>
-          <RoundedBox args={[0.125, 0.165, 0.035]} radius={0.012} smoothness={3} position={[0, 0, 0.014]} castShadow><primitive object={white} attach="material" /></RoundedBox>
-          <mesh position={[0.012, 0.043, 0.025]} scale={[0.060, 0.022, 0.012]} geometry={SHARED_BOX}><primitive object={dark} attach="material" /></mesh>
-          <RoundedBox args={[0.026, 0.115, 0.045]} radius={0.010} smoothness={3} position={[-0.043, -0.008, 0.042]} castShadow><primitive object={white} attach="material" /></RoundedBox>
-          {[-0.028, 0, 0.028].map((x) => <mesh key={x} position={[x + 0.012, -0.043, 0.044]} rotation={[Math.PI / 2, 0, 0]} scale={[0.009, 0.004, 0.009]} geometry={SHARED_CYLINDER}><primitive object={metal} attach="material" /></mesh>)}
+          {/* Photo-backed silhouette; retain the existing 145 × 185 mm plan envelope. */}
+          <RoundedBox args={[0.145, 0.185, 0.035]} radius={0.004} smoothness={3} position={[0, 0, 0.014]} castShadow><primitive object={white} attach="material" /></RoundedBox>
+          <mesh position={[0, 0.034, 0.034]} scale={[0.104, 0.066, 0.004]} geometry={SHARED_BOX}><primitive object={dark} attach="material" /></mesh>
+          {[-0.028, 0, 0.028].map((x) => <mesh key={x} position={[x, -0.043, 0.034]} rotation={[Math.PI / 2, 0, 0]} scale={[0.009, 0.004, 0.009]} geometry={SHARED_CYLINDER}><primitive object={metal} attach="material" /></mesh>)}
         </group>
       ) : null}
       {fixture.detailProfile === "hall-distribution" ? (
@@ -1302,12 +1298,22 @@ function MossPanel({ item }: { item: SceneObject<PlannerBuiltIn> }) {
 
 function WallClock({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   const [width, height, depth] = item.size;
+  const silver = getPlannerMaterial("metal-satin");
   return (
     <group>
-      <mesh rotation={[Math.PI / 2, 0, 0]} scale={[width, depth, height]} geometry={SHARED_CYLINDER} castShadow><primitive object={getPlannerMaterial("metal-satin")} attach="material" /></mesh>
-      <mesh position={[0, 0, depth * 0.58]} rotation={[Math.PI / 2, 0, 0]} scale={[width * 0.82, depth * 0.22, height * 0.82]} geometry={SHARED_CYLINDER}><primitive object={getPlannerMaterial("white-matte")} attach="material" /></mesh>
-      <mesh position={[0, height * 0.08, depth * 0.72]} rotation={[0, 0, -0.45]} scale={[0.025, height * 0.25, 0.018]} geometry={SHARED_BOX}><primitive object={getPlannerMaterial("metal-dark")} attach="material" /></mesh>
-      <mesh position={[width * 0.06, -height * 0.02, depth * 0.73]} rotation={[0, 0, 1.1]} scale={[0.02, height * 0.18, 0.018]} geometry={SHARED_BOX}><primitive object={getPlannerMaterial("metal-dark")} attach="material" /></mesh>
+      {/* The reference shows a square, profiled silver frame. Its relief is simplified. */}
+      <mesh position={[0, 0, -depth * 0.4]} scale={[width, height, depth * 0.2]} geometry={SHARED_BOX} castShadow><primitive object={silver} attach="material" /></mesh>
+      {[-1, 1].map((side) => (
+        <group key={side}>
+          <mesh position={[side * width * 0.435, 0, depth * 0.1]} scale={[width * 0.13, height, depth * 0.8]} geometry={SHARED_BOX} castShadow><primitive object={silver} attach="material" /></mesh>
+          <mesh position={[0, side * height * 0.435, depth * 0.1]} scale={[width * 0.74, height * 0.13, depth * 0.8]} geometry={SHARED_BOX} castShadow><primitive object={silver} attach="material" /></mesh>
+          <mesh position={[side * width * 0.3725, 0, depth * 0.37]} scale={[width * 0.035, height * 0.78, depth * 0.18]} geometry={SHARED_BOX}><primitive object={silver} attach="material" /></mesh>
+          <mesh position={[0, side * height * 0.3725, depth * 0.37]} scale={[width * 0.71, height * 0.035, depth * 0.18]} geometry={SHARED_BOX}><primitive object={silver} attach="material" /></mesh>
+        </group>
+      ))}
+      <mesh position={[0, 0, depth * 0.4]} scale={[width * 0.7, height * 0.7, depth * 0.08]} geometry={SHARED_BOX}><primitive object={getPlannerMaterial("white-matte")} attach="material" /></mesh>
+      <mesh position={[0, height * 0.08, depth * 0.47]} rotation={[0, 0, -0.45]} scale={[width * 0.048, height * 0.25, depth * 0.025]} geometry={SHARED_BOX}><primitive object={getPlannerMaterial("metal-dark")} attach="material" /></mesh>
+      <mesh position={[width * 0.06, -height * 0.02, depth * 0.47]} rotation={[0, 0, 1.1]} scale={[width * 0.038, height * 0.18, depth * 0.025]} geometry={SHARED_BOX}><primitive object={getPlannerMaterial("metal-dark")} attach="material" /></mesh>
     </group>
   );
 }

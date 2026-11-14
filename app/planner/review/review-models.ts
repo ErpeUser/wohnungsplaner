@@ -1,5 +1,6 @@
 import { FURNITURE_CATALOG, type FurnitureMaterial } from "../catalog/catalog.ts";
 import { DEFAULT_APARTMENT_DOCUMENT } from "../domain/apartment-v3.ts";
+import { refineRoomLayout } from "../domain/room-refinement.ts";
 import type { PlannerBuiltIn, PlannerPlacement, Size3 } from "../domain/types.ts";
 import { createSceneModel } from "../scene-3d/scene-model.ts";
 import { TABLE_MODELS } from "../tables/table-models.ts";
@@ -24,8 +25,10 @@ const furniture: ReviewModel[] = FURNITURE_CATALOG.map((item) => {
   };
 });
 
+// The workspace applies this refinement to its default apartment before rendering.
+const REVIEW_DOCUMENT = refineRoomLayout(DEFAULT_APARTMENT_DOCUMENT);
 const fixed = new Map<string, PlannerBuiltIn>();
-for (const item of DEFAULT_APARTMENT_DOCUMENT.builtIns) {
+for (const item of REVIEW_DOCUMENT.builtIns) {
   const id = `builtin:${item.catalogId ?? item.id}`;
   if (!fixed.has(id)) fixed.set(id, item);
 }
@@ -48,15 +51,15 @@ export function createReviewScene(id: string, materialId?: string, variantId?: s
   if (!variant) throw new Error("Unbekannte Größenvariante");
   const size = { ...variant.size };
   const position = { x: 0, z: 0 };
-  const roomId = DEFAULT_APARTMENT_DOCUMENT.rooms[0].id;
+  const roomId = REVIEW_DOCUMENT.rooms[0].id;
   const materialVariants = { ...model.builtIn?.materialVariants, main: material.id };
   const placement: PlannerPlacement = { id: `review-${model.id}`, catalogId: model.id, roomId, position, rotation: 0, size, materialVariants };
   const document = {
-    ...DEFAULT_APARTMENT_DOCUMENT,
+    ...REVIEW_DOCUMENT,
     walls: [], openings: [], fixtures: [],
     builtIns: model.builtIn ? [{ ...model.builtIn, roomId, position, rotation: 0, elevation: 0, size, materialVariants }] : [],
     placements: model.builtIn ? [] : [placement],
-    rooms: [{ ...DEFAULT_APARTMENT_DOCUMENT.rooms[0], boundary: [] }],
+    rooms: [{ ...REVIEW_DOCUMENT.rooms[0], boundary: [] }],
   };
   const scene = createSceneModel(document, null);
   scene.floors = [];

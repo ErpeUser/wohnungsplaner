@@ -1,4 +1,4 @@
-import { access, cp, mkdir } from "node:fs/promises";
+import { access, cp, mkdir, rm } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -7,6 +7,14 @@ const clientRoot = path.join(root, "dist", "client");
 const serverRoot = path.join(root, "dist", "server");
 const assetDirectories = ["assets", "_next"];
 let copied = 0;
+
+// Vite copies public files before this build step. Remove only generated
+// reference copies; keep the original local research files untouched.
+for (const output of [clientRoot, serverRoot]) {
+  for (const directory of ["planner-assets/private-reference", "planner-assets/reference", "planner-assets/local-sources", ".codex-temp"]) {
+    await rm(path.join(output, directory), { recursive: true, force: true });
+  }
+}
 
 for (const directory of assetDirectories) {
   const source = path.join(clientRoot, directory);

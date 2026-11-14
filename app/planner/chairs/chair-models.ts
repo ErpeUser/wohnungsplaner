@@ -38,7 +38,7 @@ export const CHAIR_MODELS: readonly ChairModel[] = [
     catalogId: "chair-temu-swivel-upholstered",
     sourceUrl: "https://www.temu.com/goods.html?_bg_fs=1&goods_id=606097863765202&sku_id=93416948027298&_oak_page_source=501&page_source=10037&top_gallery_url=https%3A%2F%2Fimg.kwcdn.com%2Fproduct%2Ffancy%2F53b253e1-a9b1-4517-b392-efa473b51af4.jpg",
     mirrorUrl: "https://www.woltu.eu/en/p/woltu-swivel-dining-chairs-set-of-2-with-armrests-backrest-with-faux-leather-cover",
-    sourceLabel: "Temu goods_id 606097863765202 · identisches WOLTU BH366br-2 Maßblatt",
+    sourceLabel: "Temu goods_id 606097863765202 · WOLTU-Mirror, SKU-Zuordnung unbestätigt",
     sourceStatus: "estimated",
     confidence: "estimated",
     imageUrls: [
@@ -49,13 +49,13 @@ export const CHAIR_MODELS: readonly ChairModel[] = [
     sizeCm: { width: 56, depth: 55, height: 81.5 },
     seatCm: { width: 42, depth: 41, height: 40 },
     armHeightCm: undefined,
-    baseStyle: "swivel-disc",
+    baseStyle: "swivel-metal-legs",
     swivel: true,
     materialId: "fabric-temu-sand",
     sourceNotes: [
-      "Temu nennt die 360°-Drehfunktion; die öffentlich erreichbare Temu-Seite ist durch CAPTCHA geschützt.",
-      "Das Temu/Shopcaddy-Thumbnail entspricht WOLTU BH366br-2 / Order W0ATT0029-2; die aktuelle WOLTU-Galerie und ein WOLTU-Kaufland-Seller-Eintrag bestätigen 56 × 55 × 81,5 cm, Sitz 42 × 41 cm und Sitzhöhe 40 cm.",
-      "Ältere Händler-Mirrors nennen abweichend 58,5 × 54,5 × 82,5 cm, Sitzhöhe 48 cm und Armlehne 62,5 cm; dieser Datenkonflikt bleibt sichtbar und die aktuelle EAN-Spezifikation wird verwendet.",
+      "Der überlieferte Temu-Artikeltitel nennt die 360°-Drehfunktion; der gespeicherte Temu-Auszug enthält keine auswertbaren Produktdaten. Der WOLTU-Bildbeleg zeigt vier ausgestellte Metallbeine mit Diagonalstreben, keinen Rundfuß.",
+      "Der verwendete WOLTU-Mirror-Datensatz nennt 56 × 55 × 81,5 cm, Sitz 42 × 41 cm und Sitzhöhe 40 cm. Die Zuordnung dieses Händlerprodukts zur Temu-SKU ist nicht unabhängig bestätigt; Maße, Bezug und Konstruktion bleiben daher als geschätzt markiert.",
+      "Ältere Händler-Mirrors nennen abweichend 58,5 × 54,5 × 82,5 cm, Sitzhöhe 48 cm und Armlehne 62,5 cm. Dieser Datenkonflikt bleibt offen; die Planung verwendet die Maße des gespeicherten WOLTU-Datensatzes.",
     ],
   },
   {
@@ -65,7 +65,7 @@ export const CHAIR_MODELS: readonly ChairModel[] = [
     catalogId: "chair-temu-faux-leather-metal",
     sourceUrl: "https://www.temu.com/goods.html?_bg_fs=1&goods_id=601105793166093&sku_id=17621190185196&_oak_page_source=501&page_source=10037&top_gallery_url=https%3A%2F%2Fimg.kwcdn.com%2Fproduct%2Ffancy%2Fbd83d8ec-4435-40da-a864-c9030213bed8.jpg",
     mirrorUrl: "https://www.wayfair.com/furniture/pdp/george-oliver-unfinished-side-chair-w100836954.html",
-    sourceLabel: "Temu goods_id 601105793166093 · dimensionsgleicher Wayfair-Mirror",
+    sourceLabel: "Temu goods_id 601105793166093 · Wayfair-Mirror, SKU-Zuordnung unbestätigt",
     sourceStatus: "estimated",
     confidence: "estimated",
     imageUrls: [
@@ -80,8 +80,8 @@ export const CHAIR_MODELS: readonly ChairModel[] = [
     swivel: false,
     materialId: "leather-temu-cream",
     sourceNotes: [
-      "Der Artikeltitel belegt Kunstlederbezug, Rückenlehne und Metallbeine; die Temu-Seite ist durch Login/Sicherheitsprüfung blockiert.",
-      "Dimensionsgleicher Wayfair-Mirror: 58 × 50,98 × 79,99 cm gesamt, Sitzhöhe 46,99 cm, Sitzbreite 50,98 cm, Sitztiefe 44 cm. Die Zuordnung zur Temu-ID bleibt als Mirrorbeleg markiert.",
+      "Der überlieferte Artikeltitel nennt Kunstlederbezug, Rückenlehne und Metallbeine; der gespeicherte Temu-Auszug enthält keine auswertbaren Produktdaten.",
+      "Der verwendete Wayfair-Mirror-Datensatz nennt 58 × 50,98 × 79,99 cm gesamt, Sitzhöhe 46,99 cm, Sitzbreite 50,98 cm und Sitztiefe 44 cm. Die Zuordnung zur Temu-SKU und ihrer Farbvariante ist nicht unabhängig bestätigt; der Mirror ersetzt keinen direkten Produktbeleg.",
     ],
   },
   {
@@ -90,7 +90,7 @@ export const CHAIR_MODELS: readonly ChairModel[] = [
     shortName: "Temu Samt-Drehstuhl",
     catalogId: "chair-temu-velvet-swivel-arm",
     sourceUrl: "https://www.temu.com/goods.html?_bg_fs=1&goods_id=601105624026260&sku_id=17620367356026&_oak_page_source=501&page_source=10037&top_gallery_url=https%3A%2F%2Fimg.kwcdn.com%2Fproduct%2Ffancy%2F83234f53-a1c7-491b-98fd-79d55723b961.jpg",
-    sourceLabel: "Temu goods_id 601105624026260 · identisches WOLTU W0ATT0178 Maßblatt",
+    sourceLabel: "Temu goods_id 601105624026260 · WOLTU-Mirror W0ATT0178, SKU-Zuordnung unbestätigt",
     mirrorUrl: "https://www.woltu.eu/p/woltu-esszimmerstuhl-drehbar-2er-set-polsterstuhl-mit-armlehnen-samt-metallbeine",
     sourceStatus: "estimated",
     confidence: "estimated",
@@ -106,8 +106,8 @@ export const CHAIR_MODELS: readonly ChairModel[] = [
     swivel: true,
     materialId: "velvet-temu-beige",
     sourceNotes: [
-      "Der Artikeltitel belegt Samtbezug, Armlehnen, Metallbeine und Drehfunktion; die Live-Seite war beim Crawl ausverkauft.",
-      "Identisches Motiv/Titel auf WOLTU W0ATT0178: 58 × 63,5 × 86 cm, Sitz 41 × 45 cm, Sitzhöhe 47 cm; vier pyramidenförmige Metallbeine mit 360°-Drehplatte.",
+      "Der überlieferte Artikeltitel nennt Samtbezug, Armlehnen, Metallbeine und Drehfunktion; der gespeicherte Temu-Auszug enthält keine auswertbaren Produktdaten.",
+      "Der gespeicherte WOLTU-Mirror W0ATT0178 nennt 58 × 63,5 × 86 cm, Sitz 41 × 45 cm und Sitzhöhe 47 cm und zeigt vier ausgestellte Metallbeine mit Drehplatte. Das ähnliche Motiv bestätigt keine Identität mit der Temu-SKU; Zuordnung und Maße bleiben geschätzt.",
     ],
   },
   {
@@ -157,7 +157,7 @@ export const CHAIR_MODELS: readonly ChairModel[] = [
     materialId: "fabric-amber-beige",
     sourceNotes: [
       "Möbelix-Maßblatt: B × H × T 56 × 90 × 61 cm, Sitzhöhe 49 cm, Sitztiefe 43 cm, Sitzbreite 42 cm, Armlehnenoberkante 66 cm.",
-      "Drehbare Sitzfläche und schwarzer Sternfuß; Fußbreite/-tiefe jeweils ca. 65 cm.",
+      "Drehbare Sitzfläche und schwarzer vierarmiger Kreuzfuß laut gespeichertem Produktbild. Separate Fußabmessungen sind in den gespeicherten Maßangaben nicht bestätigt.",
     ],
   },
 ];

@@ -4,16 +4,36 @@ GitHub ist das private Quellarchiv. Google Cloud Build ist mit
 `ErpeUser/wohnungsplaner` verbunden und startet bei jedem Push auf `main`.
 GitHub Actions wird für diese Veröffentlichung nicht verwendet.
 
-## Schnelle Preview bei jedem main-Push
+## Geprüfte Preview bei jedem freigegebenen main-Push
 
-Der Trigger `wohnungsplaner-main` verwendet `cloudbuild.yaml`. Er installiert
-die Abhängigkeiten, baut den aktuellen Commit und veröffentlicht ihn ohne die
-vollständige GUI-/3D-Pipeline auf dem privaten Dienst `wohnungsplaner-preview`.
+Der Trigger `wohnungsplaner-main` verwendet `cloudbuild.yaml`. Vor Image-Bau
+und Veröffentlichung führt er Produktionsbuild, Prüfung der privaten
+Build-Ausgabe, `npm run validate`, Dependency-Audit und `npm run test:browser`
+aus. Ein Fehler stoppt den Lauf. Eine vollständige Vier-Perspektiven-Prüfung
+aller Modelle ist damit nicht abgedeckt; sie bleibt eine eigene visuelle
+Abnahme. Der konfigurierte Preview-Build hat ein Zeitlimit von 45 Minuten.
+
+`_DEPLOY` steht in dieser Preview-Konfiguration standardmäßig auf `true`.
+Für einen reinen Prüflauf ausdrücklich `_DEPLOY=false` übergeben: Dann
+entfallen Image-Bau, Upload und Deploy. Der Deploy-Schritt liest vorab die
+vorhandene Cloud-Run-IAM-Konfiguration und bricht bei anonymer Freigabe oder
+ausgeschalteter Invoker-Prüfung ab. Er ändert keine IAM-Bindings. Nach dem
+Deploy muss ein anonymer Abruf mit 401/403 scheitern und ein authentifizierter
+Abruf die Anwendung liefern. Diese Schutzbedingungen sind keine Bestätigung
+des aktuell bereitgestellten Dienstes; dessen Zustand muss separat geprüft
+werden.
+
+Die Preview veröffentlicht auf dem privaten Dienst `wohnungsplaner-preview`.
 Die Preview-URL wird nach dem ersten erfolgreichen Lauf in der Cloud-Run-
 Servicebeschreibung sichtbar. Auch diese Preview ist ein neu gebautes Containerimage;
 Cloud Run lädt keine Quelldateien live.
 
-## Was bei einem Push passiert
+## Vollständiger Produktionslauf
+
+Die folgenden erweiterten Schritte gehören zu `cloudbuild-production.yaml`
+und `scripts/cloud-run-release.sh`. Sie sind vom Preview-Trigger getrennt;
+eine Veröffentlichung über das vorgesehene Tag-Muster `production-*` benötigt eine
+ausdrückliche Freigabe.
 
 1. Google lädt den exakten Commit, installiert den Lockfile-Stand und führt
    Produktionsbuild, `npm run validate` und Dependency-Audit aus.

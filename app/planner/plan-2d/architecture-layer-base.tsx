@@ -1,4 +1,4 @@
-import { Arc, Circle, Group, Layer, Line, Text } from "react-konva";
+import { Arc, Circle, Group, Line, Text } from "react-konva";
 
 import type { PlanObjectDescriptor, PlanOpeningDescriptor, PlanScene } from "./plan-scene.ts";
 
@@ -13,9 +13,9 @@ const FLOOR_COLORS: Record<string, string> = {
   "balcony-floor-beige": "#c6b386",
 };
 
-export function ArchitectureLayer({ scene, onToggleDoor, onSelect }: { scene: PlanScene; onToggleDoor?(openingId: string): void; onSelect?(id: string | null): void }) {
+export function ArchitectureLayer({ scene, selectionId, onToggleDoor, onSelect }: { scene: PlanScene; selectionId?: string | null; onToggleDoor?(openingId: string): void; onSelect?(id: string | null): void }) {
   return (
-    <Layer listening>
+    <Group listening>
       {scene.rooms.map((room) => (
         <Group key={room.id}>
           <Line
@@ -52,7 +52,10 @@ export function ArchitectureLayer({ scene, onToggleDoor, onSelect }: { scene: Pl
       {scene.openings.map((opening) => <OpeningShape key={opening.id} opening={opening} onToggleDoor={onToggleDoor} />)}
       {scene.builtIns.map((item) => {
         const box = polygonBounds(item.points);
-        const showLabel = !item.catalogId?.startsWith("floor-zone-")
+        // Stacked kitchen elements share a 2D footprint. Label the selection;
+        // full names and evidence remain available in the object list/inspector.
+        const selected = item.id === selectionId;
+        const showLabel = selected && !item.catalogId?.startsWith("floor-zone-")
           && !item.catalogId?.startsWith("zimmer1-")
           && item.catalogId !== "wall-finish-taupe"
           && item.catalogId !== "wall-finish-vintage-fabric-wallpaper"
@@ -66,8 +69,8 @@ export function ArchitectureLayer({ scene, onToggleDoor, onSelect }: { scene: Pl
               points={flatten(item.points)}
               closed
               fill={planObjectColor(item.catalogId, item.kind)}
-              stroke="#506366"
-              strokeWidth={0.025}
+              stroke={selected ? "#176b61" : "#506366"}
+              strokeWidth={selected ? 0.045 : 0.025}
               hitStrokeWidth={0.12}
               dash={item.metadata?.confidence === "estimated" || item.metadata?.confidence === "legacy"
                 ? [0.04, 0.03]
@@ -80,13 +83,15 @@ export function ArchitectureLayer({ scene, onToggleDoor, onSelect }: { scene: Pl
               x={box.minX + 0.03}
               y={box.minZ + 0.03}
               width={Math.max(0.2, box.maxX - box.minX - 0.06)}
+              height={Math.max(0.09, Math.min(0.22, box.maxZ - box.minZ - 0.06))}
               text={planObjectLabel(item)}
+              ellipsis
               fontFamily="Arial"
               fontSize={0.08}
               fill="#405255"
               listening={false}
             /> : null}
-            {item.metadata?.confidence === "estimated" ? (
+            {selected && box.maxZ - box.minZ > 0.3 && item.metadata?.confidence === "estimated" ? (
               <Text
                 x={box.minX + 0.03}
                 y={box.maxZ - 0.14}
@@ -101,7 +106,7 @@ export function ArchitectureLayer({ scene, onToggleDoor, onSelect }: { scene: Pl
           </Group>
         );
       })}
-    </Layer>
+    </Group>
   );
 }
 

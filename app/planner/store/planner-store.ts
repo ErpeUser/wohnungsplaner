@@ -105,8 +105,9 @@ export function createPlannerStore(options: {
       return result;
     },
     undo() {
+      if (!history.canUndo()) return;
       const before = get().document;
-      const document = history.undo();
+      const document = withCurrentViewPreferences(history.undo(), get());
       set({
         document,
         selectionId: validSelection(get().selectionId, document),
@@ -120,8 +121,9 @@ export function createPlannerStore(options: {
       if (document !== before) get().scheduleSave();
     },
     redo() {
+      if (!history.canRedo()) return;
       const before = get().document;
-      const document = history.redo();
+      const document = withCurrentViewPreferences(history.redo(), get());
       set({
         document,
         selectionId: validSelection(get().selectionId, document),
@@ -264,6 +266,17 @@ export function createPlannerStore(options: {
       return result;
     },
   }));
+}
+
+function withCurrentViewPreferences(document: PlannerDocumentV3, state: Pick<PlannerState, "activeRoomId" | "overlays">): PlannerDocumentV3 {
+  return {
+    ...document,
+    viewPreferences: {
+      ...document.viewPreferences,
+      activeRoomId: state.activeRoomId,
+      overlays: { ...state.overlays },
+    },
+  };
 }
 
 function validSelection(selectionId: string | null, document: PlannerDocumentV3) {

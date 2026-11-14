@@ -110,46 +110,46 @@ describe("PlannerWorkspace", () => {
     assert.equal(screen.getByTestId("mock-planner-3d").getAttribute("data-camera-mode"), "walk");
   });
 
-  test("switches measured table models and extension states from accessible tabs", async () => {
+  test("switches measured table models and extension states from compact selectors", async () => {
     const user = userEvent.setup();
     const store = createPlannerStore({ initialDocument: DEFAULT_APARTMENT_DOCUMENT });
     act(() => store.getState().select("living-bozan-table"));
     render(<PlannerWorkspace store={store} />);
 
-    const kaufland = screen.getByRole("tab", { name: /Kaufland 120 → 160/ });
-    await user.click(kaufland);
-    assert.equal(kaufland.getAttribute("aria-selected"), "true");
+    const model = screen.getByRole("combobox", { name: "Tischmodell" });
+    await user.selectOptions(model, "kaufland-567080013-120-160");
     expect(screen.getByText("120 × 80 × 75,5 cm")).toBeTruthy();
     expect(screen.getByRole("link", { name: /Originalquelle.*Kaufland/i }).getAttribute("href")).toBe("https://www.kaufland.at/product/567080013/");
 
-    await user.click(screen.getByRole("tab", { name: /1 Auszug · oval/ }));
+    await user.selectOptions(screen.getByRole("combobox", { name: "Ausziehzustand" }), "extended");
     expect(screen.getByText("160 × 80 × 75,5 cm")).toBeTruthy();
-    await user.click(screen.getByRole("button", { name: "Im Grundriss anwenden" }));
+    await user.click(screen.getByRole("button", { name: "Auf diesen Tisch anwenden" }));
     assert.equal(store.getState().document.placements.find((item) => item.id === "living-bozan-table")?.catalogId, "dining-table-kaufland-567080013-120-160");
     assert.deepEqual(store.getState().document.placements.find((item) => item.id === "living-bozan-table")?.size, { width: 1.6, depth: 0.8, height: 0.755 });
 
-    const temu609726 = screen.getByRole("tab", { name: /Temu 110 → 150/ });
-    await user.click(temu609726);
+    await user.selectOptions(screen.getByRole("combobox", { name: "Tischmodell" }), "temu-609726-unknown");
     expect(screen.getByText("110 × 110 × 75 cm")).toBeTruthy();
-    await user.click(screen.getByRole("tab", { name: "1 Auszug · oval" }));
+    await user.selectOptions(screen.getByRole("combobox", { name: "Ausziehzustand" }), "extended");
     expect(screen.getByText("150 × 110 × 75 cm")).toBeTruthy();
   });
 
-  test("switches the four measured chair models and applies their footprints", async () => {
+  test("applies the chosen chair footprint only to the selected east seat", async () => {
     const user = userEvent.setup();
     const store = createPlannerStore({ initialDocument: DEFAULT_APARTMENT_DOCUMENT });
-    act(() => store.getState().select("living-kaleo-chair-west"));
+    act(() => store.getState().select("living-kaleo-chair-east"));
+    const before = store.getState().document.placements;
     render(<PlannerWorkspace store={store} />);
 
-    const amber = screen.getByRole("tab", { name: /Möbelix Amber/ });
-    await user.click(amber);
+    await user.selectOptions(screen.getByRole("combobox", { name: "Stuhlmodell" }), "moebelix-amber-chenille");
     expect(screen.getByText("56 × 61 × 90 cm")).toBeTruthy();
     expect(screen.getByRole("link", { name: /Originalquelle.*Möbelix Amber/i }).getAttribute("href")).toBe("https://www.moebelix.at/p/livetastic-armlehnstuhl-amber-chenille-beige-b-56-cm-001125032251");
-    await user.click(screen.getByRole("button", { name: "Vier Stühle im Grundriss anwenden" }));
+    await user.click(screen.getByRole("button", { name: "Auf diesen Stuhl anwenden" }));
     const chairs = store.getState().document.placements.filter((item) => item.id.includes("living-kaleo-chair-"));
     assert.equal(chairs.length, 4);
-    assert.ok(chairs.every((item) => item.catalogId === "chair-amber-chenille-beige"));
-    assert.ok(chairs.every((item) => item.size.width === 0.56 && item.size.depth === 0.61 && item.size.height === 0.9));
+    const changed = chairs.find((item) => item.id === "living-kaleo-chair-east");
+    assert.equal(changed?.catalogId, "chair-amber-chenille-beige");
+    assert.deepEqual(changed?.size, { width: 0.56, depth: 0.61, height: 0.9 });
+    assert.deepEqual(store.getState().document.placements.filter((item) => item.id !== changed?.id), before.filter((item) => item.id !== changed?.id));
   });
 
   test("groups seven interior rooms and one connected outdoor area", () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { lazy, Suspense, useEffect, useState, useSyncExternalStore } from "react";
+import { lazy, Suspense, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { REVIEW_MODELS, type ReviewView } from "./review-models.ts";
 import type { ReviewReferences } from "./reference-files.ts";
@@ -15,10 +15,14 @@ const VIEWS: { id: ReviewView; label: string }[] = [
   { id: "side", label: "Seite" }, { id: "back", label: "Hinten" },
 ];
 
-export function ModelReview({ references }: { references: Record<string, ReviewReferences> }) {
+export function ModelReview({ references, initialModelId = "chair-kaleo-chenille-beige", initialView = "perspective" }: {
+  references: Record<string, ReviewReferences>;
+  initialModelId?: string;
+  initialView?: ReviewView;
+}) {
   const clientReady = useSyncExternalStore(subscribe, browserSnapshot, serverSnapshot);
-  const [modelId, setModelId] = useState("chair-kaleo-chenille-beige");
-  const [view, setView] = useState<ReviewView>("perspective");
+  const [modelId, setModelId] = useState(initialModelId);
+  const [view, setView] = useState<ReviewView>(initialView);
   const [variant, setVariant] = useState<string | undefined>();
   const [material, setMaterial] = useState<string | undefined>();
   const [ready, setReady] = useState(false);
@@ -27,17 +31,6 @@ export function ModelReview({ references }: { references: Record<string, ReviewR
   const materialId = material ?? model.materials[0].id;
   const variantId = variant ?? model.variants[0].id;
   const renderKey = `${model.id}:${view}:${materialId}:${variantId}`;
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const requested = REVIEW_MODELS.find((entry) => entry.id === params.get("model"));
-    const requestedView = VIEWS.find((entry) => entry.id === params.get("view"));
-    const frame = requestAnimationFrame(() => {
-      if (requested) setModelId(requested.id);
-      if (requestedView) setView(requestedView.id);
-    });
-    return () => cancelAnimationFrame(frame);
-  }, []);
 
   function changeModel(id: string) {
     setReady(false); setModelId(id); setMaterial(undefined); setVariant(undefined);
