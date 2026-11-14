@@ -116,6 +116,11 @@ const manifest = {
     capturedScreenshots: screenshots.filter((item) => item.result === 'captured').length,
   },
   diagnostics: { invalidReferenceImages: copyFailures },
+  scenarios: (testReport?.tests ?? []).map((test) => ({
+    scenario: test.name, result: test.status, commit,
+    screenshots: (test.screenshots ?? []).map((shot) => ({ name: shot.name, path: shot.path })),
+    errors: test.failures ?? [],
+  })),
   models: files, screenshots,
 };
 await fs.mkdir(reports, { recursive: true });
