@@ -111,7 +111,7 @@ export function Planner3D({
         tabIndex={0}
         frameloop="demand"
         dpr={quality.dpr}
-        shadows={quality.shadows ? "soft" : false}
+        shadows={quality.shadows ? "percentage" : false}
         camera={{
           position: orbitPose.position,
           fov: orbitFovForRoom(activeRoomId),

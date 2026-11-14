@@ -25,7 +25,8 @@ test("beige shower curtain uses a generated textile instead of a merchant screen
 test("comparison tables keep distinct local wood finishes with linear bump maps", () => {
   const finishes = ["oak-artisan", "oak-natural", "walnut"].map((id) => getPlannerMaterial(id));
   assert.ok(finishes.every((material) => material.map instanceof DataTexture));
-  assert.equal(new Set(finishes.map((material) => material.color.getHexString())).size, 3);
+  assert.ok(finishes.every((material) => material.color.getHexString() === "ffffff"), "authored wood RGB must not be tinted twice");
+  assert.equal(new Set(finishes.map((material) => Array.from((material.map as DataTexture).image.data ?? []).slice(0, 3).join(","))).size, 3, "the authored albedo maps retain three different wood finishes");
   assert.ok(finishes.every((material) => material.bumpMap && material.bumpMap !== material.map));
   assert.ok(finishes.every((material) => material.bumpMap?.colorSpace === NoColorSpace));
 });

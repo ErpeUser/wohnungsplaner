@@ -1,4 +1,4 @@
-timeout: 900s
+timeout: 2700s
 options:
   machineType: E2_STANDARD_2
   logging: CLOUD_LOGGING_ONLY
@@ -13,7 +13,7 @@ substitutions:
   _REPOSITORY: wohnungsplaner
   _DEPLOY: 'true'
 steps:
-  - id: fast-build
+  - id: build-and-validate
     name: node:22.22.2-bookworm
     env: ['CI=true']
     entrypoint: bash
@@ -22,14 +22,40 @@ steps:
       - |
         npx --yes npm@12.1.0 ci --ignore-scripts --no-audit --no-fund
         npm run build
+        node scripts/check-private-references.mjs --build
+        npm run validate
+        npm audit --audit-level=high
+
+  - id: browser
+    name: node:22.22.2-bookworm
+    env: ['CI=true']
+    entrypoint: bash
+    args:
+      - -euc
+      - |
+        export VISUAL_SKIP_BUILD=1 VISUAL_COMMIT="$COMMIT_SHA" VISUAL_BRANCH="$BRANCH_NAME"
+        npx playwright install --with-deps chromium
+        npm run test:browser
 
   - id: image-build
     name: gcr.io/cloud-builders/docker
-    args: ['build', '--platform', 'linux/amd64', '--tag', 'europe-west1-docker.pkg.dev/$PROJECT_ID/wohnungsplaner/wohnungsplaner:$COMMIT_SHA-$BUILD_ID', '.']
+    entrypoint: bash
+    args:
+      - -euc
+      - |
+        if [[ "$${_DEPLOY:-false}" == true ]]; then
+          docker build --platform linux/amd64 --tag '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REGISTRY}/${_IMAGE_NAME}:$COMMIT_SHA-$BUILD_ID' .
+        fi
 
   - id: image-push
     name: gcr.io/cloud-builders/docker
-    args: ['push', 'europe-west1-docker.pkg.dev/$PROJECT_ID/wohnungsplaner/wohnungsplaner:$COMMIT_SHA-$BUILD_ID']
+    entrypoint: bash
+    args:
+      - -euc
+      - |
+        if [[ "$${_DEPLOY:-false}" == true ]]; then
+          docker push '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REGISTRY}/${_IMAGE_NAME}:$COMMIT_SHA-$BUILD_ID'
+        fi
 
   - id: preview-deploy
     name: gcr.io/google.com/cloudsdktool/google-cloud-cli:slim

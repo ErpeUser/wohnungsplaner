@@ -90,6 +90,28 @@ const safePublicPath = (pathname) => {
   return resolved.startsWith(path.resolve(publicRoot) + path.sep) ? resolved : null;
 };
 
+function isPrivateReferencePath(pathname) {
+  try {
+    // Match the decoded filesystem path, including Windows separators, before
+    // a static adapter can turn an encoded spelling into a private directory.
+    const normalized = path.posix.normalize(decodeURIComponent(pathname).replaceAll("\\", "/")).toLowerCase();
+    return ["/planner-assets/private-reference", "/planner-assets/reference", "/planner-assets/local-sources", "/.codex-temp"].some(
+      (prefix) => normalized === prefix || normalized.startsWith(`${prefix}/`),
+    );
+  } catch {
+    return true;
+  }
+}
+
+const productImageSources = [
+  "https://media.moebelix.com",
+  "https://img.kwcdn.com",
+  "https://www.woltu.eu",
+  "https://assets.wfcdn.com",
+  "https://ae-pic-a1.aliexpress-media.com",
+  "https://www.rathwood.com",
+].join(" ");
+
 const securityHeaders = {
   "X-Content-Type-Options": "nosniff",
   "Referrer-Policy": "no-referrer",
@@ -97,7 +119,7 @@ const securityHeaders = {
   "Cross-Origin-Opener-Policy": "same-origin",
   "Cross-Origin-Resource-Policy": "same-origin",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
-  "Content-Security-Policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: blob:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; worker-src 'self' blob:; connect-src 'self' ws: wss:;",
+  "Content-Security-Policy": `default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: blob: ${productImageSources}; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; worker-src 'self' blob:; connect-src 'self' ws: wss:;`,
 };
 
 function clientAddress(req) {
@@ -185,6 +207,7 @@ const server = http.createServer(async (req, res) => {
     }
     if ((req.url || "").length > 4096) return fail(res, 414, "Request-URI too long");
     const url = new URL(req.url || "/", `http://${req.headers.host || "127.0.0.1"}`);
+    if (isPrivateReferencePath(url.pathname)) return fail(res, 404, "Not found");
     if (url.pathname === "/__codex/health") {
       const healthPayload = JSON.stringify({
         status: "ok",
@@ -205,9 +228,6 @@ const server = http.createServer(async (req, res) => {
       return res.writeHead(200, { ...securityHeaders, "Content-Type": contentTypes[path.extname(file)] || "application/octet-stream", "Cache-Control": "no-cache", "Content-Length": size }).end(req.method === "HEAD" ? undefined : data);
     }
     if (url.pathname.startsWith("/planner-assets/") || url.pathname.startsWith("/room-studies/") || url.pathname.startsWith("/zimmer1-") || url.pathname.startsWith("/vorraum-") || url.pathname === "/og-v2.png" || url.pathname === "/og.png" || url.pathname === "/favicon.svg") {
-      if (url.pathname.startsWith("/planner-assets/private-reference/") || url.pathname.startsWith("/planner-assets/reference/")) {
-        return fail(res, 404, "Not found");
-      }
       const file = safePublicPath(url.pathname);
       if (!file) return fail(res, 400, "Bad public path");
       const { data, size } = await readStaticFile(file);

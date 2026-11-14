@@ -1,4 +1,5 @@
 /** Cloudflare Worker entry point for the vinext-starter template. */
+import path from "node:path";
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
 
@@ -25,11 +26,22 @@ interface ExecutionContext {
 // dangerouslyAllowSVG: true in next.config.js and uncomment below:
 // const imageConfig: ImageConfig = { dangerouslyAllowSVG: true };
 
+function isPrivateReferencePath(pathname: string) {
+  try {
+    const normalized = path.posix.normalize(decodeURIComponent(pathname).replaceAll("\\", "/")).toLowerCase();
+    return ["/planner-assets/private-reference", "/planner-assets/reference", "/planner-assets/local-sources", "/.codex-temp"].some(
+      (prefix) => normalized === prefix || normalized.startsWith(`${prefix}/`),
+    );
+  } catch {
+    return true;
+  }
+}
+
 const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
-    if (url.pathname.startsWith("/planner-assets/private-reference/") || url.pathname.startsWith("/planner-assets/reference/") || url.pathname.startsWith("/.codex-temp/")) {
+    if (isPrivateReferencePath(url.pathname)) {
       return new Response("Not Found", { status: 404 });
     }
 
@@ -41,7 +53,7 @@ const worker = {
           if (!assetPath.startsWith("/planner-assets/") && !assetPath.startsWith("/assets/")) {
             return Promise.resolve(new Response("Asset path not allowed", { status: 400 }));
           }
-          if (assetPath.startsWith("/planner-assets/private-reference/") || assetPath.startsWith("/planner-assets/reference/")) {
+          if (isPrivateReferencePath(assetPath)) {
             return Promise.resolve(new Response("Asset path not allowed", { status: 404 }));
           }
           if (assetPath.includes("..")) return Promise.resolve(new Response("Asset path not allowed", { status: 400 }));

@@ -284,6 +284,8 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
     material.map = weave;
     material.bumpMap = asBumpMap(weave);
     material.bumpScale = materialId === "fabric-chicago-chenille" ? 0.022 : 0.018;
+    // Generated RGB already carries the finish; tinting it again darkens it.
+    material.color.set("#ffffff");
     material.needsUpdate = true;
   } else if (materialId === "tejo-cashmere-grain") {
     const grain = loadProductGrainTexture(materialId, [203, 194, 182], 0.76, 0.018);
@@ -314,6 +316,7 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
     material.map = wood;
     material.bumpMap = asBumpMap(wood);
     material.bumpScale = materialId === "walnut" ? 0.018 : 0.014;
+    material.color.set("#ffffff");
     material.needsUpdate = true;
   } else if (materialId === "leather-ivory-pebble") {
     const leather = loadProductPebbleTexture();
@@ -471,7 +474,8 @@ function createProductDataTexture(key: string, size: number, pixel: (x: number, 
 }
 
 function loadProductWeaveTexture(materialId: string) {
-  const base = materialId === "fabric-chicago-chenille" ? [216, 213, 204] : materialId === "fabric-kaleo-chenille" ? [221, 210, 194] : [221, 209, 189];
+  const colour = new Color(RECIPES[materialId].color).getRGB({ r: 0, g: 0, b: 0 }, SRGBColorSpace);
+  const base = [colour.r * 255, colour.g * 255, colour.b * 255];
   return createProductDataTexture(`generated:${materialId}`, 128, (x, y) => {
     const diagonal = Math.sin((x + y * 0.7) * 0.58) * 5.6;
     const cross = Math.sin((x - y * 0.45) * 0.74) * 3.4;

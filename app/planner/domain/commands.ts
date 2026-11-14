@@ -26,6 +26,7 @@ export type PlannerCommand =
       metadata?: PlannerPlacement["metadata"];
     }
   | { type: "setDiningChairModel"; modelId: string }
+  | { type: "setPlacementChairModel"; placementId: string; modelId: string }
   | { type: "rotatePlacement"; placementId: string; rotation: number }
   | { type: "setPlacementMaterial"; placementId: string; slot: string; materialId: string }
   | { type: "removePlacement"; placementId: string }
@@ -140,14 +141,17 @@ export function applyPlannerCommand(
         size: { ...command.size },
         materialVariants: { ...selected.materialVariants, main: materialId },
         metadata: {
+          ...selected.metadata,
+          ...command.metadata,
           source: tableModel.sourceLabel,
           confidence: selectedVariant.confidence === "unknown" ? "estimated" : selectedVariant.confidence,
-          notes: [
+          notes: [...new Set([
+            ...(selected.metadata?.notes ?? []),
             ...tableModel.sourceNotes,
             ...selectedVariant.notes,
             `Vergleichsmodell ${tableModel.id} · Zustand ${selectedVariant.id}.`,
             ...(command.metadata?.notes ?? []).filter((note) => !note.startsWith("Vergleichsmodell ")),
-          ],
+          ])],
         },
       };
       const ignorePlacementIds = selected.groupId
@@ -158,6 +162,42 @@ export function applyPlannerCommand(
         updatedAt: timestamp(),
         placements: document.placements.map((item) => item.id === placement.id ? placement : item),
       }), ignorePlacementIds);
+    }
+
+    case "setPlacementChairModel": {
+      if (document.builtIns.some((item) => item.id === command.placementId)) {
+        return reject(document, "locked", "Fest eingebaute Elemente können nicht verändert werden.");
+      }
+      const selected = document.placements.find((item) => item.id === command.placementId);
+      if (!selected) return reject(document, "not-found", `Das Objekt ${command.placementId} wurde nicht gefunden.`);
+      if (!isDiningChairPlacement(selected) || getFurnitureCatalogItem(selected.catalogId)?.symbol !== "chair") {
+        return reject(document, "invalid", "Der Stuhlvergleich kann nur einen vorhandenen Esszimmerstuhl ersetzen.");
+      }
+      const model = getChairModel(command.modelId);
+      if (!model) return reject(document, "invalid", `Das Stuhlmodell ${command.modelId} ist nicht im Vergleichskatalog vorhanden.`);
+      const catalogItem = getFurnitureCatalogItem(model.catalogId);
+      if (!catalogItem || catalogItem.symbol !== "chair") {
+        return reject(document, "invalid", `Das Produkt ${model.catalogId} ist kein registriertes Stuhlmodell.`);
+      }
+      if (!isKnownMaterialId(document, model.materialId) || !catalogItem.materials.some((material) => material.id === model.materialId)) {
+        return reject(document, "invalid", `Das Material ${model.materialId} gehört nicht zum Produkt ${model.catalogId}.`);
+      }
+      return updatePlacement(document, selected.id, (placement) => ({
+        ...placement,
+        catalogId: model.catalogId,
+        size: chairMetresFromCentimetres(model.sizeCm),
+        materialVariants: { ...placement.materialVariants, main: model.materialId },
+        metadata: {
+          ...placement.metadata,
+          source: model.sourceLabel,
+          confidence: model.confidence,
+          notes: [...new Set([
+            ...(placement.metadata?.notes ?? []),
+            ...model.sourceNotes,
+            `Stuhlvergleich ${model.id} · ${model.sizeCm.width} × ${model.sizeCm.depth} × ${model.sizeCm.height} cm.`,
+          ])],
+        },
+      }));
     }
 
     case "setDiningChairModel": {
@@ -417,7 +457,7 @@ function updatePlacement(
     ...document,
     updatedAt: timestamp(),
     placements: document.placements.map((item, placementIndex) => placementIndex === index ? placement : item),
-  }));
+  }), isDiningChairPlacement(candidate) ? new Set(["living-bozan-table"]) : undefined);
 }
 
 function validatePlacement(

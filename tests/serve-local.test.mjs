@@ -78,10 +78,21 @@ test("serve-local akzeptiert HOST für Container-Netzwerkschnittstellen", async 
   });
   t.after(() => child.kill("SIGTERM"));
 
-  await waitForServer(child, `http://127.0.0.1:${port}/`);
-  const response = await fetch(`http://127.0.0.2:${port}/`);
+  const response = await waitForServer(child, `http://127.0.0.1:${port}/`);
   assert.equal(response.status, 200);
   assert.match(await response.text(), /Raumplaner/);
+
+  // Observe the kernel's wildcard binding directly. Requests to alternate
+  // loopback addresses may be routed through a host proxy in CI sandboxes.
+  const otherInterface = http.createServer();
+  try {
+    await assert.rejects(new Promise((resolve, reject) => {
+      otherInterface.once("error", reject);
+      otherInterface.listen(port, "127.0.0.2", resolve);
+    }), { code: "EADDRINUSE" });
+  } finally {
+    if (otherInterface.listening) await new Promise((resolve) => otherInterface.close(resolve));
+  }
 });
 
 async function stopServer(child) {
@@ -152,4 +163,80 @@ test("Server entfernt beim Beenden keine fremde PID-Datei", async (t) => {
   await fs.writeFile(pidFile, "987654\n");
   await stopServer(child);
   assert.equal(await fs.readFile(pidFile, "utf8"), "987654\n");
+});
+
+test("serve-local sperrt private Referenzen auch bei kodierten oder doppelten Pfadtrennern", async (t) => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "planner-private-paths-"));
+  const port = 45000 + (process.pid % 1000);
+  await fs.copyFile(new URL("../serve-local.mjs", import.meta.url), path.join(directory, "serve-local.mjs"));
+  for (const folder of ["reference", "private-reference", "local-sources", "textures"]) {
+    await fs.mkdir(path.join(directory, "public", "planner-assets", folder), { recursive: true });
+  }
+  await fs.writeFile(path.join(directory, "public", "planner-assets", "reference", "fixture.txt"), "PRIVATE_REFERENCE_SENTINEL");
+  await fs.writeFile(path.join(directory, "public", "planner-assets", "private-reference", "fixture.txt"), "PRIVATE_REFERENCE_SENTINEL");
+  await fs.writeFile(path.join(directory, "public", "planner-assets", "local-sources", "fixture.txt"), "PRIVATE_REFERENCE_SENTINEL");
+  await fs.writeFile(path.join(directory, "public", "planner-assets", "textures", "oak sample.svg"), "<svg>public texture</svg>");
+  const child = spawn(process.execPath, ["serve-local.mjs"], {
+    cwd: directory,
+    env: { ...process.env, HOST: "127.0.0.1", PORT: String(port), PLANNER_WRITE_PID: "0" },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  t.after(async () => {
+    if (child.exitCode === null && child.signalCode === null) {
+      const exited = once(child, "exit");
+      child.kill("SIGTERM");
+      await exited;
+    }
+    await fs.rm(directory, { recursive: true, force: true });
+  });
+  await waitForServer(child, `http://127.0.0.1:${port}/__codex/health`);
+  const publicAsset = await requestRaw(port, "/planner-assets/textures/oak%20sample.svg");
+  assert.equal(publicAsset.status, 200);
+  assert.equal(publicAsset.body, "<svg>public texture</svg>");
+
+  for (const target of [
+    "/planner-assets/reference/fixture.txt",
+    "/planner-assets/%72eference/fixture.txt",
+    "/planner-assets//reference/fixture.txt",
+    "/planner-assets/private%2dreference/fixture.txt",
+    "/planner-assets/private-reference%2ffixture.txt",
+    "/planner%2dassets/reference/fixture.txt",
+    "/planner-assets/local-sources/fixture.txt",
+    "/planner-assets/local%2dsources/fixture.txt",
+  ]) {
+    const response = await requestRaw(port, target);
+    assert.equal(response.status, 404, target);
+    assert.doesNotMatch(response.body, /PRIVATE_REFERENCE_SENTINEL/, target);
+  }
+});
+
+test("serve-local erlaubt ausschließlich registrierte Produktbild-Origins im CSP-Header", async (t) => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "planner-image-policy-"));
+  const port = 47000 + (process.pid % 1000);
+  await fs.copyFile(new URL("../serve-local.mjs", import.meta.url), path.join(directory, "serve-local.mjs"));
+  const child = spawn(process.execPath, ["serve-local.mjs"], {
+    cwd: directory,
+    env: { ...process.env, HOST: "127.0.0.1", PORT: String(port), PLANNER_WRITE_PID: "0" },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  t.after(async () => {
+    if (child.exitCode === null && child.signalCode === null) {
+      const exited = once(child, "exit");
+      child.kill("SIGTERM");
+      await exited;
+    }
+    await fs.rm(directory, { recursive: true, force: true });
+  });
+  const response = await waitForServer(child, `http://127.0.0.1:${port}/__codex/health`);
+  const directives = new Map((response.headers.get("content-security-policy") ?? "").split(";").map((value) => {
+    const [name, ...sources] = value.trim().split(/\s+/);
+    return [name, sources];
+  }));
+  assert.deepEqual(directives.get("img-src")?.sort(), [
+    "'self'", "data:", "blob:",
+    "https://media.moebelix.com", "https://img.kwcdn.com", "https://www.woltu.eu",
+    "https://assets.wfcdn.com", "https://ae-pic-a1.aliexpress-media.com", "https://www.rathwood.com",
+  ].sort());
+  assert.deepEqual(directives.get("script-src"), ["'self'", "'unsafe-inline'", "'unsafe-eval'"]);
+  assert.deepEqual(directives.get("connect-src"), ["'self'", "ws:", "wss:"]);
 });

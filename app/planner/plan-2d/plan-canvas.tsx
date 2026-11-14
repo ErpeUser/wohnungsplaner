@@ -86,8 +86,9 @@ export function PlanCanvas({
     const container = containerRef.current;
     if (!container || typeof ResizeObserver === "undefined") return;
     const observer = new ResizeObserver(([entry]) => {
-      const width = Math.max(320, Math.round(entry.contentRect.width));
-      const height = Math.max(420, Math.round(entry.contentRect.height));
+      const width = Math.round(entry.contentRect.width);
+      const height = Math.round(entry.contentRect.height);
+      if (width <= 0 || height <= 0) return;
       const nextSize = { width, height };
       const previousSize = sizeRef.current;
       if (previousSize.width === width && previousSize.height === height) return;
@@ -328,7 +329,7 @@ function InteractivePlanStage({
       >
         {layersReady ? (
           <>
-            <ArchitectureLayer scene={scene} onToggleDoor={onToggleDoor} onSelect={onSelect} />
+            <ArchitectureLayer scene={scene} selectionId={selectionId} onToggleDoor={onToggleDoor} onSelect={onSelect} />
             <FurnitureLayer
               document={document}
               activeRoomId={activeRoomId}

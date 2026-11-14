@@ -20,11 +20,11 @@ function KitchenFloorPatch({ item, onSelect }: { item: PlanObjectDescriptor; onS
 export function ArchitectureLayer(props: Props) {
   const { scene, onSelect } = props;
   const { floor, objects } = useMemo(() => partitionInteriorPlan(scene.builtIns), [scene.builtIns]);
-  return <>
+  return <Layer>
     <BaseLayer {...props} scene={{ ...scene, builtIns: [] }} />
-    <Layer>{floor.map(item => <KitchenFloorPatch key={item.id} item={item} onSelect={onSelect} />)}</Layer>
+    <Group>{floor.map(item => <KitchenFloorPatch key={item.id} item={item} onSelect={onSelect} />)}</Group>
     <BaseLayer {...props} scene={{ ...scene, rooms: [], walls: [], openings: [], builtIns: objects.filter(item => !refined(item)) }} />
-    <Layer>
+    <Group>
       {objects.filter(refined).map(item => {
         if (item.points.length < 4) return null;
         const center = item.points.reduce((a, p) => ({ x: a.x + p.x / item.points.length, z: a.z + p.z / item.points.length }), { x: 0, z: 0 });
@@ -45,6 +45,6 @@ export function ArchitectureLayer(props: Props) {
           </>}
         </Group>;
       })}
-    </Layer>
-  </>;
+    </Group>
+  </Layer>;
 }

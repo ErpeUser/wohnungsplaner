@@ -130,7 +130,7 @@ export const TABLE_MODELS: readonly TableModel[] = [
     sourceLabel: "Kaufland.at Produkt 567080013 · Maßgrafik und Galerie",
     sourceNotes: [
       "Die Galerie nennt 120–160 × 80 × 75,5 cm, 1,8 cm Plattenstärke, 60-cm-Endstücke und ein 40-cm-Mittelblatt.",
-      "Das Produkt ist ein ovaler MDF-/Holzdekor-Tisch mit vertikal strukturierter Sockelform und 60 kg Belastbarkeit.",
+      "Das Produkt ist ein ovaler MDF-/Holzdekor-Tisch mit zwei separaten, vertikal geriffelten Querwangen (je 10,8 × 51,2 cm) und 60 kg Belastbarkeit.",
     ],
     imageUrls: [
       "/planner-assets/references/tables/kaufland-567080013/normal.png",

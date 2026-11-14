@@ -2,7 +2,7 @@
 
 import { RoundedBox, useGLTF } from "@react-three/drei";
 import { Component, Suspense, useMemo, type ReactNode } from "react";
-import { BoxGeometry, CylinderGeometry, Mesh, Object3D, SphereGeometry } from "three";
+import { BoxGeometry, BufferGeometry, CatmullRomCurve3, CylinderGeometry, ExtrudeGeometry, Float32BufferAttribute, LatheGeometry, Mesh, Object3D, Quaternion, Shape, SphereGeometry, TubeGeometry, Vector2, Vector3 } from "three";
 
 import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
 import { resolveFurnitureAsset } from "../catalog/asset-manifest.ts";
@@ -11,6 +11,7 @@ import { getPlannerMaterial } from "./materials.ts";
 import { furnitureRenderTransform, furnitureWorldPosition, type SceneModel, type SceneObject } from "./scene-model.ts";
 import type { PlannerPlacement } from "../domain/types.ts";
 import { tableVisualProfile } from "../tables/table-models.ts";
+import { getChairModelForCatalogId } from "../chairs/chair-models.ts";
 
 const SHARED_BOX = new BoxGeometry(1, 1, 1);
 const SHARED_CYLINDER = new CylinderGeometry(0.5, 0.5, 1, 24);
@@ -157,7 +158,7 @@ function GltfFurniture({ path }: { path: string }) {
 function ParametricFurniture({ fallback, materialId, catalogId, size }: { fallback: string; materialId: string; catalogId: string; size?: [number, number, number] }) {
   const material = getPlannerMaterial(materialId);
   if (catalogId === "bed-bliss-120") return <BlissBed />;
-  if (catalogId === "sofa-aliexpress-142" || catalogId === "sofa-aliexpress-142-open") return <IvoryPulloutSofa extended={catalogId === "sofa-aliexpress-142-open"} />;
+  if (catalogId === "sofa-aliexpress-142" || catalogId === "sofa-aliexpress-142-open") return <IvoryPulloutSofa extended={catalogId === "sofa-aliexpress-142-open"} depth={size?.[2]} />;
   if (catalogId === "sofa-chicago-206") return <ChicagoSofa />;
   if (catalogId === "hallway-tejo-115") return <TejoHallway />;
   if (catalogId === "dining-table-bozan-110") return <BozanDiningTable />;
@@ -353,28 +354,39 @@ function LedChargingNightstand() {
 }
 
 /** Metric dimensions are applied by furnitureRenderTransform to this normalized geometry. */
-function IvoryPulloutSofa({ extended }: { extended: boolean }) {
+function IvoryPulloutSofa({ extended, depth = extended ? 1.72 : 0.9 }: { extended: boolean; depth?: number }) {
   const fabric = getPlannerMaterial("fabric-ali-ivory");
   const shadow = getPlannerMaterial("fabric-ali-shade");
   const metal = getPlannerMaterial("metal-black");
   const centers = [-0.235, 0.235];
+  // The plan uses the complete open footprint. Cancel that extra depth for
+  // the stationary body; only the sliding supports and cushions extend.
+  const bodyDepth = extended ? 0.9 : depth;
+  const bodyOffset = extended ? -(depth - bodyDepth) / 2 : 0;
+  const footrestEnd = (depth * 0.485 - bodyOffset) / bodyDepth;
+  const footrestStart = 0.33;
+  const footrestDepth = footrestEnd - footrestStart;
+  const footrestCenter = (footrestStart + footrestEnd) / 2;
+  const railStart = 0.12;
+  const railDepth = footrestEnd - railStart;
+  const railCenter = (railStart + footrestEnd) / 2;
   return (
-    <group>
-      <RoundedBox args={[0.83, 0.36, extended ? 0.45 : 0.76]} radius={0.055} smoothness={6} position={[0, 0.23, extended ? -0.20 : 0]} castShadow receiveShadow><primitive object={fabric} attach="material" /></RoundedBox>
+    <group position={[0, 0, bodyOffset / depth]} scale={[1, 1, bodyDepth / depth]}>
+      <RoundedBox args={[0.83, 0.36, 0.76]} radius={0.055} smoothness={6} position={[0, 0.23, 0]} castShadow receiveShadow><primitive object={fabric} attach="material" /></RoundedBox>
       {centers.map((x) => (
         <group key={x}>
-          <RoundedBox args={[0.42, 0.15, extended ? 0.37 : 0.55]} radius={0.055} smoothness={6} position={[x, 0.47, extended ? -0.15 : 0.07]} castShadow receiveShadow><primitive object={fabric} attach="material" /></RoundedBox>
+          <RoundedBox args={[0.42, 0.15, 0.55]} radius={0.055} smoothness={6} position={[x, 0.47, 0.07]} castShadow receiveShadow><primitive object={fabric} attach="material" /></RoundedBox>
           <RoundedBox args={[0.31, 0.20, 0.11]} radius={0.037} smoothness={5} position={[x, 0.62, -0.19]} rotation={[-0.15, 0, 0]} castShadow receiveShadow><primitive object={fabric} attach="material" /></RoundedBox>
           <RoundedBox args={[0.43, 0.40, 0.18]} radius={0.07} smoothness={7} position={[x, 0.72, -0.36]} rotation={[-0.06, 0, 0]} castShadow receiveShadow><primitive object={fabric} attach="material" /></RoundedBox>
           <RoundedBox args={[0.43, 0.21, 0.19]} radius={0.075} smoothness={7} position={[x, 0.89, -0.39]} rotation={[-0.1, 0, 0]} castShadow receiveShadow><primitive object={fabric} attach="material" /></RoundedBox>
           <DetailStrip position={[x, 0.72, -0.26]} scale={[0.34, 0.006, 0.009]} materialId="fabric-ali-seam" />
           {extended ? (
             <group>
-              <DetailStrip position={[x, 0.235, 0.17]} scale={[0.3, 0.025, 0.55]} materialId="metal-black" />
-              <DetailStrip position={[x - 0.10, 0.215, 0.16]} scale={[0.018, 0.018, 0.52]} materialId="metal-black" rotation={[0.13, -0.12, 0]} />
-              <DetailStrip position={[x + 0.10, 0.215, 0.16]} scale={[0.018, 0.018, 0.52]} materialId="metal-black" rotation={[-0.13, 0.12, 0]} />
-              <RoundedBox args={[0.43, 0.16, 0.43]} radius={0.05} smoothness={6} position={[x, 0.42, 0.27]} castShadow receiveShadow><primitive object={fabric} attach="material" /></RoundedBox>
-              <DetailStrip position={[x, 0.43, 0.485]} scale={[0.33, 0.008, 0.012]} materialId="fabric-ali-seam" />
+              <DetailStrip position={[x, 0.235, railCenter]} scale={[0.3, 0.025, railDepth]} materialId="metal-black" />
+              <DetailStrip position={[x - 0.10, 0.215, railCenter]} scale={[0.018, 0.018, railDepth * 0.94]} materialId="metal-black" rotation={[0.13, -0.12, 0]} />
+              <DetailStrip position={[x + 0.10, 0.215, railCenter]} scale={[0.018, 0.018, railDepth * 0.94]} materialId="metal-black" rotation={[-0.13, 0.12, 0]} />
+              <RoundedBox args={[0.43, 0.16, footrestDepth]} radius={0.05} smoothness={6} position={[x, 0.42, footrestCenter]} castShadow receiveShadow><primitive object={fabric} attach="material" /></RoundedBox>
+              <DetailStrip position={[x, 0.43, footrestEnd]} scale={[0.33, 0.008, 0.012]} materialId="fabric-ali-seam" />
             </group>
           ) : <RoundedBox args={[0.43, 0.23, 0.10]} radius={0.036} smoothness={5} position={[x, 0.29, 0.39]} castShadow receiveShadow><primitive object={fabric} attach="material" /></RoundedBox>}
         </group>
@@ -542,7 +554,7 @@ function TejoHallway() {
       ))}
 
       {hookXs.map((x) => (
-        <group key={x} position={[x, 0.69, 0.445]}>
+        <group key={x} position={[x, 0.69, -0.355]}>
           <mesh position={[0, 0, 0]} scale={[0.022, 0.075, 0.025]} geometry={SHARED_BOX} castShadow>
             <primitive object={dark} attach="material" />
           </mesh>
@@ -551,6 +563,9 @@ function TejoHallway() {
           </mesh>
         </group>
       ))}
+      <RoundedBox args={[0.565, 0.09, 0.025]} radius={0.005} smoothness={3} position={[0.18, 0.69, -0.38]} castShadow receiveShadow>
+        <primitive object={cashmere} attach="material" />
+      </RoundedBox>
 
       {[-0.43, 0.43].map((x) => (
         <mesh key={x} position={[x, 0.012, 0.32]} scale={[0.055, 0.024, 0.055]} geometry={SHARED_BOX} castShadow>
@@ -1187,102 +1202,114 @@ function DetailedTable({ materialId }: { materialId: string }) {
   );
 }
 
+function capsuleShape(width: number, depth: number) {
+  const shape = new Shape();
+  const horizontal = width >= depth;
+  const radius = Math.min(width, depth) / 2;
+  const halfStraight = Math.max(0, (Math.max(width, depth) - radius * 2) / 2);
+  shape.moveTo(-halfStraight, -radius);
+  shape.lineTo(halfStraight, -radius);
+  shape.absarc(halfStraight, 0, radius, -Math.PI / 2, Math.PI / 2, false);
+  shape.lineTo(-halfStraight, radius);
+  shape.absarc(-halfStraight, 0, radius, Math.PI / 2, Math.PI * 1.5, false);
+  shape.closePath();
+  return { shape, horizontal };
+}
+
+function CapsuleSolid({ width, depth, height, position, materialId }: {
+  width: number; depth: number; height: number; position: [number, number, number]; materialId: string;
+}) {
+  const geometry = useMemo(() => {
+    const bevel = Math.min(0.002, height / 5, width / 8, depth / 8);
+    const { shape, horizontal } = capsuleShape(width - bevel * 2, depth - bevel * 2);
+    const geometry = new ExtrudeGeometry(shape, {
+      depth: height - bevel * 2, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel,
+      bevelSegments: 2, steps: 1, curveSegments: 40,
+    });
+    geometry.rotateX(-Math.PI / 2);
+    geometry.translate(0, -(height - bevel * 2) / 2, 0);
+    if (!horizontal) geometry.rotateY(Math.PI / 2);
+    return geometry;
+  }, [width, depth, height]);
+  return <mesh position={position} geometry={geometry} castShadow receiveShadow><primitive object={getPlannerMaterial(materialId)} attach="material" /></mesh>;
+}
+
+function FurnitureBeam({ start, end, width, depth = width, materialId = "metal-black", round = false }: {
+  start: [number, number, number]; end: [number, number, number]; width: number; depth?: number; materialId?: string; round?: boolean;
+}) {
+  const from = new Vector3(...start);
+  const to = new Vector3(...end);
+  const direction = to.clone().sub(from);
+  const rotation = new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), direction.clone().normalize());
+  return <mesh position={from.add(to).multiplyScalar(0.5)} quaternion={rotation} scale={[width, direction.length(), depth]} geometry={round ? SHARED_CYLINDER : SHARED_BOX} castShadow receiveShadow>
+    <primitive object={getPlannerMaterial(materialId)} attach="material" />
+  </mesh>;
+}
+
+function FlutedSlab({ width, depth, height, x, materialId }: { width: number; depth: number; height: number; x: number; materialId: string }) {
+  const points = useMemo(() => {
+    const { shape, horizontal } = capsuleShape(width - 0.008, depth - 0.008);
+    return shape.getSpacedPoints(Math.round((width + depth) * 2 / 0.018)).slice(0, -1).map((point) => horizontal ? [point.x, -point.y] : [-point.y, -point.x]);
+  }, [width, depth]);
+  return <group position={[x, 0, 0]}>
+    <CapsuleSolid width={width - 0.008} depth={depth - 0.008} height={height} position={[0, height / 2, 0]} materialId={materialId} />
+    {points.map(([px, pz], index) => <mesh key={index} position={[px, height / 2, pz]} scale={[0.008, height - 0.006, 0.008]} geometry={SHARED_CYLINDER} castShadow receiveShadow>
+      <primitive object={getPlannerMaterial(materialId)} attach="material" />
+    </mesh>)}
+  </group>;
+}
+
 function ComparisonDiningTable({ materialId, catalogId, size }: { materialId: string; catalogId: string; size?: [number, number, number] }) {
-  const top = getPlannerMaterial(materialId);
-  const edge = getPlannerMaterial("oak-artisan-edge");
-  const dark = getPlannerMaterial("metal-dark");
   const profile = tableVisualProfile(catalogId);
-  const extended = catalogId === "dining-table-aliexpress-100-140"
-    ? (size?.[0] ?? 1) > 1.01
-    : (size?.[0] ?? 1.2) > 1.21;
-
-  // Content spans y=0..1 so the placement height remains the measured
-  // tabletop height. The three construction profiles intentionally differ:
-  // metal-frame, storage pedestal and fluted extension pedestal.
-  if (profile === "storage-pedestal") {
-    return (
+  const width = size?.[0] ?? (profile === "round-metal-frame" ? 1 : 1.2);
+  const height = size?.[1] ?? (profile === "round-metal-frame" ? 0.75 : 0.755);
+  const depth = size?.[2] ?? (profile === "fluted-extension-pedestal" ? 0.8 : profile === "round-metal-frame" ? 1 : 1.2);
+  const extended = width > (profile === "round-metal-frame" ? 1.01 : 1.21);
+  if (profile === "fluted-round-pedestal") return <FlutedRoundPedestalTable top={getPlannerMaterial(materialId)} edge={getPlannerMaterial("oak-artisan-edge")} extended={extended} />;
+  const thickness = profile === "fluted-extension-pedestal" ? 0.018 : 0.025;
+  // Author these measured products in metres, then cancel the parent's unit-box
+  // normalization. Extending the top must not stretch the legs or cabinet.
+  return <group scale={[1 / width, 1 / height, 1 / depth]}>
+    <CapsuleSolid width={width} depth={depth} height={thickness} position={[0, height - thickness / 2, 0]} materialId={materialId} />
+    {(extended ? [-0.2, 0.2] : [0]).map((x) => <mesh key={x} position={[x, height + 0.0002, 0]} scale={[0.0012, 0.0004, depth - 0.006]} geometry={SHARED_BOX}>
+      <primitive object={getPlannerMaterial("oak-artisan-edge")} attach="material" />
+    </mesh>)}
+    {profile === "storage-pedestal" ? <StorageTableCabinet height={height - thickness} materialId={materialId} /> : profile === "fluted-extension-pedestal" ? (
       <group>
-        {extended ? (
-          <group>
-            {[-0.3, 0, 0.3].map((x, index) => (
-              <RoundedBox key={x} args={[index === 1 ? 0.23 : 0.36, 0.1, 0.98]} radius={index === 1 ? 0.025 : 0.08} smoothness={6} position={[x, 0.95, 0]} castShadow receiveShadow>
-                <primitive object={top} attach="material" />
-              </RoundedBox>
-            ))}
-            {[-0.13, 0.13].map((x) => <DetailStrip key={x} position={[x, 1.004, 0]} scale={[0.012, 0.006, 0.92]} materialId="oak-artisan-edge" />)}
-          </group>
-        ) : (
-          <RoundedBox args={[0.98, 0.1, 0.98]} radius={0.08} smoothness={6} position={[0, 0.95, 0]} castShadow receiveShadow>
-            <primitive object={top} attach="material" />
-          </RoundedBox>
-        )}
-        <RoundedBox args={[0.72, 0.64, 0.72]} radius={0.055} smoothness={5} position={[0, 0.58, 0]} castShadow receiveShadow>
-          <primitive object={getPlannerMaterial("oak-natural")} attach="material" />
-        </RoundedBox>
-        <mesh position={[0, 0.58, 0.372]} scale={[0.52, 0.38, 0.012]} geometry={SHARED_BOX} castShadow>
-          <primitive object={getPlannerMaterial("glass-frosted")} attach="material" />
-        </mesh>
-        <mesh position={[-0.27, 0.58, 0.39]} scale={[0.028, 0.48, 0.035]} geometry={SHARED_BOX} castShadow>
-          <primitive object={edge} attach="material" />
-        </mesh>
-        <mesh position={[0.27, 0.58, 0.39]} scale={[0.028, 0.48, 0.035]} geometry={SHARED_BOX} castShadow>
-          <primitive object={edge} attach="material" />
-        </mesh>
-        <mesh position={[0, 0.58, 0.39]} scale={[0.022, 0.48, 0.035]} geometry={SHARED_BOX} castShadow>
-          <primitive object={edge} attach="material" />
-        </mesh>
-        <mesh position={[0, 0.78, 0.39]} scale={[0.58, 0.028, 0.035]} geometry={SHARED_BOX} castShadow>
-          <primitive object={edge} attach="material" />
-        </mesh>
-        <mesh position={[0, 0.38, 0.39]} scale={[0.58, 0.028, 0.035]} geometry={SHARED_BOX} castShadow>
-          <primitive object={edge} attach="material" />
-        </mesh>
-        <mesh position={[0, 0.58, 0.365]} scale={[0.54, 0.018, 0.54]} geometry={SHARED_BOX} castShadow>
-          <primitive object={edge} attach="material" />
-        </mesh>
-        {[-0.18, 0.18].map((x) => (
-          <group key={x} position={[x, 0.57, 0.39]}>
-            <RoundedBox args={[0.13, 0.18, 0.028]} radius={0.01} smoothness={3} castShadow>
-              <primitive object={getPlannerMaterial("oak-artisan-edge")} attach="material" />
-            </RoundedBox>
-            <mesh position={[0, 0, 0.024]} scale={[0.012, 0.065, 0.012]} geometry={SHARED_CYLINDER} castShadow>
-              <primitive object={dark} attach="material" />
-            </mesh>
-          </group>
-        ))}
-        <mesh position={[0, 0.14, 0]} scale={[0.78, 0.09, 0.78]} geometry={SHARED_CYLINDER} castShadow>
-          <primitive object={dark} attach="material" />
-        </mesh>
+        {/* Saved dimension drawing: two 10.8 × 51.2 cm fluted slab legs,
+            18 mm top, and a 40 cm centre leaf. */}
+        {[-1, 1].map((side) => <FlutedSlab key={side} width={0.108} depth={0.512} height={height - thickness} x={side * (width / 2 - 0.27)} materialId={materialId} />)}
+        {[-0.18, 0.18].map((z) => <FurnitureBeam key={z} start={[-width / 2 + 0.25, height - 0.038, z]} end={[width / 2 - 0.25, height - 0.038, z]} width={0.018} depth={0.028} materialId="oak-artisan-edge" />)}
       </group>
-    );
-  }
+    ) : (
+      <group>
+        <mesh position={[0, height - 0.055, 0]} scale={[width - 0.3, 0.045, 0.14]} geometry={SHARED_BOX} castShadow><primitive object={getPlannerMaterial("metal-dark")} attach="material" /></mesh>
+        <mesh position={[0, height - 0.095, 0]} scale={[0.105, 0.1, 0.105]} geometry={SHARED_CYLINDER} castShadow><primitive object={getPlannerMaterial("metal-black")} attach="material" /></mesh>
+        {[-1, 1].flatMap((x) => [-1, 1].map((z) => <FurnitureBeam key={`${x}-${z}`} start={[x * 0.045, height - 0.065, z * 0.045]} end={[x * 0.36, 0.012, z * 0.32]} width={0.047} depth={0.026} />))}
+      </group>
+    )}
+  </group>;
+}
 
-  if (profile === "fluted-extension-pedestal") {
-    return <FlutedExtensionTable top={top} edge={edge} extended={extended} />;
-  }
-
-  if (profile === "fluted-round-pedestal") {
-    return <FlutedRoundPedestalTable top={top} edge={edge} extended={extended} />;
-  }
-
-  return (
-    <group>
-      <mesh position={[0, 0.94, 0]} scale={[1, 0.12, 1]} geometry={SHARED_CYLINDER} castShadow receiveShadow>
-        <primitive object={top} attach="material" />
-      </mesh>
-      <mesh position={[0, 0.87, 0]} scale={[0.7, 0.08, 0.7]} geometry={SHARED_CYLINDER} castShadow>
-        <primitive object={edge} attach="material" />
-      </mesh>
-      {[-1, 1].flatMap((x) => [-1, 1].map((z) => (
-        <mesh key={`${x}-${z}`} position={[x * 0.28, 0.43, z * 0.28]} rotation={[0, 0, x * z * 0.12]} scale={[0.055, 0.82, 0.055]} geometry={SHARED_BOX} castShadow>
-          <primitive object={dark} attach="material" />
-        </mesh>
-      )))}
-      <mesh position={[0, 0.08, 0]} scale={[0.72, 0.08, 0.72]} geometry={SHARED_CYLINDER} castShadow>
-        <primitive object={dark} attach="material" />
-      </mesh>
-    </group>
-  );
+function StorageTableCabinet({ height, materialId }: { height: number; materialId: string }) {
+  // The saved product image supports the cabinet construction; its internal
+  // proportions remain image estimates, not additional verified dimensions.
+  const bodyHeight = height - 0.055;
+  const front = 0.253;
+  return <group>
+    <CapsuleSolid width={0.72} depth={0.52} height={0.018} position={[0, 0.009, 0]} materialId={materialId} />
+    <CapsuleSolid width={0.72} depth={0.52} height={0.025} position={[0, bodyHeight - 0.0125, 0]} materialId={materialId} />
+    {[-1, 1].map((side) => <FlutedSlab key={side} x={side * 0.285} width={0.15} depth={0.5} height={bodyHeight} materialId={materialId} />)}
+    <mesh position={[0, bodyHeight / 2, -0.235]} scale={[0.43, bodyHeight - 0.035, 0.025]} geometry={SHARED_BOX} castShadow receiveShadow><primitive object={getPlannerMaterial(materialId)} attach="material" /></mesh>
+    <mesh position={[0, bodyHeight * 0.47, 0]} scale={[0.43, 0.014, 0.47]} geometry={SHARED_BOX} castShadow receiveShadow><primitive object={getPlannerMaterial(materialId)} attach="material" /></mesh>
+    <RoundedBox args={[0.78, 0.055, 0.47]} radius={0.009} position={[0, height - 0.0275, 0]} castShadow receiveShadow><primitive object={getPlannerMaterial(materialId)} attach="material" /></RoundedBox>
+    {[-1, 1].map((side) => <group key={side} position={[side * 0.106, 0, front]}>
+      <mesh position={[0, bodyHeight / 2, 0]} scale={[0.172, bodyHeight - 0.09, 0.006]} geometry={SHARED_BOX}><primitive object={getPlannerMaterial("glass-frosted")} attach="material" /></mesh>
+      {[-0.097, 0.097].map((x) => <mesh key={x} position={[x, bodyHeight / 2, 0.003]} scale={[0.022, bodyHeight - 0.035, 0.025]} geometry={SHARED_BOX} castShadow><primitive object={getPlannerMaterial(materialId)} attach="material" /></mesh>)}
+      {[0.032, bodyHeight - 0.032].map((y) => <mesh key={y} position={[0, y, 0.003]} scale={[0.214, 0.031, 0.025]} geometry={SHARED_BOX} castShadow><primitive object={getPlannerMaterial(materialId)} attach="material" /></mesh>)}
+      <FurnitureBeam start={[-side * 0.073, bodyHeight / 2 - 0.05, 0.027]} end={[-side * 0.073, bodyHeight / 2 + 0.05, 0.027]} width={0.008} materialId="metal-gold" round />
+    </group>)}
+  </group>;
 }
 
 function FlutedRoundPedestalTable({ top, edge, extended }: { top: ReturnType<typeof getPlannerMaterial>; edge: ReturnType<typeof getPlannerMaterial>; extended: boolean }) {
@@ -1308,54 +1335,6 @@ function FlutedRoundPedestalTable({ top, edge, extended }: { top: ReturnType<typ
       {angles.map((angle) => <mesh key={angle} position={[Math.cos(angle) * 0.315, 0.49, Math.sin(angle) * 0.315]} scale={[0.012, 0.66, 0.012]} geometry={SHARED_CYLINDER} castShadow><primitive object={flute} attach="material" /></mesh>)}
       <mesh position={[0, 0.08, 0]} scale={[0.38, 0.08, 0.38]} geometry={SHARED_CYLINDER} castShadow><primitive object={pedestal} attach="material" /></mesh>
       {!extended ? <DetailStrip position={[0, 0.944, 0]} scale={[0.012, 0.014, 0.48]} materialId="oak-artisan-edge" /> : null}
-    </group>
-  );
-}
-
-function FlutedExtensionTable({ top, edge, extended }: { top: ReturnType<typeof getPlannerMaterial>; edge: ReturnType<typeof getPlannerMaterial>; extended: boolean }) {
-  const pedestal = getPlannerMaterial("oak-artisan");
-  const seam = getPlannerMaterial("oak-artisan-edge");
-  const flutes = Array.from({ length: 18 }, (_, index) => (index / 18) * Math.PI * 2);
-  return (
-    <group>
-      {extended ? (
-        <group>
-          {[-0.3, 0, 0.3].map((x, index) => (
-            <RoundedBox key={x} args={[index === 1 ? 0.23 : 0.36, 0.09, 0.86]} radius={index === 1 ? 0.025 : 0.11} smoothness={8} position={[x, 0.95, 0]} castShadow receiveShadow>
-              <primitive object={top} attach="material" />
-            </RoundedBox>
-          ))}
-          {[-0.13, 0.13].map((x) => <DetailStrip key={x} position={[x, 0.998, 0]} scale={[0.012, 0.006, 0.8]} materialId="oak-artisan-edge" />)}
-        </group>
-      ) : (
-        <RoundedBox args={[1, 0.09, 0.86]} radius={0.11} smoothness={8} position={[0, 0.95, 0]} castShadow receiveShadow>
-          <primitive object={top} attach="material" />
-        </RoundedBox>
-      )}
-      <RoundedBox args={[0.98, 0.025, 0.018]} radius={0.007} smoothness={2} position={[0, 0.992, 0]} castShadow>
-        <primitive object={edge} attach="material" />
-      </RoundedBox>
-      <RoundedBox args={[0.44, 0.72, 0.44]} radius={0.12} smoothness={8} position={[0, 0.48, 0]} castShadow receiveShadow>
-        <primitive object={pedestal} attach="material" />
-      </RoundedBox>
-      {flutes.map((angle) => (
-        <mesh key={angle} position={[Math.cos(angle) * 0.235, 0.48, Math.sin(angle) * 0.235]} scale={[0.018, 0.68, 0.018]} geometry={SHARED_CYLINDER} castShadow>
-          <primitive object={getPlannerMaterial("oak-artisan-edge")} attach="material" />
-        </mesh>
-      ))}
-      <mesh position={[0, 0.08, 0]} scale={[0.52, 0.08, 0.52]} geometry={SHARED_CYLINDER} castShadow>
-        <primitive object={pedestal} attach="material" />
-      </mesh>
-      {extended ? null : (
-        <>
-          <mesh position={[0, 0.944, 0]} scale={[0.016, 0.014, 0.41]} geometry={SHARED_BOX} castShadow>
-            <primitive object={seam} attach="material" />
-          </mesh>
-          <mesh position={[0, 0.944, 0]} scale={[0.41, 0.014, 0.016]} geometry={SHARED_BOX} castShadow>
-            <primitive object={seam} attach="material" />
-          </mesh>
-        </>
-      )}
     </group>
   );
 }
@@ -1395,137 +1374,136 @@ function BozanDiningTable() {
   );
 }
 
+type ComparisonChairVariant = "kaleo" | "temu-swivel" | "faux-leather" | "velvet-swivel" | "amber";
+
 function KaleoArmchair() {
-  const fabric = getPlannerMaterial("fabric-kaleo-chenille");
-  const metal = getPlannerMaterial("metal-black");
-  const seam = getPlannerMaterial("fabric-sand");
-
-  return (
-    <group>
-      <mesh position={[0, 0.035, 0]} scale={[0.79, 0.07, 0.78]} geometry={SHARED_CYLINDER} castShadow receiveShadow>
-        <primitive object={metal} attach="material" />
-      </mesh>
-      <mesh position={[0, 0.27, 0]} scale={[0.15, 0.44, 0.15]} geometry={SHARED_CYLINDER} castShadow>
-        <primitive object={metal} attach="material" />
-      </mesh>
-      <mesh position={[0, 0.49, 0]} scale={[0.34, 0.07, 0.34]} geometry={SHARED_CYLINDER} castShadow>
-        <primitive object={metal} attach="material" />
-      </mesh>
-
-      <RoundedBox args={[0.88, 0.16, 0.68]} radius={0.09} smoothness={7} position={[0, 0.61, 0.055]} castShadow receiveShadow>
-        <primitive object={fabric} attach="material" />
-      </RoundedBox>
-      <RoundedBox args={[0.8, 0.11, 0.58]} radius={0.075} smoothness={7} position={[0, 0.675, 0.07]} castShadow receiveShadow>
-        <primitive object={fabric} attach="material" />
-      </RoundedBox>
-      <RoundedBox args={[0.7, 0.012, 0.018]} radius={0.006} smoothness={3} position={[0, 0.748, 0.365]} castShadow>
-        <primitive object={seam} attach="material" />
-      </RoundedBox>
-      <RoundedBox args={[0.7, 0.012, 0.018]} radius={0.006} smoothness={3} position={[0, 0.55, -0.31]} rotation={[-0.1, 0, 0]} castShadow>
-        <primitive object={seam} attach="material" />
-      </RoundedBox>
-
-      {[-0.445, 0.445].map((x) => (
-        <RoundedBox key={x} args={[0.11, 0.27, 0.62]} radius={0.055} smoothness={6} position={[x, 0.7, 0.015]} rotation={[0, 0, x < 0 ? -0.04 : 0.04]} castShadow receiveShadow>
-          <primitive object={fabric} attach="material" />
-        </RoundedBox>
-      ))}
-      <RoundedBox args={[0.9, 0.36, 0.18]} radius={0.085} smoothness={7} position={[0, 0.81, -0.255]} rotation={[-0.1, 0, 0]} castShadow receiveShadow>
-        <primitive object={fabric} attach="material" />
-      </RoundedBox>
-      <RoundedBox args={[0.79, 0.28, 0.09]} radius={0.06} smoothness={6} position={[0, 0.815, -0.35]} rotation={[-0.1, 0, 0]} castShadow>
-        <primitive object={fabric} attach="material" />
-      </RoundedBox>
-
-      {[-0.25, 0, 0.25].map((x) => (
-        <mesh key={x} position={[x, 0.815, -0.398]} scale={[0.01, 0.24, 0.01]} geometry={SHARED_BOX} castShadow>
-          <primitive object={seam} attach="material" />
-        </mesh>
-      ))}
-      <mesh position={[0, 0.82, -0.4]} scale={[0.72, 0.01, 0.01]} geometry={SHARED_BOX} castShadow>
-        <primitive object={seam} attach="material" />
-      </mesh>
-      <mesh position={[0, 0.54, 0]} scale={[0.2, 0.012, 0.2]} geometry={SHARED_CYLINDER} castShadow>
-        <primitive object={metal} attach="material" />
-      </mesh>
-    </group>
-  );
+  return <ComparisonChair variant="kaleo" materialId="fabric-kaleo-chenille" />;
 }
 
-function ComparisonChair({ variant, materialId }: { variant: "temu-swivel" | "faux-leather" | "velvet-swivel" | "amber"; materialId: string }) {
+function ChairUpholstery({ width, depth, height, seatHeight, seatWidth, seatDepth, armHeight, materialId, channels }: {
+  width: number; depth: number; height: number; seatHeight: number; seatWidth: number; seatDepth: number;
+  armHeight: number; materialId: string; channels: boolean;
+}) {
+  const { shell, rim } = useMemo(() => {
+    // A continuous padded U shell gives the back and arms one smooth outline.
+    // Its lower rim tapers toward the seat, while the upper back leans outward.
+    const curve = new CatmullRomCurve3([
+      new Vector3(-width * 0.46, armHeight, depth * 0.31),
+      new Vector3(-width * 0.49, armHeight + 0.012, depth * 0.06),
+      new Vector3(-width * 0.43, height - 0.075, -depth * 0.30),
+      new Vector3(-width * 0.29, height - 0.006, -depth * 0.44),
+      new Vector3(0, height - 0.002, -depth * 0.46),
+      new Vector3(width * 0.29, height - 0.006, -depth * 0.44),
+      new Vector3(width * 0.43, height - 0.075, -depth * 0.30),
+      new Vector3(width * 0.49, armHeight + 0.012, depth * 0.06),
+      new Vector3(width * 0.46, armHeight, depth * 0.31),
+    ]);
+    const segments = 56;
+    const rows = 8;
+    const stride = rows + 1;
+    const layer = (segments + 1) * stride;
+    const positions: number[] = [];
+    const uv: number[] = [];
+    const indices: number[] = [];
+    for (let side = 0; side < 2; side++) {
+      for (let u = 0; u <= segments; u++) {
+        const top = curve.getPoint(u / segments);
+        const tangent = curve.getTangent(u / segments);
+        const normal = new Vector3(tangent.z, 0, -tangent.x).normalize();
+        const bottom = new Vector3(top.x * 0.91, seatHeight - 0.055, top.z * 0.8 + 0.015);
+        for (let v = 0; v <= rows; v++) {
+          const point = bottom.clone().lerp(top, v / rows);
+          point.addScaledVector(normal, Math.sin(v / rows * Math.PI) * 0.012 - side * 0.036);
+          positions.push(point.x, point.y, point.z);
+          uv.push(u / segments, v / rows);
+        }
+      }
+    }
+    for (let side = 0; side < 2; side++) {
+      for (let u = 0; u < segments; u++) for (let v = 0; v < rows; v++) {
+        const a = side * layer + u * stride + v;
+        const b = a + stride;
+        if (side === 0) indices.push(a, a + 1, b, b, a + 1, b + 1);
+        else indices.push(a, b, a + 1, b, b + 1, a + 1);
+      }
+    }
+    for (let u = 0; u < segments; u++) {
+      const a = u * stride + rows;
+      const b = a + stride;
+      indices.push(a, a + layer, b, b, a + layer, b + layer);
+      const lower = u * stride;
+      indices.push(lower, lower + stride, lower + layer, lower + stride, lower + stride + layer, lower + layer);
+    }
+    for (const u of [0, segments]) for (let v = 0; v < rows; v++) {
+      const a = u * stride + v;
+      if (u === 0) indices.push(a, a + layer, a + 1, a + 1, a + layer, a + layer + 1);
+      else indices.push(a, a + 1, a + layer, a + 1, a + layer + 1, a + layer);
+    }
+    const shell = new BufferGeometry();
+    shell.setAttribute("position", new Float32BufferAttribute(positions, 3));
+    shell.setAttribute("uv", new Float32BufferAttribute(uv, 2));
+    shell.setIndex(indices);
+    shell.computeVertexNormals();
+    return { shell, rim: new TubeGeometry(curve, 72, 0.0016, 6, false) };
+  }, [width, depth, height, seatHeight, armHeight]);
   const fabric = getPlannerMaterial(materialId);
-  const dark = getPlannerMaterial("metal-black");
-  const seam = getPlannerMaterial(variant === "velvet-swivel" ? "velvet-temu-beige" : "fabric-sand");
-  const isLegged = variant === "faux-leather" || variant === "velvet-swivel";
-  const isAmber = variant === "amber";
-  const isVelvet = variant === "velvet-swivel";
-
-  return (
-    <group>
-      {isLegged ? (
-        <group>
-          {[-1, 1].flatMap((x) => [-1, 1].map((z) => (
-            <mesh key={`${x}-${z}`} position={[x * 0.25, 0.34, z * 0.2]} rotation={[0, 0, x * -0.12]} scale={[0.035, 0.68, 0.035]} geometry={SHARED_BOX} castShadow>
-              <primitive object={dark} attach="material" />
-            </mesh>
-          )))}
-          {isVelvet ? (
-            <mesh position={[0, 0.11, 0]} scale={[0.36, 0.035, 0.36]} geometry={SHARED_CYLINDER} castShadow>
-              <primitive object={dark} attach="material" />
-            </mesh>
-          ) : null}
-        </group>
-      ) : isAmber ? (
-        <group>
-          <mesh position={[0, 0.05, 0]} scale={[0.9, 0.075, 0.9]} geometry={SHARED_CYLINDER} castShadow>
-            <primitive object={dark} attach="material" />
-          </mesh>
-          {[0, 1, 2, 3, 4].map((index) => (
-            <mesh key={index} position={[Math.cos(index * (Math.PI * 2 / 5)) * 0.3, 0.18, Math.sin(index * (Math.PI * 2 / 5)) * 0.3]} rotation={[0, index * (Math.PI * 2 / 5), 0]} scale={[0.07, 0.05, 0.34]} geometry={SHARED_BOX} castShadow>
-              <primitive object={dark} attach="material" />
-            </mesh>
-          ))}
-          <mesh position={[0, 0.38, 0]} scale={[0.13, 0.44, 0.13]} geometry={SHARED_CYLINDER} castShadow>
-            <primitive object={dark} attach="material" />
-          </mesh>
-        </group>
-      ) : (
-        <group>
-          <mesh position={[0, 0.05, 0]} scale={[isVelvet ? 0.82 : 0.74, 0.065, isVelvet ? 0.82 : 0.74]} geometry={SHARED_CYLINDER} castShadow>
-            <primitive object={dark} attach="material" />
-          </mesh>
-          <mesh position={[0, 0.29, 0]} scale={[0.13, 0.44, 0.13]} geometry={SHARED_CYLINDER} castShadow>
-            <primitive object={dark} attach="material" />
-          </mesh>
-          <mesh position={[0, 0.51, 0]} scale={[0.29, 0.06, 0.29]} geometry={SHARED_CYLINDER} castShadow>
-            <primitive object={dark} attach="material" />
-          </mesh>
-        </group>
-      )}
-
-      <RoundedBox args={[isAmber ? 0.78 : isVelvet ? 0.76 : 0.7, 0.16, isAmber ? 0.65 : isVelvet ? 0.68 : 0.62]} radius={0.08} smoothness={6} position={[0, 0.64, 0.04]} castShadow receiveShadow>
-        <primitive object={fabric} attach="material" />
-      </RoundedBox>
-      <RoundedBox args={[isAmber ? 0.76 : isVelvet ? 0.74 : 0.68, 0.1, 0.12]} radius={0.04} smoothness={5} position={[0, 0.77, -0.23]} rotation={[-0.12, 0, 0]} castShadow receiveShadow>
-        <primitive object={fabric} attach="material" />
-      </RoundedBox>
-      <RoundedBox args={[isAmber ? 0.78 : isVelvet ? 0.76 : 0.7, 0.34, 0.13]} radius={0.065} smoothness={6} position={[0, 0.82, -0.28]} rotation={[-0.12, 0, 0]} castShadow receiveShadow>
-        <primitive object={fabric} attach="material" />
-      </RoundedBox>
-      {(isVelvet || isAmber) ? (
-        [-1, 1].map((x) => (
-          <RoundedBox key={x} args={[0.1, 0.26, 0.55]} radius={0.045} smoothness={5} position={[x * 0.38, 0.72, 0.02]} rotation={[0, 0, x * 0.04]} castShadow receiveShadow>
-            <primitive object={fabric} attach="material" />
-          </RoundedBox>
-        ))
-      ) : null}
-      <RoundedBox args={[isAmber ? 0.64 : isVelvet ? 0.62 : 0.58, 0.012, 0.018]} radius={0.006} smoothness={3} position={[0, 0.72, 0.36]} castShadow>
-        <primitive object={seam} attach="material" />
-      </RoundedBox>
-    </group>
-  );
+  return <group>
+    <mesh geometry={shell} castShadow receiveShadow><primitive object={fabric} attach="material" /></mesh>
+    <mesh geometry={rim} castShadow><primitive object={fabric} attach="material" /></mesh>
+    <RoundedBox args={[seatWidth, 0.055, seatDepth]} radius={0.025} smoothness={6} position={[0, seatHeight - 0.0275, 0.025]} castShadow receiveShadow><primitive object={fabric} attach="material" /></RoundedBox>
+    {channels ? [-1, 1].map((side) => <ChairStitch key={side} points={[
+      [side * seatWidth * 0.22, seatHeight + 0.045, -depth * 0.32],
+      [side * seatWidth * 0.22, (height + seatHeight) / 2, -depth * 0.355],
+      [side * seatWidth * 0.22, height - 0.035, -depth * 0.42],
+    ]} materialId={materialId} />) : null}
+    <ChairStitch points={[
+      [-seatWidth * 0.42, seatHeight + (height - seatHeight) * 0.55, -depth * 0.33],
+      [0, seatHeight + (height - seatHeight) * 0.48, -depth * 0.365],
+      [seatWidth * 0.42, seatHeight + (height - seatHeight) * 0.55, -depth * 0.33],
+    ]} materialId={materialId} />
+  </group>;
 }
 
+function ChairStitch({ points, materialId }: { points: [number, number, number][]; materialId: string }) {
+  const geometry = useMemo(() => new TubeGeometry(new CatmullRomCurve3(points.map((point) => new Vector3(...point))), 24, 0.0011, 5, false), [points]);
+  return <mesh geometry={geometry}><primitive object={getPlannerMaterial(materialId)} attach="material" /></mesh>;
+}
+
+function KaleoDiscBase({ seatHeight }: { seatHeight: number }) {
+  const geometry = useMemo(() => new LatheGeometry([
+    new Vector2(0, 0), new Vector2(0.245, 0), new Vector2(0.25, 0.008),
+    new Vector2(0.241, 0.018), new Vector2(0.12, 0.035), new Vector2(0.04, 0.065), new Vector2(0.026, 0.09),
+  ], 64), []);
+  return <group>
+    <mesh geometry={geometry} castShadow receiveShadow><primitive object={getPlannerMaterial("metal-black")} attach="material" /></mesh>
+    <FurnitureBeam start={[0, 0.07, 0]} end={[0, seatHeight - 0.055, 0]} width={0.046} round />
+    <mesh position={[0, seatHeight - 0.06, 0]} scale={[0.18, 0.025, 0.18]} geometry={SHARED_CYLINDER} castShadow><primitive object={getPlannerMaterial("metal-black")} attach="material" /></mesh>
+  </group>;
+}
+
+function ComparisonChair({ variant, materialId }: { variant: ComparisonChairVariant; materialId: string }) {
+  const id = variant === "kaleo" ? "chair-kaleo-chenille-beige" : variant === "amber" ? "chair-amber-chenille-beige" : variant === "temu-swivel" ? "chair-temu-swivel-upholstered" : variant === "velvet-swivel" ? "chair-temu-velvet-swivel-arm" : "chair-temu-faux-leather-metal";
+  const model = getChairModelForCatalogId(id)!;
+  const width = model.sizeCm.width / 100;
+  const depth = model.sizeCm.depth / 100;
+  const height = model.sizeCm.height / 100;
+  const seatHeight = model.seatCm.height / 100;
+  const armless = variant === "faux-leather";
+  const armHeight = armless ? seatHeight + 0.035 : (model.armHeightCm ? model.armHeightCm / 100 : seatHeight + 0.18);
+  return <group scale={[1 / width, 1 / height, 1 / depth]}>
+    <ChairUpholstery width={width} depth={depth} height={height} seatHeight={seatHeight} seatWidth={model.seatCm.width / 100} seatDepth={model.seatCm.depth / 100} armHeight={armHeight} materialId={materialId} channels={variant !== "amber" && !armless} />
+    {variant === "kaleo" ? <KaleoDiscBase seatHeight={seatHeight} /> : variant === "amber" ? <group>
+      <FurnitureBeam start={[0, 0.035, 0]} end={[0, seatHeight - 0.055, 0]} width={0.046} round />
+      {[0, Math.PI / 2, Math.PI, Math.PI * 1.5].map((angle) => <FurnitureBeam key={angle} start={[0, 0.04, 0]} end={[Math.cos(angle) * width * 0.49, 0.018, Math.sin(angle) * depth * 0.49]} width={0.026} depth={0.034} />)}
+    </group> : <group>
+      {model.swivel ? <mesh position={[0, seatHeight - 0.075, 0]} scale={[0.075, 0.08, 0.075]} geometry={SHARED_CYLINDER} castShadow><primitive object={getPlannerMaterial("metal-black")} attach="material" /></mesh> : null}
+      {[-1, 1].flatMap((x) => [-1, 1].map((z) => <group key={`${x}-${z}`}>
+        <FurnitureBeam start={[x * (armless ? width * 0.31 : 0.055), seatHeight - 0.06, z * (armless ? depth * 0.30 : 0.05)]} end={[x * width * 0.46, 0.015, z * depth * 0.43]} width={variant === "temu-swivel" ? 0.027 : 0.025} depth={variant === "temu-swivel" ? 0.027 : 0.018} round={variant === "temu-swivel"} />
+        {variant === "temu-swivel" ? <FurnitureBeam start={[x * 0.035, seatHeight - 0.09, z * 0.025]} end={[x * width * 0.36, 0.12, z * depth * 0.34]} width={0.006} round /> : null}
+      </group>))}
+    </group>}
+  </group>;
+}
 
 function StandardWardrobe({ materialId }: { materialId: string }) {
   const shell = getPlannerMaterial(materialId);

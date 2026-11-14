@@ -50,8 +50,18 @@ test("does not expose private review references or private asset paths in the pr
   const worker = await getWorker();
   const review = await worker.fetch("http://localhost/dev/references/sofa-3seat/0");
   assert.equal(review.status, 404);
-  const privateAsset = await worker.fetch("http://localhost/planner-assets/private-reference/wohnzimmer/reference.png");
-  assert.equal(privateAsset.status, 404);
+  for (const assetPath of [
+    "/planner-assets/private-reference/wohnzimmer/reference.png",
+    "/planner-assets/%72eference/wohnungsplan.png",
+    "/planner-assets//reference/wohnungsplan.png",
+    "/planner-assets/private%2dreference/wohnzimmer/reference.png",
+    "/planner-assets/private-reference%2fwohnzimmer/reference.png",
+    "/planner-assets/local-sources/fixture.txt",
+    "/planner-assets/local%2dsources/fixture.txt",
+  ]) {
+    const privateAsset = await worker.fetch(`http://localhost${assetPath}`);
+    assert.equal(privateAsset.status, 404, assetPath);
+  }
 });
 
 test("the root is a thin V3 entry and no legacy renderer remains", async () => {

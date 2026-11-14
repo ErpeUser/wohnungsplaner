@@ -57,6 +57,7 @@ const BOZAN_ARTISAN = [
 ];
 const TABLE_KAUFLAND_WALNUT = [
   { id: "walnut", label: "Walnussbraun", color: "#76513b" },
+  { id: "oak-natural", label: "Eicheton · Referenzfoto", color: "#b98a5e" },
 ];
 const TABLE_TEMU_OAK = [
   { id: "oak-natural", label: "Eiche natur", color: "#b98a5e" },

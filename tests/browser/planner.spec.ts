@@ -31,19 +31,19 @@ test('one chair moves independently and survives undo redo and reload', async ({
   await screenshot(page, info, 'chair-move-restored-after-reload');
 });
 
-test('table model and extension can be applied through comparison controls', async ({ page }, info) => {
+test('table model and extension can be applied through compact controls', async ({ page }, info) => {
   await startPlanner(page);
   await page.getByLabel('Planobjekt auswählen').selectOption('living-bozan-table');
   await page.getByRole('tab', { name: 'Tischmodell ändern', exact: true }).click();
-  await page.getByRole('tab', { name: /Kaufland 120/ }).click();
-  const dimensionImage = page.locator('img[src="/planner-assets/references/tables/kaufland-567080013/dimensions.jpg"]');
+  await page.getByRole('combobox', { name: 'Tischmodell', exact: true }).selectOption('kaufland-567080013-120-160');
+  await page.getByText('Produktbelege und Unsicherheiten', { exact: true }).click();
+  const dimensionImage = page.locator('.planner-model-evidence img[src="/planner-assets/references/tables/kaufland-567080013/dimensions.jpg"]');
   await expect(dimensionImage).toBeVisible();
   await expect.poll(() => dimensionImage.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
   await screenshot(page, info, 'table-kaufland-dimensions');
-  await page.getByRole('tab', { name: /AliExpress 100/ }).click();
-  const variants = page.getByRole('tablist', { name: 'Ausziehstufen' });
-  await variants.getByRole('tab').last().click();
-  await page.getByRole('button', { name: 'Im Grundriss anwenden', exact: true }).click();
+  await page.getByRole('combobox', { name: 'Tischmodell', exact: true }).selectOption('aliexpress-100-140');
+  await page.getByRole('combobox', { name: 'Ausziehzustand', exact: true }).selectOption('extended');
+  await page.getByRole('button', { name: 'Auf diesen Tisch anwenden', exact: true }).click();
   await expect.poll(async () => (await savedDocument(page)).placements.find((item) => item.id === 'living-bozan-table')?.catalogId).toBe('dining-table-aliexpress-100-140');
   const table = (await savedDocument(page)).placements.find((item) => item.id === 'living-bozan-table')!;
   expect(table.size.width).toBe(1.4);
@@ -52,17 +52,25 @@ test('table model and extension can be applied through comparison controls', asy
   await screenshot(page, info, 'table-aliexpress-extended-applied');
 });
 
-test('chair comparison replaces four seats and leaves table unchanged', async ({ page }, info) => {
+test('chair model changes only the selected east seat and persists with undo redo', async ({ page }, info) => {
   await startPlanner(page);
-  const originalTable = (await savedDocument(page)).placements.find((item) => item.id === 'living-bozan-table');
-  await page.getByLabel('Planobjekt auswählen').selectOption(chairId);
+  const target = 'living-kaleo-chair-east';
+  const initial = await savedDocument(page);
+  await page.getByLabel('Planobjekt auswählen').selectOption(target);
   await page.getByRole('tab', { name: 'Stuhlmodell ändern', exact: true }).click();
-  await page.getByRole('tab', { name: /Temu Kunstleder/ }).click();
-  await page.getByRole('button', { name: 'Vier Stühle im Grundriss anwenden' }).click();
-  await expect.poll(async () => (await savedDocument(page)).placements.filter((item) => item.catalogId === 'chair-temu-faux-leather-metal').length).toBe(4);
-  expect((await savedDocument(page)).placements.find((item) => item.id === 'living-bozan-table')).toEqual(originalTable);
-  await collapseComparisons(page);
-  await screenshot(page, info, 'four-temu-chairs-applied');
+  await page.getByRole('combobox', { name: 'Stuhlmodell', exact: true }).selectOption('temu-faux-leather-metal');
+  await page.getByRole('button', { name: 'Auf diesen Stuhl anwenden', exact: true }).click();
+  await expect.poll(async () => (await savedDocument(page)).placements.find((item) => item.id === target)?.catalogId).toBe('chair-temu-faux-leather-metal');
+  const changed = await savedDocument(page);
+  expect(changed.placements.filter((item) => item.id.startsWith('living-kaleo-chair-'))).toHaveLength(4);
+  expect(changed.placements.filter((item) => item.id !== target)).toEqual(initial.placements.filter((item) => item.id !== target));
+  await screenshot(page, info, 'single-temu-chair-applied');
+  await page.getByRole('button', { name: 'Rückgängig', exact: true }).click();
+  await expect.poll(async () => (await savedDocument(page)).placements).toEqual(initial.placements);
+  await page.getByRole('button', { name: 'Wiederholen', exact: true }).click();
+  await expect.poll(async () => (await savedDocument(page)).placements).toEqual(changed.placements);
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await expect.poll(async () => (await savedDocument(page)).placements).toEqual(changed.placements);
 });
 
 test('model switcher tabs keep keyboard focus and inspector scrolling local', async ({ page }, info) => {

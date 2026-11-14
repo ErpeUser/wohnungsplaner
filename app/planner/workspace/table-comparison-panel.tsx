@@ -1,216 +1,81 @@
 "use client";
 
-import { useRef, useState, type KeyboardEvent, type MutableRefObject } from "react";
-
+import { useState } from "react";
+import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
 import type { PlannerCommand, CommandResult } from "../domain/commands.ts";
 import { inspectPlacement } from "../domain/collisions.ts";
 import type { PlannerDocumentV3 } from "../domain/types.ts";
-import {
-  TABLE_MODELS,
-  getTableModel,
-  getTableVariant,
-  metresFromCentimetres,
-  tableModelHasGeometry,
-  tableVisualProfile,
-  type TableModelId,
-  type TableVariantId,
-} from "../tables/table-models.ts";
+import { TABLE_MODELS, getTableModel, getTableModelForCatalogId, getTableVariant, metresFromCentimetres, tableModelHasGeometry, tableVisualProfile, type TableModelId, type TableVariantId } from "../tables/table-models.ts";
+import { centimetres, ModelEvidence, ModelImage, referenceKind } from "./model-evidence.tsx";
 
-export function TableComparisonPanel({
-  document,
-  dispatch,
-  select,
-}: {
+export function TableComparisonPanel({ document, dispatch, select }: {
   document: PlannerDocumentV3;
   dispatch(command: PlannerCommand): CommandResult;
   select(id: string | null): void;
 }) {
-  const table = document.placements.find((placement) => placement.id === "living-bozan-table");
-  const initialSelection = selectionForPlacement(table);
-  const [activeModelId, setActiveModelId] = useState<TableModelId>(initialSelection?.modelId ?? TABLE_MODELS[0].id);
-  const [activeVariantId, setActiveVariantId] = useState<TableVariantId>(initialSelection?.variantId ?? "closed");
-  const modelTabs = useRef<Array<HTMLButtonElement | null>>([]);
-  const variantTabs = useRef<Array<HTMLButtonElement | null>>([]);
-  const model = getTableModel(activeModelId) ?? TABLE_MODELS[0];
-  const variant = getTableVariant(model, activeVariantId) ?? model.variants[0];
-  const panelId = `table-panel-${model.id}`;
-
-  const chooseModel = (nextId: TableModelId) => {
-    const next = getTableModel(nextId);
-    if (!next || !tableModelHasGeometry(next)) return;
-    setActiveModelId(nextId);
-    setActiveVariantId(next.variants[0]?.id ?? "closed");
-  };
+  const table = document.placements.find((item) => item.id === "living-bozan-table");
+  const initial = getTableModelForCatalogId(table?.catalogId);
+  const initialVariant = initial?.variants.find((item) => table && sameSize(table.size, metresFromCentimetres(item.sizeCm)));
+  const [modelId, setModelId] = useState<TableModelId>(initial?.id ?? TABLE_MODELS[0].id);
+  const [variantId, setVariantId] = useState<TableVariantId>(initialVariant?.id ?? "closed");
+  const [error, setError] = useState<string | null>(null);
+  const model = getTableModel(modelId) ?? TABLE_MODELS[0];
+  const variant = getTableVariant(model, variantId) ?? model.variants[0];
+  const material = getFurnitureCatalogItem(model.catalogId ?? "")?.materials.find((item) => item.id === model.materialId)?.label;
+  const preview = table && variant && model.catalogId ? inspectPlacement(document, { ...table, catalogId: model.catalogId, size: metresFromCentimetres(variant.sizeCm) }, {
+    ignorePlacementIds: new Set(document.placements.filter((item) => table.groupId && item.groupId === table.groupId && item.id !== table.id).map((item) => item.id)),
+  }) : null;
+  const unchanged = table && variant && table.catalogId === model.catalogId && sameSize(table.size, metresFromCentimetres(variant.sizeCm));
 
   const apply = () => {
     if (!table || !variant || !model.catalogId) return;
-    const result = dispatch({
-      type: "setPlacementProduct",
-      placementId: table.id,
-      catalogId: model.catalogId,
-      size: metresFromCentimetres(variant.sizeCm),
-      materialId: model.materialId,
-      metadata: {
-        source: model.sourceLabel,
-        confidence: variant.confidence === "unknown" ? "estimated" : variant.confidence,
-        notes: [...model.sourceNotes, ...variant.notes, `Vergleichsmodell ${model.id} · Zustand ${variant.id}.`],
-      },
-    });
+    const result = dispatch({ type: "setPlacementProduct", placementId: table.id, catalogId: model.catalogId, size: metresFromCentimetres(variant.sizeCm), materialId: model.materialId });
+    setError(result.error?.message ?? null);
     if (!result.error) select(table.id);
   };
 
-  const preview = table && variant && model.catalogId
-    ? inspectPlacement(
-        document,
-        { ...table, catalogId: model.catalogId, size: metresFromCentimetres(variant.sizeCm) },
-        table.groupId ? {
-          ignorePlacementIds: new Set(document.placements.filter((item) => item.groupId === table.groupId && item.id !== table.id).map((item) => item.id)),
-        } : undefined,
-      )
-    : null;
-
-  const handleArrow = (event: KeyboardEvent<HTMLDivElement>, tabs: MutableRefObject<Array<HTMLButtonElement | null>>, index: number, enabledIndices: number[], onMove?: (nextIndex: number) => void) => {
-    if (!["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp", "Home", "End"].includes(event.key)) return;
-    if (!enabledIndices.length) return;
-    event.preventDefault();
-    const delta = event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 0;
-    const current = Math.max(0, enabledIndices.indexOf(index));
-    const next = event.key === "Home" ? 0 : event.key === "End" ? enabledIndices.length - 1 : (current + delta + enabledIndices.length) % enabledIndices.length;
-    const nextIndex = enabledIndices[next];
-    tabs.current[nextIndex]?.focus();
-    onMove?.(nextIndex);
-  };
-
   return (
-    <details className="planner-table-compare" open>
-      <summary className="planner-table-compare__summary">
-        <span>
-          <span className="planner-kicker">Essgruppe</span>
-          <strong>Tischvergleich · maßstäblich im Grundriss</strong>
-        </span>
-        <span className="planner-table-compare__summary-hint">4 Modelle · cm</span>
-      </summary>
-      <div className="planner-table-compare__body">
-        <div className="planner-table-compare__tabs" role="tablist" aria-label="Tischmodelle" onKeyDown={(event) => handleArrow(event, modelTabs, Math.max(0, TABLE_MODELS.findIndex((item) => item.id === activeModelId)), TABLE_MODELS.map((item, index) => tableModelHasGeometry(item) ? index : -1).filter((index) => index >= 0), (nextIndex) => chooseModel(TABLE_MODELS[nextIndex].id))}>
-          {TABLE_MODELS.map((item, index) => {
-            const available = tableModelHasGeometry(item);
-            return (
-              <button
-                key={item.id}
-                ref={(element) => { modelTabs.current[index] = element; }}
-                id={`table-tab-${item.id}`}
-                type="button"
-                role="tab"
-                aria-selected={item.id === activeModelId}
-                aria-controls={item.id === activeModelId ? panelId : undefined}
-                aria-describedby={available ? undefined : "table-blocked-source"}
-                aria-disabled={!available}
-                disabled={!available}
-                tabIndex={item.id === activeModelId ? 0 : -1}
-                className="planner-table-compare__tab"
-                data-material={item.materialId}
-                data-visual-profile={tableVisualProfile(item.catalogId)}
-                onClick={() => chooseModel(item.id)}
-              >
-                <span className="planner-table-compare__swatch" aria-hidden="true" />
-                <span>{item.shortName}</span>
-                <small id={!available ? "table-tab-status-blocked" : undefined}>{item.sourceStatus === "blocked" ? "Quelle blockiert" : item.sourceStatus === "confirmed" ? "Maßgrafik" : "Spiegelbeleg"}</small>
-              </button>
-            );
-          })}
-        </div>
-
-        <p id="table-blocked-source" className="planner-table-compare__blocked-source">
-          <strong>Referenzstatus:</strong> Alle vier Vergleichsmodelle besitzen eine belegte Grundgeometrie; die 110 × 150 cm-Variante von Temu ist durch sichtbare Maßgrafik bestätigt.
-        </p>
-
-        <div id={panelId} role="tabpanel" tabIndex={0} aria-labelledby={`table-tab-${model.id}`} className="planner-table-compare__panel">
-          <div className="planner-table-compare__header">
-            <div>
-              <h3>{model.name}</h3>
-              <p>{model.sourceLabel}</p>
-            </div>
-            <span className={`planner-table-compare__status planner-table-compare__status--${model.sourceStatus}`}>{model.sourceStatus === "confirmed" ? "Maßgrafik bestätigt" : "Maße aus Spiegelbeleg"}</span>
-          </div>
-
-          <p className="planner-table-compare__construction">
-            <span className={`planner-table-compare__construction-swatch planner-table-compare__construction-swatch--${tableVisualProfile(model.catalogId)}`} aria-hidden="true" />
-            <span>{tableConstructionLabel(tableVisualProfile(model.catalogId))}</span>
-          </p>
-
-          {model.imageUrls.length ? (
-            <div className="planner-table-compare__evidence" aria-label={`Produktbilder ${model.name}`}>
-              {model.imageUrls.slice(0, 2).map((imageUrl, index) => (
-                <a key={imageUrl} href={imageUrl} target="_blank" rel="noreferrer" aria-label={`Bildbeleg ${index + 1} · ${model.shortName}`}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  {imageUrl.startsWith("/planner-assets/") ? <img src={imageUrl} alt={`Produktbild ${model.name}, Beleg ${index + 1}`} loading="lazy" /> : `Bildbeleg ${index + 1} öffnen ↗`}
-                </a>
-              ))}
-            </div>
-          ) : null}
-
-          {model.variants.length ? (
-            <>
-              <div className="planner-table-compare__variants" role="tablist" aria-label="Ausziehstufen" onKeyDown={(event) => handleArrow(event, variantTabs, Math.max(0, model.variants.findIndex((item) => item.id === (variant?.id ?? activeVariantId))), model.variants.map((_, index) => index), (nextIndex) => setActiveVariantId(model.variants[nextIndex].id))}>
-                {model.variants.map((item, index) => (
-                  <button
-                    key={item.id}
-                    ref={(element) => { variantTabs.current[index] = element; }}
-                    type="button"
-                    role="tab"
-                    aria-selected={item.id === variant?.id}
-                    aria-controls={`${panelId}-variant`}
-                    tabIndex={item.id === variant?.id ? 0 : -1}
-                    className="planner-table-compare__variant"
-                    onClick={() => setActiveVariantId(item.id)}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-              <div id={`${panelId}-variant`} role="tabpanel" className="planner-table-compare__measure">
-                <strong>{variant ? `${formatCentimetres(variant.sizeCm.width)} × ${formatCentimetres(variant.sizeCm.depth)} × ${formatCentimetres(variant.sizeCm.height)} cm` : "Maße offen"}</strong>
-                <span>{variant ? `${variant.seatCount} Sitzplätze · ${variant.confidence === "confirmed" ? "bestätigt" : "geschätzt"}` : "Keine belegte Geometrie"}</span>
-              </div>
-              <p className="planner-table-compare__notes">{variant?.notes.join(" ")}</p>
-            </>
-          ) : (
-            <p className="planner-table-compare__blocked" role="status">Diese Quelle ist derzeit durch Login/Sicherheitsprüfung blockiert. Es gibt keine belastbaren Maße; der Tisch wird deshalb nicht in den Grundriss übernommen.</p>
-          )}
-
-          <div className="planner-table-compare__sources">
-            <a href={model.sourceUrl} target="_blank" rel="noreferrer" aria-label={`Originalquelle · ${model.shortName}`}>Originalquelle · {model.shortName}</a>
-            {model.canonicalUrl ? <a href={model.canonicalUrl} target="_blank" rel="noreferrer">Canonical-/Spiegelquelle</a> : null}
-            <span>{model.sourceNotes[0]}</span>
-          </div>
-          {preview?.hard.length ? <p className="planner-table-compare__collision planner-table-compare__collision--hard" role="alert">Dieser Zustand passt an der aktuellen Position nicht in den Raum; der harte Konflikt wird beim Anwenden blockiert.</p> : preview?.warnings.length ? <p className="planner-table-compare__collision" role="note">Passagehinweis: Der Zustand passt geometrisch, verringert aber den empfohlenen Durchgang.</p> : <p className="planner-table-compare__collision" role="note">Keine harte Geometriekollision an der aktuellen Position.</p>}
-          <button type="button" className="planner-button planner-button--primary" disabled={!tableModelHasGeometry(model) || !variant} onClick={apply}>Im Grundriss anwenden</button>
-        </div>
+    <div className="planner-model-choice">
+      <label className="planner-select-field">
+        <span>Tischmodell <small>{TABLE_MODELS.length} Varianten</small></span>
+        <select aria-label="Tischmodell" value={model.id} onChange={(event) => { setModelId(event.target.value as TableModelId); setVariantId("closed"); setError(null); }}>
+          {TABLE_MODELS.map((item) => <option key={item.id} value={item.id} disabled={!tableModelHasGeometry(item)}>{item.shortName}</option>)}
+        </select>
+      </label>
+      <div className="planner-model-preview">
+        <a href={model.imageUrls[0] ?? model.sourceUrl} target="_blank" rel="noreferrer" className="planner-model-preview__image" aria-label={`${referenceKind(model.imageUrls[0])} öffnen · ${model.shortName}`}>
+          <ModelImage src={model.imageUrls[0]} name={model.name} kind={referenceKind(model.imageUrls[0])} />
+        </a>
+        <div><strong>{model.shortName}</strong><span className="planner-model-status" data-confidence={variant?.confidence}>{variant?.confidence === "confirmed" ? "Maße belegt" : "Maße teilweise geschätzt"}</span></div>
       </div>
-    </details>
+      <label className="planner-select-field">
+        <span>Ausziehzustand</span>
+        <select aria-label="Ausziehzustand" value={variant?.id ?? ""} onChange={(event) => { setVariantId(event.target.value as TableVariantId); setError(null); }}>
+          {model.variants.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
+        </select>
+      </label>
+      <dl className="planner-model-facts">
+        <div><dt>B × T × H</dt><dd>{variant ? `${centimetres(variant.sizeCm.width)} × ${centimetres(variant.sizeCm.depth)} × ${centimetres(variant.sizeCm.height)} cm` : "Maße offen"}</dd></div>
+        <div><dt>Planmaterial</dt><dd>{material ?? "Materialangabe offen"}</dd></div>
+        <div><dt>Konstruktion</dt><dd>{constructionLabel(tableVisualProfile(model.catalogId))}</dd></div>
+      </dl>
+      <a className="planner-model-source" href={model.sourceUrl} target="_blank" rel="noreferrer">Originalquelle · {model.shortName} ↗</a>
+      <button type="button" className="planner-button planner-button--primary planner-model-apply" disabled={!table || !tableModelHasGeometry(model) || !variant || Boolean(unchanged) || Boolean(preview?.hard.length)} onClick={apply}>Auf diesen Tisch anwenden</button>
+      {preview?.hard.length ? <p className="planner-field-error" role="alert">{preview.hard[0].message} Wähle einen kleineren Ausziehzustand oder verschiebe den Tisch.</p> : <p className="planner-model-hint">Position, Drehung und die vier einzeln platzierten Stühle bleiben erhalten.</p>}
+      {preview?.warnings.length ? <p className="planner-model-hint" role="note">{preview.warnings[0].message}</p> : null}
+      {error ? <p className="planner-field-error" role="alert">{error}</p> : null}
+      <ModelEvidence name={model.shortName} sourceUrl={model.sourceUrl} sourceLabel={model.sourceLabel} imageUrls={model.imageUrls} notes={[...model.sourceNotes, ...(variant?.notes ?? [])]} mirrorUrl={model.canonicalUrl} />
+    </div>
   );
 }
 
-function formatCentimetres(value: number) {
-  return value.toLocaleString("de-AT", { maximumFractionDigits: 1 });
+function sameSize(a: { width: number; depth: number; height: number }, b: { width: number; depth: number; height: number }) {
+  return Math.abs(a.width - b.width) < 0.0001 && Math.abs(a.depth - b.depth) < 0.0001 && Math.abs(a.height - b.height) < 0.0001;
 }
 
-function selectionForPlacement(placement: PlannerDocumentV3["placements"][number] | undefined) {
-  if (!placement) return null;
-  const model = TABLE_MODELS.find((candidate) => candidate.catalogId === placement.catalogId);
-  if (!model) return null;
-  const variant = model.variants.find((candidate) => {
-    const size = metresFromCentimetres(candidate.sizeCm);
-    return Math.abs(size.width - placement.size.width) < 0.0001
-      && Math.abs(size.depth - placement.size.depth) < 0.0001
-      && Math.abs(size.height - placement.size.height) < 0.0001;
-  });
-  return variant ? { modelId: model.id, variantId: variant.id } : { modelId: model.id, variantId: model.variants[0]?.id ?? "closed" };
-}
-
-function tableConstructionLabel(profile: ReturnType<typeof tableVisualProfile>) {
-  if (profile === "fluted-extension-pedestal") return "Geriffeltes Holzpodest · sichtbarer Mittelauszug";
-  if (profile === "fluted-round-pedestal") return "Geriffelter Rundsockel · versteckte Auszugsplatten";
-  if (profile === "storage-pedestal") return "Runder Stauraumkorpus · Schiebetüren unter der Platte";
-  return "Runde Platte · schlanker Metallrahmen";
+function constructionLabel(profile: ReturnType<typeof tableVisualProfile>) {
+  if (profile === "fluted-extension-pedestal") return "Zwei geriffelte Stützen · Mittelauszug";
+  if (profile === "fluted-round-pedestal") return "Geriffelter Rundsockel";
+  if (profile === "storage-pedestal") return "Stauraumsockel mit Schiebetüren";
+  return "Runde / ovale Platte auf Metallgestell";
 }

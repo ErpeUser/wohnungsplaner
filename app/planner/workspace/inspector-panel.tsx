@@ -7,8 +7,9 @@ import type { CommandResult, PlannerCommand } from "../domain/commands.ts";
 import type { PlannerDocumentV3, PlannerPlacement } from "../domain/types.ts";
 import { ChairComparisonPanel } from "./chair-comparison-panel.tsx";
 import { getChairModelForCatalogId } from "../chairs/chair-models.ts";
-import { getTableModel } from "../tables/table-models.ts";
+import { getTableModelForCatalogId } from "../tables/table-models.ts";
 import { TableComparisonPanel } from "./table-comparison-panel.tsx";
+import { ModelImage, referenceKind } from "./model-evidence.tsx";
 import "./model-switcher.css";
 
 type InspectorPanelProps = {
@@ -29,7 +30,7 @@ export function InspectorPanel({ document, selectionId, dispatch, select }: Insp
         <h2>Eigenschaften</h2>
         <p>{selected ? "Position und Maß präzise anpassen." : builtIn ? "Fest eingebautes Element." : "Element im Plan auswählen."}</p>
       </header>
-      {selected ? <PlacementFields document={document} placement={selected} dispatch={dispatch} select={select} /> : builtIn ? (
+      {selected ? <PlacementFields key={selected.id} document={document} placement={selected} dispatch={dispatch} select={select} /> : builtIn ? (
         <div className="planner-locked-state">
           <span aria-hidden="true">◆</span>
           <div><strong>{builtIn.label}</strong><p>Bestand · gegen Verschieben und Entfernen geschützt</p></div>
@@ -183,17 +184,17 @@ function ModelSwitcher({
     modelTabs.current[next]?.focus();
   };
 
-  const catalogItem = getFurnitureCatalogItem(placement.catalogId);
-  const size = placement.size;
-  const confidence = placement.metadata?.confidence === "confirmed" ? "Beleg bestätigt" : "Beleg geschätzt";
-  const referenceUrl = referenceForPlacement(placement.catalogId);
-  const referenceLink = referenceLinkForPlacement(placement.catalogId);
+  const target = activeTab === "table" ? document.placements.find((item) => item.id === "living-bozan-table") : chairSelected ? placement : undefined;
+  const catalogItem = target ? getFurnitureCatalogItem(target.catalogId) : undefined;
+  const confidence = target?.metadata?.confidence === "confirmed" ? "Beleg bestätigt" : "Beleg geschätzt";
+  const referenceUrl = target ? referenceForPlacement(target.catalogId) : undefined;
+  const referenceLink = referenceUrl ?? getChairModelForCatalogId(target?.catalogId)?.sourceUrl ?? getTableModelForCatalogId(target?.catalogId)?.sourceUrl;
 
   return (
     <section className="planner-model-switcher" aria-label="Modellwechsel">
       <div className="planner-model-switcher__header">
         <span className="planner-kicker">Essgruppe</span>
-        <strong>Modell kompakt wechseln</strong>
+        <strong>Modell für dieses Objekt</strong>
       </div>
       <div
         className="planner-model-switcher__tabs"
@@ -228,25 +229,22 @@ function ModelSwitcher({
           Tischmodell ändern
         </button>
       </div>
-      <div className="planner-model-switcher__current">
-        <span className="planner-model-switcher__thumb">
-          {referenceUrl ? (
-            <>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={referenceUrl} alt={`Gespeicherter Referenzbeleg für ${catalogItem?.name ?? placement.catalogId}`} loading="lazy" />
-            </>
-          ) : referenceLink ? <a href={referenceLink} target="_blank" rel="noreferrer">Beleg ↗</a> : <span aria-hidden="true">∎</span>}
-        </span>
+      {target ? <div className="planner-model-switcher__current">
+        {referenceLink ? <a className="planner-model-switcher__thumb" href={referenceLink} target="_blank" rel="noreferrer" aria-label={`Bildquelle öffnen · ${catalogItem?.name ?? target.catalogId}`}>
+          <ModelImage src={referenceUrl} name={catalogItem?.name ?? target.catalogId} kind={referenceKind(referenceUrl)} />
+        </a> : <span className="planner-model-switcher__thumb"><ModelImage name={catalogItem?.name ?? target.catalogId} /></span>}
         <span>
-          <strong>{catalogItem?.name ?? placement.catalogId}</strong>
-          <small>{Math.round(size.width * 100)} × {Math.round(size.depth * 100)} × {Math.round(size.height * 100)} cm · {confidence}</small>
+          <small>Aktuell im Plan</small>
+          <strong>{catalogItem?.name ?? target.catalogId}</strong>
+          <small>{Math.round(target.size.width * 100)} × {Math.round(target.size.depth * 100)} × {Math.round(target.size.height * 100)} cm · {confidence}</small>
         </span>
-      </div>
+      </div> : null}
       {activeTab === "chair" ? (
         <div id="planner-chair-model-panel" role="tabpanel" aria-labelledby="planner-chair-model-tab" className="planner-model-switcher__panel">
           <ChairComparisonPanel
-            key={placement.catalogId}
+            key={`${placement.id}:${placement.catalogId}`}
             document={document}
+            placementId={chairSelected ? placement.id : undefined}
             dispatch={dispatch}
             select={select}
           />
@@ -254,7 +252,7 @@ function ModelSwitcher({
       ) : (
         <div id="planner-table-model-panel" role="tabpanel" aria-labelledby="planner-table-model-tab" className="planner-model-switcher__panel">
           <TableComparisonPanel
-            key={placement.catalogId}
+            key={`${target?.catalogId}:${target?.size.width}:${target?.size.depth}`}
             document={document}
             dispatch={dispatch}
             select={select}
@@ -266,19 +264,8 @@ function ModelSwitcher({
 }
 function referenceForPlacement(catalogId: string) {
   const chair = getChairModelForCatalogId(catalogId);
-  const chairReference = chair?.imageUrls[0];
-  if (chairReference?.startsWith("/planner-assets/")) return chairReference;
-  const table = getTableModel(catalogId);
-  const tableReference = table?.imageUrls[0];
-  if (tableReference?.startsWith("/planner-assets/")) return tableReference;
-  return null;
-}
-
-function referenceLinkForPlacement(catalogId: string) {
-  const chair = getChairModelForCatalogId(catalogId);
-  if (chair?.imageUrls[0]) return chair.imageUrls[0];
-  const table = getTableModel(catalogId);
-  return table?.imageUrls[0] ?? null;
+  const table = getTableModelForCatalogId(catalogId);
+  return chair?.imageUrls[0] ?? table?.imageUrls[0];
 }
 
 function NumericField({
@@ -300,13 +287,16 @@ function NumericField({
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(() => formatNumber(value));
   const [error, setError] = useState<string | null>(null);
+  const cancelOnBlur = useRef(false);
   const commit = () => {
     setEditing(false);
-    const parsed = Number(draft.replace(",", "."));
-    if (!Number.isFinite(parsed) || (minimum !== undefined && parsed < minimum)) {
+    if (cancelOnBlur.current) { cancelOnBlur.current = false; return; }
+    const parsed = Number(draft.trim().replace(",", "."));
+    if (!draft.trim() || !Number.isFinite(parsed) || (minimum !== undefined && parsed < minimum)) {
       setError(minimum === undefined ? "Bitte eine gültige Zahl eingeben." : `Der Wert muss mindestens ${minimum} sein.`);
       return;
     }
+    if (parsed === Number(formatNumber(value))) { setError(null); return; }
     const commandError = onCommit(parsed);
     setError(commandError);
     if (commandError) setDraft(formatNumber(value));
@@ -332,6 +322,9 @@ function NumericField({
           onKeyDown={(event) => {
             if (event.key === "Enter") event.currentTarget.blur();
             if (event.key === "Escape") {
+              event.preventDefault();
+              event.stopPropagation();
+              cancelOnBlur.current = true;
               setDraft(formatNumber(value));
               setError(null);
               event.currentTarget.blur();

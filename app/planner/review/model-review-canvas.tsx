@@ -21,7 +21,7 @@ export function ModelReviewCanvas(props: Props) {
   }, [onReady]);
   return <div ref={host} style={{ height: "100%" }}>
     <ReviewBoundary>
-      <Canvas aria-label="Modellvorschau" frameloop="demand" dpr={1} shadows
+      <Canvas aria-label="Modellvorschau" frameloop="demand" dpr={1} shadows="percentage"
         camera={{ position: reviewCameraPosition(review.size, props.view), fov: 35, near: 0.01, far: 100 }}
         gl={{ antialias: true, preserveDrawingBuffer: true }}
         onCreated={({ gl, camera }) => {
