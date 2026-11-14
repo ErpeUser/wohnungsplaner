@@ -384,7 +384,10 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
     material.bumpScale = 0.008;
     material.needsUpdate = true;
   } else if (materialId === "outdoor-concrete") {
-    material.map = loadConcreteTexture();
+    const concrete = loadConcreteTexture();
+    material.map = concrete;
+    material.bumpMap = asBumpMap(concrete);
+    material.bumpScale = 0.012;
     material.needsUpdate = true;
   } else if (materialId === "epoxy-grey") {
     const epoxyTexture = loadEpoxyFloorTexture();
@@ -393,7 +396,10 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
     material.bumpScale = 0.006;
     material.needsUpdate = true;
   } else if (materialId === "balcony-floor-beige") {
-    material.map = loadBalconyFloorTexture();
+    const balconyFloor = loadBalconyFloorTexture();
+    material.map = balconyFloor;
+    material.bumpMap = asBumpMap(balconyFloor);
+    material.bumpScale = 0.01;
     material.needsUpdate = true;
   } else if (texturePath && typeof document !== "undefined") {
     material.map = loadPlannerTexture(texturePath);
