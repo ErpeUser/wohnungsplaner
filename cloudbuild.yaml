@@ -1,4 +1,4 @@
-timeout: 1800s
+timeout: 5400s
 options:
   machineType: E2_STANDARD_2
   logging: CLOUD_LOGGING_ONLY
