@@ -24,8 +24,8 @@ docker exec "$container" sh -c 'test -z "$(find /app -type f \( -path "*/private
 scope=(--project "$PROJECT_ID" --region "$_REGION")
 existing="$(gcloud run services list "${scope[@]}" --filter="metadata.name=$_SERVICE" --format='value(metadata.name)')"
 if [[ -n "$existing" ]]; then
-  service_json="$(gcloud run services describe "$_SERVICE" "${scope[@]}" --format=json)"
-  python3 -c 'import json, sys; a = json.load(sys.stdin)["metadata"].get("annotations", {}); assert a.get("run.googleapis.com/invoker-iam-disabled") != "true", "Cloud Run must require IAM"' <<< "$service_json"
+  invoker_disabled="$(gcloud run services describe "$_SERVICE" "${scope[@]}" --format="value(metadata.annotations['run.googleapis.com/invoker-iam-disabled'])")"
+  [[ "$invoker_disabled" != "true" ]]
   policy="$(gcloud run services get-iam-policy "$_SERVICE" "${scope[@]}" --flatten=bindings[].members --format='value(bindings.members)')"
   if grep -Eqx 'allUsers|allAuthenticatedUsers' <<< "$policy"; then
     echo "Refusing to deploy to an anonymous service" >&2
@@ -41,7 +41,7 @@ access_token="$(gcloud auth print-access-token)"
 repository_token="$(curl --fail --silent --show-error -X POST \
   -H "Authorization: Bearer $access_token" \
   "https://cloudbuild.googleapis.com/v2/$repo_resource:accessReadToken" |
-  python3 -c 'import json, sys; print(json.load(sys.stdin)["token"])')"
+  sed -nE 's/.*"token"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/p')"
 git_auth="$(printf 'x-access-token:%s' "$repository_token" | base64 -w0)"
 unset access_token repository_token
 current_main() {
@@ -78,5 +78,5 @@ curl --fail --silent --show-error --retry 3 --retry-delay 2 \
   -H "Authorization: Bearer $token" "$url/" --output /tmp/cloud-planner.html
 grep --quiet 'Raumplaner' /tmp/cloud-planner.html
 curl --fail --silent --show-error -H "Authorization: Bearer $token" "$url/__codex/health" |
-  python3 -c 'import json, sys; assert json.load(sys.stdin)["sourceCommit"] == sys.argv[1]' "$COMMIT_SHA"
+  grep --quiet "\"sourceCommit\":\"$COMMIT_SHA\""
 printf 'Deployed %s to private endpoint %s\n' "$COMMIT_SHA" "$url"

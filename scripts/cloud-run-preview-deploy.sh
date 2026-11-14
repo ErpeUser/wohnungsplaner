@@ -12,8 +12,8 @@ fi
 scope=(--project "$PROJECT_ID" --region "$_REGION")
 existing="$(gcloud run services list "${scope[@]}" --filter="metadata.name=$_SERVICE" --format='value(metadata.name)')"
 if [[ -n "$existing" ]]; then
-  service_json="$(gcloud run services describe "$_SERVICE" "${scope[@]}" --format=json)"
-  python3 -c 'import json, sys; a = json.load(sys.stdin)["metadata"].get("annotations", {}); assert a.get("run.googleapis.com/invoker-iam-disabled") != "true", "Cloud Run must require IAM"' <<< "$service_json"
+  invoker_disabled="$(gcloud run services describe "$_SERVICE" "${scope[@]}" --format="value(metadata.annotations['run.googleapis.com/invoker-iam-disabled'])")"
+  [[ "$invoker_disabled" != "true" ]]
   policy="$(gcloud run services get-iam-policy "$_SERVICE" "${scope[@]}" --flatten=bindings[].members --format='value(bindings.members)')"
   if grep -Eqx 'allUsers|allAuthenticatedUsers' <<< "$policy"; then
     echo "Refusing to deploy to an anonymous service" >&2

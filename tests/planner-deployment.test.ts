@@ -47,7 +47,7 @@ case "$*" in
   "artifacts docker images describe "*) printf 'sha256:${"0".repeat(64)}\\n' ;;
   "run services list "*) printf 'test-preview\\n' ;;
   "run services get-iam-policy "*) printf 'allUsers\\n' ;;
-  "run services describe "*"--format=json"*) printf '{"metadata":{"annotations":{}}}\\n' ;;
+  "run services describe "*"--format=value(metadata.annotations['run.googleapis.com/invoker-iam-disabled'])"*) printf '\\n' ;;
   "run services describe "*) printf 'https://test-preview.run.app\\n' ;;
   "run deploy "*) : > "$DEPLOY_TEST_MUTATION" ;;
   *) exit 92 ;;
