@@ -57,7 +57,7 @@ Browserumgebung; lokaler und Cloud-Ursprung teilen den Speicher nicht.
 
 ## Kosten und Betrieb
 
-- **Cloud Build:** `E2_STANDARD_2` im Standardpool, maximal 15 Minuten pro
+- **Cloud Build:** `E2_STANDARD_2` im Standardpool, maximal 2,5 Stunden pro
   Build. Google nennt für diese Konfiguration derzeit 2.500 Freiminuten pro
   Abrechnungskonto und Monat, danach 0,006 USD je Minute. Einzelaufnahmen
   besser lokal ausführen. [Cloud Build Preise](https://cloud.google.com/build/pricing)
