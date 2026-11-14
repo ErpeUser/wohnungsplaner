@@ -1,1 +1,38 @@
-import { promises as fs } from "node:fs";\nimport path from "node:path";\nimport { fileURLToPath } from "node:url";\n\nconst root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");\nconst privateRoots = [\n  path.join(root, "public", "planner-assets", "private-reference"),\n  path.join(root, ".codex-temp"),\n];\nconst strict = process.argv.includes("--strict");\nconst findings = [];\n\nasync function walk(directory) {\n  let entries;\n  try {\n    entries = await fs.readdir(directory, { withFileTypes: true });\n  } catch (error) {\n    if (error.code === "ENOENT") return;\n    throw error;\n  }\n  for (const entry of entries) {\n    const absolute = path.join(directory, entry.name);\n    if (entry.isDirectory()) await walk(absolute);\n    else if (entry.isFile()) findings.push(path.relative(root, absolute).replaceAll(path.sep, "/"));\n  }\n}\n\nfor (const directory of privateRoots) await walk(directory);\n\nif (!findings.length) {\n  console.log("Private Referenzen: keine versionierten Produktions- oder Temp-Dateien gefunden.");\n} else {\n  console.warn(\n    "Private Referenzen gefunden. Sie dürfen weder unter public/ noch in Produktionsartefakte gelangen:\\n" +\n      findings.map((file) => "- " + file).join("\\n"),\n  );\n  if (strict) process.exitCode = 1;\n}\n
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const privateRoots = [
+  path.join(root, "public", "planner-assets", "private-reference"),
+  path.join(root, ".codex-temp"),
+];
+const strict = process.argv.includes("--strict");
+const findings = [];
+
+async function walk(directory) {
+  let entries;
+  try {
+    entries = await fs.readdir(directory, { withFileTypes: true });
+  } catch (error) {
+    if (error.code === "ENOENT") return;
+    throw error;
+  }
+  for (const entry of entries) {
+    const absolute = path.join(directory, entry.name);
+    if (entry.isDirectory()) await walk(absolute);
+    else if (entry.isFile()) findings.push(path.relative(root, absolute).replaceAll(path.sep, "/"));
+  }
+}
+
+for (const directory of privateRoots) await walk(directory);
+
+if (!findings.length) {
+  console.log("Private Referenzen: keine versionierten Produktions- oder Temp-Dateien gefunden.");
+} else {
+  console.warn(
+    "Private Referenzen gefunden. Sie dürfen weder unter public/ noch in Produktionsartefakte gelangen:\n" +
+      findings.map((file) => "- " + file).join("\n"),
+  );
+  if (strict) process.exitCode = 1;
+}
