@@ -1,8 +1,19 @@
 # Codex repository instructions
 
+## Standardbranch-only für KI-Agenten
+
+Für alle KI-Aufträge in diesem Repository ist `main` der einzige Arbeitszweig.
+Vor Änderungen muss `main` auf `origin/main` aktualisiert werden. KI-Agenten
+erstellen oder verwenden keine Feature-, Review-, QA- oder sonstigen Branches,
+keine zusätzlichen Worktrees und keine Pull Requests. Nach abgeschlossenen
+Änderungen werden die geprüften Dateien direkt auf `main` committed und nach
+GitHub gepusht; lokaler `main` und `origin/main` müssen danach denselben Commit
+zeigen. Nicht benötigte Nebenbranches und zugehörige Pull Requests werden
+geschlossen und gelöscht.
+
 ## GitHub-only-Prüfung für ChatGPT- und GitHub-Agenten
 
-ChatGPT Web braucht keinen eigenen Chromium-/WebGL-Browser. Die echte Anwendung wird in GitHub Actions durch den im Ubuntu-Runner vorinstallierten Chrome (optional Edge) fotografiert. Voraussetzung für eine behauptete visuelle Abnahme ist das **Herunterladen und Öffnen konkreter PNG-Dateien** aus dem privaten Workflow-Artefakt. `report/models.html` und `report/manifest.json` dokumentieren auch nicht renderbare Modellordner; `webgl-probe.json` prüft Cloud-WebGL. Siehe `docs/VISUAL_CLOUD.md`. Es wird keine private Referenz in GitHub Pages veröffentlicht. Workflow-Trigger auf Review-Branches über `push`; `Run workflow` wird erst verfügbar, wenn die Workflowdatei im Standardbranch liegt.
+ChatGPT Web braucht keinen eigenen Chromium-/WebGL-Browser. Die echte Anwendung wird in GitHub Actions durch den im Ubuntu-Runner vorinstallierten Chrome (optional Edge) fotografiert. Voraussetzung für eine behauptete visuelle Abnahme ist das **Herunterladen und Öffnen konkreter PNG-Dateien** aus dem privaten Workflow-Artefakt. `report/models.html` und `report/manifest.json` dokumentieren auch nicht renderbare Modellordner; `webgl-probe.json` prüft Cloud-WebGL. Siehe `docs/VISUAL_CLOUD.md`. Es wird keine private Referenz in GitHub Pages veröffentlicht. Der Visual-Workflow startet bei Pushes auf `main`; `Run workflow` steht im Standardbranch bereit.
 
 ## ZUERST LESEN: Verbindliche visuelle Prüfung für KI-Agenten
 
@@ -14,7 +25,7 @@ Diese Regeln gelten für jeden Auftrag an Oberfläche, 2D/3D-Modellen, Materiali
 4. Auf `canvas[data-render-ready="true"]` und den passenden `data-render-key` warten. Screenshots tatsächlich öffnen und betrachten. Ein Canvas, ein Screenshot-Dateiname oder ein grüner Test allein belegt keine richtige Darstellung.
 5. Nach gezielten Änderungen am laufenden Entwicklungsserver `npm run visual:models -- --live --model <Katalog-ID>`; bei GUI-Änderungen `npm run test:browser`. Ergebnisse: `artifacts/visual/latest/report/index.html` und `results.json`.
 6. Bei sichtbaren Abweichungen korrigieren und erneut aufnehmen. Baselines niemals ungeprüft ersetzen. Vor Abschluss Browserfehler, defekte Ressourcen und ausstehende Prüfschritte benennen.
-7. Vor Integration Produktionsbuild, `npm run validate` und `npm run visual:check` ausführen. Google Cloud Build prüft Pushes auf `main` und speichert Browserberichte pro Commit. Der GitHub-Lauf startet nur manuell.
+7. Vor Integration Produktionsbuild und `npm run validate` ausführen. Google Cloud Build baut und veröffentlicht den Dienst; GitHub Actions übernimmt Browser-, WebGL- und Screenshot-Prüfungen und speichert die privaten Artefakte pro Commit.
 8. Keine visuelle Fertigstellung ohne tatsächliche Bildkontrolle behaupten. Falls Browser, WebGL oder Referenzen fehlen, genau diesen Teil als offen melden. Screenshot-Prüfung ersetzt keine fachliche Produkt-/Maßprüfung.
 
 Verbindlicher Ablauf und Abdeckung: [docs/VISUAL_WORKFLOW.md](docs/VISUAL_WORKFLOW.md), [tests/browser/COVERAGE.md](tests/browser/COVERAGE.md).
@@ -42,5 +53,5 @@ Verwende dafür mindestens `npm run codex:pipeline -- --mode=check --dry-run`; f
 - `modelRevision` migriert Katalog- und Materialdefaults. Bei Migrationen bleiben stabile Platzierungs-IDs, Position, Rotation, Raum-/Wandbezug, Gruppen und Nutzermetadaten erhalten; neue Defaults dürfen nur erkannte Legacy-Signaturen ersetzen.
 - Möbelbefehle verwenden stabile Platzierungs-IDs und Katalog-IDs aus `app/planner/catalog/catalog.ts`. Änderungen laufen über `applyPlannerCommand` und dessen Undo-/Redo-Historie; Rohdaten werden nicht direkt mutiert.
 - Referenzfotos und private Quellen gehören nicht unter `public/planner-assets/`; Exporte entfernen Laufzeit- und Quell-URLs, und der lokale Adapter muss private Referenzpfade mit 404 sperren.
-- Vor einem Push sind Diff, Typecheck, Lint, Asset-Checks, Planner-/UI-Tests, Build und Cutover zu prüfen. Ohne eine neue ausdrückliche Freigabe wird nicht gepusht.
+- Vor dem direkten Push auf `main` sind Diff, Typecheck, Lint, Asset-Checks, Planner-/UI-Tests, Build und Cutover zu prüfen. Danach wird der geprüfte Commit ohne Pull Request veröffentlicht; Nebenbranches werden nicht angelegt.
 
