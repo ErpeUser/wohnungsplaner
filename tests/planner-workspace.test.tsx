@@ -113,6 +113,7 @@ describe("PlannerWorkspace", () => {
   test("switches measured table models and extension states from accessible tabs", async () => {
     const user = userEvent.setup();
     const store = createPlannerStore({ initialDocument: DEFAULT_APARTMENT_DOCUMENT });
+    act(() => store.getState().select("living-bozan-table"));
     render(<PlannerWorkspace store={store} />);
 
     const kaufland = screen.getByRole("tab", { name: /Kaufland 120 → 160/ });
@@ -137,6 +138,7 @@ describe("PlannerWorkspace", () => {
   test("switches the four measured chair models and applies their footprints", async () => {
     const user = userEvent.setup();
     const store = createPlannerStore({ initialDocument: DEFAULT_APARTMENT_DOCUMENT });
+    act(() => store.getState().select("living-kaleo-chair-west"));
     render(<PlannerWorkspace store={store} />);
 
     const amber = screen.getByRole("tab", { name: /Möbelix Amber/ });
@@ -158,7 +160,6 @@ describe("PlannerWorkspace", () => {
     assert.equal(screen.getByRole("group", { name: "Außenbereich" }).querySelectorAll("option").length, 1);
     expect(screen.getByRole("option", { name: /Balkon \/ Loggia.*6,03 m²/ })).toBeTruthy();
   });
-
   test("collapses panels and exposes truthful undo and redo states", async () => {
     const user = userEvent.setup();
     const store = createPlannerStore({ initialDocument: DEFAULT_APARTMENT_DOCUMENT });
