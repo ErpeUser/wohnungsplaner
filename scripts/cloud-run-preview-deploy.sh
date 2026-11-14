@@ -36,4 +36,6 @@ preview_html="$(mktemp)"
 trap 'rm -f "$preview_html"' EXIT
 curl --fail --silent --show-error "${auth_header[@]}" "$url/" --output "$preview_html"
 grep --quiet 'Raumplaner' "$preview_html"
-printf 'Preview deployed to private endpoint: %s\n' "$url"
+curl --fail --silent --show-error "${auth_header[@]}" "$url/__codex/health" |
+  grep -Eq "\"sourceCommit\"[[:space:]]*:[[:space:]]*\"$COMMIT_SHA\""
+printf 'Preview deployed and verified: %s (%s)\n' "$url" "$COMMIT_SHA"

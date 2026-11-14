@@ -28,21 +28,23 @@ steps:
 
   - id: image-build
     name: gcr.io/cloud-builders/docker
+    env: ['_DEPLOY=${_DEPLOY}']
     entrypoint: bash
     args:
       - -euc
       - |
-        if [[ "$${_DEPLOY:-false}" == true ]]; then
+        if [[ "$${_DEPLOY:?Missing deploy flag}" == true ]]; then
           docker build --platform linux/amd64 --tag '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REGISTRY}/${_IMAGE_NAME}:$COMMIT_SHA-$BUILD_ID' .
         fi
 
   - id: image-push
     name: gcr.io/cloud-builders/docker
+    env: ['_DEPLOY=${_DEPLOY}']
     entrypoint: bash
     args:
       - -euc
       - |
-        if [[ "$${_DEPLOY:-false}" == true ]]; then
+        if [[ "$${_DEPLOY:?Missing deploy flag}" == true ]]; then
           docker push '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REGISTRY}/${_IMAGE_NAME}:$COMMIT_SHA-$BUILD_ID'
         fi
 

@@ -14,15 +14,13 @@ läuft im GitHub-Workflow `Visual Cloud Evidence`.
 
 `_DEPLOY` steht in dieser Preview-Konfiguration standardmäßig auf `true`.
 Für einen reinen Prüflauf ausdrücklich `_DEPLOY=false` übergeben: Dann
-entfallen Image-Bau, Upload und Deploy. Der Deploy-Schritt liest vorab die
-vorhandene Cloud-Run-IAM-Konfiguration und bricht bei anonymer Freigabe oder
-ausgeschalteter Invoker-Prüfung ab. Er ändert keine IAM-Bindings. Nach dem
-Deploy muss ein anonymer Abruf mit 401/403 scheitern und ein authentifizierter
-Abruf die Anwendung liefern. Diese Schutzbedingungen sind keine Bestätigung
-des aktuell bereitgestellten Dienstes; dessen Zustand muss separat geprüft
-werden.
+entfallen Image-Bau, Upload und Deploy. Die Docker-Schritte erhalten diesen
+Wert explizit als Umgebungsvariable. Der Preview-Deploy erhält die vorhandene
+Zugangsregel: öffentliche Preview direkt, private Dienste per IAM-Token.
+Er ändert keine IAM-Bindings. Erfolg wird erst gemeldet, wenn die Seite
+„Raumplaner“ liefert und `/__codex/health` den exakten gebauten Commit meldet.
 
-Die Preview veröffentlicht auf dem privaten Dienst `wohnungsplaner-preview`.
+Die Preview veröffentlicht auf dem Dienst `wohnungsplaner-preview`.
 Die Preview-URL wird nach dem ersten erfolgreichen Lauf in der Cloud-Run-
 Servicebeschreibung sichtbar. Auch diese Preview ist ein neu gebautes Containerimage;
 Cloud Run lädt keine Quelldateien live.
@@ -50,6 +48,9 @@ und [COVERAGE.md](../tests/browser/COVERAGE.md).
 
 ## Google-Konfiguration
 
+- Projekt `example-project`. Alle `gcloud builds`-Abfragen
+  müssen `--project=example-project --region=europe-west1`
+  verwenden; die globale Build-Liste zeigt diese regionalen Läufe nicht.
 - Region `europe-west1` (Belgien), Trigger `wohnungsplaner-main`, Quellfilter
   `^main$`, Build-Datei `cloudbuild.yaml`.
 - Das separate Cloud-Build-Konto erhält Schreibrechte nur auf die betreffende
