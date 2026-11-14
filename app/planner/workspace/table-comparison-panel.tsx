@@ -121,7 +121,7 @@ export function TableComparisonPanel({
         </div>
 
         <p id="table-blocked-source" className="planner-table-compare__blocked-source">
-          <strong>Blockierte Quelle:</strong> Für Temu 609726 sind noch keine belastbaren Maße verfügbar. <a href="https://www.temu.com/at/g-609726356120319.html" target="_blank" rel="noreferrer">Originalquelle öffnen</a>.
+          <strong>Referenzstatus:</strong> Alle vier Vergleichsmodelle besitzen eine belegte Grundgeometrie; die 110 × 150 cm-Variante von Temu bleibt als geschätzte Quelleninterpretation gekennzeichnet.
         </p>
 
         <div id={panelId} role="tabpanel" tabIndex={0} aria-labelledby={`table-tab-${model.id}`} className="planner-table-compare__panel">
