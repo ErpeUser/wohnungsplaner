@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useRef, useState, type KeyboardEvent } from "react";
 
 import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
 import type { CommandResult, PlannerCommand } from "../domain/commands.ts";
@@ -168,7 +168,20 @@ function ModelSwitcher({
   const tableSelected = placement.id === "living-bozan-table";
   const chairSelected = DINING_CHAIR_IDS.has(placement.id);
   const [activeTab, setActiveTab] = useState<"chair" | "table">(chairSelected ? "chair" : "table");
+  const modelTabs = useRef<Array<HTMLButtonElement | null>>([]);
   if (!tableSelected && !chairSelected) return null;
+
+  const handleModelTabKeyDown = (event: KeyboardEvent<HTMLDivElement>, index: number) => {
+    if (!["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    const next = event.key === "Home"
+      ? 0
+      : event.key === "End"
+        ? 1
+        : (index + (event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : -1) + 2) % 2;
+    setActiveTab(next === 0 ? "chair" : "table");
+    modelTabs.current[next]?.focus();
+  };
 
   const catalogItem = getFurnitureCatalogItem(placement.catalogId);
   const size = placement.size;
@@ -182,22 +195,33 @@ function ModelSwitcher({
         <span className="planner-kicker">Essgruppe</span>
         <strong>Modell kompakt wechseln</strong>
       </div>
-      <div className="planner-model-switcher__tabs" role="tablist" aria-label="Modelle wechseln">
+      <div
+        className="planner-model-switcher__tabs"
+        role="tablist"
+        aria-label="Modelle wechseln"
+        onKeyDown={(event) => handleModelTabKeyDown(event, activeTab === "chair" ? 0 : 1)}
+      >
         <button
+          ref={(element) => { modelTabs.current[0] = element; }}
+          id="planner-chair-model-tab"
           type="button"
           role="tab"
           aria-selected={activeTab === "chair"}
-          aria-controls="planner-chair-model-panel"
+          aria-controls={activeTab === "chair" ? "planner-chair-model-panel" : undefined}
+          tabIndex={activeTab === "chair" ? 0 : -1}
           className="planner-model-switcher__tab"
           onClick={() => setActiveTab("chair")}
         >
           Stuhlmodell ändern
         </button>
         <button
+          ref={(element) => { modelTabs.current[1] = element; }}
+          id="planner-table-model-tab"
           type="button"
           role="tab"
           aria-selected={activeTab === "table"}
-          aria-controls="planner-table-model-panel"
+          aria-controls={activeTab === "table" ? "planner-table-model-panel" : undefined}
+          tabIndex={activeTab === "table" ? 0 : -1}
           className="planner-model-switcher__tab"
           onClick={() => setActiveTab("table")}
         >
@@ -219,7 +243,7 @@ function ModelSwitcher({
         </span>
       </div>
       {activeTab === "chair" ? (
-        <div id="planner-chair-model-panel" role="tabpanel" className="planner-model-switcher__panel">
+        <div id="planner-chair-model-panel" role="tabpanel" aria-labelledby="planner-chair-model-tab" className="planner-model-switcher__panel">
           <ChairComparisonPanel
             key={placement.catalogId}
             document={document}
@@ -228,7 +252,7 @@ function ModelSwitcher({
           />
         </div>
       ) : (
-        <div id="planner-table-model-panel" role="tabpanel" className="planner-model-switcher__panel">
+        <div id="planner-table-model-panel" role="tabpanel" aria-labelledby="planner-table-model-tab" className="planner-model-switcher__panel">
           <TableComparisonPanel
             key={placement.catalogId}
             document={document}
