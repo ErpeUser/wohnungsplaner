@@ -205,7 +205,7 @@ const server = http.createServer(async (req, res) => {
       return res.writeHead(200, { ...securityHeaders, "Content-Type": contentTypes[path.extname(file)] || "application/octet-stream", "Cache-Control": "no-cache", "Content-Length": size }).end(req.method === "HEAD" ? undefined : data);
     }
     if (url.pathname.startsWith("/planner-assets/") || url.pathname.startsWith("/room-studies/") || url.pathname.startsWith("/zimmer1-") || url.pathname.startsWith("/vorraum-") || url.pathname === "/og-v2.png" || url.pathname === "/og.png" || url.pathname === "/favicon.svg") {
-      if (url.pathname.startsWith("/planner-assets/private-reference/")) {
+      if (url.pathname.startsWith("/planner-assets/private-reference/") || url.pathname.startsWith("/planner-assets/reference/")) {
         return fail(res, 404, "Not found");
       }
       const file = safePublicPath(url.pathname);
