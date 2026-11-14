@@ -121,7 +121,7 @@ export function TableComparisonPanel({
         </div>
 
         <p id="table-blocked-source" className="planner-table-compare__blocked-source">
-          <strong>Referenzstatus:</strong> Alle vier Vergleichsmodelle besitzen eine belegte Grundgeometrie; die 110 × 150 cm-Variante von Temu bleibt als geschätzte Quelleninterpretation gekennzeichnet.
+          <strong>Referenzstatus:</strong> Alle vier Vergleichsmodelle besitzen eine belegte Grundgeometrie; die 110 × 150 cm-Variante von Temu ist durch sichtbare Maßgrafik bestätigt.
         </p>
 
         <div id={panelId} role="tabpanel" tabIndex={0} aria-labelledby={`table-tab-${model.id}`} className="planner-table-compare__panel">
