@@ -29,7 +29,7 @@ const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
-    if (url.pathname.startsWith("/planner-assets/private-reference/") || url.pathname.startsWith("/.codex-temp/")) {
+    if (url.pathname.startsWith("/planner-assets/private-reference/") || url.pathname.startsWith("/planner-assets/reference/") || url.pathname.startsWith("/.codex-temp/")) {
       return new Response("Not Found", { status: 404 });
     }
 
@@ -41,7 +41,7 @@ const worker = {
           if (!assetPath.startsWith("/planner-assets/") && !assetPath.startsWith("/assets/")) {
             return Promise.resolve(new Response("Asset path not allowed", { status: 400 }));
           }
-          if (assetPath.startsWith("/planner-assets/private-reference/")) {
+          if (assetPath.startsWith("/planner-assets/private-reference/") || assetPath.startsWith("/planner-assets/reference/")) {
             return Promise.resolve(new Response("Asset path not allowed", { status: 404 }));
           }
           if (assetPath.includes("..")) return Promise.resolve(new Response("Asset path not allowed", { status: 400 }));
