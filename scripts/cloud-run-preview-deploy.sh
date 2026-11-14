@@ -5,7 +5,7 @@ set -euo pipefail
 [[ "${BRANCH_NAME:-}" == main ]]
 [[ "$COMMIT_SHA" =~ ^[0-9a-f]{40}$ ]]
 registry="${_REGION}-docker.pkg.dev"
-image="$registry/$PROJECT_ID/$_REGISTRY/$_SERVICE"
+image="$registry/$PROJECT_ID/$_REGISTRY/${_IMAGE_NAME:-$_SERVICE}"
 tag="$image:$COMMIT_SHA-$BUILD_ID"
 digest="$(gcloud artifacts docker images describe "$tag" --project "$PROJECT_ID" --format='value(image_summary.digest)')"
 [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]

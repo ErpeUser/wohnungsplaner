@@ -6,6 +6,7 @@ options:
 substitutions:
   _REGION: europe-west1
   _SERVICE: wohnungsplaner-preview
+  _IMAGE_NAME: wohnungsplaner
   _REGISTRY: wohnungsplaner
   _RUNTIME_ACCOUNT: wohnungsplaner-runtime
   _CONNECTION: wohnungsplaner-github
@@ -39,6 +40,7 @@ steps:
       - 'BRANCH_NAME=$BRANCH_NAME'
       - '_REGION=${_REGION}'
       - '_SERVICE=${_SERVICE}'
+      - '_IMAGE_NAME=${_IMAGE_NAME}'
       - '_REGISTRY=${_REGISTRY}'
       - '_RUNTIME_ACCOUNT=${_RUNTIME_ACCOUNT}'
       - '_CONNECTION=${_CONNECTION}'
