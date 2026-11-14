@@ -185,6 +185,9 @@ function ParametricFurniture({ fallback, materialId, catalogId, size }: { fallba
   if (catalogId === "desk-standard") return <PhotoDesk />;
   if (catalogId === "chair-office") return <PhotoOfficeChair />;
   if (catalogId === "sofa-sectional-photo") return <PhotoSectionalSofa />;
+  if (catalogId === "rug-200") return <StandardWovenRug />;
+  if (catalogId === "floor-lamp") return <DetailedFloorLamp />;
+  if (catalogId === "plant-medium") return <StandardPlant />;
   if (fallback === "rug") {
     return <mesh position={[0, 0.01, 0]} scale={[1, 0.02, 1]} geometry={SHARED_BOX} receiveShadow><primitive object={getPlannerMaterial("rug-woven")} attach="material" /></mesh>;
   }
@@ -212,6 +215,75 @@ function ParametricFurniture({ fallback, materialId, catalogId, size }: { fallba
     <RoundedBox args={[0.96, 0.96, 0.96]} radius={0.035} smoothness={2} position={[0, 0.5, 0]} castShadow receiveShadow>
       <primitive object={material} attach="material" />
     </RoundedBox>
+  );
+}
+
+
+function StandardWovenRug() {
+  const base = getPlannerMaterial("rug-woven");
+  const edge = getPlannerMaterial("rug-gala-beige-taupe");
+  return (
+    <group>
+      <RoundedBox args={[1, 0.018, 0.7]} radius={0.025} smoothness={3} position={[0, 0.012, 0]} receiveShadow>
+        <primitive object={base} attach="material" />
+      </RoundedBox>
+      <mesh position={[0, 0.024, 0]} scale={[0.94, 0.006, 0.64]} geometry={SHARED_BOX} receiveShadow>
+        <primitive object={edge} attach="material" />
+      </mesh>
+      <DetailStrip position={[0, 0.031, -0.29]} scale={[0.9, 0.004, 0.012]} materialId="rug-gala-beige-taupe" />
+      <DetailStrip position={[0, 0.031, 0.29]} scale={[0.9, 0.004, 0.012]} materialId="rug-gala-beige-taupe" />
+      <DetailStrip position={[-0.44, 0.031, 0]} scale={[0.012, 0.004, 0.58]} materialId="rug-gala-beige-taupe" />
+      <DetailStrip position={[0.44, 0.031, 0]} scale={[0.012, 0.004, 0.58]} materialId="rug-gala-beige-taupe" />
+    </group>
+  );
+}
+
+function DetailedFloorLamp() {
+  const base = getPlannerMaterial("metal-dark");
+  const stem = getPlannerMaterial("metal-satin");
+  const shade = getPlannerMaterial("shade-linen");
+  return (
+    <group>
+      <mesh position={[0, 0.035, 0]} scale={[0.42, 0.07, 0.42]} geometry={SHARED_CYLINDER} castShadow receiveShadow>
+        <primitive object={base} attach="material" />
+      </mesh>
+      <mesh position={[0, 0.78, 0]} scale={[0.045, 1.45, 0.045]} geometry={SHARED_CYLINDER} castShadow>
+        <primitive object={stem} attach="material" />
+      </mesh>
+      <mesh position={[0, 1.52, 0]} scale={[0.38, 0.28, 0.38]} geometry={SHARED_CYLINDER} castShadow receiveShadow>
+        <primitive object={shade} attach="material" />
+      </mesh>
+      <mesh position={[0, 1.45, 0]} scale={[0.11, 0.08, 0.11]} geometry={SHARED_SPHERE} castShadow>
+        <meshStandardMaterial color="#fff4da" emissive="#ffd27a" emissiveIntensity={0.65} roughness={0.32} />
+      </mesh>
+      <pointLight position={[0, 1.45, 0]} color="#ffd59a" intensity={0.18} distance={1.5} decay={2} />
+    </group>
+  );
+}
+
+function StandardPlant() {
+  const pot = getPlannerMaterial("terracotta");
+  const leaf = getPlannerMaterial("leaf-green");
+  const stems = [-0.2, -0.07, 0.08, 0.22];
+  return (
+    <group>
+      <mesh position={[0, 0.16, 0]} scale={[0.62, 0.32, 0.62]} geometry={SHARED_CYLINDER} castShadow receiveShadow>
+        <primitive object={pot} attach="material" />
+      </mesh>
+      {stems.map((x, index) => (
+        <group key={x} position={[x, 0.38, index % 2 === 0 ? -0.03 : 0.05]} rotation={[0, 0, (index - 1.5) * 0.12]}>
+          <mesh position={[0, 0.3, 0]} scale={[0.028, 0.58, 0.028]} geometry={SHARED_CYLINDER} castShadow>
+            <primitive object={getPlannerMaterial("metal-dark")} attach="material" />
+          </mesh>
+          <mesh position={[index % 2 === 0 ? -0.12 : 0.12, 0.6, index % 2 === 0 ? 0.04 : -0.04]} scale={[0.2, 0.09, 0.07]} geometry={SHARED_SPHERE} castShadow receiveShadow>
+            <primitive object={leaf} attach="material" />
+          </mesh>
+          <mesh position={[index % 2 === 0 ? 0.12 : -0.12, 0.75, index % 2 === 0 ? -0.03 : 0.03]} scale={[0.18, 0.08, 0.065]} geometry={SHARED_SPHERE} castShadow receiveShadow>
+            <primitive object={leaf} attach="material" />
+          </mesh>
+        </group>
+      ))}
+    </group>
   );
 }
 
