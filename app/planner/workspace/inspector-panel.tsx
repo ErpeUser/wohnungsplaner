@@ -144,6 +144,90 @@ function PlacementFields({
   );
 }
 
+const DINING_CHAIR_IDS = new Set([
+  "living-kaleo-chair-west",
+  "living-kaleo-chair-east",
+  "living-kaleo-chair-south",
+  "living-kaleo-chair-north",
+]);
+
+function ModelSwitcher({
+  document,
+  placement,
+  dispatch,
+  select,
+}: {
+  document: PlannerDocumentV3;
+  placement: PlannerPlacement;
+  dispatch(command: PlannerCommand): CommandResult;
+  select(id: string | null): void;
+}) {
+  const tableSelected = placement.id === "living-bozan-table";
+  const chairSelected = DINING_CHAIR_IDS.has(placement.id);
+  const [activeTab, setActiveTab] = useState<"chair" | "table">(chairSelected ? "chair" : "table");
+  if (!tableSelected && !chairSelected) return null;
+
+  const catalogItem = getFurnitureCatalogItem(placement.catalogId);
+  const size = placement.size;
+  const confidence = placement.metadata?.confidence === "confirmed" ? "Beleg bestätigt" : "Beleg geschätzt";
+
+  return (
+    <section className="planner-model-switcher" aria-label="Modellwechsel">
+      <div className="planner-model-switcher__header">
+        <span className="planner-kicker">Essgruppe</span>
+        <strong>Modell kompakt wechseln</strong>
+      </div>
+      <div className="planner-model-switcher__tabs" role="tablist" aria-label="Modelle wechseln">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "chair"}
+          aria-controls="planner-chair-model-panel"
+          className="planner-model-switcher__tab"
+          onClick={() => setActiveTab("chair")}
+        >
+          Stuhlmodell ändern
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "table"}
+          aria-controls="planner-table-model-panel"
+          className="planner-model-switcher__tab"
+          onClick={() => setActiveTab("table")}
+        >
+          Tischmodell ändern
+        </button>
+      </div>
+      <div className="planner-model-switcher__current">
+        <span className="planner-model-switcher__thumb" aria-hidden="true" />
+        <span>
+          <strong>{catalogItem?.name ?? placement.catalogId}</strong>
+          <small>{Math.round(size.width * 100)} × {Math.round(size.depth * 100)} × {Math.round(size.height * 100)} cm · {confidence}</small>
+        </span>
+      </div>
+      {activeTab === "chair" ? (
+        <div id="planner-chair-model-panel" role="tabpanel" className="planner-model-switcher__panel">
+          <ChairComparisonPanel
+            key={placement.catalogId}
+            document={document}
+            dispatch={dispatch}
+            select={select}
+          />
+        </div>
+      ) : (
+        <div id="planner-table-model-panel" role="tabpanel" className="planner-model-switcher__panel">
+          <TableComparisonPanel
+            key={placement.catalogId}
+            document={document}
+            dispatch={dispatch}
+            select={select}
+          />
+        </div>
+      )}
+    </section>
+  );
+}
 function NumericField({
   label,
   value,
