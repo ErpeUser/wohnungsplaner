@@ -88,7 +88,7 @@ export function ChairComparisonPanel({
             {model.imageUrls.slice(0, 3).map((imageUrl, index) => (
               <a key={imageUrl} href={imageUrl} target="_blank" rel="noreferrer" aria-label={`Bildbeleg ${index + 1} · ${model.shortName}`}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={imageUrl} alt={`Produktbild ${model.name}, Beleg ${index + 1}`} loading="lazy" />
+                {imageUrl.startsWith("/planner-assets/") ? <img src={imageUrl} alt={`Produktbild ${model.name}, Beleg ${index + 1}`} loading="lazy" /> : `Bildbeleg ${index + 1} öffnen ↗`}
               </a>
             ))}
           </div>

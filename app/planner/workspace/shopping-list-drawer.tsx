@@ -13,9 +13,9 @@ export function ShoppingListDrawer({ onClose }: { onClose(): void }) {
         {SHOPPING_ITEMS.map((item) => (
           <article key={item.id} className="planner-shopping__item">
             <div className={`planner-shopping__preview planner-shopping__preview--${item.type}`} aria-hidden="true">
-              {/* Product hosts are user-provided/external; next/image cannot safely optimize an open host list. */}
+              {/* External product sources stay in the link; the app serves its own previews. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              {item.imageUrl ? <img src={item.imageUrl} alt="" loading="lazy" referrerPolicy="no-referrer" onError={(event) => { event.currentTarget.hidden = true; }} /> : null}
+              {item.imageUrl?.startsWith("/planner-assets/") ? <img src={item.imageUrl} alt="" loading="lazy" onError={(event) => { event.currentTarget.hidden = true; }} /> : null}
               <i /><i /><i />
             </div>
             <div className="planner-shopping__copy">
@@ -29,6 +29,7 @@ export function ShoppingListDrawer({ onClose }: { onClose(): void }) {
                 maximumFractionDigits: 2,
               })}</strong><small>{item.amountLabel ?? `${item.quantity ?? 1} Stück`}</small></div>
               {item.url ? <a href={item.url} target="_blank" rel="noreferrer">Produkt bei {item.retailer} öffnen ↗</a> : <em className="planner-shopping__search">Suchbegriff: {item.searchHint}</em>}
+              {item.imageUrl?.startsWith("https://") && <a href={item.imageUrl} target="_blank" rel="noreferrer">Produktbild öffnen ↗</a>}
             </div>
           </article>
         ))}

@@ -6,18 +6,23 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      full_gallery:
+        description: Capture every model from four angles
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
 concurrency:
   group: quality-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - name: Check out source
         uses: actions/checkout@v4
@@ -27,7 +32,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22.13.0
+          node-version: 22.22.2
           cache: npm
 
       - name: Install locked dependencies
@@ -57,5 +62,178 @@ jobs:
       - name: Reference export validation
         run: npm run reference:check
 
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Browser and visual regression tests
+        env:
+          VISUAL_SKIP_BUILD: "1"
+          FULL_GALLERY: ${{ inputs.full_gallery }}
+        run: |
+          if [[ "$FULL_GALLERY" == "true" ]]; then
+            npm run visual:check
+          else
+            npm run test:browser
+          fi
+
+      - name: Upload browser report and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-report-${{ github.sha }}
+          path: artifacts/visual/latest/
+          if-no-files-found: warn
+          retention-days: 7
+
       - name: Dependency audit
+        if: ${{ !cancelled() }}
         run: npm audit --audit-level=high --json
+
+      - name: Build verified production container
+        run: docker build --platform linux/amd64 --tag "wohnungsplaner:${GITHUB_SHA}" .
+
+      - name: Smoke test production container
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --detach --name planner-smoke --publish 127.0.0.1:8080:8080 "wohnungsplaner:${GITHUB_SHA}"
+          trap 'docker logs planner-smoke; docker rm --force planner-smoke' EXIT
+          curl --fail --retry 20 --retry-connrefused --retry-delay 1 http://127.0.0.1:8080/ --output /tmp/planner.html
+          grep --quiet 'Raumplaner' /tmp/planner.html
+          curl --fail http://127.0.0.1:8080/planner-assets/textures/wood/oak.svg --output /dev/null
+          docker exec planner-smoke sh -c 'test -z "$(find /app -type f \( -path "*/private-reference/*" -o -path "*/planner-assets/reference/*" \) -print -quit)"'
+          test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:8080/planner-assets/reference/wohnungsplan.png)" = 404
+          test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:8080/dev/models)" = 404
+
+      - name: Save verified container for deployment
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.CLOUD_RUN_ENABLED == 'true'
+        run: docker save "wohnungsplaner:${GITHUB_SHA}" | gzip > /tmp/wohnungsplaner-image.tar.gz
+
+      - name: Upload verified container
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.CLOUD_RUN_ENABLED == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-container-${{ github.sha }}
+          path: /tmp/wohnungsplaner-image.tar.gz
+          retention-days: 1
+
+  deploy:
+    needs: quality
+    if: >-
+      github.event_name == 'push' && github.ref == 'refs/heads/main' &&
+      vars.CLOUD_RUN_ENABLED == 'true' && vars.GCP_PROJECT_ID != '' &&
+      vars.GCP_REGION != '' && vars.GCP_ARTIFACT_REPOSITORY != '' &&
+      vars.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && vars.GCP_DEPLOY_SERVICE_ACCOUNT != '' &&
+      vars.GCP_RUNTIME_SERVICE_ACCOUNT != '' && vars.CLOUD_RUN_SERVICE != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    # A newer commit must not cancel a Cloud Run update half way through.
+    concurrency:
+      group: cloud-run-production
+      cancel-in-progress: false
+    env:
+      GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      GCP_REGION: ${{ vars.GCP_REGION }}
+      GCP_ARTIFACT_REPOSITORY: ${{ vars.GCP_ARTIFACT_REPOSITORY }}
+      CLOUD_RUN_SERVICE: ${{ vars.CLOUD_RUN_SERVICE }}
+      GCP_RUNTIME_SERVICE_ACCOUNT: ${{ vars.GCP_RUNTIME_SERVICE_ACCOUNT }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Reject deployment from a superseded commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          latest="$(git ls-remote --exit-code origin refs/heads/main | cut -f1)"
+          if [[ "$latest" != "$GITHUB_SHA" ]]; then
+            echo "Refusing deployment: $GITHUB_SHA is no longer the head of main." >&2
+            exit 1
+          fi
+
+      - name: Download verified container
+        uses: actions/download-artifact@v4
+        with:
+          name: production-container-${{ github.sha }}
+          path: /tmp/production-container
+
+      - name: Load verified container
+        run: docker load --input /tmp/production-container/wohnungsplaner-image.tar.gz
+
+      - name: Authenticate using GitHub OIDC
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+
+      - name: Set up Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Publish immutable image and deploy private service
+        id: cloud-deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          registry="${GCP_REGION}-docker.pkg.dev"
+          image="${registry}/${GCP_PROJECT_ID}/${GCP_ARTIFACT_REPOSITORY}/wohnungsplaner"
+          tag="${GITHUB_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          gcloud auth configure-docker "$registry" --quiet
+          docker tag "wohnungsplaner:${GITHUB_SHA}" "${image}:${tag}"
+          docker push "${image}:${tag}"
+          digest="$(docker inspect --format '{{index .RepoDigests 0}}' "${image}:${tag}")"
+          [[ "$digest" == "${image}@sha256:"* ]]
+          existing="$(gcloud run services list --project "$GCP_PROJECT_ID" --region "$GCP_REGION" --filter "metadata.name=${CLOUD_RUN_SERVICE}" --format 'value(metadata.name)')"
+          if [[ -n "$existing" ]]; then
+            service="$(gcloud run services describe "$CLOUD_RUN_SERVICE" --project "$GCP_PROJECT_ID" --region "$GCP_REGION" --format json)"
+            if jq --exit-status '.metadata.annotations["run.googleapis.com/invoker-iam-disabled"] == "true"' <<< "$service" >/dev/null; then
+              echo 'Refusing deployment: existing service does not require IAM authentication.' >&2
+              exit 1
+            fi
+            policy="$(gcloud run services get-iam-policy "$CLOUD_RUN_SERVICE" --project "$GCP_PROJECT_ID" --region "$GCP_REGION" --format json)"
+            if jq --exit-status '[.bindings[]?.members[]? | select(. == "allUsers" or . == "allAuthenticatedUsers")] | length > 0' <<< "$policy" >/dev/null; then
+              echo 'Refusing deployment: existing service has broad IAM access. Review access manually.' >&2
+              exit 1
+            fi
+          fi
+          gcloud run deploy "$CLOUD_RUN_SERVICE" \
+            --project "$GCP_PROJECT_ID" --region "$GCP_REGION" \
+            --image "$digest" --service-account "$GCP_RUNTIME_SERVICE_ACCOUNT" \
+            --port 8080 --update-env-vars HOST=0.0.0.0 \
+            --cpu 1 --memory 1Gi --cpu-throttling \
+            --min 0 --max 1 --min-instances 0 --max-instances 1 \
+            --concurrency 40 --timeout 60 \
+            --labels "commit-sha=${GITHUB_SHA}" --quiet
+          url="$(gcloud run services describe "$CLOUD_RUN_SERVICE" --project "$GCP_PROJECT_ID" --region "$GCP_REGION" --format 'value(status.url)')"
+          [[ "$url" =~ ^https://[a-z0-9-]+(\.[a-z0-9-]+)*\.run\.app$ ]]
+          printf 'url=%s\ndigest=%s\n' "$url" "$digest" >> "$GITHUB_OUTPUT"
+
+      - name: Mint identity token for the deployed service
+        id: smoke-auth
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+          token_format: id_token
+          id_token_audience: ${{ steps.cloud-deploy.outputs.url }}
+          id_token_include_email: true
+          create_credentials_file: false
+          export_environment_variables: false
+
+      - name: Verify deployed planner over HTTPS
+        env:
+          SERVICE_URL: ${{ steps.cloud-deploy.outputs.url }}
+          DEPLOYED_DIGEST: ${{ steps.cloud-deploy.outputs.digest }}
+          ID_TOKEN: ${{ steps.smoke-auth.outputs.id_token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          unauthenticated="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' "$SERVICE_URL/")"
+          [[ "$unauthenticated" == "401" || "$unauthenticated" == "403" ]]
+          curl --fail --silent --show-error --retry 4 --retry-delay 2 \
+            --header "Authorization: Bearer $ID_TOKEN" "$SERVICE_URL/" --output /tmp/deployed-planner.html
+          grep --quiet 'Raumplaner' /tmp/deployed-planner.html
+          printf 'Deployed `%s` to %s (IAM protected).\n' "$DEPLOYED_DIGEST" "$SERVICE_URL" >> "$GITHUB_STEP_SUMMARY"

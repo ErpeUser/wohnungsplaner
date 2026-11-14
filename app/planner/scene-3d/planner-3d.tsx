@@ -8,6 +8,7 @@ import type { PlannerDocumentV3, Point2 } from "../domain/types.ts";
 import { PlannerArchitecture } from "./architecture.tsx";
 import { CameraController, createOrbitPose, dispatchWalkCommand, orbitFovForRoom, type CameraMode } from "./camera-controller.tsx";
 import { Furniture3D } from "./furniture.tsx";
+import { RenderReady } from "./render-ready.tsx";
 import { PlannerLighting } from "./lighting.tsx";
 import { PLANNER_TEXTURE_READY_EVENT } from "./materials.ts";
 import {
@@ -146,6 +147,7 @@ export function Planner3D({
             onSelect={onSelect}
             hiddenObjectIds={cutaway.hiddenObjectIds}
           />
+          <RenderReady renderKey={`${activeRoomId ?? "all"}:${document.updatedAt}:${cameraMode}`} />
         </Suspense>
         <CameraController
           document={document}

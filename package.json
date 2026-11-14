@@ -43,7 +43,11 @@
     "validate": "npm run typecheck && npm run lint && npm run assets:check && npm run test:planner && npm run test:ui && npm run test:cutover && npm run reference:check",
     "codex:update": "node scripts/codex-update.mjs",
     "codex:release": "node scripts/codex-release.mjs",
-    "reference:check": "node scripts/check-reference-exports.mjs"
+    "reference:check": "node scripts/check-reference-exports.mjs",
+    "test:browser": "node scripts/visual-run.mjs gui",
+    "visual:models": "node scripts/visual-run.mjs models",
+    "visual:check": "node scripts/visual-run.mjs all",
+    "dev:review": "node scripts/visual-dev.mjs"
   },
   "dependencies": {
     "@react-three/drei": "10.7.9",
@@ -62,6 +66,7 @@
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.69.1",
     "@cloudflare/workers-types": "^5.20261112.1",
+    "@playwright/test": "1.65.1",
     "@tailwindcss/postcss": "4.2.1",
     "@testing-library/dom": "10.4.1",
     "@testing-library/react": "16.3.3",

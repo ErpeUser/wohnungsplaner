@@ -12,6 +12,15 @@ const localBindingConfig = {
 };
 
 export default defineConfig(async () => {
+  if (process.env.PLANNER_REVIEW_DEV === "1") {
+    return {
+      server: { watch: {
+        ignored: ["**/artifacts/**", "**/.local/**", "**/dist/**"],
+        ...(isCodexSeatbeltSandbox ? { useFsEvents: false, usePolling: true } : {}),
+      } },
+      plugins: [vinext()],
+    };
+  }
   // Keep Wrangler and Miniflare state project-local. These are non-secret tool
   // settings; application environment belongs in ignored `.env*` files.
   process.env.WRANGLER_WRITE_LOGS ??= "false";

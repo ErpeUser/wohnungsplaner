@@ -1,6 +1,6 @@
 import http from "node:http";
 import fs from "node:fs/promises";
-import { rmSync } from "node:fs";
+import { readFileSync, rmSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -8,9 +8,10 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 const serverRoot = path.join(root, "dist", "server");
 const clientRoot = path.join(root, "dist", "client");
 const publicRoot = path.join(root, "public");
-const localRoot = path.join(root, ".local");
-const pidFile = path.join(localRoot, "codex-server.pid");
+const pidFile = path.resolve(root, process.env.PLANNER_PID_FILE || ".local/codex-server.pid");
+const writePidEnabled = process.env.PLANNER_WRITE_PID !== "0";
 const port = Number(process.env.PORT || 3000);
+const host = process.env.HOST || "127.0.0.1";
 const MAX_STATIC_BYTES = 12 * 1024 * 1024;
 const RATE_WINDOW_MS = 60_000;
 const RATE_LIMIT = 240;
@@ -18,6 +19,7 @@ const requestBuckets = new Map();
 let runtimeHandler;
 let runtimeError;
 let shuttingDown = false;
+let ownsPidFile = false;
 
 async function loadRuntimeHandler() {
   try {
@@ -133,16 +135,30 @@ function fail(res, statusCode, message, extraHeaders = {}) {
 }
 
 async function writePidFile() {
-  await fs.mkdir(localRoot, { recursive: true });
+  if (!writePidEnabled) return;
+  await fs.mkdir(path.dirname(pidFile), { recursive: true });
   await fs.writeFile(pidFile, `${process.pid}\n`, "utf8");
+  ownsPidFile = true;
 }
 
 async function removePidFile() {
-  await fs.rm(pidFile, { force: true }).catch(() => undefined);
+  if (!ownsPidFile) return;
+  try {
+    if ((await fs.readFile(pidFile, "utf8")).trim() === String(process.pid)) {
+      await fs.rm(pidFile, { force: true });
+    }
+  } catch { /* cleanup is best effort during shutdown */ }
+  ownsPidFile = false;
 }
 
 function removePidFileSync() {
-  try { rmSync(pidFile, { force: true }); } catch { /* cleanup is best effort during process exit */ }
+  if (!ownsPidFile) return;
+  try {
+    if (readFileSync(pidFile, "utf8").trim() === String(process.pid)) {
+      rmSync(pidFile, { force: true });
+    }
+  } catch { /* cleanup is best effort during process exit */ }
+  ownsPidFile = false;
 }
 
 async function shutdown(signal) {
@@ -207,14 +223,17 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(response.status, { ...securityHeaders, ...Object.fromEntries(response.headers) });
     return res.end(body);
   } catch (error) {
+    if (error?.code === "ENOENT" || error?.code === "ENOTDIR" || error?.statusCode === 404) {
+      return fail(res, 404, "Not found");
+    }
     console.error(error);
     return fail(res, error?.statusCode || 500, error?.statusCode === 413 ? "Asset ist zu groß." : "Lokaler Raumplaner konnte die Anfrage nicht verarbeiten.");
   }
 });
 
-server.listen(port, "127.0.0.1", () => {
+server.listen(port, host, () => {
   void writePidFile().then(() => {
-    console.log(`Lokaler Raumplaner läuft auf http://127.0.0.1:${port}`);
+    console.log(`Lokaler Raumplaner läuft auf http://${host}:${port}`);
   }).catch(async (error) => {
     console.error("PID-Datei konnte nicht geschrieben werden.", error);
     await shutdown("startup-error");

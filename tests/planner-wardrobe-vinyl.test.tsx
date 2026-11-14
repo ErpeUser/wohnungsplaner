@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, test } from "vitest";
 
 import { getWardrobeFrontLayout } from "../app/planner/scene-3d/furniture.tsx";
@@ -48,7 +48,9 @@ describe("Zimmer 1 wardrobe vinyl", () => {
       const product = screen.getByRole("heading", { name: lookupName }).closest("article");
       assert.ok(product);
       assert.match(product.textContent ?? "", new RegExp(lookupDimension.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
-      assert.match(product.querySelector("img")?.getAttribute("src") ?? "", new RegExp(lookupGalleryFile.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+      const gallerySource = product.querySelector("img")?.getAttribute("src")
+        ?? within(product).getByRole("link", { name: /Produktbild öffnen/ }).getAttribute("href");
+      assert.match(gallerySource ?? "", new RegExp(lookupGalleryFile.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
       assert.match(product.querySelector("a")?.getAttribute("href") ?? "", /top_gallery_url=/);
     }
   });

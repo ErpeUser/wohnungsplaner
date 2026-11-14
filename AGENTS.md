@@ -1,5 +1,24 @@
 # Codex repository instructions
 
+## ZUERST LESEN: Verbindliche visuelle Prüfung für KI-Agenten
+
+Diese Regeln gelten für jeden Auftrag an Oberfläche, 2D/3D-Modellen, Materialien und Kamera:
+
+1. Vor Änderungen den Git-/Pipeline-Startcheck unten ausführen. Nutzerdaten und andere Arbeitskopien erhalten.
+2. Während der Bearbeitung `npm run dev:review` verwenden, Browser auf `http://127.0.0.1:3001` öffnen. Änderungen über die automatische Vorschau prüfen; nur bei Bedarf neu starten.
+3. Für ein Möbel `/dev/models?model=<Katalog-ID>&view=perspective` öffnen. Modellgalerie und Wohnung verwenden dieselben Renderer. Gespeicherte Produktreferenzen direkt daneben vergleichen.
+4. Auf `canvas[data-render-ready="true"]` und den passenden `data-render-key` warten. Screenshots tatsächlich öffnen und betrachten. Ein Canvas, ein Screenshot-Dateiname oder ein grüner Test allein belegt keine richtige Darstellung.
+5. Nach gezielten Änderungen am laufenden Entwicklungsserver `npm run visual:models -- --live --model <Katalog-ID>`; bei GUI-Änderungen `npm run test:browser`. Ergebnisse: `artifacts/visual/latest/report/index.html` und `results.json`.
+6. Bei sichtbaren Abweichungen korrigieren und erneut aufnehmen. Baselines niemals ungeprüft ersetzen. Vor Abschluss Browserfehler, defekte Ressourcen und ausstehende Prüfschritte benennen.
+7. Vor Integration Produktionsbuild, `npm run validate` und `npm run visual:check` ausführen. GitHub `Quality` führt die Browsertests zusätzlich aus und bewahrt Berichte pro Commit auf.
+8. Keine visuelle Fertigstellung ohne tatsächliche Bildkontrolle behaupten. Falls Browser, WebGL oder Referenzen fehlen, genau diesen Teil als offen melden. Screenshot-Prüfung ersetzt keine fachliche Produkt-/Maßprüfung.
+
+Verbindlicher Ablauf und Abdeckung: [docs/VISUAL_WORKFLOW.md](docs/VISUAL_WORKFLOW.md), [tests/browser/COVERAGE.md](tests/browser/COVERAGE.md).
+Cloud-Veröffentlichung und einmalige Einrichtung: [docs/CLOUD_RUN.md](docs/CLOUD_RUN.md).
+Private Referenzen bleiben außerhalb `public/`; die Prüfrouten sind in Produktion standardmäßig abgeschaltet. Hosting ist keine automatische Berechtigung, Wohnungsreferenzen öffentlich zu machen.
+
+Die Anweisungen sind eine Arbeitsvorgabe; die automatische Gegenprüfung erfolgt im GitHub-Workflow. Kein Text kann garantieren, dass ein beliebiger externer Agent alle Regeln liest.
+
 Before making a change, run `npm run codex:preflight` (or `npm run codex:pipeline -- --mode=check`). It records the active branch, local status, origin/default branch, ahead/behind counts, remote branches, pull requests when `gh` is authenticated, and known local runtime state. Never discard an uncommitted working tree. A dirty tree that is behind or diverged from origin must be preserved and resolved explicitly.
 
 Use `npm run codex:sync` for a safe fast-forward/publish check. The synchronizer never force-pushes, resets, rebases, or merges divergent histories automatically. Use `npm run codex:reconcile` to inspect PRs; only `--merge`/full mode may request GitHub's `--auto` merge, and only for non-draft, approved, mergeable PRs with successful checks. Never delete a branch containing unique commits.
