@@ -19,6 +19,12 @@ const CATEGORIES: Array<FurnitureCategory | "Alle"> = [
   "Licht/Deko",
 ];
 
+const CONFIDENCE_LABELS: Record<AssetImportMetadata["confidence"], string> = {
+  estimated: "geschätzt",
+  confirmed: "bestätigt",
+  legacy: "aus Bestand",
+};
+
 export function CatalogPanel({
   activeRoomId,
   onAdd,
@@ -94,11 +100,11 @@ export function CatalogPanel({
         setImportError(error);
         return;
       }
-      setImportMessage(`${asset.name} wurde lokal registriert. Eine Storage-URL ist noch nicht hinterlegt.`);
+      setImportMessage(`Die Angaben zu ${asset.name} wurden lokal registriert. Die Originaldatei wurde weder gespeichert noch hochgeladen.`);
       setFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (error) {
-      setImportError(error instanceof Error ? error.message : "Der Asset-Import ist fehlgeschlagen.");
+      setImportError(error instanceof Error ? error.message : "Der Dateiimport ist fehlgeschlagen.");
     } finally {
       setImportState("idle");
     }
@@ -133,43 +139,42 @@ export function CatalogPanel({
           </button>
         ))}
       </div>
-      <section className="planner-catalog__import" aria-labelledby="planner-asset-import-title">
-        <div className="planner-catalog__import-header">
-          <div>
-            <span className="planner-kicker">Lokaler Import</span>
-            <h3 id="planner-asset-import-title">Eigenes Asset hinzufügen</h3>
-          </div>
+      <details className="planner-catalog__import" aria-labelledby="planner-asset-import-title">
+        <summary className="planner-catalog__import-summary">
+          <span id="planner-asset-import-title">Eigene Datei registrieren</span>
           <span className="planner-catalog__import-limit">max. 5 MB</span>
+        </summary>
+        <div className="planner-catalog__import-body">
+          <label className="planner-catalog__file">
+            <span>Datei (GLB, PNG, JPEG, SVG, WEBP)</span>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".glb,.png,.jpg,.jpeg,.svg,.webp,model/gltf-binary,image/png,image/jpeg,image/svg+xml,image/webp"
+              onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
+            />
+          </label>
+          {file ? <p className="planner-catalog__file-name" title={file.name}>{file.name} · {formatBytes(file.size)}</p> : null}
+          <div className="planner-catalog__import-grid">
+            <label>Name<input value={name} onChange={(event) => setName(event.target.value)} placeholder="z. B. Meine Leuchte" /></label>
+            <label>Kategorie<select value={assetCategory} onChange={(event) => setAssetCategory(event.target.value as FurnitureCategory)}>{CATEGORIES.filter((entry): entry is FurnitureCategory => entry !== "Alle").map((entry) => <option key={entry}>{entry}</option>)}</select></label>
+            <label>Breite (m)<input inputMode="decimal" type="number" min="0.01" step="0.01" value={width} onChange={(event) => setWidth(event.target.value)} /></label>
+            <label>Tiefe (m)<input inputMode="decimal" type="number" min="0.01" step="0.01" value={depth} onChange={(event) => setDepth(event.target.value)} /></label>
+            <label>Höhe (m)<input inputMode="decimal" type="number" min="0.01" step="0.01" value={height} onChange={(event) => setHeight(event.target.value)} /></label>
+            <label>Material-ID<input value={materialId} onChange={(event) => setMaterialId(event.target.value)} /></label>
+            <label>Quelle<input value={source} onChange={(event) => setSource(event.target.value)} /></label>
+            <label>Maßangaben<select value={confidence} onChange={(event) => setConfidence(event.target.value as AssetImportMetadata["confidence"])}>{Object.entries(CONFIDENCE_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+            <label>Lizenz<select value={license} onChange={(event) => setLicense(event.target.value as AssetImportMetadata["license"])}><option value="CC0-1.0">CC0-1.0</option><option value="MIT">MIT</option></select></label>
+            <label className="planner-catalog__import-wide">Quell-URL (optional)<input type="url" value={sourceUrl} onChange={(event) => setSourceUrl(event.target.value)} placeholder="https://…" /></label>
+          </div>
+          <button type="button" className="planner-catalog__import-button" disabled={!file || !onRegisterAsset || importState !== "idle"} onClick={() => void importAsset()}>
+            {importState === "reading" ? "Datei wird geprüft …" : importState === "registering" ? "Angaben werden registriert …" : "Angaben lokal registrieren"}
+          </button>
+          <p className="planner-catalog__import-hint">Die Datei wird lokal geprüft. Gespeichert werden nur ihre Angaben; die Originaldatei wird weder gespeichert noch hochgeladen.</p>
+          {importError ? <p className="planner-catalog__import-error" role="alert">{importError}</p> : null}
+          {importMessage ? <p className="planner-catalog__import-success" role="status">{importMessage}</p> : null}
         </div>
-        <label className="planner-catalog__file">
-          <span>Datei (GLB, PNG, JPEG, SVG, WEBP)</span>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".glb,.png,.jpg,.jpeg,.svg,.webp,model/gltf-binary,image/png,image/jpeg,image/svg+xml,image/webp"
-            onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
-          />
-        </label>
-        {file ? <p className="planner-catalog__file-name" title={file.name}>{file.name} · {formatBytes(file.size)}</p> : null}
-        <div className="planner-catalog__import-grid">
-          <label>Name<input value={name} onChange={(event) => setName(event.target.value)} placeholder="z. B. Meine Leuchte" /></label>
-          <label>Kategorie<select value={assetCategory} onChange={(event) => setAssetCategory(event.target.value as FurnitureCategory)}>{CATEGORIES.filter((entry): entry is FurnitureCategory => entry !== "Alle").map((entry) => <option key={entry}>{entry}</option>)}</select></label>
-          <label>Breite (m)<input inputMode="decimal" type="number" min="0.01" step="0.01" value={width} onChange={(event) => setWidth(event.target.value)} /></label>
-          <label>Tiefe (m)<input inputMode="decimal" type="number" min="0.01" step="0.01" value={depth} onChange={(event) => setDepth(event.target.value)} /></label>
-          <label>Höhe (m)<input inputMode="decimal" type="number" min="0.01" step="0.01" value={height} onChange={(event) => setHeight(event.target.value)} /></label>
-          <label>Material-ID<input value={materialId} onChange={(event) => setMaterialId(event.target.value)} /></label>
-          <label>Quelle<input value={source} onChange={(event) => setSource(event.target.value)} /></label>
-          <label>Confidence<select value={confidence} onChange={(event) => setConfidence(event.target.value as AssetImportMetadata["confidence"])}><option value="estimated">geschätzt</option><option value="confirmed">bestätigt</option><option value="legacy">Bestand</option></select></label>
-          <label>Lizenz<select value={license} onChange={(event) => setLicense(event.target.value as AssetImportMetadata["license"])}><option value="CC0-1.0">CC0-1.0</option><option value="MIT">MIT</option></select></label>
-          <label className="planner-catalog__import-wide">Quell-URL (optional)<input type="url" value={sourceUrl} onChange={(event) => setSourceUrl(event.target.value)} placeholder="https://…" /></label>
-        </div>
-        <button type="button" className="planner-catalog__import-button" disabled={!file || !onRegisterAsset || importState !== "idle"} onClick={() => void importAsset()}>
-          {importState === "reading" ? "Datei wird geprüft …" : importState === "registering" ? "Asset wird registriert …" : "Asset lokal registrieren"}
-        </button>
-        <p className="planner-catalog__import-hint">Die Datei wird nur lokal validiert. Ohne freigegebenen Storage-Vertrag wird kein URL-Upload vorgetäuscht.</p>
-        {importError ? <p className="planner-catalog__import-error" role="alert">{importError}</p> : null}
-        {importMessage ? <p className="planner-catalog__import-success" role="status">{importMessage}</p> : null}
-      </section>
+      </details>
       <div className="planner-catalog__items" role="list" aria-label="Möbel">
         {items.map((item) => (
           <article key={item.id} role="listitem" className="planner-catalog__item">
@@ -191,9 +196,9 @@ export function CatalogPanel({
         {items.length === 0 ? <p className="planner-catalog__empty">Keine passenden Möbel gefunden.</p> : null}
       </div>
       {document?.assets?.length ? (
-        <section className="planner-catalog__assets" aria-label="Registrierte lokale Assets">
-          <h3>Registrierte Assets</h3>
-          {document.assets.map((asset) => <article key={asset.assetId} className="planner-catalog__asset-record"><strong>{asset.name}</strong><small>{asset.normalizedSize.width.toFixed(2)} × {asset.normalizedSize.depth.toFixed(2)} × {asset.normalizedSize.height.toFixed(2)} m · {asset.confidence}</small><small>{asset.assetUrl ? "Storage-URL hinterlegt" : "nur lokal registriert"}</small></article>)}
+        <section className="planner-catalog__assets" aria-label="Registrierte Dateiangaben">
+          <h3>Registrierte Dateiangaben</h3>
+          {document.assets.map((asset) => <article key={asset.assetId} className="planner-catalog__asset-record"><strong>{asset.name}</strong><small>{asset.normalizedSize.width.toFixed(2)} × {asset.normalizedSize.depth.toFixed(2)} × {asset.normalizedSize.height.toFixed(2)} m · {CONFIDENCE_LABELS[asset.confidence]}</small><small>{asset.assetUrl ? "Dateilink hinterlegt" : "nur Angaben registriert"}</small></article>)}
         </section>
       ) : null}
       <p className="planner-panel__note">Alt beim Ziehen löst das Raster. Pfeiltasten bewegen 1 cm, mit Umschalt 10 cm.</p>

@@ -517,7 +517,6 @@ function TejoHallway() {
       <mesh position={[-0.327, 0.53, 0.496]} scale={[0.235, 0.49, 0.008]} geometry={SHARED_BOX} receiveShadow>
         <primitive object={mirror} attach="material" />
       </mesh>
-      <DetailStrip position={[-0.327, 0.53, 0.505]} scale={[0.285, 0.012, 0.012]} materialId="metal-satin" />
       <DetailStrip position={[-0.327, 0.53, 0.459]} scale={[0.285, 0.012, 0.012]} materialId="metal-satin" />
       <DetailStrip position={[-0.47, 0.53, 0.482]} scale={[0.012, 0.53, 0.012]} materialId="metal-satin" />
       <DetailStrip position={[-0.184, 0.53, 0.482]} scale={[0.012, 0.53, 0.012]} materialId="metal-satin" />
