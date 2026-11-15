@@ -42,6 +42,32 @@ test("preview deploy makes no cloud calls when deployment is disabled or unspeci
   }
 });
 
+test("preview deploy rejects every non-preview service before any cloud call", cloudShell, async (t) => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "planner-deploy-service-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const gcloud = path.join(directory, "gcloud");
+  await writeFile(gcloud, '#!/bin/sh\nprintf "%s\\n" "$*" >> "$DEPLOY_TEST_LOG"\nexit 90\n');
+  await chmod(gcloud, 0o755);
+  for (const [index, service] of ["wohnungsplaner", "wohnungsplaner-production", "test-preview", "wohnungsplaner-preview-other", "", undefined].entries()) {
+    await t.test(`service ${JSON.stringify(service) ?? "unset"}`, async () => {
+      const log = path.join(directory, `cloud-calls-${index}.txt`);
+      const env: NodeJS.ProcessEnv = {
+        ...process.env,
+        PATH: `${directory}${path.delimiter}${process.env.PATH ?? ""}`,
+        DEPLOY_TEST_LOG: log,
+        DEPLOY_TEST_BIN: directory,
+        PROJECT_ID: "test-project", COMMIT_SHA: "0".repeat(40), BUILD_ID: "test-build", BRANCH_NAME: "main",
+        _REGION: "europe-west1", _REGISTRY: "test-registry", _RUNTIME_ACCOUNT: "test-runtime", _DEPLOY: "true",
+      };
+      if (service === undefined) delete env._SERVICE;
+      else env._SERVICE = service;
+      const result = spawnSync(bash, deployArgs, { env, encoding: "utf8", timeout: 10_000 });
+      assert.equal(result.status, 1, `Non-preview target must be refused: ${result.stderr}`);
+      await assert.rejects(readFile(log), { code: "ENOENT" });
+    });
+  }
+});
+
 test("preview deploy verifies the live commit and rejects a stale revision", cloudShell, async (t) => {
   const directory = await mkdtemp(path.join(os.tmpdir(), "planner-deploy-iam-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
@@ -73,7 +99,7 @@ esac
       DEPLOY_TEST_BIN: directory,
       DEPLOY_TEST_HEALTH_COMMIT: "0".repeat(40),
       PROJECT_ID: "test-project", COMMIT_SHA: "0".repeat(40), BUILD_ID: "test-build", BRANCH_NAME: "main",
-      _REGION: "europe-west1", _SERVICE: "test-preview", _REGISTRY: "test-registry", _RUNTIME_ACCOUNT: "test-runtime", _DEPLOY: "true",
+      _REGION: "europe-west1", _SERVICE: "wohnungsplaner-preview", _REGISTRY: "test-registry", _RUNTIME_ACCOUNT: "test-runtime", _DEPLOY: "true",
     },
     encoding: "utf8" as const, timeout: 10_000,
   };

@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, test } from "vitest";
 import { useStore } from "zustand";
@@ -93,5 +93,39 @@ describe("inspector editing", () => {
     await user.selectOptions(screen.getByRole("combobox", { name: "Stuhl auswählen" }), "living-kaleo-chair-north");
     expect(store.getState().selectionId).toBe("living-kaleo-chair-north");
     expect(screen.getByRole("tab", { name: "Stuhlmodell ändern" }).getAttribute("aria-selected")).toBe("true");
+  });
+
+  test("switches directly among the four named seats and keeps model changes in undo redo history", async () => {
+    const user = userEvent.setup();
+    const store = setup("living-kaleo-chair-east");
+    const before = store.getState().document;
+    const chooser = screen.getByRole("combobox", { name: "Stuhl auswählen" });
+    expect(chooser.querySelector("option:checked")?.getAttribute("value")).toBe("living-kaleo-chair-east");
+    expect(within(chooser).getAllByRole("option").map((option) => option.textContent)).toEqual([
+      "Stuhl 1 · Armlehnstuhl Kaleo", "Stuhl 2 · Armlehnstuhl Kaleo", "Stuhl 3 · Armlehnstuhl Kaleo", "Stuhl 4 · Armlehnstuhl Kaleo",
+    ]);
+
+    for (const id of ["living-kaleo-chair-west", "living-kaleo-chair-south", "living-kaleo-chair-north"]) {
+      await user.selectOptions(screen.getByRole("combobox", { name: "Stuhl auswählen" }), id);
+      expect(store.getState().selectionId).toBe(id);
+      expect(store.getState().document).toBe(before);
+      expect(store.getState().canUndo).toBe(false);
+    }
+    const inspector = screen.getByRole("region", { name: "Eigenschaften" });
+    expect(inspector.querySelector(".planner-selection-summary strong")?.textContent).toBe("Stuhl 4 · Armlehnstuhl Kaleo");
+    expect(inspector.querySelector(".planner-model-switcher__current strong")?.textContent).toBe("Stuhl 4 · Armlehnstuhl Kaleo");
+
+    await user.selectOptions(screen.getByRole("combobox", { name: "Stuhlmodell" }), "temu-faux-leather-metal");
+    await user.click(screen.getByRole("button", { name: "Auf diesen Stuhl anwenden" }));
+    const after = store.getState().document;
+    expect(after.placements.find((item) => item.id === "living-kaleo-chair-north")?.catalogId).toBe("chair-temu-faux-leather-metal");
+    expect(after.placements.filter((item) => item.id !== "living-kaleo-chair-north")).toEqual(before.placements.filter((item) => item.id !== "living-kaleo-chair-north"));
+    expect(inspector.querySelector(".planner-selection-summary strong")?.textContent).toBe("Stuhl 4 · Temu Kunstlederstuhl");
+    act(() => store.getState().undo());
+    expect(store.getState().document.placements).toEqual(before.placements);
+    expect(store.getState().canUndo).toBe(false);
+    act(() => store.getState().redo());
+    expect(store.getState().document.placements).toEqual(after.placements);
+    expect(store.getState().selectionId).toBe("living-kaleo-chair-north");
   });
 });

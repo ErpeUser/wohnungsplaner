@@ -6,6 +6,12 @@ if [[ "${_DEPLOY:-false}" != true ]]; then
   exit 0
 fi
 
+# Trigger substitutions must never redirect this entry point to production.
+if [[ "${_SERVICE:-}" != wohnungsplaner-preview ]]; then
+  printf 'Refusing preview deployment: _SERVICE must be wohnungsplaner-preview.\n' >&2
+  exit 1
+fi
+
 : "${PROJECT_ID:?}" "${COMMIT_SHA:?}" "${BUILD_ID:?}" "${_REGION:?}" "${_SERVICE:?}" "${_REGISTRY:?}" "${_RUNTIME_ACCOUNT:?}"
 [[ "${BRANCH_NAME:-}" == main ]]
 [[ "$COMMIT_SHA" =~ ^[0-9a-f]{40}$ ]]

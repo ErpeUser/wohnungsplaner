@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, test, vi } from "vitest";
 
@@ -117,6 +117,9 @@ describe("PlannerWorkspace", () => {
     render(<PlannerWorkspace store={store} />);
 
     const model = screen.getByRole("combobox", { name: "Tischmodell" });
+    expect(within(model).getAllByRole("option").map((option) => option.getAttribute("value"))).toEqual([
+      "aliexpress-100-140", "temu-606997-120-160", "kaufland-567080013-120-160",
+    ]);
     await user.selectOptions(model, "kaufland-567080013-120-160");
     expect(screen.getByText("120 × 80 × 75,5 cm")).toBeTruthy();
     expect(screen.getByRole("link", { name: /Originalquelle.*Kaufland/i }).getAttribute("href")).toBe("https://www.kaufland.at/product/567080013/");
@@ -127,10 +130,55 @@ describe("PlannerWorkspace", () => {
     assert.equal(store.getState().document.placements.find((item) => item.id === "living-bozan-table")?.catalogId, "dining-table-kaufland-567080013-120-160");
     assert.deepEqual(store.getState().document.placements.find((item) => item.id === "living-bozan-table")?.size, { width: 1.6, depth: 0.8, height: 0.755 });
 
-    await user.selectOptions(screen.getByRole("combobox", { name: "Tischmodell" }), "temu-609726-unknown");
-    expect(screen.getByText("110 × 110 × 75 cm")).toBeTruthy();
+    await user.selectOptions(screen.getByRole("combobox", { name: "Tischmodell" }), "temu-606997-120-160");
+    expect(screen.getByText("120 × 120 × 75,5 cm")).toBeTruthy();
     await user.selectOptions(screen.getByRole("combobox", { name: "Ausziehzustand" }), "extended");
-    expect(screen.getByText("150 × 110 × 75 cm")).toBeTruthy();
+    expect(screen.getByText("160 × 120 × 75,5 cm")).toBeTruthy();
+  });
+
+  test("preserves an existing extra table while offering only the three primary replacements", async () => {
+    const user = userEvent.setup();
+    const initialDocument = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
+    const table = initialDocument.placements.find((item) => item.id === "living-bozan-table")!;
+    table.catalogId = "dining-table-temu-609726-110-150";
+    table.size = { width: 1.1, depth: 1.1, height: 0.75 };
+    const store = createPlannerStore({ initialDocument });
+    store.getState().select(table.id);
+    render(<PlannerWorkspace store={store} />);
+
+    const model = screen.getByRole("combobox", { name: "Tischmodell" });
+    expect(model.querySelector("option:checked")?.getAttribute("value")).toBe("temu-609726-unknown");
+    const current = within(model).getByRole("option", { name: "Aktuell im Plan · Temu 110 → 150" });
+    expect(current.hasAttribute("disabled")).toBe(true);
+    expect(within(model).getAllByRole("option").filter((option) => !option.hasAttribute("disabled")).map((option) => option.getAttribute("value"))).toEqual([
+      "aliexpress-100-140", "temu-606997-120-160", "kaufland-567080013-120-160",
+    ]);
+    expect(screen.getByText("110 × 110 × 75 cm")).toBeTruthy();
+    await user.selectOptions(model, "aliexpress-100-140");
+    expect(store.getState().document).toBe(initialDocument);
+    expect(store.getState().canUndo).toBe(false);
+  });
+
+  test("keeps each dining seat identifiable in the object chooser and accessible list after reordering", () => {
+    const initialDocument = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
+    initialDocument.placements.reverse();
+    const store = createPlannerStore({ initialDocument });
+    render(<PlannerWorkspace store={store} />);
+
+    const chooser = screen.getByRole("combobox", { name: "Planobjekt auswählen" });
+    const list = screen.getByLabelText("Planobjekte als Liste");
+    for (const [id, label] of [
+      ["living-kaleo-chair-west", "Stuhl 1 · Armlehnstuhl Kaleo"],
+      ["living-kaleo-chair-east", "Stuhl 2 · Armlehnstuhl Kaleo"],
+      ["living-kaleo-chair-south", "Stuhl 3 · Armlehnstuhl Kaleo"],
+      ["living-kaleo-chair-north", "Stuhl 4 · Armlehnstuhl Kaleo"],
+    ]) {
+      expect(within(chooser).getByRole("option", { name: label }).getAttribute("value")).toBe(id);
+      expect(within(list).getByRole("button", { name: label })).toBeTruthy();
+    }
+    expect(within(chooser).getByRole("option", { name: "Chefsessel Creme mit Fußstütze" }).getAttribute("value")).toBe("zimmer1-chair");
+    expect(store.getState().document).toBe(initialDocument);
+    expect(store.getState().canUndo).toBe(false);
   });
 
   test("applies the chosen chair footprint only to the selected east seat", async () => {

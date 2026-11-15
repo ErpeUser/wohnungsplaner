@@ -92,6 +92,62 @@ describe("source-backed furniture geometry", () => {
   });
 
   test.each([
+    ["closed", 1.10],
+    ["extended", 1.50],
+  ] as const)("Temu round pedestal table keeps its recorded %s footprint in world metres", async (variant, width) => {
+    const model = await furnitureScene("dining-table-temu-609726-110-150", "oak-natural", variant);
+    try {
+      const bounds = new THREE.Box3().setFromObject(model.scene);
+      const size = bounds.getSize(new THREE.Vector3());
+      expect(size.x).toBeCloseTo(width, 3);
+      expect(size.z).toBeCloseTo(1.10, 3);
+      expect(bounds.max.y).toBeCloseTo(0.75, 3);
+    } finally { await model.dispose(); }
+  });
+
+  test("extending the Temu round table changes the top without stretching its pedestal", async () => {
+    const closed = await furnitureScene("dining-table-temu-609726-110-150", "oak-natural", "closed");
+    const extended = await furnitureScene("dining-table-temu-609726-110-150", "oak-natural", "extended");
+    try {
+      const closedSide = ray(closed.scene, [2, 0.35, 0], [-1, 0, 0])[0];
+      const extendedSide = ray(extended.scene, [2, 0.35, 0], [-1, 0, 0])[0];
+      expect(closedSide).toBeDefined();
+      expect(extendedSide).toBeDefined();
+      expect(extendedSide.point.x).toBeCloseTo(closedSide.point.x, 4);
+    } finally { await closed.dispose(); await extended.dispose(); }
+  });
+
+  test.each(["closed", "extended"] as const)("Temu round pedestal has floor contact in its %s state", async (variant) => {
+    const model = await furnitureScene("dining-table-temu-609726-110-150", "oak-natural", variant);
+    try {
+      expect(new THREE.Box3().setFromObject(model.scene).min.y).toBeCloseTo(0, 4);
+    } finally { await model.dispose(); }
+  });
+
+  test("Temu round pedestal connects its flutes, foot and tabletop support", async () => {
+    const model = await furnitureScene("dining-table-temu-609726-110-150", "oak-natural");
+    try {
+      // Halfway between adjacent flute strips the solid core must still reach
+      // their inner edge. A ring of detached strips is not a fluted cylinder.
+      const angle = Math.PI / 28;
+      const surface = ray(model.scene, [2 * Math.cos(angle), 0.35, 2 * Math.sin(angle)], [-Math.cos(angle), 0, -Math.sin(angle)])[0];
+      expect(surface).toBeDefined();
+      expect(Math.hypot(surface.point.x, surface.point.z)).toBeGreaterThan(0.33);
+      for (let index = 0; index < 28; index += 1) {
+        const fluteAngle = index * Math.PI * 2 / 28;
+        const hits = ray(model.scene, [2 * Math.cos(fluteAngle), 0.35, 2 * Math.sin(fluteAngle)], [-Math.cos(fluteAngle), 0, -Math.sin(fluteAngle)]);
+        const core = hits.find((hit) => ((hit.object as THREE.Mesh).material as THREE.Material).name === "planner-material-oak-natural");
+        expect(core).toBeDefined();
+        // The inner edge of each existing strip is at radius 0.3399 m.
+        expect(Math.hypot(core!.point.x, core!.point.z)).toBeGreaterThanOrEqual(0.3399);
+      }
+      for (const height of [0.10, 0.65]) {
+        expect(ray(model.scene, [0, height, 1], [0, 0, -1]).length).toBeGreaterThan(0);
+      }
+    } finally { await model.dispose(); }
+  });
+
+  test.each([
     ["chair-kaleo-chenille-beige", "fabric-kaleo-beige", 0.50],
     ["chair-amber-chenille-beige", "fabric-amber-beige", 0.49],
     ["chair-temu-swivel-upholstered", "fabric-temu-sand", 0.40],
@@ -200,12 +256,12 @@ describe("photographed fixed fixture silhouettes", () => {
     } finally { await model.dispose(); }
   });
 
-  test("the hall video intercom has a broad upper screen inside its existing envelope", async () => {
+  test("the hall video intercom has a broad upper screen inside its documented housing", async () => {
     const model = await architectureScene("intercom");
     try {
       const bounds = new THREE.Box3().setFromObject(model.scene);
-      expect(bounds.max.x - bounds.min.x).toBeCloseTo(0.145, 4);
-      expect(bounds.max.y - bounds.min.y).toBeCloseTo(0.185, 4);
+      expect(bounds.max.x - bounds.min.x).toBeCloseTo(0.125, 4);
+      expect(bounds.max.y - bounds.min.y).toBeCloseTo(0.165, 4);
       const screen = ray(model.scene, [-0.04, 0.035, 1], [0, 0, -1])[0];
       expect(screen).toBeDefined();
       expect(((screen.object as THREE.Mesh).material as THREE.Material).name).toBe("planner-material-screen-black");

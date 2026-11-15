@@ -212,6 +212,8 @@ const server = http.createServer(async (req, res) => {
       const healthPayload = JSON.stringify({
         status: "ok",
         sourceCommit: process.env.CODEX_SOURCE_COMMIT || null,
+        service: process.env.K_SERVICE || null,
+        revision: process.env.K_REVISION || null,
         pid: process.pid,
       });
       return res.writeHead(200, {

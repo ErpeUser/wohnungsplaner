@@ -18,8 +18,9 @@
     "status": "documented"
   },
   "dimensions": {
-    "status": "verified-in-alias-manifest",
-    "verified": [
+    "status": "estimated-in-alias-manifest",
+    "verified": [],
+    "estimated": [
       {
         "closedCm": {
           "width": 120,
@@ -32,8 +33,7 @@
           "height": 75.5
         }
       }
-    ],
-    "estimated": []
+    ]
   },
   "assetFiles": [
     "references/normal.png"
@@ -70,7 +70,8 @@
     "Exact dimensions and product identity require source-specific verification before a photorealistic asset can be claimed.",
     "This folder is a retained source alias; runtime catalog resolution points to the canonical dining-table folder.",
     "The source URL is intentionally stored on this retained alias; the canonical runtime folder carries the synchronized URL.",
-    "The existing references/normal.png is a reference image, not a verified PBR normal texture."
+    "The existing references/normal.png is a reference image, not a verified PBR normal texture.",
+    "Dimension confidence follows app/planner/tables/table-models.ts and docs/table-sources.json: estimated; all existing numeric dimensions are retained."
   ],
   "auditedAt": "2026-11-12"
 }

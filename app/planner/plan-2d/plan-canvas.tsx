@@ -4,7 +4,7 @@ import Konva from "konva";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { Stage } from "react-konva";
 
-import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
+import { placementLabel } from "../workspace/placement-label.ts";
 import { placementPolygon } from "../domain/geometry.ts";
 import type { SnapGuide } from "../domain/snapping.ts";
 import type { PlannerDocumentV3, PlannerViewPreferences } from "../domain/types.ts";
@@ -156,7 +156,7 @@ export function PlanCanvas({
             <option value="">Kein Objekt gewählt</option>
             {document.placements
               .filter((item) => !activeRoomId || item.roomId === activeRoomId)
-              .map((item) => <option key={item.id} value={item.id}>{getFurnitureCatalogItem(item.catalogId)?.name ?? item.catalogId}</option>)}
+              .map((item) => <option key={item.id} value={item.id}>{placementLabel(item)}</option>)}
             {document.builtIns
               .filter((item) => !activeRoomId || item.roomId === activeRoomId)
               .map((item) => <option key={item.id} value={item.id}>{item.label} (fix)</option>)}
@@ -187,7 +187,7 @@ export function PlanCanvas({
         <ul>
           {scene.rooms.map((room) => <li key={room.id}>{room.name}, {Math.round(room.area * 100) / 100} m²</li>)}
           {document.placements.filter((item) => !activeRoomId || item.roomId === activeRoomId).map((item) => (
-            <li key={item.id}><button type="button" onClick={() => onSelect(item.id)}>{getFurnitureCatalogItem(item.catalogId)?.name ?? item.catalogId}</button></li>
+            <li key={item.id}><button type="button" onClick={() => onSelect(item.id)}>{placementLabel(item)}</button></li>
           ))}
           {scene.builtIns.map((item) => (
             <li key={item.id}><button type="button" onClick={() => onSelect(item.id)}>{item.label} (fix)</button></li>
@@ -421,7 +421,7 @@ function PlanSvgFallback({
           strokeDasharray={item.metadata?.confidence === "estimated" || item.metadata?.confidence === "legacy" ? "0.08 0.05" : undefined}
           data-source={item.metadata?.source}
           data-confidence={item.metadata?.confidence}
-          aria-label={`${getFurnitureCatalogItem(item.catalogId)?.name ?? item.catalogId}${item.metadata?.confidence === "estimated" ? " (Schätzung)" : ""}`}
+          aria-label={`${placementLabel(item)}${item.metadata?.confidence === "estimated" ? " (Schätzung)" : ""}`}
           onClick={(event) => { event.stopPropagation(); onSelect(item.id); }}
         />
       ))}

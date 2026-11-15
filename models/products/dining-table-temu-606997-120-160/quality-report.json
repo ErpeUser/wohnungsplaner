@@ -22,8 +22,9 @@
     "status": "documented"
   },
   "dimensions": {
-    "status": "verified-from-source-alias",
-    "verified": [
+    "status": "estimated-from-source-alias",
+    "verified": [],
+    "estimated": [
       {
         "closedCm": {
           "width": 120,
@@ -36,8 +37,7 @@
           "height": 75.5
         }
       }
-    ],
-    "estimated": []
+    ]
   },
   "assetFiles": [],
   "reconstruction": {
@@ -70,7 +70,8 @@
     "No mesh asset is present in this model folder; existing runtime GLBs remain outside models/** and are not copied into this folder.",
     "No repository PBR texture set is present; material fidelity remains runtime-defined.",
     "Exact dimensions and product identity require source-specific verification before a photorealistic asset can be claimed.",
-    "This canonical runtime folder inherits source metadata from a retained short-name alias; the viewer still uses the parametric renderer."
+    "This canonical runtime folder inherits source metadata from a retained short-name alias; the viewer still uses the parametric renderer.",
+    "Dimension confidence follows app/planner/tables/table-models.ts and docs/table-sources.json: estimated; all existing numeric dimensions are retained."
   ],
   "auditedAt": "2026-11-12"
 }

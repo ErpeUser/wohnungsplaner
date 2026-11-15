@@ -451,8 +451,8 @@ function FixtureMarker({ fixture }: { fixture: SceneFixture }) {
       ) : null}
       {fixture.kind === "intercom" ? (
         <group>
-          {/* Photo-backed silhouette; retain the existing 145 × 185 mm plan envelope. */}
-          <RoundedBox args={[0.145, 0.185, 0.035]} radius={0.004} smoothness={3} position={[0, 0, 0.014]} castShadow><primitive object={white} attach="material" /></RoundedBox>
+          {/* Recorded user size: 125 × 165 mm. The unchanged mounting centre keeps the lower edge at 133 cm. */}
+          <RoundedBox args={[0.125, 0.165, 0.035]} radius={0.004} smoothness={3} position={[0, 0, 0.014]} castShadow><primitive object={white} attach="material" /></RoundedBox>
           <mesh position={[0, 0.034, 0.034]} scale={[0.104, 0.066, 0.004]} geometry={SHARED_BOX}><primitive object={dark} attach="material" /></mesh>
           {[-0.028, 0, 0.028].map((x) => <mesh key={x} position={[x, -0.043, 0.034]} rotation={[Math.PI / 2, 0, 0]} scale={[0.009, 0.004, 0.009]} geometry={SHARED_CYLINDER}><primitive object={metal} attach="material" /></mesh>)}
         </group>

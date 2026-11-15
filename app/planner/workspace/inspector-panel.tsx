@@ -10,6 +10,7 @@ import { getChairModelForCatalogId } from "../chairs/chair-models.ts";
 import { getTableModelForCatalogId } from "../tables/table-models.ts";
 import { TableComparisonPanel } from "./table-comparison-panel.tsx";
 import { ModelImage, referenceKind } from "./model-evidence.tsx";
+import { DINING_CHAIR_IDS, placementLabel } from "./placement-label.ts";
 import "./model-switcher.css";
 
 type InspectorPanelProps = {
@@ -64,7 +65,7 @@ function PlacementFields({
     <div className="planner-inspector__form" aria-label="Numerische Objektbearbeitung">
       <div className="planner-selection-summary">
         <span className="planner-selection-summary__swatch" aria-hidden="true" />
-        <span><strong>{catalogItem?.name ?? placement.catalogId}</strong><small>{placement.roomId}</small></span>
+        <span><strong>{placementLabel(placement)}</strong><small>{placement.roomId}</small></span>
       </div>
       <ModelSwitcher document={document} placement={placement} dispatch={dispatch} select={select} />
       <fieldset>
@@ -148,13 +149,6 @@ function PlacementFields({
   );
 }
 
-const DINING_CHAIR_IDS = new Set([
-  "living-kaleo-chair-west",
-  "living-kaleo-chair-east",
-  "living-kaleo-chair-south",
-  "living-kaleo-chair-north",
-]);
-
 function ModelSwitcher({
   document,
   placement,
@@ -167,7 +161,7 @@ function ModelSwitcher({
   select(id: string | null): void;
 }) {
   const tableSelected = placement.id === "living-bozan-table";
-  const chairSelected = DINING_CHAIR_IDS.has(placement.id);
+  const chairSelected = DINING_CHAIR_IDS.some((id) => id === placement.id);
   const [activeTab, setActiveTab] = useState<"chair" | "table">(chairSelected ? "chair" : "table");
   const modelTabs = useRef<Array<HTMLButtonElement | null>>([]);
   if (!tableSelected && !chairSelected) return null;
@@ -235,7 +229,7 @@ function ModelSwitcher({
         </a> : <span className="planner-model-switcher__thumb"><ModelImage name={catalogItem?.name ?? target.catalogId} /></span>}
         <span>
           <small>Aktuell im Plan</small>
-          <strong>{catalogItem?.name ?? target.catalogId}</strong>
+          <strong>{placementLabel(target)}</strong>
           <small>{Math.round(target.size.width * 100)} × {Math.round(target.size.depth * 100)} × {Math.round(target.size.height * 100)} cm · {confidence}</small>
         </span>
       </div> : null}

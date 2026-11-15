@@ -37,6 +37,35 @@ function requestRaw(port, path, options = {}) {
   });
 }
 
+test("health identifies the serving revision without exposing unrelated environment values", async (t) => {
+  const port = 39000 + (process.pid % 1000);
+  const child = spawn(process.execPath, ["serve-local.mjs"], {
+    env: {
+      ...process.env, HOST: "127.0.0.1", PORT: String(port), PLANNER_WRITE_PID: "0",
+      CODEX_SOURCE_COMMIT: "a".repeat(40), K_SERVICE: "wohnungsplaner-preview",
+      K_REVISION: "wohnungsplaner-preview-00042-test", PRIVATE_TEST_VALUE: "not-for-health",
+    },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  t.after(async () => {
+    if (child.exitCode === null && child.signalCode === null) {
+      const exited = once(child, "exit");
+      child.kill("SIGTERM");
+      await exited;
+    }
+  });
+  const response = await waitForServer(child, `http://127.0.0.1:${port}/__codex/health`);
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+  assert.deepEqual(await response.json(), {
+    status: "ok", sourceCommit: "a".repeat(40), service: "wohnungsplaner-preview",
+    revision: "wohnungsplaner-preview-00042-test", pid: child.pid,
+  });
+  const head = await fetch(`http://127.0.0.1:${port}/__codex/health`, { method: "HEAD" });
+  assert.equal(head.status, 200);
+  assert.equal(await head.text(), "");
+});
+
 test("serve-local startet mit Node-Shim und setzt Schutzheader", async (t) => {
   const port = 35000 + (process.pid % 1000);
   const child = spawn(process.execPath, ["serve-local.mjs"], {

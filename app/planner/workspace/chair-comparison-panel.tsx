@@ -6,6 +6,7 @@ import type { PlannerCommand, CommandResult } from "../domain/commands.ts";
 import type { PlannerDocumentV3 } from "../domain/types.ts";
 import { CHAIR_MODELS, chairModelHasGeometry, getChairModel, getChairModelForCatalogId, type ChairModelId } from "../chairs/chair-models.ts";
 import { centimetres, ModelEvidence, ModelImage } from "./model-evidence.tsx";
+import { DINING_CHAIR_IDS, placementLabel } from "./placement-label.ts";
 
 export function ChairComparisonPanel({ document, placementId, dispatch, select }: {
   document: PlannerDocumentV3;
@@ -19,20 +20,21 @@ export function ChairComparisonPanel({ document, placementId, dispatch, select }
   const [error, setError] = useState<string | null>(null);
   const model = getChairModel(modelId) ?? CHAIR_MODELS[0];
   const material = getFurnitureCatalogItem(model.catalogId)?.materials.find((item) => item.id === model.materialId)?.label;
+  const chairs = DINING_CHAIR_IDS.flatMap((id) => {
+    const seat = document.placements.find((item) => item.id === id);
+    return seat ? [seat] : [];
+  });
+  const seatChooser = (
+    <label className="planner-select-field">
+      <span>Stuhl auswählen</span>
+      <select aria-label="Stuhl auswählen" value={chair?.id ?? ""} onChange={(event) => select(event.target.value)}>
+        {!chair ? <option value="" disabled>Welchen Sitzplatz möchtest du ändern?</option> : null}
+        {chairs.map((item) => <option key={item.id} value={item.id}>{placementLabel(item)}</option>)}
+      </select>
+    </label>
+  );
 
-  if (!chair) {
-    return (
-      <label className="planner-select-field">
-        <span>Stuhl auswählen</span>
-        <select aria-label="Stuhl auswählen" value="" onChange={(event) => select(event.target.value)}>
-          <option value="" disabled>Welchen Sitzplatz möchtest du ändern?</option>
-          {document.placements.filter((item) => /^living-kaleo-chair-(west|east|south|north)$/.test(item.id)).map((item, index) => (
-            <option key={item.id} value={item.id}>Stuhl {index + 1} · {getFurnitureCatalogItem(item.catalogId)?.name ?? item.catalogId}</option>
-          ))}
-        </select>
-      </label>
-    );
-  }
+  if (!chair) return seatChooser;
 
   const apply = () => {
     const result = dispatch({ type: "setPlacementChairModel", placementId: chair.id, modelId: model.id });
@@ -42,6 +44,7 @@ export function ChairComparisonPanel({ document, placementId, dispatch, select }
 
   return (
     <div className="planner-model-choice">
+      {seatChooser}
       <label className="planner-select-field">
         <span>Stuhlmodell <small>{CHAIR_MODELS.length} Varianten</small></span>
         <select aria-label="Stuhlmodell" value={model.id} onChange={(event) => { setModelId(event.target.value as ChairModelId); setError(null); }}>

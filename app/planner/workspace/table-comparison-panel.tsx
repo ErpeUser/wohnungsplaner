@@ -8,6 +8,11 @@ import type { PlannerDocumentV3 } from "../domain/types.ts";
 import { TABLE_MODELS, getTableModel, getTableModelForCatalogId, getTableVariant, metresFromCentimetres, tableModelHasGeometry, tableVisualProfile, type TableModelId, type TableVariantId } from "../tables/table-models.ts";
 import { centimetres, ModelEvidence, ModelImage, referenceKind } from "./model-evidence.tsx";
 
+const PRIMARY_TABLE_MODEL_IDS: readonly TableModelId[] = [
+  "aliexpress-100-140", "temu-606997-120-160", "kaufland-567080013-120-160",
+];
+const PRIMARY_TABLE_MODELS = TABLE_MODELS.filter((model) => PRIMARY_TABLE_MODEL_IDS.includes(model.id));
+
 export function TableComparisonPanel({ document, dispatch, select }: {
   document: PlannerDocumentV3;
   dispatch(command: PlannerCommand): CommandResult;
@@ -15,11 +20,12 @@ export function TableComparisonPanel({ document, dispatch, select }: {
 }) {
   const table = document.placements.find((item) => item.id === "living-bozan-table");
   const initial = getTableModelForCatalogId(table?.catalogId);
+  const extraCurrentModel = initial && !PRIMARY_TABLE_MODEL_IDS.includes(initial.id) ? initial : null;
   const initialVariant = initial?.variants.find((item) => table && sameSize(table.size, metresFromCentimetres(item.sizeCm)));
-  const [modelId, setModelId] = useState<TableModelId>(initial?.id ?? TABLE_MODELS[0].id);
+  const [modelId, setModelId] = useState<TableModelId>(initial?.id ?? PRIMARY_TABLE_MODELS[0].id);
   const [variantId, setVariantId] = useState<TableVariantId>(initialVariant?.id ?? "closed");
   const [error, setError] = useState<string | null>(null);
-  const model = getTableModel(modelId) ?? TABLE_MODELS[0];
+  const model = getTableModel(modelId) ?? PRIMARY_TABLE_MODELS[0];
   const variant = getTableVariant(model, variantId) ?? model.variants[0];
   const material = getFurnitureCatalogItem(model.catalogId ?? "")?.materials.find((item) => item.id === model.materialId)?.label;
   const preview = table && variant && model.catalogId ? inspectPlacement(document, { ...table, catalogId: model.catalogId, size: metresFromCentimetres(variant.sizeCm) }, {
@@ -37,9 +43,10 @@ export function TableComparisonPanel({ document, dispatch, select }: {
   return (
     <div className="planner-model-choice">
       <label className="planner-select-field">
-        <span>Tischmodell <small>{TABLE_MODELS.length} Varianten</small></span>
+        <span>Tischmodell <small>{PRIMARY_TABLE_MODELS.length} Hauptmodelle</small></span>
         <select aria-label="Tischmodell" value={model.id} onChange={(event) => { setModelId(event.target.value as TableModelId); setVariantId("closed"); setError(null); }}>
-          {TABLE_MODELS.map((item) => <option key={item.id} value={item.id} disabled={!tableModelHasGeometry(item)}>{item.shortName}</option>)}
+          {extraCurrentModel ? <option value={extraCurrentModel.id} disabled>Aktuell im Plan · {extraCurrentModel.shortName}</option> : null}
+          {PRIMARY_TABLE_MODELS.map((item) => <option key={item.id} value={item.id} disabled={!tableModelHasGeometry(item)}>{item.shortName}</option>)}
         </select>
       </label>
       <div className="planner-model-preview">

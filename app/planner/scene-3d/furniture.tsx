@@ -1265,7 +1265,7 @@ function ComparisonDiningTable({ materialId, catalogId, size }: { materialId: st
   const height = size?.[1] ?? (profile === "round-metal-frame" ? 0.75 : 0.755);
   const depth = size?.[2] ?? (profile === "fluted-extension-pedestal" ? 0.8 : profile === "round-metal-frame" ? 1 : 1.2);
   const extended = width > (profile === "round-metal-frame" ? 1.01 : 1.21);
-  if (profile === "fluted-round-pedestal") return <FlutedRoundPedestalTable top={getPlannerMaterial(materialId)} edge={getPlannerMaterial("oak-artisan-edge")} extended={extended} />;
+  if (profile === "fluted-round-pedestal") return <FlutedRoundPedestalTable width={width} height={height} depth={depth} materialId={materialId} extended={extended} />;
   const thickness = profile === "fluted-extension-pedestal" ? 0.018 : 0.025;
   // Author these measured products in metres, then cancel the parent's unit-box
   // normalization. Extending the top must not stretch the legs or cabinet.
@@ -1312,29 +1312,36 @@ function StorageTableCabinet({ height, materialId }: { height: number; materialI
   </group>;
 }
 
-function FlutedRoundPedestalTable({ top, edge, extended }: { top: ReturnType<typeof getPlannerMaterial>; edge: ReturnType<typeof getPlannerMaterial>; extended: boolean }) {
+function FlutedRoundPedestalTable({ width, height, depth, materialId, extended }: {
+  width: number; height: number; depth: number; materialId: string; extended: boolean;
+}) {
+  const edge = getPlannerMaterial("oak-artisan-edge");
   const pedestal = getPlannerMaterial("oak-natural");
   const flute = getPlannerMaterial("oak-artisan-edge");
   const angles = Array.from({ length: 28 }, (_, index) => (index / 28) * Math.PI * 2);
+  const thickness = height * 0.09;
+  const footHeightRatio = 0.08;
+  const supportHeightRatio = 0.025;
+  const coreTopRatio = 1 - thickness / height - supportHeightRatio;
+  const coreHeightRatio = coreTopRatio - footHeightRatio;
   return (
-    <group>
-      {extended ? (
-        <group>
-          <RoundedBox args={[0.62, 0.09, 1.04]} radius={0.16} smoothness={8} position={[-0.44, 0.95, 0]} castShadow receiveShadow><primitive object={top} attach="material" /></RoundedBox>
-          <RoundedBox args={[0.62, 0.09, 1.04]} radius={0.16} smoothness={8} position={[0.44, 0.95, 0]} castShadow receiveShadow><primitive object={top} attach="material" /></RoundedBox>
-          <RoundedBox args={[0.36, 0.09, 1.04]} radius={0.11} smoothness={8} position={[0, 0.95, 0]} castShadow receiveShadow><primitive object={top} attach="material" /></RoundedBox>
-          <DetailStrip position={[0, 0.998, 0]} scale={[0.012, 0.006, 0.98]} materialId="oak-artisan-edge" />
-        </group>
-      ) : (
-        <mesh position={[0, 0.95, 0]} scale={[0.55, 0.09, 0.55]} geometry={SHARED_CYLINDER} castShadow receiveShadow><primitive object={top} attach="material" /></mesh>
-      )}
-      <mesh position={[0, 0.90, 0]} scale={[0.56, 0.025, 0.56]} geometry={SHARED_CYLINDER} castShadow>
-        <primitive object={edge} attach="material" />
-      </mesh>
-      <mesh position={[0, 0.49, 0]} scale={[0.31, 0.71, 0.31]} geometry={SHARED_CYLINDER} castShadow receiveShadow><primitive object={pedestal} attach="material" /></mesh>
-      {angles.map((angle) => <mesh key={angle} position={[Math.cos(angle) * 0.315, 0.49, Math.sin(angle) * 0.315]} scale={[0.012, 0.66, 0.012]} geometry={SHARED_CYLINDER} castShadow><primitive object={flute} attach="material" /></mesh>)}
-      <mesh position={[0, 0.08, 0]} scale={[0.38, 0.08, 0.38]} geometry={SHARED_CYLINDER} castShadow><primitive object={pedestal} attach="material" /></mesh>
-      {!extended ? <DetailStrip position={[0, 0.944, 0]} scale={[0.012, 0.014, 0.48]} materialId="oak-artisan-edge" /> : null}
+    <group scale={[1 / width, 1 / height, 1 / depth]}>
+      <CapsuleSolid width={width} depth={depth} height={thickness} position={[0, height - thickness / 2, 0]} materialId={materialId} />
+      {(extended ? [-(width - depth) / 2, (width - depth) / 2] : [0]).map((x) => (
+        <mesh key={x} position={[x, height + 0.0002, 0]} scale={[0.0012, 0.0004, depth - 0.006]} geometry={SHARED_BOX}>
+          <primitive object={edge} attach="material" />
+        </mesh>
+      ))}
+      {/* Keep the same estimated outer flute envelope in both variants. The
+          solid core connects its strips, floor-contact foot and top support. */}
+      <group scale={[depth, height, depth]}>
+        <mesh position={[0, coreTopRatio + supportHeightRatio / 2, 0]} scale={[0.56, supportHeightRatio, 0.56]} geometry={SHARED_CYLINDER} castShadow>
+          <primitive object={edge} attach="material" />
+        </mesh>
+        <mesh position={[0, footHeightRatio + coreHeightRatio / 2, 0]} scale={[0.63, coreHeightRatio, 0.63]} geometry={SHARED_CYLINDER} castShadow receiveShadow><primitive object={pedestal} attach="material" /></mesh>
+        {angles.map((angle) => <mesh key={angle} position={[Math.cos(angle) * 0.315, 0.49, Math.sin(angle) * 0.315]} scale={[0.012, 0.66, 0.012]} geometry={SHARED_CYLINDER} castShadow><primitive object={flute} attach="material" /></mesh>)}
+        <mesh position={[0, footHeightRatio / 2, 0]} scale={[0.38, footHeightRatio, 0.38]} geometry={SHARED_CYLINDER} castShadow><primitive object={pedestal} attach="material" /></mesh>
+      </group>
     </group>
   );
 }

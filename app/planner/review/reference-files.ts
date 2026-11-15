@@ -16,23 +16,44 @@ function imageType(bytes: Buffer) {
   return null;
 }
 
-async function modelDirectory(id: string) {
+// Source folders retained before canonical catalog IDs were introduced.
+// This allowlist exposes them only through the existing private review route.
+const PRODUCT_REFERENCE_ALIASES: Readonly<Record<string, string>> = {
+  "dining-table-aliexpress-100-140": "aliexpress-100-140",
+  "dining-table-temu-606997-120-160": "temu-606997-120-160",
+  "dining-table-kaufland-567080013-120-160": "kaufland-567080013-120-160",
+  "dining-table-temu-609726-110-150": "temu-609726-110-150",
+};
+
+async function modelDirectories(id: string) {
   const model = REVIEW_MODELS.find((item) => item.id === id);
-  if (!model) return null;
+  if (!model) return [];
   const root = await realpath(path.resolve("models")).catch(() => null);
-  if (!root) return null;
-  const candidate = model.builtIn
-    ? path.join(root, "fixed", model.builtIn.id)
-    : path.join(root, "products", model.id);
-  const directory = await realpath(candidate).catch(() => null);
-  return directory?.startsWith(root + path.sep) ? { directory, root } : null;
+  if (!root) return [];
+  const candidates = model.builtIn
+    ? [path.join(root, "fixed", model.builtIn.id)]
+    : [model.id, PRODUCT_REFERENCE_ALIASES[model.id]].filter(Boolean).map((name) => path.join(root, "products", name));
+  const directories = await Promise.all(candidates.map(async (candidate) => {
+    const directory = await realpath(candidate).catch(() => null);
+    // A registered product must not redirect into another model or private
+    // sibling, even when that sibling is still below the models root.
+    return directory === candidate ? directory : null;
+  }));
+  return [...new Set(directories.filter((directory): directory is string => directory !== null))];
 }
 
 async function imageFiles(id: string) {
-  const location = await modelDirectory(id);
-  if (!location) return [];
-  const folder = await realpath(path.join(location.directory, "Auszug", "Bilder")).catch(() => null);
-  if (!folder?.startsWith(location.directory + path.sep)) return [];
+  const directories = await modelDirectories(id);
+  const groups = await Promise.all(directories.flatMap((directory) => [
+    imageFolder(directory, path.join(directory, "Auszug", "Bilder")),
+    imageFolder(directory, path.join(directory, "references")),
+  ]));
+  return groups.flat();
+}
+
+async function imageFolder(directory: string, candidate: string) {
+  const folder = await realpath(candidate).catch(() => null);
+  if (!folder?.startsWith(directory + path.sep)) return [];
   const files = await readdir(folder, { withFileTypes: true }).catch(() => []);
   const images = await Promise.all(files.filter((entry) => entry.isFile()).map(async ({ name }) => {
     const file = path.join(folder, name);
@@ -57,9 +78,13 @@ export async function readReviewImage(id: string, index: number) {
 
 export async function readReviewReferences(id: string): Promise<ReviewReferences> {
   if (!isReviewEnabled()) return { images: [], links: [] };
-  const location = await modelDirectory(id);
-  if (!location) return { images: [], links: [] };
-  const rawLinks = await readFile(path.join(location.directory, "link.txt"), "utf8").catch(() => "");
+  const directories = await modelDirectories(id);
+  if (!directories.length) return { images: [], links: [] };
+  const sourceLinks = await Promise.all(directories.map(async (directory) => {
+    const file = await realpath(path.join(directory, "link.txt")).catch(() => null);
+    return file?.startsWith(directory + path.sep) ? readFile(file, "utf8").catch(() => "") : "";
+  }));
+  const rawLinks = sourceLinks.join("\n");
   const links = [...new Set(rawLinks.split(/\r?\n/).map((value) => value.trim()).filter((value) => {
     try { return new URL(value).protocol === "https:"; } catch { return false; }
   }))];
