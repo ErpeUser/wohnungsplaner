@@ -10,6 +10,8 @@ const originalReviewSetting = process.env.PLANNER_REVIEW_ENABLED;
 const originalNodeEnv = process.env.NODE_ENV;
 const environment = process.env as Record<string, string | undefined>;
 const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6J8sAAAAASUVORK5CYII=", "base64");
+// Junctions exercise the same realpath boundaries on Windows without admin privileges.
+const directoryLinkType = process.platform === "win32" ? "junction" : "dir";
 let directory: string;
 
 async function fixture(relative: string, content: string | Buffer) {
@@ -59,7 +61,7 @@ test("review combines canonical excerpts and alias references in stable order", 
 test("alias review rejects unregistered ids and reference symlinks outside models", async () => {
   await fixture("outside/private.png", png);
   await mkdir(path.join(directory, "models/products/aliexpress-100-140"), { recursive: true });
-  await symlink(path.join(directory, "outside"), path.join(directory, "models/products/aliexpress-100-140/references"), "dir");
+  await symlink(path.join(directory, "outside"), path.join(directory, "models/products/aliexpress-100-140/references"), directoryLinkType);
   assert.deepEqual(await readReviewReferences("dining-table-aliexpress-100-140"), { images: [], links: [] });
   assert.deepEqual(await readReviewReferences("../../outside"), { images: [], links: [] });
   assert.equal(await readReviewImage("aliexpress-100-140", 0), null);
@@ -78,7 +80,7 @@ test("a retained alias cannot redirect review into a private sibling inside mode
   await fixture("models/private-flat/references/private.png", png);
   await fixture("models/private-flat/link.txt", "https://private.example.invalid/reference\n");
   await mkdir(path.join(directory, "models/products"), { recursive: true });
-  await symlink(path.join(directory, "models/private-flat"), path.join(directory, "models/products/aliexpress-100-140"), "dir");
+  await symlink(path.join(directory, "models/private-flat"), path.join(directory, "models/products/aliexpress-100-140"), directoryLinkType);
   assert.deepEqual(await readReviewReferences("dining-table-aliexpress-100-140"), { images: [], links: [] });
   assert.equal(await readReviewImage("dining-table-aliexpress-100-140", 0), null);
 });

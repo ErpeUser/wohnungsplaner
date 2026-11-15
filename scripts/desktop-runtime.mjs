@@ -1,6 +1,6 @@
 import { execFileSync, spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { closeSync, existsSync, mkdirSync, openSync, readFileSync, writeFileSync, renameSync, unlinkSync } from 'node:fs';
+import { closeSync, existsSync, lstatSync, mkdirSync, openSync, readFileSync, writeFileSync, renameSync, unlinkSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -51,8 +51,23 @@ function powershell(code) {
 }
 function processDetails(pid) {
   if (!Number.isSafeInteger(pid) || pid <= 0) return null;
-  const details = powershell(`Get-CimInstance Win32_Process -Filter 'ProcessId = ${pid}' | Select-Object Name,CommandLine | ConvertTo-Json -Compress`).trim();
+  const details = powershell(`Get-CimInstance Win32_Process -Filter 'ProcessId = ${pid}' | Select-Object Name,CommandLine,@{Name='StartedAt';Expression={([DateTimeOffset]$_.CreationDate).ToUnixTimeMilliseconds()}} | ConvertTo-Json -Compress`).trim();
   return details ? JSON.parse(details) : null;
+}
+export function clearStaleDevLock(root) {
+  const lockPath = path.join(root, '.vinext', 'dev', 'lock.json');
+  if (!existsSync(lockPath)) return false;
+  for (const relative of ['.vinext', '.vinext/dev', '.vinext/dev/lock.json']) {
+    if (lstatSync(path.join(root, relative)).isSymbolicLink()) throw new Error('Startsperre verweist außerhalb des Projektordners.');
+  }
+  let lock;
+  try { lock = JSON.parse(readFileSync(lockPath, 'utf8')); } catch { return false; }
+  if (typeof lock.cwd !== 'string' || path.resolve(lock.cwd).toLowerCase() !== path.resolve(root).toLowerCase() || !Number.isFinite(lock.startedAt)) return false;
+  const owner = processDetails(lock.pid);
+  // A live reused PID is not the process that created this old framework lock.
+  if (owner && owner.Name === 'node.exe' && !(owner.StartedAt > lock.startedAt)) return false;
+  unlinkSync(lockPath);
+  return true;
 }
 export function acquireWorkerLock(folder) {
   const lockPath = path.join(folder, 'desktop-worker.lock');
@@ -83,6 +98,7 @@ function stopServer() {
   }
   execFileSync('taskkill.exe', ['/PID', String(saved.pid), '/T', '/F'], { windowsHide: true, stdio: 'pipe' });
   unlinkSync(path.join(local, 'desktop-server.json'));
+  clearStaleDevLock(repositoryRoot);
 }
 async function healthy() {
   try {
@@ -102,6 +118,7 @@ async function startServer() {
     }
     return;
   }
+  clearStaleDevLock(repositoryRoot);
   const out = openSync(path.join(local, 'desktop-server.log'), 'a');
   const child = spawn(process.execPath, [path.join(repositoryRoot, 'scripts', 'visual-dev.mjs')], {
     cwd: repositoryRoot, detached: true, windowsHide: true, stdio: ['ignore', out, out],

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, writeFileSync, readFileSync, rmSync, existsSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -79,4 +79,25 @@ test('Windows PowerShell retains background exit status for tray shutdown', { sk
   const result = JSON.parse(execFileSync('powershell.exe', ['-NoProfile', '-EncodedCommand', Buffer.from(code, 'utf16le').toString('base64')], { encoding:'utf8', windowsHide:true, stdio:['ignore','pipe','pipe'] }));
   assert.equal(result.code, 0);
   assert.equal(result.exited, true);
+});
+test('a reused PID in the framework lock does not prevent reopening the planner', { skip: process.platform !== 'win32' }, async t => {
+  const folder = mkdtempSync(path.join(tmpdir(), 'planner-dev-lock-'));
+  t.after(() => rmSync(folder, { recursive:true, force:true }));
+  mkdirSync(path.join(folder,'.vinext','dev'), {recursive:true});
+  const lock = path.join(folder,'.vinext','dev','lock.json');
+  writeFileSync(lock,JSON.stringify({pid:process.pid,startedAt:Date.now()-600000,cwd:folder}));
+  const { clearStaleDevLock } = await import('../scripts/desktop-runtime.mjs');
+  assert.equal(clearStaleDevLock(folder),true);
+  assert.equal(existsSync(lock),false);
+});
+test('the lock of a currently running dev server remains intact', { skip: process.platform !== 'win32' }, async t => {
+  const folder = mkdtempSync(path.join(tmpdir(), 'planner-dev-lock-live-'));
+  t.after(() => rmSync(folder, { recursive:true, force:true }));
+  mkdirSync(path.join(folder,'.vinext','dev'), {recursive:true});
+  const lock = path.join(folder,'.vinext','dev','lock.json');
+  const contents=JSON.stringify({pid:process.pid,startedAt:Date.now(),cwd:folder});
+  writeFileSync(lock,contents);
+  const { clearStaleDevLock } = await import('../scripts/desktop-runtime.mjs');
+  assert.equal(clearStaleDevLock(folder),false);
+  assert.equal(readFileSync(lock,'utf8'),contents);
 });
