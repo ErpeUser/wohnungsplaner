@@ -1,8 +1,8 @@
 "use client";
 
 import { RoundedBox, useGLTF } from "@react-three/drei";
-import { Component, Suspense, useMemo, type ReactNode } from "react";
-import { BoxGeometry, BufferGeometry, CatmullRomCurve3, CylinderGeometry, ExtrudeGeometry, Float32BufferAttribute, LatheGeometry, Mesh, Object3D, Quaternion, Shape, SphereGeometry, TubeGeometry, Vector2, Vector3 } from "three";
+import { Component, Suspense, useEffect, useMemo, type ReactNode } from "react";
+import { BoxGeometry, BufferGeometry, CatmullRomCurve3, CylinderGeometry, ExtrudeGeometry, Float32BufferAttribute, LatheGeometry, Mesh, Object3D, Quaternion, Shape, SphereGeometry, TubeGeometry, Vector2, Vector3, type Material } from "three";
 
 import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
 import { resolveFurnitureAsset } from "../catalog/asset-manifest.ts";
@@ -13,6 +13,7 @@ import type { PlannerPlacement } from "../domain/types.ts";
 import { tableVisualProfile } from "../tables/table-models.ts";
 import { getChairModelForCatalogId } from "../chairs/chair-models.ts";
 import { normalizeCatalogGltf } from "./gltf-normalization.ts";
+import { createCatalogGltfMaterialCloner } from "./gltf-material-roles.ts";
 
 const SHARED_BOX = new BoxGeometry(1, 1, 1);
 const SHARED_CYLINDER = new CylinderGeometry(0.5, 0.5, 1, 24);
@@ -105,7 +106,12 @@ function FurnitureInstance({
   ) : catalogGlb ? (
     <FurnitureAssetBoundary fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} size={item.size} />}>
       <Suspense fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} size={item.size} />}>
-        <GltfFurniture path={resolution.asset.path} normalizeToUnitBounds />
+        <GltfFurniture
+          path={resolution.asset.path}
+          normalizeToUnitBounds
+          catalogAssetId={resolution.asset.id}
+          materialId={item.source.materialVariants?.main ?? item.source.materialVariants?.color ?? catalogItem?.materials[0]?.id}
+        />
       </Suspense>
     </FurnitureAssetBoundary>
   ) : <ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} size={item.size} />;
@@ -135,24 +141,38 @@ function plannerAssetOrigins(): ReadonlySet<string> {
   return new Set((configured ?? "").split(",").map((origin) => origin.trim()).filter(Boolean));
 }
 
-function GltfFurniture({ path, normalizeToUnitBounds = false }: { path: string; normalizeToUnitBounds?: boolean }) {
+function GltfFurniture({ path, normalizeToUnitBounds = false, catalogAssetId, materialId }: {
+  path: string; normalizeToUnitBounds?: boolean; catalogAssetId?: string; materialId?: string;
+}) {
   const gltf = useGLTF(path);
   const object = useMemo(() => {
     const clone = gltf.scene.clone(true);
+    const cloneMaterial = createCatalogGltfMaterialCloner(gltf.parser.associations, catalogAssetId, materialId);
     clone.traverse((child: Object3D) => {
       if (!(child instanceof Mesh)) return;
       child.castShadow = true;
       child.receiveShadow = true;
-      // Keep the GLB's authored PBR materials and texture maps. Replacing every
-      // submesh with one planner material made imported products look flat and
-      // destroyed multi-material details. Material variants remain available
-      // for parametric fallbacks; imported assets are authoritative.
+      // Only known local catalog roles use the selected finish. Imported assets
+      // and all other slots keep private clones of their authored PBR materials.
       child.material = Array.isArray(child.material)
-        ? child.material.map((material) => material.clone())
-        : child.material.clone();
+        ? child.material.map(cloneMaterial)
+        : cloneMaterial(child.material);
     });
     return normalizeToUnitBounds ? normalizeCatalogGltf(clone) : clone;
-  }, [gltf.scene, normalizeToUnitBounds]);
+  }, [gltf.scene, gltf.parser.associations, normalizeToUnitBounds, catalogAssetId, materialId]);
+  useEffect(() => {
+    if (!catalogAssetId) return;
+    // R3F leaves primitives undisposed. These are only the private material
+    // clones created above; geometry, textures and loader/recipe caches are shared.
+    const materials = new Set<Material>();
+    object.traverse((child) => {
+      if (!(child instanceof Mesh)) return;
+      for (const material of Array.isArray(child.material) ? child.material : [child.material]) materials.add(material);
+    });
+    return () => {
+      for (const material of materials) material.dispose();
+    };
+  }, [catalogAssetId, object]);
   return <primitive object={object} />;
 }
 
