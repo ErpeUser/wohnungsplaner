@@ -12,6 +12,7 @@ import { furnitureRenderTransform, furnitureWorldPosition, type SceneModel, type
 import type { PlannerPlacement } from "../domain/types.ts";
 import { tableVisualProfile } from "../tables/table-models.ts";
 import { getChairModelForCatalogId } from "../chairs/chair-models.ts";
+import { normalizeCatalogGltf } from "./gltf-normalization.ts";
 
 const SHARED_BOX = new BoxGeometry(1, 1, 1);
 const SHARED_CYLINDER = new CylinderGeometry(0.5, 0.5, 1, 24);
@@ -104,7 +105,7 @@ function FurnitureInstance({
   ) : catalogGlb ? (
     <FurnitureAssetBoundary fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} size={item.size} />}>
       <Suspense fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} size={item.size} />}>
-        <GltfFurniture path={resolution.asset.path} />
+        <GltfFurniture path={resolution.asset.path} normalizeToUnitBounds />
       </Suspense>
     </FurnitureAssetBoundary>
   ) : <ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} size={item.size} />;
@@ -134,7 +135,7 @@ function plannerAssetOrigins(): ReadonlySet<string> {
   return new Set((configured ?? "").split(",").map((origin) => origin.trim()).filter(Boolean));
 }
 
-function GltfFurniture({ path }: { path: string }) {
+function GltfFurniture({ path, normalizeToUnitBounds = false }: { path: string; normalizeToUnitBounds?: boolean }) {
   const gltf = useGLTF(path);
   const object = useMemo(() => {
     const clone = gltf.scene.clone(true);
@@ -150,8 +151,8 @@ function GltfFurniture({ path }: { path: string }) {
         ? child.material.map((material) => material.clone())
         : child.material.clone();
     });
-    return clone;
-  }, [gltf.scene]);
+    return normalizeToUnitBounds ? normalizeCatalogGltf(clone) : clone;
+  }, [gltf.scene, normalizeToUnitBounds]);
   return <primitive object={object} />;
 }
 
