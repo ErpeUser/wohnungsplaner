@@ -1,4 +1,4 @@
-import { doorPose, openingSegment } from "../domain/geometry.ts";
+import { doorPose, GEOMETRY_EPSILON, openingSegment, placementPolygon, pointInPolygon } from "../domain/geometry.ts";
 import type {
   PlannerBuiltIn,
   PlannerAssetRecord,
@@ -290,9 +290,33 @@ export function derivePerspectiveCutaway(
     ...foregroundOpenDoorIds,
   ])].sort();
 
+  // This decorative built-in has no persisted attachment field. Infer its
+  // support only while its full rotated footprint rests on the same top face.
+  const supportedDecorations = scene.builtIns
+    .filter((item) => item.catalogId === "zimmer1-wardrobe-top-decor")
+    .flatMap((decoration) => {
+      const bottom = decoration.position[1] - decoration.size[1] / 2;
+      const footprint = placementPolygon(decoration.source);
+      const support = scene.placements.find((item) => {
+        if (item.roomId !== decoration.roomId) return false;
+        const top = item.position[1] + item.size[1] / 2;
+        if (Math.abs(top - bottom) > GEOMETRY_EPSILON) return false;
+        const supportFootprint = placementPolygon(item.source);
+        return footprint.every((point) => pointInPolygon(point, supportFootprint));
+      });
+      return support ? [{ decorationId: decoration.id, supportId: support.id }] : [];
+    });
+  const protectedObjectIds = new Set(selectedId ? [selectedId] : []);
+  for (const { decorationId, supportId } of supportedDecorations) {
+    if (selectedId === decorationId || selectedId === supportId) {
+      protectedObjectIds.add(decorationId);
+      protectedObjectIds.add(supportId);
+    }
+  }
+
   const objects = [...scene.builtIns, ...scene.placements];
-  const hiddenObjectIds = objects
-    .filter((item) => item.id !== selectedId)
+  const hiddenObjects = new Set(objects
+    .filter((item) => !protectedObjectIds.has(item.id))
     .filter((item) => !(
       roomId === "vorraum"
       && item.id === "hall-tejo-wardrobe"
@@ -319,8 +343,12 @@ export function derivePerspectiveCutaway(
       const wallMounted = Math.min(item.size[0], item.size[2]) <= 0.24;
       return blocksRoomCenter || (hugsHiddenWall && (item.size[1] >= 1.2 || wallMounted));
     })
-    .map((item) => item.id)
-    .sort();
+    .map((item) => item.id));
+  for (const { decorationId, supportId } of supportedDecorations) {
+    if (hiddenObjects.has(supportId)) hiddenObjects.add(decorationId);
+    else hiddenObjects.delete(decorationId);
+  }
+  const hiddenObjectIds = [...hiddenObjects].sort();
 
   const hiddenFixtureIds = scene.fixtures
     .filter((fixture) => hiddenWalls.some((wall) => (
