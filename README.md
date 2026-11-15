@@ -30,18 +30,16 @@ Private Quellpfade, Fotos oder externe Laufzeit-URLs werden weder in Sicherungen
 
 Alle zur Laufzeit verwendeten Modelle, Materialien und die Umgebung liegen unter `public/planner-assets/`. Herkunft, Lizenz, Maßstab und Prüfsummen sind in `public/planner-assets/manifest.json` dokumentiert. Fehlende oder beschädigte Modelle werden durch lokale parametrische Ersatzobjekte dargestellt.
 
-Neue KI- oder Produktdateien werden vor dem Eintrag in den Katalog als lokale Asset-Importe vorbereitet. Die Sidecar-Datei hält Produktquelle, Lizenz, Außenmaße, Materialhinweise, Pivot/Floor-Offset und SHA-256 fest:
+Neue KI- oder Produktdateien werden vor dem Eintrag in den Katalog als lokale Asset-Importe vorbereitet. Das Werkzeug erwartet Positionsargumente und erzeugt `<Datei>.asset.json` mit Name, Kategorie, Außenmaßen in Metern, Pivot/Floor-Offset, Dateityp, Dateigröße und SHA-256:
 
 ```bash
 node scripts/prepare-planner-asset.mjs \
-  --file public/planner-assets/models/neues-produkt.glb \
-  --name "Neues Produkt" \
-  --category furniture \
-  --width 1.20 --depth 0.60 --height 0.75 \
-  --source "https://example.invalid/product" \
-  --license "Herstellerfreigabe"
+  public/planner-assets/models/neues-produkt.glb \
+  "Neues Produkt" "Licht/Deko" 1.20 0.60 0.75
 npm run assets:check
 ```
+
+Produktquelle, Nutzungsrechte und Materialhinweise müssen separat in den Modell- und Asset-Quellen dokumentiert werden. Das Skript prüft diese Angaben nicht und übernimmt die Datei nicht automatisch in den Katalog oder das Asset-Manifest. `npm run assets:check` prüft die bereits registrierten Laufzeit-Assets.
 
 `renderMode: "gltf"` nutzt das geprüfte Originalmodell, `renderMode: "parametric"` die gezielt modellierte Produktform und `renderMode: "auto"` entscheidet anhand der lokalen Verfügbarkeit. Produktbilder bleiben Referenzmaterial; die metrischen Außenmaße im Sidecar und im Katalog sind die Geometriequelle.
 

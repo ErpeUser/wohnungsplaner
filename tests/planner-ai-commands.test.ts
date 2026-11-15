@@ -55,3 +55,13 @@ test("keeps AI commands safe for malformed numeric input", () => {
   const malformed = executePlannerAiRequest(DEFAULT_APARTMENT_DOCUMENT, { action: "material", objectId: "living-chicago-sofa", materialId: undefined } as never);
   assert.equal(malformed.result.error?.code, "invalid");
 });
+
+test("rejects unknown transported actions without throwing or changing the document", () => {
+  for (const action of ["unknown", "removePlacement", ""]) {
+    const result = executePlannerAiRequest(DEFAULT_APARTMENT_DOCUMENT, { action } as never);
+    assert.equal(result.result.error?.code, "invalid");
+    assert.equal(result.result.document, DEFAULT_APARTMENT_DOCUMENT);
+    assert.equal(result.command, undefined);
+    assert.equal(result.stableId, undefined);
+  }
+});

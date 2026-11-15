@@ -7,13 +7,19 @@ const root = process.cwd();
 const output = path.join(root, 'artifacts', 'visual', 'latest');
 const reports = path.join(output, 'report');
 const mode = process.argv[2] ?? 'all';
-const angles = ['front', 'side', 'back', 'perspective'];
+const standardAngles = ['front', 'side', 'back', 'perspective'];
+const modelFilter = mode === 'gui' ? null : process.env.VISUAL_MODEL || null;
+const viewFilter = mode === 'gui' ? null : process.env.VISUAL_VIEW || null;
+const angles = viewFilter ? [viewFilter] : standardAngles;
 const safe = (s) => String(s).replace(/[^a-zA-Z0-9_-]/g, '-');
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (v) =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[v]);
 const commit = (() => { try { return execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(); } catch { return 'unverified'; } })();
 const viewer = new Map(REVIEW_MODELS.map((item) => [item.id, item]));
 const viewerByBuiltIn = new Map(REVIEW_MODELS.filter((item) => item.builtIn).map((item) => [item.builtIn.id, item]));
+const selectionError = modelFilter && !viewer.has(modelFilter)
+  ? `Unknown model: ${modelFilter}`
+  : viewFilter && !standardAngles.includes(viewFilter) ? `Unknown perspective: ${viewFilter}` : null;
 const files = [];
 const screenshots = [];
 let copyFailures = [];
@@ -61,11 +67,12 @@ for (const group of ['products', 'fixed']) {
       ? viewer.get(spec.runtime?.catalogId ?? spec.canonicalId ?? id)
       : viewerByBuiltIn.get(id);
     const variants = mapped?.variants.map((item) => item.id) ?? (spec.variants ?? ['default']);
+    const requested = Boolean(mapped && (!modelFilter || mapped.id === modelFilter));
     const images = [
       ...await collectImages(path.join(base, 'Auszug', 'Bilder'), id),
       ...await collectImages(path.join(base, 'references'), id),
     ];
-    const expected = mapped ? variants.flatMap((variant) => angles.map((view) => {
+    const expected = requested ? variants.flatMap((variant) => angles.map((view) => {
       const relative = `models/${safe(mapped.id)}/${safe(mapped.id + '--' + variant + '--' + view)}.png`;
       return { modelId: id, viewerId: mapped.id, variant, view,
         scenario: `model:${id}:${variant}:${view}`,
@@ -91,7 +98,7 @@ for (const group of ['products', 'fixed']) {
       variants, sourceUrls: links, references: images,
       expectedScreenshots: expected.length,
       screenshots: expected,
-      coverage: !mapped ? 'not-renderable' : mode === 'gui' ? 'not-executed' : completed ? 'captured' : 'missing',
+      coverage: !mapped ? 'not-renderable' : mode === 'gui' ? 'not-executed' : !requested ? 'not-requested' : completed ? 'captured' : 'missing',
       fidelity: 'not-reviewed',
     });
   }
@@ -103,10 +110,11 @@ let probe = null;
 try { probe = JSON.parse(await fs.readFile(path.join(reports, 'webgl-probe.json'), 'utf8')); } catch {}
 const misses = screenshots.filter((item) => item.result === 'missing').length;
 const gaps = files.filter((model) => model.coverage === 'not-renderable').length;
-const technicalStatus = !testReport || testReport.status !== 'passed' || (process.env.VISUAL_BROWSER_CHANNEL && probe?.status !== 'passed') || misses > 0
+const technicalStatus = selectionError || !testReport || testReport.status !== 'passed' || (process.env.VISUAL_BROWSER_CHANNEL && probe?.status !== 'passed') || misses > 0
   ? 'failed' : gaps && mode !== 'gui' ? 'passed-with-coverage-gaps' : 'passed';
 const manifest = {
   schemaVersion: 1, commit, generatedAt: new Date().toISOString(), mode, technicalStatus,
+  selection: { modelId: modelFilter, views: angles },
   fidelityStatus: 'not-reviewed', browserProbe: probe, testReport: testReport ? {
     status: testReport.status, tests: testReport.tests.length, errors: testReport.errors,
   } : null,
@@ -115,7 +123,7 @@ const manifest = {
     expectedModelScreenshots: screenshots.length, missingScreenshots: misses,
     capturedScreenshots: screenshots.filter((item) => item.result === 'captured').length,
   },
-  diagnostics: { invalidReferenceImages: copyFailures },
+  diagnostics: { invalidReferenceImages: copyFailures, selectionError },
   scenarios: (testReport?.tests ?? []).map((test) => ({
     scenario: test.name, result: test.status, commit,
     screenshots: (test.screenshots ?? []).map((shot) => ({ name: shot.name, path: shot.path })),
@@ -139,6 +147,8 @@ section{border-top:1px solid #aaa;padding:20px 0} .grid{display:grid;grid-templa
 figure{margin:0;border:1px solid #ddd;padding:8px}img{width:100%;height:190px;object-fit:contain}
 figcaption{font-size:12px;overflow-wrap:anywhere}code{font-size:13px}p{overflow-wrap:anywhere}
 </style><h1>Modellprüfung · ${esc(commit)}</h1>
+<p>Prüfumfang: ${esc(modelFilter ?? 'alle Modelle')} · ${esc(angles.join(', '))}.
+Nicht angeforderte Modelle bleiben im Inventar mit dem Status <code>not-requested</code>.</p>
 <p>Status ${esc(technicalStatus)} · ${files.length} Modellmanifeste, ${gaps} ohne direkte Galeriezuordnung,
 ${manifest.coverage.capturedScreenshots} aktuelle Modellaufnahmen, ${misses} fehlende Aufnahmen.</p>
 <p>Ein Screenshot ist KEINE Freigabe der Modelltreue. Produktreferenzen können falsche Varianten zeigen.</p>

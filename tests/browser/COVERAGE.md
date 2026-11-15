@@ -17,6 +17,11 @@ npm run visual:models -- --live --model chair-kaleo-chenille-beige --view front
 
 Views are `front`, `side`, `back`, and `perspective`. Model IDs come from
 the gallery's **Modell** selector; an unknown model or view fails.
+The generated inventory records the requested model and views in `selection`.
+All manifest rows remain present; mapped models outside the requested scope
+are marked `not-requested`. Missing requested captures still fail the run,
+while unrequested captures are not counted as missing. A focused run does
+not certify the remaining catalog or the visual fidelity of any capture.
 `npm run dev:review` starts the immediate local preview with gallery and live updates.
 
 ## Automated interaction checks

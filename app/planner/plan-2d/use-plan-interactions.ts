@@ -134,11 +134,13 @@ export function nudgePlacementResize(
   if (!axis) return { ...current };
   const direction = key === "ArrowLeft" || key === "ArrowDown" ? -1 : 1;
   const target = Math.max(0.1, current[axis] + direction * amount);
+  const factor = target / current[axis];
+  const uniform = item?.resize === "uniform";
   return resolvePlacementResize(
     item,
     current,
-    axis === "width" ? target / current.width : 1,
-    axis === "depth" ? target / current.depth : 1,
+    uniform || axis === "width" ? factor : 1,
+    uniform || axis === "depth" ? factor : 1,
   );
 }
 
@@ -156,7 +158,10 @@ export function resolvePlacementResize(
   if (item?.resize === "fixed") return { ...current };
   const safeX = clamp(Math.abs(scaleX), 0.25, 4);
   const safeZ = clamp(Math.abs(scaleZ), 0.25, 4);
-  const uniform = item?.resize === "uniform" ? Math.max(safeX, safeZ) : null;
+  // Clamp the shared factor so the minimum cannot distort a uniform footprint.
+  const uniform = item?.resize === "uniform"
+    ? Math.max(safeX, safeZ, 0.1 / current.width, 0.1 / current.depth)
+    : null;
   return {
     width: normalize(Math.max(0.1, current.width * (uniform ?? safeX))),
     depth: normalize(Math.max(0.1, current.depth * (uniform ?? safeZ))),

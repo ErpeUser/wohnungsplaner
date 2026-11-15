@@ -378,7 +378,7 @@ function FurnitureSymbol({
     return (
       <Group data-testid="plan-graphic-table-comparison">
         <Ellipse radiusX={width / 2} radiusY={depth / 2} fill={fill} stroke="#5f554b" strokeWidth={0.025} />
-        {extended ? <Line points={[0, -depth * 0.86, 0, depth * 0.86]} stroke="#8d603c" strokeWidth={0.018} dash={[0.06, 0.04]} /> : null}
+        {extended ? <Line points={[0, -depth * 0.43, 0, depth * 0.43]} stroke="#8d603c" strokeWidth={0.018} dash={[0.06, 0.04]} /> : null}
         <Line points={[-width * 0.25, -depth * 0.22, width * 0.25, depth * 0.22]} stroke="#242728" strokeWidth={0.045} />
         <Line points={[width * 0.25, -depth * 0.22, -width * 0.25, depth * 0.22]} stroke="#242728" strokeWidth={0.045} />
         <Text x={-width / 2} y={-0.045} width={width} align="center" text={label} fontFamily="Arial" fontSize={0.08} fill="#30383a" listening={false} />
@@ -528,7 +528,7 @@ function FurnitureSymbol({
           y={depth / 2 - 0.105}
           width={width}
           align="center"
-          text="Easy Line · 120 × 180 cm"
+          text={`Easy Line · ${Math.round(width * 100)} × ${Math.round(depth * 100)} cm`}
           fontFamily="Arial"
           fontStyle="bold"
           fontSize={0.061}

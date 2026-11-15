@@ -73,7 +73,6 @@ export function PlannerToolbar({
 
       <div className="planner-segmented" aria-label="Ansicht">
         <button
-          ref={shoppingButtonRef}
           type="button"
           aria-label="2D-Ansicht"
           aria-pressed={viewMode === "2d"}
@@ -149,6 +148,7 @@ export function PlannerToolbar({
           Details
         </button>
         <button
+          ref={shoppingButtonRef}
           type="button"
           aria-expanded={shoppingOpen}
           aria-controls="planner-shopping-list"

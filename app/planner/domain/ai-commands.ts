@@ -113,6 +113,8 @@ function toPlannerCommand(
       };
       return { command: { type: "addPlacement", placement }, stableId };
     }
+    default:
+      return invalid(document, "Die KI-Aktion ist unbekannt.");
   }
 }
 

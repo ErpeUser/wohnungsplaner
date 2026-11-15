@@ -9,7 +9,10 @@ import { describe, expect, test, vi } from "vitest";
 vi.mock("react-konva", () => {
   const node = (name: string) => {
     function KonvaNode({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) {
-      return <div data-konva-node={name} data-object-id={String(props.id ?? "")} data-testid={String(props["data-testid"] ?? "")}>{children}{typeof props.text === "string" ? props.text : null}</div>;
+      // Expose the drawing inputs produced by the real component so geometry
+      // assertions can inspect its output without requiring a browser canvas.
+      const geometry = { points: props.points, radiusX: props.radiusX, radiusY: props.radiusY, strokeWidth: props.strokeWidth };
+      return <div data-konva-node={name} data-konva-geometry={JSON.stringify(geometry)} data-object-id={String(props.id ?? "")} data-testid={String(props["data-testid"] ?? "")}>{children}{typeof props.text === "string" ? props.text : null}</div>;
     }
     KonvaNode.displayName = `Konva${name}`;
     return KonvaNode;
@@ -157,6 +160,52 @@ describe("furniture interactions", () => {
     });
   });
 
+  test.each([
+    ["ArrowLeft", false, 2.19, 0.916],
+    ["ArrowDown", false, 2.176, 0.91],
+    ["ArrowLeft", true, 2.1, 0.878],
+    ["ArrowDown", true, 1.961, 0.82],
+    ["ArrowRight", false, 2.21, 0.924],
+    ["ArrowUp", false, 2.224, 0.93],
+    ["ArrowRight", true, 2.3, 0.962],
+    ["ArrowUp", true, 2.439, 1.02],
+  ] as const)("uniform keyboard resize %s (large step: %s) changes both footprint axes", (key, largeStep, width, depth) => {
+    const sofa = FURNITURE_CATALOG.find((item) => item.id === "sofa-3seat")!;
+    // Independently calculated from the 220 × 92 cm footprint, rounded to mm.
+    assert.deepEqual(nudgePlacementResize(sofa, sofa.defaultSize, key, largeStep), {
+      width, depth, height: 0.82,
+    });
+    assert.deepEqual(sofa.defaultSize, { width: 2.2, depth: 0.92, height: 0.82 });
+  });
+
+  test("keyboard resize preserves the fixed product envelope", () => {
+    const kaleo = FURNITURE_CATALOG.find((item) => item.id === "chair-kaleo-chenille-beige")!;
+    for (const key of ["ArrowLeft", "ArrowDown", "ArrowRight", "ArrowUp"]) {
+      assert.deepEqual(nudgePlacementResize(kaleo, kaleo.defaultSize, key, true), {
+        width: 0.63, depth: 0.64, height: 0.87,
+      });
+    }
+  });
+
+  test.each([
+    [0.24, 0.1, "ArrowLeft"],
+    [0.1, 0.24, "ArrowDown"],
+  ] as const)("uniform keyboard resize preserves the ratio at the %s by %s minimum boundary", (width, depth, key) => {
+    const sofa = FURNITURE_CATALOG.find((item) => item.id === "sofa-3seat")!;
+    const current = { width, depth, height: 0.82 };
+    assert.deepEqual(nudgePlacementResize(sofa, current, key, false), current);
+  });
+
+  test.each([
+    [0.24, 0.12, 0.2, 0.1],
+    [0.12, 0.24, 0.1, 0.2],
+  ] as const)("uniform transform preserves the %s by %s ratio when a minimum is reached", (width, depth, expectedWidth, expectedDepth) => {
+    const sofa = FURNITURE_CATALOG.find((item) => item.id === "sofa-3seat")!;
+    assert.deepEqual(resolvePlacementResize(sofa, { width, depth, height: 0.82 }, 0.25, 0.25), {
+      width: expectedWidth, depth: expectedDepth, height: 0.82,
+    });
+  });
+
   test("renders selectable furniture and a transformer for the selection", () => {
     render(
       <FurnitureLayer
@@ -225,6 +274,61 @@ describe("furniture interactions", () => {
     const graphic = screen.getByTestId("plan-graphic-table-comparison");
     expect(graphic.querySelector('[data-konva-node="Ellipse"]')).toBeTruthy();
     expect(graphic.querySelectorAll('[data-konva-node="Line"]').length).toBe(2);
+  });
+
+  test.each([
+    ["dining-table-aliexpress-100-140", 1.4, 1],
+    ["dining-table-temu-606997-120-160", 1.6, 1.2],
+    ["dining-table-kaufland-567080013-120-160", 1.6, 0.8],
+  ] as const)("keeps the visible extension seam inside the %s tabletop", (catalogId, width, depth) => {
+    const table = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "living-bozan-table")!;
+    const { container } = render(<FurnitureLayer
+      document={{ ...DEFAULT_APARTMENT_DOCUMENT, placements: [{
+        ...table, catalogId, size: { ...table.size, width, depth },
+        metadata: { ...table.metadata, notes: ["Zustand extended"] },
+      }] }}
+      activeRoomId={null}
+      selectionId={null}
+      onSelect={vi.fn()}
+      onMove={vi.fn()}
+      onResize={vi.fn()}
+      onRotate={vi.fn()}
+    />);
+    const plate = JSON.parse(container.querySelector('[data-konva-node="Ellipse"]')!.getAttribute("data-konva-geometry")!) as { radiusX: number; radiusY: number };
+    const lines = [...container.querySelectorAll('[data-konva-node="Line"]')].map((element) => (
+      JSON.parse(element.getAttribute("data-konva-geometry")!) as { points: number[]; strokeWidth: number }
+    ));
+    const seam = lines.find(({ points }) => points.length === 4 && points[0] === 0 && points[2] === 0);
+    assert.ok(seam, "the extended tabletop must show its central joint");
+    const halfStroke = seam.strokeWidth / 2;
+    const rear = Math.min(seam.points[1], seam.points[3]) - halfStroke;
+    const front = Math.max(seam.points[1], seam.points[3]) + halfStroke;
+    assert.ok(rear < 0 && front > 0, "joint crosses the plate centre");
+    assert.ok(rear >= -plate.radiusY, "joint stroke must not extend beyond the rear plate edge");
+    assert.ok(front <= plate.radiusY, "joint stroke must not extend beyond the front plate edge");
+    // Conservatively include the full stroke envelope, not just the line ends.
+    for (const y of [rear, front]) {
+      assert.ok((halfStroke / plate.radiusX) ** 2 + (y / plate.radiusY) ** 2 <= 1,
+        "the full central joint must remain inside the oval plate");
+    }
+  });
+
+  test.each([
+    ["rug-temu-easy-line-120x180", "Easy Line · 120 × 180 cm"],
+    ["rug-temu-easy-line-140x200", "Easy Line · 140 × 200 cm"],
+  ] as const)("labels the %s rug with its actual footprint", (catalogId, label) => {
+    const item = FURNITURE_CATALOG.find((candidate) => candidate.id === catalogId)!;
+    const rug = createCatalogPlacement(item, "vorraum", { x: -1.29, z: 7.04 }, "labelled-rug");
+    render(<FurnitureLayer
+      document={{ ...DEFAULT_APARTMENT_DOCUMENT, placements: [rug] }}
+      activeRoomId={null}
+      selectionId={null}
+      onSelect={vi.fn()}
+      onMove={vi.fn()}
+      onResize={vi.fn()}
+      onRotate={vi.fn()}
+    />);
+    expect(screen.getByText(label)).toBeTruthy();
   });
 
   test("rejects hard collisions and preserves undo/redo history", () => {
