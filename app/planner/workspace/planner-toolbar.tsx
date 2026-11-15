@@ -60,7 +60,7 @@ export function PlannerToolbar({
       <div className="planner-brand" aria-label="Raumplaner Wohnung">
         <span className="planner-brand__mark" aria-hidden="true">WP</span>
         <span>
-          <small>CLOUD-TEST 1511</small>
+          <small>Wohnungsplanung</small>
           <strong>Raumplaner</strong>
         </span>
       </div>
