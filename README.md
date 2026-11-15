@@ -13,6 +13,14 @@ npm run dev
 
 Der Produktionsstand wird mit `npm run build` erstellt. `npm test` prüft Datenmodell, Geometrie, Bearbeitung, Speicherung, Oberfläche, Export, Serverausgabe und Bundle-Aufteilung.
 
+### Windows: Desktop-Verknüpfung und Tray
+
+Einmal `powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/install-desktop.ps1` ausführen. Danach startet **Wohnungsplaner** auf dem Desktop den aktuellen lokalen Projektordner ohne Konsolenfenster. Der Installer speichert den absoluten Ordnerpfad unter `%LOCALAPPDATA%\Wohnungsplaner`; nach einem Umzug des Repositorys den Installer erneut ausführen.
+
+Das Haus im Infobereich (gegebenenfalls unter **^**) ist gelb beim Aktualisieren/Laden, grün bei erreichbarer Vorschau und rot bei Fehlern. Doppelklick öffnet die App; das Kontextmenü bietet Öffnen, Aktualisieren, Projektordner und **Wohnungsplaner beenden**. Beenden stoppt den eigenen lokalen Server und entfernt das Tray-Symbol; bereits offene Browser-Tabs bleiben erhalten.
+
+Beim Start und alle fünf Minuten wird `main` ausschließlich per Fast-Forward aktualisiert. Lokale Änderungen und andere Arbeitszweige pausieren Updates mit einem sichtbaren Hinweis; Offlinebetrieb verwendet den vorhandenen Stand. Neue Abhängigkeiten werden automatisch installiert, neue Commits starten die Vorschau neu. Browserdaten bleiben im bisherigen Browserprofil unter `http://127.0.0.1:3001/`. Es wird kein Autostart oder kostenpflichtiger Cloud-Dienst eingerichtet. Diagnose: `.local/desktop-state.json`, `.local/desktop-server.log` und `.local/desktop-worker-error.log`.
+
 ## Bedienung
 
 - Raum über die Kopfleiste wählen und Möbel aus dem Katalog einfügen.
