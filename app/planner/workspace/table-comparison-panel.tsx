@@ -13,12 +13,14 @@ const PRIMARY_TABLE_MODEL_IDS: readonly TableModelId[] = [
 ];
 const PRIMARY_TABLE_MODELS = TABLE_MODELS.filter((model) => PRIMARY_TABLE_MODEL_IDS.includes(model.id));
 
-export function TableComparisonPanel({ document, dispatch, select }: {
+export function TableComparisonPanel({ document, placementId = "living-bozan-table", dispatch, select }: {
   document: PlannerDocumentV3;
+  placementId?: string;
   dispatch(command: PlannerCommand): CommandResult;
   select(id: string | null): void;
 }) {
-  const table = document.placements.find((item) => item.id === "living-bozan-table");
+  const target = document.placements.find((item) => item.id === placementId);
+  const table = target && (target.id === "living-bozan-table" || getTableModelForCatalogId(target.catalogId)) ? target : undefined;
   const initial = getTableModelForCatalogId(table?.catalogId);
   const extraCurrentModel = initial && !PRIMARY_TABLE_MODEL_IDS.includes(initial.id) ? initial : null;
   const initialVariant = initial?.variants.find((item) => table && sameSize(table.size, metresFromCentimetres(item.sizeCm)));
@@ -68,7 +70,7 @@ export function TableComparisonPanel({ document, dispatch, select }: {
       </dl>
       <a className="planner-model-source" href={model.sourceUrl} target="_blank" rel="noreferrer">Originalquelle · {model.shortName} ↗</a>
       <button type="button" className="planner-button planner-button--primary planner-model-apply" disabled={!table || !tableModelHasGeometry(model) || !variant || Boolean(unchanged) || Boolean(preview?.hard.length)} onClick={apply}>Auf diesen Tisch anwenden</button>
-      {preview?.hard.length ? <p className="planner-field-error" role="alert">{preview.hard[0].message} Wähle einen kleineren Ausziehzustand oder verschiebe den Tisch.</p> : <p className="planner-model-hint">Position, Drehung und die vier einzeln platzierten Stühle bleiben erhalten.</p>}
+      {preview?.hard.length ? <p className="planner-field-error" role="alert">{preview.hard[0].message} Wähle einen kleineren Ausziehzustand oder verschiebe den Tisch.</p> : <p className="planner-model-hint">{table?.id === "living-bozan-table" ? "Position, Drehung und die vier einzeln platzierten Stühle bleiben erhalten." : "Position und Drehung bleiben erhalten. Andere Möbel bleiben unverändert."}</p>}
       {preview?.warnings.length ? <p className="planner-model-hint" role="note">{preview.warnings[0].message}</p> : null}
       {error ? <p className="planner-field-error" role="alert">{error}</p> : null}
       <ModelEvidence name={model.shortName} sourceUrl={model.sourceUrl} sourceLabel={model.sourceLabel} imageUrls={model.imageUrls} notes={[...model.sourceNotes, ...(variant?.notes ?? [])]} mirrorUrl={model.canonicalUrl} />

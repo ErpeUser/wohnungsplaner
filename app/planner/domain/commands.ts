@@ -2,7 +2,7 @@ import { inspectPlacement, type CollisionHit } from "./collisions.ts";
 import { getTableModelForCatalogId, metresFromCentimetres } from "../tables/table-models.ts";
 import { isKnownMaterialId } from "./material-registry.ts";
 import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
-import { chairSeatLayout, getChairModel, metresFromCentimetres as chairMetresFromCentimetres } from "../chairs/chair-models.ts";
+import { chairSeatLayout, getChairModel, getChairModelForCatalogId, metresFromCentimetres as chairMetresFromCentimetres } from "../chairs/chair-models.ts";
 import type {
   PlannerAssetRecord,
   PlannerDocumentV3,
@@ -115,8 +115,8 @@ export function applyPlannerCommand(
       }
       const selected = document.placements.find((item) => item.id === command.placementId);
       if (!selected) return reject(document, "not-found", `Das Objekt ${command.placementId} wurde nicht gefunden.`);
-      if (selected.id !== "living-bozan-table") {
-        return reject(document, "invalid", "Der Tischvergleich kann nur den vorhandenen Esstisch ersetzen.");
+      if (selected.id !== "living-bozan-table" && !getTableModelForCatalogId(selected.catalogId)) {
+        return reject(document, "invalid", "Für dieses Objekt ist kein Tischmodellwechsel verfügbar.");
       }
       const catalogItem = getFurnitureCatalogItem(command.catalogId);
       if (!catalogItem) return reject(document, "invalid", `Das Produkt ${command.catalogId} ist im Katalog nicht vorhanden.`);
@@ -170,8 +170,8 @@ export function applyPlannerCommand(
       }
       const selected = document.placements.find((item) => item.id === command.placementId);
       if (!selected) return reject(document, "not-found", `Das Objekt ${command.placementId} wurde nicht gefunden.`);
-      if (!isDiningChairPlacement(selected) || getFurnitureCatalogItem(selected.catalogId)?.symbol !== "chair") {
-        return reject(document, "invalid", "Der Stuhlvergleich kann nur einen vorhandenen Esszimmerstuhl ersetzen.");
+      if ((!isDiningChairPlacement(selected) && !getChairModelForCatalogId(selected.catalogId)) || getFurnitureCatalogItem(selected.catalogId)?.symbol !== "chair") {
+        return reject(document, "invalid", "Für dieses Objekt ist kein Stuhlmodellwechsel verfügbar.");
       }
       const model = getChairModel(command.modelId);
       if (!model) return reject(document, "invalid", `Das Stuhlmodell ${command.modelId} ist nicht im Vergleichskatalog vorhanden.`);

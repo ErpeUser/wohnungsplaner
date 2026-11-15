@@ -14,7 +14,8 @@ export function ChairComparisonPanel({ document, placementId, dispatch, select }
   dispatch(command: PlannerCommand): CommandResult;
   select(id: string | null): void;
 }) {
-  const chair = document.placements.find((item) => item.id === placementId);
+  const target = document.placements.find((item) => item.id === placementId);
+  const chair = target && (DINING_CHAIR_IDS.some((id) => id === target.id) || getChairModelForCatalogId(target.catalogId)) ? target : undefined;
   const initial = getChairModelForCatalogId(chair?.catalogId)?.id ?? CHAIR_MODELS[0].id;
   const [modelId, setModelId] = useState<ChairModelId>(initial);
   const [error, setError] = useState<string | null>(null);
@@ -24,6 +25,7 @@ export function ChairComparisonPanel({ document, placementId, dispatch, select }
     const seat = document.placements.find((item) => item.id === id);
     return seat ? [seat] : [];
   });
+  if (chair && !chairs.some((item) => item.id === chair.id)) chairs.push(chair);
   const seatChooser = (
     <label className="planner-select-field">
       <span>Stuhl auswählen</span>
@@ -65,7 +67,7 @@ export function ChairComparisonPanel({ document, placementId, dispatch, select }
       </dl>
       <a className="planner-model-source" href={model.sourceUrl} target="_blank" rel="noreferrer">Originalquelle · {model.shortName} ↗</a>
       <button type="button" className="planner-button planner-button--primary planner-model-apply" disabled={!chairModelHasGeometry(model) || chair.catalogId === model.catalogId} onClick={apply}>Auf diesen Stuhl anwenden</button>
-      <p className="planner-model-hint">Position und Drehung bleiben erhalten. Die anderen drei Stühle bleiben unverändert.</p>
+      <p className="planner-model-hint">Position und Drehung bleiben erhalten. {DINING_CHAIR_IDS.some((id) => id === chair.id) ? "Die anderen drei Stühle bleiben unverändert." : "Andere Möbel bleiben unverändert."}</p>
       {error ? <p className="planner-field-error" role="alert">{error}</p> : null}
       <ModelEvidence name={model.shortName} sourceUrl={model.sourceUrl} sourceLabel={model.sourceLabel} imageUrls={model.imageUrls} notes={model.sourceNotes} mirrorUrl={model.mirrorUrl} />
     </div>

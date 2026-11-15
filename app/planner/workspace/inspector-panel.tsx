@@ -160,11 +160,16 @@ function ModelSwitcher({
   dispatch(command: PlannerCommand): CommandResult;
   select(id: string | null): void;
 }) {
-  const tableSelected = placement.id === "living-bozan-table";
-  const chairSelected = DINING_CHAIR_IDS.some((id) => id === placement.id);
+  const originalTableSelected = placement.id === "living-bozan-table";
+  const originalChairSelected = DINING_CHAIR_IDS.some((id) => id === placement.id);
+  const tableSelected = originalTableSelected || Boolean(getTableModelForCatalogId(placement.catalogId));
+  const chairSelected = originalChairSelected || Boolean(getChairModelForCatalogId(placement.catalogId));
+  const originalDiningGroup = originalTableSelected || originalChairSelected;
+  const availableTabs: Array<"chair" | "table"> = originalDiningGroup ? ["chair", "table"] : chairSelected ? ["chair"] : tableSelected ? ["table"] : [];
   const [activeTab, setActiveTab] = useState<"chair" | "table">(chairSelected ? "chair" : "table");
   const modelTabs = useRef<Array<HTMLButtonElement | null>>([]);
-  if (!tableSelected && !chairSelected) return null;
+  if (!availableTabs.length) return null;
+  const currentTab = availableTabs.includes(activeTab) ? activeTab : availableTabs[0];
 
   const handleModelTabKeyDown = (event: KeyboardEvent<HTMLDivElement>, index: number) => {
     if (!["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp", "Home", "End"].includes(event.key)) return;
@@ -172,13 +177,14 @@ function ModelSwitcher({
     const next = event.key === "Home"
       ? 0
       : event.key === "End"
-        ? 1
-        : (index + (event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : -1) + 2) % 2;
-    setActiveTab(next === 0 ? "chair" : "table");
+        ? availableTabs.length - 1
+        : (index + (event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : -1) + availableTabs.length) % availableTabs.length;
+    setActiveTab(availableTabs[next]);
     modelTabs.current[next]?.focus();
   };
 
-  const target = activeTab === "table" ? document.placements.find((item) => item.id === "living-bozan-table") : chairSelected ? placement : undefined;
+  const tableTargetId = tableSelected ? placement.id : originalDiningGroup ? "living-bozan-table" : undefined;
+  const target = currentTab === "table" ? document.placements.find((item) => item.id === tableTargetId) : chairSelected ? placement : undefined;
   const catalogItem = target ? getFurnitureCatalogItem(target.catalogId) : undefined;
   const confidence = target?.metadata?.confidence === "confirmed" ? "Beleg bestätigt" : "Beleg geschätzt";
   const referenceUrl = target ? referenceForPlacement(target.catalogId) : undefined;
@@ -187,41 +193,32 @@ function ModelSwitcher({
   return (
     <section className="planner-model-switcher" aria-label="Modellwechsel">
       <div className="planner-model-switcher__header">
-        <span className="planner-kicker">Essgruppe</span>
+        <span className="planner-kicker">{originalDiningGroup ? "Essgruppe" : "Modell"}</span>
         <strong>Modell für dieses Objekt</strong>
       </div>
       <div
         className="planner-model-switcher__tabs"
         role="tablist"
         aria-label="Modelle wechseln"
-        onKeyDown={(event) => handleModelTabKeyDown(event, activeTab === "chair" ? 0 : 1)}
+        onKeyDown={(event) => handleModelTabKeyDown(event, availableTabs.indexOf(currentTab))}
       >
-        <button
-          ref={(element) => { modelTabs.current[0] = element; }}
-          id="planner-chair-model-tab"
-          type="button"
-          role="tab"
-          aria-selected={activeTab === "chair"}
-          aria-controls={activeTab === "chair" ? "planner-chair-model-panel" : undefined}
-          tabIndex={activeTab === "chair" ? 0 : -1}
-          className="planner-model-switcher__tab"
-          onClick={() => setActiveTab("chair")}
-        >
-          Stuhlmodell ändern
-        </button>
-        <button
-          ref={(element) => { modelTabs.current[1] = element; }}
-          id="planner-table-model-tab"
-          type="button"
-          role="tab"
-          aria-selected={activeTab === "table"}
-          aria-controls={activeTab === "table" ? "planner-table-model-panel" : undefined}
-          tabIndex={activeTab === "table" ? 0 : -1}
-          className="planner-model-switcher__tab"
-          onClick={() => setActiveTab("table")}
-        >
-          Tischmodell ändern
-        </button>
+        {availableTabs.map((tab, index) => (
+          <button
+            key={tab}
+            ref={(element) => { modelTabs.current[index] = element; }}
+            id={`planner-${tab}-model-tab`}
+            type="button"
+            role="tab"
+            aria-selected={currentTab === tab}
+            aria-controls={currentTab === tab ? `planner-${tab}-model-panel` : undefined}
+            tabIndex={currentTab === tab ? 0 : -1}
+            className="planner-model-switcher__tab"
+            style={availableTabs.length === 1 ? { gridColumn: "1 / -1" } : undefined}
+            onClick={() => setActiveTab(tab)}
+          >
+            {tab === "chair" ? "Stuhlmodell ändern" : "Tischmodell ändern"}
+          </button>
+        ))}
       </div>
       {target ? <div className="planner-model-switcher__current">
         {referenceLink ? <a className="planner-model-switcher__thumb" href={referenceLink} target="_blank" rel="noreferrer" aria-label={`Bildquelle öffnen · ${catalogItem?.name ?? target.catalogId}`}>
@@ -233,7 +230,7 @@ function ModelSwitcher({
           <small>{Math.round(target.size.width * 100)} × {Math.round(target.size.depth * 100)} × {Math.round(target.size.height * 100)} cm · {confidence}</small>
         </span>
       </div> : null}
-      {activeTab === "chair" ? (
+      {currentTab === "chair" ? (
         <div id="planner-chair-model-panel" role="tabpanel" aria-labelledby="planner-chair-model-tab" className="planner-model-switcher__panel">
           <ChairComparisonPanel
             key={`${placement.id}:${placement.catalogId}`}
@@ -246,8 +243,9 @@ function ModelSwitcher({
       ) : (
         <div id="planner-table-model-panel" role="tabpanel" aria-labelledby="planner-table-model-tab" className="planner-model-switcher__panel">
           <TableComparisonPanel
-            key={`${target?.catalogId}:${target?.size.width}:${target?.size.depth}`}
+            key={`${target?.id}:${target?.catalogId}:${target?.size.width}:${target?.size.depth}:${target?.size.height}`}
             document={document}
+            placementId={tableTargetId}
             dispatch={dispatch}
             select={select}
           />
