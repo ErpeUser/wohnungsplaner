@@ -76,7 +76,7 @@ export function PlannerArchitecture({
         );
       })}
       {scene.builtIns.filter((item) => !hiddenObjects.has(item.id)).map((item) => (
-        <ObjectBox key={item.id} item={item} selected={selectionId === item.id} onSelect={onSelect} />
+        <ObjectBox key={item.id} item={item} walls={scene.walls} selected={selectionId === item.id} onSelect={onSelect} />
       ))}
       {scene.fixtures
         .filter((fixture) => !hiddenFixtures.has(fixture.id))
@@ -637,18 +637,47 @@ function Floor({ floor }: { floor: SceneFloor }) {
   );
 }
 
+function recessedPanelPosition(item: SceneObject<PlannerBuiltIn>, walls: readonly SceneWall[]): [number, number, number] {
+  if (
+    !["wc-flush-plate", "wc-revision-panel"].includes(item.catalogId)
+    || item.source.metadata?.confidence !== "estimated"
+  ) return item.position;
+
+  const normal = { x: Math.sin(item.rotationY), z: Math.cos(item.rotationY) };
+  for (const wall of walls) {
+    if (!wall.roomIds.includes(item.roomId)) continue;
+    const tangent = { x: Math.cos(wall.angle), z: Math.sin(wall.angle) };
+    if (Math.abs(tangent.x * normal.x + tangent.z * normal.z) > 0.000001) continue;
+    const relative = { x: item.position[0] - wall.start.x, z: item.position[2] - wall.start.z };
+    const along = relative.x * tangent.x + relative.z * tangent.z;
+    if (along < item.size[0] / 2 || along > wall.length - item.size[0] / 2) continue;
+    const fromAxis = relative.x * normal.x + relative.z * normal.z;
+    if (fromAxis < 0 || fromAxis > wall.thickness / 2) continue;
+
+    // Retain the estimated stored anchor and all dimensions. Expose only the
+    // recessed body's front face with 1 mm rendering clearance; its back stays
+    // inside the wall. Already visible or freestanding panels are untouched.
+    const offset = wall.thickness / 2 + 0.001 - fromAxis - item.size[2] / 2;
+    if (offset <= 0) continue;
+    return [item.position[0] + normal.x * offset, item.position[1], item.position[2] + normal.z * offset];
+  }
+  return item.position;
+}
+
 function ObjectBox({
   item,
+  walls,
   selected,
   onSelect,
 }: {
   item: SceneObject<PlannerBuiltIn>;
+  walls: readonly SceneWall[];
   selected: boolean;
   onSelect(id: string | null): void;
 }) {
   return (
     <group
-      position={item.position}
+      position={recessedPanelPosition(item, walls)}
       rotation={[0, item.rotationY, 0]}
       onClick={(event) => {
         event.stopPropagation();
