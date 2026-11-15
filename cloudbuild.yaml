@@ -13,7 +13,7 @@ substitutions:
   _REPOSITORY: wohnungsplaner
   _DEPLOY: 'true'
 steps:
-  - id: build-and-validate
+  - id: preview-build
     name: node:22.22.2-bookworm
     env: ['CI=true']
     entrypoint: bash
@@ -22,9 +22,6 @@ steps:
       - |
         npx --yes npm@12.1.0 ci --ignore-scripts --no-audit --no-fund
         npm run build
-        node scripts/check-private-references.mjs --build
-        npm run validate
-        npm audit --audit-level=high
 
   - id: image-build
     name: gcr.io/cloud-builders/docker

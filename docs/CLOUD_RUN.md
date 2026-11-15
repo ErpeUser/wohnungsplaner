@@ -4,13 +4,14 @@ GitHub ist das private Quellarchiv. Google Cloud Build ist mit
 `ErpeUser/wohnungsplaner` verbunden und startet bei jedem Push auf `main`.
 GitHub Actions übernimmt die visuellen Browser- und WebGL-Prüfungen separat.
 
-## Geprüfte Preview bei jedem freigegebenen main-Push
+## Schnelle KI-Preview bei jedem main-Push
 
-Der Trigger `wohnungsplaner-main` verwendet `cloudbuild.yaml`. Vor Image-Bau
-und Veröffentlichung führt er Produktionsbuild, Prüfung der privaten
-Build-Ausgabe, `npm run validate` und Dependency-Audit aus. Cloud Build lädt
-keinen Browser herunter und erzeugt keine visuellen Screenshots; diese Prüfung
-läuft im GitHub-Workflow `Visual Cloud Evidence`.
+Der Trigger `wohnungsplaner-main` verwendet `cloudbuild.yaml`: Abhängigkeiten
+installieren, Anwendung bauen, Image hochladen und Preview veröffentlichen.
+Tests, Lint, Typecheck, Audit und Screenshot-Prüfungen blockieren diese Vorschau
+nicht. Sie laufen separat; der Produktionskanal behält seine Prüfungen.
+Für Änderungen an einzelnen Modellen oder Materialien ist lokal
+`npm run dev:review` der schnellste Weg: Aktualisierung ohne Container-Build.
 
 `_DEPLOY` steht in dieser Preview-Konfiguration standardmäßig auf `true`.
 Für einen reinen Prüflauf ausdrücklich `_DEPLOY=false` übergeben: Dann
