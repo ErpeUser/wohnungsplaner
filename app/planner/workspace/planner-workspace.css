@@ -2171,6 +2171,30 @@
     max-width: calc(100% - 16px);
   }
 
+  .planner-3d__camera--orbit {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    max-width: calc(100% - 16px);
+    padding: 8px;
+  }
+
+  .planner-3d__camera--orbit .planner-3d__camera-help,
+  .planner-3d__quality {
+    display: none;
+  }
+
+  .planner-3d__camera--orbit button {
+    flex: 0 0 auto;
+    min-width: 44px;
+    height: 44px;
+    padding-inline: 12px;
+    white-space: nowrap;
+  }
+
   .planner-canvas__meta,
   .planner-status {
     overflow-x: auto;
