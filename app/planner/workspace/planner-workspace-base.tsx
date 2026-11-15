@@ -253,7 +253,7 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
                 onStageChange={setPlanStage}
               />
             ) : (
-              <Workspace3DErrorBoundary onReturn2D={() => state.setViewMode("2d")}>
+              <Workspace3DErrorBoundary onReturn2D={() => state.setViewMode("2d")} onReload={() => window.location.reload()}>
                 <Suspense fallback={<ThreeLoading />}>
                   <LazyPlanner3D
                     document={state.document}
@@ -312,29 +312,39 @@ function ThreeLoading() {
   );
 }
 
-class Workspace3DErrorBoundary extends Component<{
+export class Workspace3DErrorBoundary extends Component<{
   children: ReactNode;
   onReturn2D(): void;
-}, { failed: boolean }> {
-  state = { failed: false };
+  onReload(): void;
+}, { failed: boolean; moduleLoadFailure: boolean }> {
+  state = { failed: false, moduleLoadFailure: false };
 
-  static getDerivedStateFromError() {
-    return { failed: true };
+  static getDerivedStateFromError(error: unknown) {
+    return { failed: true, moduleLoadFailure: isModuleLoadError(error) };
   }
 
   render() {
     if (this.state.failed) {
       return (
         <div className="planner-3d-fallback" role="alert">
-          <span className="planner-kicker">Sichere Ansicht</span>
-          <strong>3D-Modul konnte nicht geladen werden</strong>
-          <p>Die Planung bleibt vollständig erhalten.</p>
+          <span className="planner-kicker">{this.state.moduleLoadFailure ? "Ladefehler" : "Sichere Ansicht"}</span>
+          <strong>{this.state.moduleLoadFailure ? "3D-Dateien konnten nicht geladen werden" : "3D-Modul konnte nicht geladen werden"}</strong>
+          <p>{this.state.moduleLoadFailure
+            ? "Bitte lade die Seite neu, um die 3D-Dateien erneut anzufordern. Du kannst auch in 2D weiterarbeiten."
+            : "Die Planung bleibt vollständig erhalten."}</p>
+          {this.state.moduleLoadFailure ? <button type="button" onClick={this.props.onReload}>Seite neu laden</button> : null}
           <button type="button" onClick={this.props.onReturn2D}>Zu 2D</button>
         </div>
       );
     }
     return this.props.children;
   }
+}
+
+function isModuleLoadError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  return error.name === "ChunkLoadError"
+    || /Failed to fetch dynamically imported module|error loading dynamically imported module|Importing a module script failed/i.test(error.message);
 }
 
 function browserRepository() {
