@@ -1,5 +1,6 @@
 ﻿param([Parameter(Mandatory=$true)][string]$RepositoryRoot, [Parameter(Mandatory=$true)][string]$NodePath)
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'desktop-process.ps1')
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 Add-Type -AssemblyName System.Net.Http
@@ -43,7 +44,7 @@ function Open-Planner {
 function Start-PlannerWorker([string]$Action) {
     if ($script:worker -and -not $script:worker.HasExited) { return }
     $tray.Icon = $icons.loading; $tray.Text = 'Wohnungsplaner - lädt'
-    $script:worker = Start-Process -FilePath $NodePath -ArgumentList @(('"' + (Join-Path $RepositoryRoot 'scripts\desktop-runtime.mjs') + '"'), $Action) -WorkingDirectory $RepositoryRoot -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $localFolder 'desktop-worker.log') -RedirectStandardError (Join-Path $localFolder 'desktop-worker-error.log')
+    $script:worker = Start-PlannerBackgroundProcess -FilePath $NodePath -Arguments @(('"' + (Join-Path $RepositoryRoot 'scripts\desktop-runtime.mjs') + '"'), $Action) -WorkingDirectory $RepositoryRoot -OutputLog (Join-Path $localFolder 'desktop-worker.log') -ErrorLog (Join-Path $localFolder 'desktop-worker-error.log')
     $script:lastUpdate = [DateTime]::Now
 }
 $openItem.Add_Click({ if ($script:phase -eq 'ready') { Open-Planner } else { $script:openWhenReady = $true; Start-PlannerWorker 'start' } })

@@ -4,6 +4,7 @@ import { mkdtempSync, writeFileSync, readFileSync, rmSync, existsSync } from 'no
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
 const git = (root, ...args) => execFileSync('git', ['-C', root, ...args], { encoding: 'utf8', windowsHide: true }).trim();
 async function fixture(t) {
@@ -68,4 +69,14 @@ test('a stale lock reused by an unrelated live process does not block startup', 
   assert.equal(typeof release, 'function');
   release();
   assert.equal(existsSync(lockPath), false);
+});
+test('Windows PowerShell retains background exit status for tray shutdown', { skip: process.platform !== 'win32' }, t => {
+  const folder = mkdtempSync(path.join(tmpdir(), 'planner-exit-'));
+  t.after(() => rmSync(folder, { recursive: true, force: true }));
+  const helper = fileURLToPath(new URL('../scripts/desktop-process.ps1', import.meta.url));
+  const quote = value => "'" + value.replaceAll("'", "''") + "'";
+  const code = `$ProgressPreference='SilentlyContinue'; . ${quote(helper)}; $p=Start-PlannerBackgroundProcess -FilePath ${quote(process.execPath)} -Arguments @('--version') -WorkingDirectory ${quote(folder)} -OutputLog ${quote(path.join(folder,'out.log'))} -ErrorLog ${quote(path.join(folder,'err.log'))}; $p.WaitForExit(); @{code=$p.ExitCode; exited=$p.HasExited}|ConvertTo-Json -Compress`;
+  const result = JSON.parse(execFileSync('powershell.exe', ['-NoProfile', '-EncodedCommand', Buffer.from(code, 'utf16le').toString('base64')], { encoding:'utf8', windowsHide:true, stdio:['ignore','pipe','pipe'] }));
+  assert.equal(result.code, 0);
+  assert.equal(result.exited, true);
 });
