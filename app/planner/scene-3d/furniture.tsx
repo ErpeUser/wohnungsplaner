@@ -7,7 +7,7 @@ import { BoxGeometry, BufferGeometry, CatmullRomCurve3, CylinderGeometry, Extrud
 import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
 import { resolveFurnitureAsset } from "../catalog/asset-manifest.ts";
 import { resolvePlannerAsset } from "../catalog/asset-resolver.ts";
-import { getPlannerMaterial } from "./materials.ts";
+import { getComparisonTabletopMaterial, getPlannerMaterial } from "./materials.ts";
 import { furnitureRenderTransform, furnitureWorldPosition, type SceneModel, type SceneObject } from "./scene-model.ts";
 import type { PlannerPlacement } from "../domain/types.ts";
 import { tableVisualProfile } from "../tables/table-models.ts";
@@ -19,6 +19,11 @@ import { plannerAssetUrl } from "./asset-url.ts";
 const SHARED_BOX = new BoxGeometry(1, 1, 1);
 const SHARED_CYLINDER = new CylinderGeometry(0.5, 0.5, 1, 24);
 const SHARED_SPHERE = new SphereGeometry(0.5, 20, 12);
+const PRIMARY_TABLETOPS = new Set([
+  "dining-table-aliexpress-100-140",
+  "dining-table-temu-606997-120-160",
+  "dining-table-kaufland-567080013-120-160",
+]);
 
 function DetailStrip({
   position,
@@ -1232,8 +1237,8 @@ function capsuleShape(width: number, depth: number) {
   return { shape, horizontal };
 }
 
-function CapsuleSolid({ width, depth, height, position, materialId }: {
-  width: number; depth: number; height: number; position: [number, number, number]; materialId: string;
+function CapsuleSolid({ width, depth, height, position, materialId, material }: {
+  width: number; depth: number; height: number; position: [number, number, number]; materialId: string; material?: Material;
 }) {
   const geometry = useMemo(() => {
     const bevel = Math.min(0.002, height / 5, width / 8, depth / 8);
@@ -1247,7 +1252,7 @@ function CapsuleSolid({ width, depth, height, position, materialId }: {
     if (!horizontal) geometry.rotateY(Math.PI / 2);
     return geometry;
   }, [width, depth, height]);
-  return <mesh position={position} geometry={geometry} castShadow receiveShadow><primitive object={getPlannerMaterial(materialId)} attach="material" /></mesh>;
+  return <mesh position={position} geometry={geometry} castShadow receiveShadow><primitive object={material ?? getPlannerMaterial(materialId)} attach="material" /></mesh>;
 }
 
 function FurnitureBeam({ start, end, width, depth = width, materialId = "metal-black", round = false }: {
@@ -1283,10 +1288,11 @@ function ComparisonDiningTable({ materialId, catalogId, size }: { materialId: st
   const extended = width > (profile === "round-metal-frame" ? 1.01 : 1.21);
   if (profile === "fluted-round-pedestal") return <FlutedRoundPedestalTable width={width} height={height} depth={depth} materialId={materialId} extended={extended} />;
   const thickness = profile === "fluted-extension-pedestal" ? 0.018 : 0.025;
+  const tabletop = PRIMARY_TABLETOPS.has(catalogId) ? getComparisonTabletopMaterial(materialId) : undefined;
   // Author these measured products in metres, then cancel the parent's unit-box
   // normalization. Extending the top must not stretch the legs or cabinet.
   return <group scale={[1 / width, 1 / height, 1 / depth]}>
-    <CapsuleSolid width={width} depth={depth} height={thickness} position={[0, height - thickness / 2, 0]} materialId={materialId} />
+    <CapsuleSolid width={width} depth={depth} height={thickness} position={[0, height - thickness / 2, 0]} materialId={materialId} material={tabletop} />
     {(extended ? [-0.2, 0.2] : [0]).map((x) => <mesh key={x} position={[x, height + 0.0002, 0]} scale={[0.0012, 0.0004, depth - 0.006]} geometry={SHARED_BOX}>
       <primitive object={getPlannerMaterial("oak-artisan-edge")} attach="material" />
     </mesh>)}

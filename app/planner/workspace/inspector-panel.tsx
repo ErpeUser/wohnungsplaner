@@ -7,7 +7,7 @@ import type { CommandResult, PlannerCommand } from "../domain/commands.ts";
 import type { PlannerDocumentV3, PlannerPlacement } from "../domain/types.ts";
 import { ChairComparisonPanel } from "./chair-comparison-panel.tsx";
 import { getChairModelForCatalogId } from "../chairs/chair-models.ts";
-import { getTableModelForCatalogId } from "../tables/table-models.ts";
+import { getTableModelForCatalogId, metresFromCentimetres } from "../tables/table-models.ts";
 import { TableComparisonPanel } from "./table-comparison-panel.tsx";
 import { ModelImage, referenceKind } from "./model-evidence.tsx";
 import { DINING_CHAIR_IDS, placementLabel } from "./placement-label.ts";
@@ -186,7 +186,7 @@ function ModelSwitcher({
   const tableTargetId = tableSelected ? placement.id : originalDiningGroup ? "living-bozan-table" : undefined;
   const target = currentTab === "table" ? document.placements.find((item) => item.id === tableTargetId) : chairSelected ? placement : undefined;
   const catalogItem = target ? getFurnitureCatalogItem(target.catalogId) : undefined;
-  const confidence = target?.metadata?.confidence === "confirmed" ? "Beleg bestätigt" : "Beleg geschätzt";
+  const confidence = target ? evidenceForPlacement(target) : "Beleg unklar";
   const referenceUrl = target ? referenceForPlacement(target.catalogId) : undefined;
   const referenceLink = referenceUrl ?? getChairModelForCatalogId(target?.catalogId)?.sourceUrl ?? getTableModelForCatalogId(target?.catalogId)?.sourceUrl;
 
@@ -258,6 +258,24 @@ function referenceForPlacement(catalogId: string) {
   const chair = getChairModelForCatalogId(catalogId);
   const table = getTableModelForCatalogId(catalogId);
   return chair?.imageUrls[0] ?? table?.imageUrls[0];
+}
+
+function evidenceForPlacement(placement: PlannerPlacement) {
+  const chair = getChairModelForCatalogId(placement.catalogId);
+  const table = getTableModelForCatalogId(placement.catalogId);
+  const catalog = getFurnitureCatalogItem(placement.catalogId);
+  const sameSize = (size: PlannerPlacement["size"]) => (
+    ["width", "depth", "height"] as const
+  ).every((axis) => Math.abs(placement.size[axis] - size[axis]) < 0.0001);
+  const variant = table?.variants.find((item) => sameSize(metresFromCentimetres(item.sizeCm)));
+  const recordedSize = chair ? metresFromCentimetres(chair.sizeCm) : table ? variant && metresFromCentimetres(variant.sizeCm) : catalog?.defaultSize;
+  const sourceConfidence = chair?.confidence ?? (table ? variant?.confidence : catalog?.realism?.confidence === "verified" ? "confirmed" : catalog?.realism?.confidence);
+
+  // Adding from the catalogue historically stamps every placement "confirmed".
+  // That instance flag cannot upgrade an estimated or missing product source.
+  if (!recordedSize || !sameSize(recordedSize) || !sourceConfidence || sourceConfidence === "unknown" || table?.sourceStatus === "blocked") return "Beleg unklar";
+  if (sourceConfidence === "estimated" || chair?.sourceStatus === "estimated" || table?.sourceStatus === "mirror" || placement.metadata?.confidence === "estimated") return "Beleg geschätzt";
+  return "Beleg bestätigt";
 }
 
 function NumericField({

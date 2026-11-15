@@ -170,6 +170,7 @@ const RECIPES: Record<string, MaterialRecipe> = {
 };
 
 const cache = new Map<string, MeshStandardMaterial>();
+const comparisonTabletopCache = new Map<string, MeshStandardMaterial>();
 const textureCache = new Map<string, Texture>();
 export const PLANNER_TEXTURE_READY_EVENT = "planner:texture-ready";
 
@@ -417,6 +418,22 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
   return material;
 }
 
+/** A separate, application-lifetime profile for the three primary table tops.
+ * Shared wood recipes also serve cabinets, supports and generic catalogue models. */
+export function getComparisonTabletopMaterial(materialId: string): MeshStandardMaterial {
+  if (!["walnut", "oak-natural", "oak-artisan"].includes(materialId)) return getPlannerMaterial(materialId);
+  const cached = comparisonTabletopCache.get(materialId);
+  if (cached) return cached;
+  const material = getPlannerMaterial(materialId).clone();
+  const wood = loadComparisonTabletopTexture(materialId);
+  material.name = `planner-tabletop-${materialId}`;
+  material.map = wood;
+  material.bumpMap = asBumpMap(wood);
+  material.needsUpdate = true;
+  comparisonTabletopCache.set(materialId, material);
+  return material;
+}
+
 /** 1-cm waffles sampled from the user photo: raised sand yarn borders and
  * a slightly darker recessed square center.  A single local procedural texture
  * works in the 2D/3D pipeline without downloading third-party image assets. */
@@ -513,19 +530,39 @@ function loadProductWoodTexture(materialId: string) {
   });
 }
 
-function loadComparisonWoodTexture(materialId: string) {
-  const base: [number, number, number] = materialId === "walnut"
+function comparisonWoodBase(materialId: string): [number, number, number] {
+  return materialId === "walnut"
     ? [111, 73, 49]
     : materialId === "oak-artisan-edge"
       ? [142, 94, 55]
       : materialId === "oak-artisan"
         ? [211, 170, 108]
         : [201, 157, 101];
+}
+
+function loadComparisonWoodTexture(materialId: string) {
+  const base = comparisonWoodBase(materialId);
   return createProductDataTexture(`generated:comparison-wood-${materialId}`, 192, (x, y) => {
     const broad = Math.sin(x * 0.052 + Math.sin(y * 0.018) * 2.4) * (materialId === "walnut" ? 11 : 9);
     const pore = Math.sin(x * 0.42 + y * 0.03) * 2.8 + Math.sin(x * 0.11 + y * 0.14) * 2.2;
     const knot = Math.sin(x * 0.018 + y * 0.07) * 4.4;
     return [base[0] + broad + pore + knot, base[1] + broad * 0.72 + pore * 0.68 + knot * 0.82, base[2] + broad * 0.48 + pore * 0.42 + knot * 0.62];
+  });
+}
+
+function loadComparisonTabletopTexture(materialId: string) {
+  const base = comparisonWoodBase(materialId);
+  const size = 512;
+  return createProductDataTexture(`generated:comparison-tabletop-${materialId}`, size, (x, y) => {
+    const u = x / size * Math.PI * 2;
+    const v = y / size * Math.PI * 2;
+    // Integer cycles and periodic bending close at both tile edges. These are
+    // subtle generic grain estimates, not measured veneer or pore dimensions.
+    const bend = Math.sin(v) * 0.25 + Math.sin(v * 2) * 0.1;
+    const grain = Math.sin(u * 29 + bend) * (materialId === "walnut" ? 4.5 : 4);
+    const pore = Math.sin(u * 71 + bend * 1.4) * 1.4 + Math.sin(u * 97 + bend * 0.7) * 0.8;
+    const tone = Math.sin(u * 47 + bend * 0.6) * 1.5;
+    return [base[0] + grain + pore + tone, base[1] + grain * 0.72 + pore * 0.68 + tone * 0.82, base[2] + grain * 0.48 + pore * 0.42 + tone * 0.62];
   });
 }
 
