@@ -962,11 +962,6 @@ function PhotoWardrobe() {
           <primitive object={frame} attach="material" />
         </mesh>
       ))}
-      {modules.map((module) => (
-        <mesh key={`wardrobe-reveal-${module.center}`} position={[module.center, 0.5, 0.526]} scale={[0.004, 0.9, 0.008]} geometry={SHARED_BOX}>
-          <primitive object={getPlannerMaterial("drawer-charcoal")} attach="material" />
-        </mesh>
-      ))}
       {upperHandleXs.map((x) => (
         <mesh key={x} position={[x, 0.58, 0.535]} scale={[0.014, 0.16, 0.014]} geometry={SHARED_CYLINDER} castShadow>
           <primitive object={metal} attach="material" />

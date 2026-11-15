@@ -16,6 +16,7 @@ const SHARED_SPHERE = new SphereGeometry(0.5, 28, 18);
 const SHARED_TORUS = new TorusGeometry(0.5, 0.1, 12, 32);
 const SHARED_MIRROR_LED = new TorusGeometry(0.5, 0.026, 10, 48);
 const BALCONY_LOOP = new TorusGeometry(0.075, 0.011, 8, 18, Math.PI);
+const GLAZED_DOOR_CROSS_RAIL_Y_RATIO = -0.18;
 const VORRAUM_PLANT_TEXTURE = new TextureLoader().load("/planner-assets/textures/vorraum-wandpflanzgefaess.svg");
 VORRAUM_PLANT_TEXTURE.colorSpace = SRGBColorSpace;
 VORRAUM_PLANT_TEXTURE.flipY = false;
@@ -214,6 +215,10 @@ function DoorAssembly({
   const glass = door.visualStyle === "glass-clear" || door.visualStyle === "glass-frosted";
   const plainWhite = door.visualStyle === "solid-white";
   const leafMaterial = door.visualStyle === "solid-oak" ? "door-oak" : "white-matte";
+  const hasOpaqueLowerPanel = glass && door.id === "hall-living-door";
+  const insetBottom = -door.height / 2 + 0.09;
+  const glassBottom = hasOpaqueLowerPanel ? door.height * GLAZED_DOOR_CROSS_RAIL_Y_RATIO : insetBottom;
+  const glassTop = door.height / 2 - 0.09;
   return (
     <group
       name={`door-${door.id}`}
@@ -226,9 +231,15 @@ function DoorAssembly({
     >
       {glass ? (
         <>
-          <mesh scale={[door.width - 0.12, door.height - 0.18, 0.026]} geometry={SHARED_BOX} receiveShadow>
+          <mesh position={[0, (glassTop + glassBottom) / 2, 0]} scale={[door.width - 0.12, glassTop - glassBottom, 0.026]} geometry={SHARED_BOX} receiveShadow>
             <primitive object={getPlannerMaterial(door.visualStyle === "glass-clear" ? "glass-clear" : "glass-frosted")} attach="material" />
           </mesh>
+          {/* The photographed lower infill meets the existing estimated crossrail height. */}
+          {hasOpaqueLowerPanel ? (
+            <mesh position={[0, (glassBottom + insetBottom) / 2, 0]} scale={[door.width - 0.12, glassBottom - insetBottom, 0.052]} geometry={SHARED_BOX} castShadow receiveShadow>
+              <primitive object={getPlannerMaterial(leafMaterial)} attach="material" />
+            </mesh>
+          ) : null}
           <DoorLeafRails width={door.width} height={door.height} materialId={leafMaterial} />
         </>
       ) : (
@@ -369,7 +380,7 @@ function DoorLeafRails({ width, height, materialId }: { width: number; height: n
       <mesh position={[width / 2 - 0.055, 0, 0]} scale={[0.11, height, 0.06]} geometry={SHARED_BOX} castShadow><primitive object={rail} attach="material" /></mesh>
       <mesh position={[0, height / 2 - 0.055, 0]} scale={[width, 0.11, 0.06]} geometry={SHARED_BOX} castShadow><primitive object={rail} attach="material" /></mesh>
       <mesh position={[0, -height / 2 + 0.055, 0]} scale={[width, 0.11, 0.06]} geometry={SHARED_BOX} castShadow><primitive object={rail} attach="material" /></mesh>
-      <mesh position={[0, -height * 0.18, 0]} scale={[width - 0.12, 0.075, 0.062]} geometry={SHARED_BOX} castShadow><primitive object={rail} attach="material" /></mesh>
+      <mesh position={[0, height * GLAZED_DOOR_CROSS_RAIL_Y_RATIO, 0]} scale={[width - 0.12, 0.075, 0.062]} geometry={SHARED_BOX} castShadow><primitive object={rail} attach="material" /></mesh>
     </group>
   );
 }
@@ -855,17 +866,18 @@ function BathTiledFinish({ item }: { item: SceneObject<PlannerBuiltIn> }) {
 function WcFlushPlate({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   const [width, height, depth] = item.size;
   const plate = getPlannerMaterial("metal-satin");
-  const button = getPlannerMaterial("screen-black");
+  const rocker = getPlannerMaterial("white-matte");
   return (
     <group name={`wc-flush-plate-${item.source.id}`}>
       <RoundedBox args={[width, height, depth]} radius={0.008} smoothness={3} castShadow receiveShadow>
         <primitive object={plate} attach="material" />
       </RoundedBox>
-      <mesh position={[-width * 0.2, 0, depth / 2 + 0.006]} scale={[width * 0.18, height * 0.24, 0.01]} geometry={SHARED_BOX}>
-        <primitive object={button} attach="material" />
+      {/* Internal proportions are estimated from the reference; the plate envelope is unchanged. */}
+      <mesh position={[-width * 0.125, 0, depth / 2 + 0.006]} scale={[width * 0.46, height * 0.56, 0.01]} geometry={SHARED_BOX}>
+        <primitive object={rocker} attach="material" />
       </mesh>
-      <mesh position={[width * 0.2, 0, depth / 2 + 0.006]} scale={[width * 0.12, height * 0.24, 0.01]} geometry={SHARED_BOX}>
-        <primitive object={button} attach="material" />
+      <mesh position={[width * 0.235, 0, depth / 2 + 0.006]} scale={[width * 0.24, height * 0.56, 0.01]} geometry={SHARED_BOX}>
+        <primitive object={rocker} attach="material" />
       </mesh>
     </group>
   );

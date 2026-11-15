@@ -19,7 +19,7 @@
 .planner-workspace button,
 .planner-workspace select,
 .planner-workspace input {
-  font: inherit;
+  font-family: inherit;
 }
 
 .planner-workspace button {
