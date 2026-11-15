@@ -14,6 +14,7 @@ import { tableVisualProfile } from "../tables/table-models.ts";
 import { getChairModelForCatalogId } from "../chairs/chair-models.ts";
 import { normalizeCatalogGltf } from "./gltf-normalization.ts";
 import { createCatalogGltfMaterialCloner } from "./gltf-material-roles.ts";
+import { plannerAssetUrl } from "./asset-url.ts";
 
 const SHARED_BOX = new BoxGeometry(1, 1, 1);
 const SHARED_CYLINDER = new CylinderGeometry(0.5, 0.5, 1, 24);
@@ -107,7 +108,7 @@ function FurnitureInstance({
     <FurnitureAssetBoundary fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} size={item.size} />}>
       <Suspense fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} size={item.size} />}>
         <GltfFurniture
-          path={resolution.asset.path}
+          path={plannerAssetUrl(resolution.asset.path)}
           normalizeToUnitBounds
           catalogAssetId={resolution.asset.id}
           materialId={item.source.materialVariants?.main ?? item.source.materialVariants?.color ?? catalogItem?.materials[0]?.id}

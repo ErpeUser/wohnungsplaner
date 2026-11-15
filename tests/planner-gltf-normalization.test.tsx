@@ -11,6 +11,7 @@ import { afterAll, beforeAll, expect, test, vi } from "vitest";
 import { PLANNER_ASSET_MANIFEST } from "../app/planner/catalog/asset-manifest.ts";
 import { createReviewScene } from "../app/planner/review/review-models.ts";
 import { Furniture3D } from "../app/planner/scene-3d/furniture.tsx";
+import { plannerAssetUrl } from "../app/planner/scene-3d/asset-url.ts";
 import type { PlannerAssetRecord } from "../app/planner/domain/types.ts";
 import type { SceneModel } from "../app/planner/scene-3d/scene-model.ts";
 
@@ -21,7 +22,8 @@ vi.mock("@react-three/drei", async (importOriginal) => {
     // Replace transport on the actual loader instance used by drei. The real
     // hook/cache and the GLTFLoader-parsed original scene are retained.
     loader.load = (url, onLoad, _onProgress, onError) => {
-      const gltf = parsed.get(String(url));
+      const source = String(url).startsWith("/planner-assets/") ? new URL(String(url), "https://test.invalid").pathname : String(url);
+      const gltf = parsed.get(source);
       queueMicrotask(() => {
         if (gltf) onLoad(gltf);
         else onError?.(new ErrorEvent("error", { error: new Error(`Missing local test fixture: ${String(url)}`) }));
@@ -110,7 +112,7 @@ beforeAll(async () => {
 });
 
 afterAll(() => {
-  for (const path of parsed.keys()) useGLTF.clear(path);
+  for (const path of parsed.keys()) useGLTF.clear(plannerAssetUrl(path));
 });
 
 async function renderedFurniture(scene: SceneModel, assetOrigins = new Set<string>()) {
@@ -202,7 +204,7 @@ test.each(["empty", "flat", "non-finite"] as const)("a local GLB with %s bounds 
   if (kind === "flat") invalid.scale.y = 0;
   if (kind === "non-finite") invalid.position.x = Infinity;
   parsed.set(path, { ...original, scene: invalid });
-  useGLTF.clear(path);
+  useGLTF.clear(plannerAssetUrl(path));
   // React reports caught boundary errors to the console; assert the actual
   // fallback geometry below rather than asserting that logging occurred.
   const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
@@ -218,6 +220,6 @@ test.each(["empty", "flat", "non-finite"] as const)("a local GLB with %s bounds 
     await model.dispose();
     consoleError.mockRestore();
     parsed.set(path, original);
-    useGLTF.clear(path);
+    useGLTF.clear(plannerAssetUrl(path));
   }
 });

@@ -2,6 +2,7 @@
 
 import { ContactShadows, Environment } from "@react-three/drei";
 
+import { plannerAssetUrl } from "./asset-url.ts";
 import type { QualitySettings } from "./quality.ts";
 import type { SceneModel } from "./scene-model.ts";
 
@@ -48,7 +49,7 @@ export function PlannerLighting({
         shadow-bias={-0.0003}
       />
       <Environment
-        files="/planner-assets/environment/studio-soft.hdr"
+        files={plannerAssetUrl("/planner-assets/environment/studio-soft.hdr")}
         background={false}
         environmentIntensity={0.8}
       />

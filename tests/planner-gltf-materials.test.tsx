@@ -13,6 +13,7 @@ import { getFurnitureCatalogItem } from "../app/planner/catalog/catalog.ts";
 import type { PlannerAssetRecord } from "../app/planner/domain/types.ts";
 import { createReviewScene } from "../app/planner/review/review-models.ts";
 import { Furniture3D } from "../app/planner/scene-3d/furniture.tsx";
+import { plannerAssetUrl } from "../app/planner/scene-3d/asset-url.ts";
 import { getPlannerMaterial } from "../app/planner/scene-3d/materials.ts";
 import type { SceneModel } from "../app/planner/scene-3d/scene-model.ts";
 
@@ -22,7 +23,8 @@ vi.mock("@react-three/drei", async (importOriginal) => {
   const useLocalGLTF = ((path: string) => original.useGLTF(path, false, false, (loader) => {
     // Keep the real loader output, drei cache and R3F tree; replace file transport only.
     loader.load = (url, onLoad, _onProgress, onError) => {
-      const gltf = parsed.get(String(url));
+      const source = String(url).startsWith("/planner-assets/") ? new URL(String(url), "https://test.invalid").pathname : String(url);
+      const gltf = parsed.get(source);
       queueMicrotask(() => {
         if (gltf) onLoad(gltf);
         else onError?.(new ErrorEvent("error", { error: new Error(`Missing original GLB fixture: ${String(url)}`) }));
@@ -170,7 +172,7 @@ beforeAll(async () => {
 });
 
 afterAll(() => {
-  for (const path of parsed.keys()) useGLTF.clear(path);
+  for (const path of parsed.keys()) useGLTF.clear(plannerAssetUrl(path));
 });
 
 async function renderedFurniture(scene: SceneModel, assetOrigins = new Set<string>()) {
@@ -293,7 +295,7 @@ test("material replacement and unmount dispose only their own private clones", a
 test.each(ASSETS)("imported $name keeps every authored material despite a catalog selection", async ({ name, ids }) => {
   const path = `https://assets.example.test/imported-${name}.glb`;
   parsed.set(path, originals.get(assetPath(name))!);
-  useGLTF.clear(path);
+  useGLTF.clear(plannerAssetUrl(path));
   const scene = withMaterial(createReviewScene(ids[0]).scene, { main: getFurnitureCatalogItem(ids[0])!.materials[1].id });
   const manifest = PLANNER_ASSET_MANIFEST.assets.find((asset) => asset.path === assetPath(name))!;
   const asset: PlannerAssetRecord = {
@@ -324,14 +326,14 @@ test.each(ASSETS)("$name roles use GLTF associations even when scene traversal o
   const reordered = original.scene.clone(true);
   reordered.traverse((object) => object.children.reverse());
   parsed.set(path, { ...original, scene: reordered });
-  useGLTF.clear(path);
+  useGLTF.clear(plannerAssetUrl(path));
   const model = await renderedFurniture(createReviewScene(ids[0]).scene);
   try {
     expectRoles(model.scene, name, selected, getFurnitureCatalogItem(ids[0])!.materials[0].id);
   } finally {
     await model.dispose();
     parsed.set(path, original);
-    useGLTF.clear(path);
+    useGLTF.clear(plannerAssetUrl(path));
   }
 });
 
@@ -342,14 +344,14 @@ test("a missing source-material association preserves authored material instead 
   for (const [object, reference] of associations) if (reference.materials === 0) associations.delete(object);
   const parser = Object.assign(Object.create(Object.getPrototypeOf(original.parser)), original.parser, { associations });
   parsed.set(path, { ...original, parser });
-  useGLTF.clear(path);
+  useGLTF.clear(plannerAssetUrl(path));
   const model = await renderedFurniture(createReviewScene("dining-table").scene);
   try {
     expectRoles(model.scene, "table", [], "unused");
   } finally {
     await model.dispose();
     parsed.set(path, original);
-    useGLTF.clear(path);
+    useGLTF.clear(plannerAssetUrl(path));
   }
 });
 

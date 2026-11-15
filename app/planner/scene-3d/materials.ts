@@ -14,6 +14,8 @@ import {
   UnsignedByteType,
 } from "three";
 
+import { plannerAssetUrl } from "./asset-url.ts";
+
 type MaterialRecipe = {
   color: string;
   roughness: number;
@@ -893,9 +895,10 @@ function fallbackRecipe(materialId: string): MaterialRecipe {
 }
 
 function loadPlannerTexture(path: string) {
-  const cached = textureCache.get(path);
+  const url = plannerAssetUrl(path);
+  const cached = textureCache.get(url);
   if (cached) return cached;
-  const texture = new TextureLoader().load(path, (loadedTexture) => {
+  const texture = new TextureLoader().load(url, (loadedTexture) => {
     loadedTexture.needsUpdate = true;
     window.dispatchEvent(new CustomEvent(PLANNER_TEXTURE_READY_EVENT, { detail: path }));
   });
@@ -908,7 +911,7 @@ function loadPlannerTexture(path: string) {
   } else {
     texture.repeat.set(path.includes("oak-blonde") ? 3.6 : 2.4, path.includes("oak-blonde") ? 1.45 : 2.4);
   }
-  textureCache.set(path, texture);
+  textureCache.set(url, texture);
   return texture;
 }
 

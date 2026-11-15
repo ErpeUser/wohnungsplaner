@@ -13,8 +13,8 @@
         "sourceUrl": "https://github.com/mrdoob/three.js/blob/dev/LICENSE",
         "note": "Project-authored normalized geometry generated with Three.js primitives."
       },
-      "sha256": "455d90638f304878fe32ff88e13a7e8a5c7e6c8bd6d35c060e8666848d13ba25",
-      "byteLength": 344592,
+      "sha256": "226eee4d15ab4c66ddb1be86285aa69ec9c32095d8c187519b3ff849f1ffe0d4",
+      "byteLength": 344596,
       "meterScale": 1,
       "catalogIds": [
         "sofa-3seat"
@@ -105,7 +105,7 @@
         "sourceUrl": "https://github.com/mrdoob/three.js/blob/dev/LICENSE",
         "note": "Project-authored normalized geometry generated with Three.js primitives."
       },
-      "sha256": "bb8d23253c2fa79c84cdf2606b713ee9339b4c5c23a7abca6d0b45aa75e89273",
+      "sha256": "cf9a1486772184341b004502ed4c97682c4ec7889d0555c4df4e0326f5cb844c",
       "byteLength": 39192,
       "meterScale": 1,
       "catalogIds": [
