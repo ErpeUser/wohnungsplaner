@@ -41,12 +41,14 @@ extend({ Group, Mesh, ExtrudeGeometry });
 // Independently specified approved source-material indices, not renderer implementation data.
 const ASSETS = [
   { name: "bed", ids: ["bed-120", "bed-160"], selected: [2] },
-  { name: "chair", ids: ["chair-dining", "chair-office"], selected: [0, 1] },
+  { name: "chair", ids: ["chair-dining"], selected: [0, 1] },
   { name: "plant", ids: ["plant-medium"], selected: [0] },
   { name: "sofa", ids: ["sofa-3seat"], selected: [0, 1, 2, 3, 4, 5] },
-  { name: "storage", ids: ["nightstand", "wardrobe-200", "dresser", "shelf", "lowboard"], selected: [0] },
+  { name: "storage", ids: ["nightstand", "wardrobe-200", "dresser", "lowboard"], selected: [0] },
   { name: "table", ids: ["desk-standard", "dining-table"], selected: [0] },
 ];
+// chair-office/shelf now have their own actual component material and imported
+// model regression cases in planner-catalog-model-geometry.test.tsx.
 const CASES = ASSETS.flatMap((asset) => asset.ids.map((catalogId) => ({ ...asset, catalogId })));
 const originals = new Map<string, GLTF>();
 const sourceSnapshots = new Map<string, ReturnType<typeof sourceSnapshot>>();

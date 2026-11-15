@@ -41,17 +41,17 @@ const CASES = [
   ["bed-120", "bed", 1.2, 0.55, 2],
   ["bed-160", "bed", 1.6, 0.62, 2],
   ["chair-dining", "chair", 0.5, 0.84, 0.55],
-  ["chair-office", "chair", 0.62, 1.05, 0.62],
   ["plant-medium", "plant", 0.55, 1.15, 0.55],
   ["sofa-3seat", "sofa", 2.2, 0.82, 0.92],
   ["nightstand", "storage", 0.45, 0.52, 0.4],
   ["wardrobe-200", "storage", 2, 2.2, 0.6],
   ["dresser", "storage", 1.2, 0.82, 0.45],
-  ["shelf", "storage", 0.9, 1.9, 0.35],
   ["lowboard", "storage", 1.8, 0.5, 0.42],
   ["desk-standard", "table", 1.3, 0.75, 0.65],
   ["dining-table", "table", 1.6, 0.75, 0.9],
 ] as const;
+// The two dedicated generic constructions retain actual bounds/material/import
+// coverage in planner-catalog-model-geometry.test.tsx; these eleven still use GLBs.
 const snapshots = new Map<string, ReturnType<typeof sourceSnapshot>>();
 const remotePath = "https://assets.example.test/imported-bed.glb";
 

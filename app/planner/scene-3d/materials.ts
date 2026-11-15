@@ -283,7 +283,8 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
     material.bumpScale = 0.008;
     material.needsUpdate = true;
   } else if (["fabric-bliss-weave", "fabric-chicago-chenille", "fabric-kaleo-chenille", "fabric-temu-sand", "velvet-temu-beige", "fabric-amber-beige"].includes(materialId)) {
-    const weave = loadProductWeaveTexture(materialId);
+    const weave = materialId === "fabric-kaleo-chenille" || materialId === "fabric-amber-beige"
+      ? loadChairChenilleTexture(materialId) : loadProductWeaveTexture(materialId);
     material.map = weave;
     material.bumpMap = asBumpMap(weave);
     material.bumpScale = materialId === "fabric-chicago-chenille" ? 0.022 : 0.018;
@@ -495,12 +496,75 @@ function createProductDataTexture(key: string, size: number, pixel: (x: number, 
 function loadProductWeaveTexture(materialId: string) {
   const colour = new Color(RECIPES[materialId].color).getRGB({ r: 0, g: 0, b: 0 }, SRGBColorSpace);
   const base = [colour.r * 255, colour.g * 255, colour.b * 255];
-  return createProductDataTexture(`generated:${materialId}`, 128, (x, y) => {
-    const diagonal = Math.sin((x + y * 0.7) * 0.58) * 5.6;
-    const cross = Math.sin((x - y * 0.45) * 0.74) * 3.4;
-    const fiber = ((x * 17 + y * 29 + x * y * 3) % 11) - 5;
-    return [base[0] + diagonal + fiber, base[1] + diagonal * 0.92 + cross * 0.28 + fiber, base[2] + diagonal * 0.72 + cross * 0.42 + fiber];
+  return createProductDataTexture(`generated:${materialId}`, 128, (x, y) => productWeavePixel(base, x, y));
+}
+
+function productWeavePixel(base: number[], x: number, y: number): [number, number, number] {
+  const diagonal = Math.sin((x + y * 0.7) * 0.58) * 5.6;
+  const cross = Math.sin((x - y * 0.45) * 0.74) * 3.4;
+  const fiber = ((x * 17 + y * 29 + x * y * 3) % 11) - 5;
+  return [base[0] + diagonal + fiber, base[1] + diagonal * 0.92 + cross * 0.28 + fiber, base[2] + diagonal * 0.72 + cross * 0.42 + fiber];
+}
+
+function loadChairChenilleTexture(materialId: string) {
+  const key = `generated:chair-chenille-${materialId}`;
+  const cached = textureCache.get(key);
+  if (cached) return cached;
+  const colour = new Color(RECIPES[materialId].color).getRGB({ r: 0, g: 0, b: 0 }, SRGBColorSpace);
+  const base = [colour.r * 255, colour.g * 255, colour.b * 255];
+  const previousSums = [0, 0, 0];
+  // Preserve the old finish's exact channel means, including byte rounding,
+  // without allocating or retaining an unused legacy texture.
+  for (let y = 0; y < 128; y += 1) for (let x = 0; x < 128; x += 1) {
+    productWeavePixel(base, x, y).forEach((value, channel) => {
+      previousSums[channel] += Math.max(0, Math.min(255, Math.round(value)));
+    });
+  }
+  const mean = previousSums.map((sum) => sum / (128 * 128));
+  // Estimated appearance detail only: this sampling resolution and irregular
+  // field do not claim a measured chenille thread size or direction.
+  const size = 256;
+  const noise = new Float32Array(size * size);
+  for (let index = 0; index < noise.length; index += 1) {
+    let value = index + 0x6d2b79f5;
+    value = Math.imul(value ^ (value >>> 16), 0x21f0aaad);
+    value = Math.imul(value ^ (value >>> 15), 0x735a2d97);
+    noise[index] = (((value ^ (value >>> 15)) >>> 0) / 0xffffffff - 0.5) * 10;
+  }
+  const detail = new Float32Array(noise.length);
+  let detailSum = 0;
+  for (let y = 0; y < size; y += 1) for (let x = 0; x < size; x += 1) {
+    const index = y * size + x;
+    // Cyclic neighbours avoid a special boundary at the repeating tile edges.
+    detail[index] = noise[index] * 0.6 + (
+      noise[y * size + ((x + 1) % size)] + noise[y * size + ((x + size - 1) % size)]
+      + noise[((y + 1) % size) * size + x] + noise[((y + size - 1) % size) * size + x]
+    ) * 0.1;
+    detailSum += detail[index];
+  }
+  const detailMean = detailSum / detail.length;
+  const texture = createProductDataTexture(key, size, (x, y) => {
+    const value = detail[y * size + x] - detailMean;
+    return [mean[0] + value, mean[1] + value, mean[2] + value];
   });
+  const pixels = (texture.image as { data: Uint8Array }).data;
+  for (let channel = 0; channel < 3; channel += 1) {
+    let sum = 0;
+    for (let index = channel; index < pixels.length; index += 4) sum += pixels[index];
+    let remainder = previousSums[channel] * 4 - sum;
+    // Spread the few rounding corrections over the whole power-of-two tile;
+    // an odd stride visits every pixel without creating a corrected-row band.
+    for (let index = 0; remainder !== 0; index = (index + 40503) % (size * size)) {
+      const offset = index * 4 + channel;
+      const step = Math.sign(remainder);
+      if (pixels[offset] + step >= 0 && pixels[offset] + step <= 255) {
+        pixels[offset] += step;
+        remainder -= step;
+      }
+    }
+  }
+  texture.needsUpdate = true;
+  return texture;
 }
 
 function loadProductGrainTexture(materialId: string, base: [number, number, number], direction: number, scale: number) {

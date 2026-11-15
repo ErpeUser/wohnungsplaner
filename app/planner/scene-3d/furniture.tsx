@@ -16,6 +16,8 @@ import { normalizeCatalogGltf } from "./gltf-normalization.ts";
 import { createCatalogGltfMaterialCloner } from "./gltf-material-roles.ts";
 import { plannerAssetUrl } from "./asset-url.ts";
 import { createChairCushionGeometry } from "./chair-cushion-geometry.ts";
+import { CatalogModelGeometry, hasCatalogModelGeometry } from "./catalog-model-geometry.tsx";
+import { createMetricChairFabricGeometry } from "./chair-fabric-uv.ts";
 
 const SHARED_BOX = new BoxGeometry(1, 1, 1);
 const SHARED_CYLINDER = new CylinderGeometry(0.5, 0.5, 1, 24);
@@ -94,7 +96,8 @@ function FurnitureInstance({
   const fallback = catalogItem?.fallback3d ?? "cabinet";
   const materialId = item.source.materialVariants?.main ?? item.source.materialVariants?.color ?? item.materialId;
   const importedGlb = importedResolution?.kind === "remote" && importedResolution.asset.mediaType === "model/gltf-binary";
-  const catalogGlb = resolution?.kind === "gltf" && catalogItem?.renderMode !== "parametric";
+  const catalogGeometryId = hasCatalogModelGeometry(item.catalogId) ? item.catalogId : null;
+  const catalogGlb = resolution?.kind === "gltf" && catalogItem?.renderMode !== "parametric" && catalogGeometryId === null;
   const modelMeterScale = importedGlb
     ? importedResolution.asset.meterScale ?? 1
     : catalogGlb
@@ -110,6 +113,12 @@ function FurnitureInstance({
         <GltfFurniture path={importedResolution.url} />
       </Suspense>
     </FurnitureAssetBoundary>
+  ) : catalogGeometryId ? (
+    <CatalogModelGeometry
+      catalogId={catalogGeometryId}
+      materialId={item.source.materialVariants?.main ?? item.source.materialVariants?.color ?? catalogItem?.materials[0]?.id ?? materialId}
+      size={item.size}
+    />
   ) : catalogGlb ? (
     <FurnitureAssetBoundary fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} size={item.size} />}>
       <Suspense fallback={<ParametricFurniture fallback={fallback} materialId={materialId} catalogId={item.catalogId} size={item.size} />}>
@@ -1373,21 +1382,40 @@ function BozanDiningTable() {
   const oak = getPlannerMaterial("oak-bozan-directional");
   const oakEdge = getPlannerMaterial("oak-bozan-edge");
   const black = getPlannerMaterial("metal-black");
+  const joint = useMemo(() => {
+    const material = getPlannerMaterial("oak-artisan-edge").clone();
+    // Keep the joint flush while separating coincident surfaces in the depth
+    // buffer. The shared edge material must retain its original settings.
+    material.polygonOffset = true;
+    material.polygonOffsetFactor = -1;
+    material.polygonOffsetUnits = -1;
+    return material;
+  }, []);
+  useEffect(() => () => joint.dispose(), [joint]);
+  // The catalogue records a 25 mm slab within the unchanged 76 cm height.
+  const slabHeight = 0.025 / 0.76;
+  const legAngle = 0.54;
+  // Extend the existing inclined supports down to the floor, preserving their
+  // upper attachment instead of translating the whole table or its placement.
+  const oldFloorGap = 0.46 - Math.cos(legAngle) * 0.44 - Math.sin(legAngle) * 0.0325;
+  const legExtension = oldFloorGap / Math.cos(legAngle);
 
   return (
     <group>
-      <mesh position={[0, 0.982, 0]} scale={[1, 0.036, 1]} geometry={SHARED_CYLINDER} castShadow receiveShadow>
+      <mesh position={[0, 1 - slabHeight / 2, 0]} scale={[1, slabHeight, 1]} geometry={SHARED_CYLINDER} castShadow receiveShadow>
         <primitive object={oak} attach="material" />
       </mesh>
-      <DetailStrip position={[0, 1.003, 0]} scale={[0.012, 0.006, 0.93]} materialId="oak-artisan-edge" />
-      <DetailStrip position={[0, 0.965, 0.498]} scale={[0.86, 0.012, 0.012]} materialId="oak-artisan-edge" />
-      <RoundedBox args={[0.72, 0.12, 0.72]} radius={0.018} smoothness={4} position={[0, 0.89, 0]} castShadow receiveShadow>
+      {/* A flush, estimated joint mark stays inside the circular slab. */}
+      <mesh position={[0, 0.999, 0]} scale={[0.0018, 0.002, 0.93]} geometry={SHARED_BOX} dispose={null}>
+        <primitive object={joint} attach="material" />
+      </mesh>
+      <RoundedBox args={[0.72, 0.12, 0.72]} radius={0.018} smoothness={4} position={[0, 1 - slabHeight - 0.06, 0]} castShadow receiveShadow>
         <primitive object={oakEdge} attach="material" />
       </RoundedBox>
 
       {[Math.PI / 4, Math.PI * 3 / 4, Math.PI * 5 / 4, Math.PI * 7 / 4].map((angle) => (
         <group key={angle} rotation={[0, angle, 0]}>
-          <mesh position={[0.22, 0.46, 0]} rotation={[0, 0, 0.54]} scale={[0.065, 0.88, 0.065]} geometry={SHARED_BOX} castShadow receiveShadow>
+          <mesh position={[0.22 + Math.sin(legAngle) * legExtension / 2, 0.46 - oldFloorGap / 2, 0]} rotation={[0, 0, legAngle]} scale={[0.065, 0.88 + legExtension, 0.065]} geometry={SHARED_BOX} castShadow receiveShadow>
             <primitive object={black} attach="material" />
           </mesh>
         </group>
@@ -1418,9 +1446,9 @@ function SoftChairSeat({ width, depth, seatHeight, material }: { width: number; 
   </mesh>;
 }
 
-function ChairUpholstery({ width, depth, height, seatHeight, seatWidth, seatDepth, armHeight, materialId, channels, softSeat = false }: {
+function ChairUpholstery({ width, depth, height, seatHeight, seatWidth, seatDepth, armHeight, materialId, channels, softSeat = false, metricFabric = false }: {
   width: number; depth: number; height: number; seatHeight: number; seatWidth: number; seatDepth: number;
-  armHeight: number; materialId: string; channels: boolean; softSeat?: boolean;
+  armHeight: number; materialId: string; channels: boolean; softSeat?: boolean; metricFabric?: boolean;
 }) {
   const { shell, rim } = useMemo(() => {
     // A continuous padded U shell gives the back and arms one smooth outline.
@@ -1482,30 +1510,46 @@ function ChairUpholstery({ width, depth, height, seatHeight, seatWidth, seatDept
     shell.setAttribute("uv", new Float32BufferAttribute(uv, 2));
     shell.setIndex(indices);
     shell.computeVertexNormals();
-    return { shell, rim: new TubeGeometry(curve, 72, 0.0016, 6, false) };
-  }, [width, depth, height, seatHeight, armHeight]);
+    const rim = new TubeGeometry(curve, 72, 0.0016, 6, false);
+    if (!metricFabric) return { shell, rim };
+    const mapped = { shell: createMetricChairFabricGeometry(shell), rim: createMetricChairFabricGeometry(rim) };
+    shell.dispose(); rim.dispose();
+    return mapped;
+  }, [width, depth, height, seatHeight, armHeight, metricFabric]);
+  useEffect(() => {
+    if (metricFabric) return () => { shell.dispose(); rim.dispose(); };
+  }, [shell, rim, metricFabric]);
   const fabric = getPlannerMaterial(materialId);
   return <group>
-    <mesh geometry={shell} castShadow receiveShadow><primitive object={fabric} attach="material" /></mesh>
-    <mesh geometry={rim} castShadow><primitive object={fabric} attach="material" /></mesh>
+    <mesh geometry={shell} castShadow receiveShadow dispose={metricFabric ? null : undefined}><primitive object={fabric} attach="material" /></mesh>
+    <mesh geometry={rim} castShadow dispose={metricFabric ? null : undefined}><primitive object={fabric} attach="material" /></mesh>
     {softSeat ? <SoftChairSeat width={seatWidth} depth={seatDepth} seatHeight={seatHeight} material={fabric} /> :
       <RoundedBox args={[seatWidth, 0.055, seatDepth]} radius={0.025} smoothness={6} position={[0, seatHeight - 0.0275, 0.025]} castShadow receiveShadow><primitive object={fabric} attach="material" /></RoundedBox>}
     {channels ? [-1, 1].map((side) => <ChairStitch key={side} points={[
       [side * seatWidth * 0.22, seatHeight + 0.045, -depth * 0.32],
       [side * seatWidth * 0.22, (height + seatHeight) / 2, -depth * 0.355],
       [side * seatWidth * 0.22, height - 0.035, -depth * 0.42],
-    ]} materialId={materialId} />) : null}
+    ]} materialId={materialId} metricFabric={metricFabric} />) : null}
     <ChairStitch points={[
       [-seatWidth * 0.42, seatHeight + (height - seatHeight) * 0.55, -depth * 0.33],
       [0, seatHeight + (height - seatHeight) * 0.48, -depth * 0.365],
       [seatWidth * 0.42, seatHeight + (height - seatHeight) * 0.55, -depth * 0.33],
-    ]} materialId={materialId} />
+    ]} materialId={materialId} metricFabric={metricFabric} />
   </group>;
 }
 
-function ChairStitch({ points, materialId }: { points: [number, number, number][]; materialId: string }) {
-  const geometry = useMemo(() => new TubeGeometry(new CatmullRomCurve3(points.map((point) => new Vector3(...point))), 24, 0.0011, 5, false), [points]);
-  return <mesh geometry={geometry}><primitive object={getPlannerMaterial(materialId)} attach="material" /></mesh>;
+function ChairStitch({ points, materialId, metricFabric = false }: { points: [number, number, number][]; materialId: string; metricFabric?: boolean }) {
+  const geometry = useMemo(() => {
+    const source = new TubeGeometry(new CatmullRomCurve3(points.map((point) => new Vector3(...point))), 24, 0.0011, 5, false);
+    if (!metricFabric) return source;
+    const mapped = createMetricChairFabricGeometry(source);
+    source.dispose();
+    return mapped;
+  }, [points, metricFabric]);
+  useEffect(() => {
+    if (metricFabric) return () => geometry.dispose();
+  }, [geometry, metricFabric]);
+  return <mesh geometry={geometry} dispose={metricFabric ? null : undefined}><primitive object={getPlannerMaterial(materialId)} attach="material" /></mesh>;
 }
 
 function KaleoDiscBase({ seatHeight }: { seatHeight: number }) {
@@ -1530,7 +1574,7 @@ function ComparisonChair({ variant, materialId }: { variant: ComparisonChairVari
   const armless = variant === "faux-leather";
   const armHeight = armless ? seatHeight + 0.035 : (model.armHeightCm ? model.armHeightCm / 100 : seatHeight + 0.18);
   return <group scale={[1 / width, 1 / height, 1 / depth]}>
-    <ChairUpholstery width={width} depth={depth} height={height} seatHeight={seatHeight} seatWidth={model.seatCm.width / 100} seatDepth={model.seatCm.depth / 100} armHeight={armHeight} materialId={materialId} channels={variant !== "amber" && !armless} softSeat={variant === "kaleo" || variant === "amber"} />
+    <ChairUpholstery width={width} depth={depth} height={height} seatHeight={seatHeight} seatWidth={model.seatCm.width / 100} seatDepth={model.seatCm.depth / 100} armHeight={armHeight} materialId={materialId} channels={variant !== "amber" && !armless} softSeat={variant === "kaleo" || variant === "amber"} metricFabric={variant === "kaleo" || variant === "amber"} />
     {variant === "kaleo" ? <KaleoDiscBase seatHeight={seatHeight} /> : variant === "amber" ? <group>
       <FurnitureBeam start={[0, 0.035, 0]} end={[0, seatHeight - 0.055, 0]} width={0.046} round />
       {[0, Math.PI / 2, Math.PI, Math.PI * 1.5].map((angle) => <FurnitureBeam key={angle} start={[0, 0.04, 0]} end={[Math.cos(angle) * width * 0.49, 0.018, Math.sin(angle) * depth * 0.49]} width={0.026} depth={0.034} />)}

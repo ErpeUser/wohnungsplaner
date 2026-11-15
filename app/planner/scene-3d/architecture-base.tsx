@@ -5,10 +5,12 @@ import { useMemo, type ReactNode } from "react";
 import { BoxGeometry, CircleGeometry, CylinderGeometry, DoubleSide, PlaneGeometry, Shape, SphereGeometry, SRGBColorSpace, TextureLoader, TorusGeometry } from "three";
 
 import { getPlannerMaterial } from "./materials.ts";
+import { createRomanClockNumeralGeometry } from "./clock-numerals.ts";
 import type { SceneFixture, SceneFloor, SceneModel, SceneObject, SceneWall, SceneWallSegment } from "./scene-model.ts";
 import type { PlannerBuiltIn } from "../domain/types.ts";
 
 const SHARED_BOX = new BoxGeometry(1, 1, 1);
+const CLOCK_NUMERALS = createRomanClockNumeralGeometry();
 const SHARED_CYLINDER = new CylinderGeometry(0.5, 0.5, 1, 24);
 const SHARED_CIRCLE = new CircleGeometry(0.5, 48);
 const SHARED_PLANE = new PlaneGeometry(1, 1);
@@ -1355,6 +1357,9 @@ function WallClock({ item }: { item: SceneObject<PlannerBuiltIn> }) {
       <mesh position={[0, 0, depth * 0.4]} scale={[width * 0.7, height * 0.7, depth * 0.08]} geometry={SHARED_BOX}><primitive object={getPlannerMaterial("white-matte")} attach="material" /></mesh>
       <mesh position={[0, height * 0.08, depth * 0.47]} rotation={[0, 0, -0.45]} scale={[width * 0.048, height * 0.25, depth * 0.025]} geometry={SHARED_BOX}><primitive object={getPlannerMaterial("metal-dark")} attach="material" /></mesh>
       <mesh position={[width * 0.06, -height * 0.02, depth * 0.47]} rotation={[0, 0, 1.1]} scale={[width * 0.038, height * 0.18, depth * 0.025]} geometry={SHARED_BOX}><primitive object={getPlannerMaterial("metal-dark")} attach="material" /></mesh>
+      <mesh name={`clock-roman-numerals-${item.id}`} position={[0, 0, depth * 0.445]} scale={[width, height, 1]} geometry={CLOCK_NUMERALS} dispose={null}>
+        <primitive object={getPlannerMaterial("metal-dark")} attach="material" />
+      </mesh>
     </group>
   );
 }
