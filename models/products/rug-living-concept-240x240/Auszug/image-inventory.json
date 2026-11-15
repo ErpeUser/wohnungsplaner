@@ -1,0 +1,106 @@
+{
+  "goodsId": "607199740937372",
+  "skuId": "106769800014188",
+  "capturedAt": "2026-11-15T03:47:48.397Z",
+  "method": "Exact image URLs read from the product gallery in the existing Edge tab; downloaded from the public product CDN.",
+  "gallerySlots": [
+    1,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    6,
+    5,
+    4,
+    3,
+    2
+  ],
+  "images": [
+    {
+      "file": "Auszug/Bilder/01-6869590d-600f-4b4b-9c69-fb314a583b9c.avif",
+      "url": "https://img.kwcdn.com/product/fancy/6869590d-600f-4b4b-9c69-fb314a583b9c.jpg?imageView2/2/w/800/q/70/format/avif",
+      "sourceId": "6869590d-600f-4b4b-9c69-fb314a583b9c",
+      "contentType": "image/avif",
+      "bytes": 81622,
+      "sha256": "d5b0bfe9b6eb3f02aa4b352c8072b47ddb2b7ea91ad5f9afeb3057420a1097aa"
+    },
+    {
+      "file": "Auszug/Bilder/02-8cd792ea-4b87-45ac-a3a7-bfbc3534713b.avif",
+      "url": "https://img.kwcdn.com/product/fancy/8cd792ea-4b87-45ac-a3a7-bfbc3534713b.jpg?imageView2/2/w/800/q/70/format/avif",
+      "sourceId": "8cd792ea-4b87-45ac-a3a7-bfbc3534713b",
+      "contentType": "image/avif",
+      "bytes": 90739,
+      "sha256": "56656fbd5ab9abe63f597c892383a36ac8797151f1ea678568e41f75ce5e6c71"
+    },
+    {
+      "file": "Auszug/Bilder/03-e52e22af-d3ae-473b-92df-5eacea193c22.avif",
+      "url": "https://img.kwcdn.com/product/fancy/e52e22af-d3ae-473b-92df-5eacea193c22.jpg?imageView2/2/w/800/q/70/format/avif",
+      "sourceId": "e52e22af-d3ae-473b-92df-5eacea193c22",
+      "contentType": "image/avif",
+      "bytes": 86897,
+      "sha256": "dfe38080b9a121373fb8c0432db5e56824c6d0dd0c14b95e0b8782a5d66fe496"
+    },
+    {
+      "file": "Auszug/Bilder/04-744f168a-8985-4a3c-9f3f-936fbe60cfcc.avif",
+      "url": "https://img.kwcdn.com/product/fancy/744f168a-8985-4a3c-9f3f-936fbe60cfcc.jpg?imageView2/2/w/800/q/70/format/avif",
+      "sourceId": "744f168a-8985-4a3c-9f3f-936fbe60cfcc",
+      "contentType": "image/avif",
+      "bytes": 93025,
+      "sha256": "cfa0716168373723af41eb76d3d7ccc03888601edfdda6bd1df7ee8c9269ac96"
+    },
+    {
+      "file": "Auszug/Bilder/05-99a68a8b-ec52-4134-9338-c529190c21e3.avif",
+      "url": "https://img.kwcdn.com/product/fancy/99a68a8b-ec52-4134-9338-c529190c21e3.jpg?imageView2/2/w/800/q/70/format/avif",
+      "sourceId": "99a68a8b-ec52-4134-9338-c529190c21e3",
+      "contentType": "image/avif",
+      "bytes": 74343,
+      "sha256": "cffa7328e66cd5e57f3cd8cde3c977fe7e49ce0d6f241bee8c44abfea293f3de"
+    },
+    {
+      "file": "Auszug/Bilder/06-8f94f416-8134-4bab-8866-c628a6c7a89c.avif",
+      "url": "https://img.kwcdn.com/product/fancy/8f94f416-8134-4bab-8866-c628a6c7a89c.jpg?imageView2/2/w/800/q/70/format/avif",
+      "sourceId": "8f94f416-8134-4bab-8866-c628a6c7a89c",
+      "contentType": "image/avif",
+      "bytes": 66847,
+      "sha256": "866cd961abb1f0aab5321aed33962a4dc70c29899f79094b72c7c2ef99d739a6"
+    },
+    {
+      "file": "Auszug/Bilder/07-d489637b-ddef-4bab-a389-a7ef427fc305.avif",
+      "url": "https://img.kwcdn.com/product/fancy/d489637b-ddef-4bab-a389-a7ef427fc305.jpg?imageView2/2/w/800/q/70/format/avif",
+      "sourceId": "d489637b-ddef-4bab-a389-a7ef427fc305",
+      "contentType": "image/avif",
+      "bytes": 67077,
+      "sha256": "7613c6fbf8fe0ec55150c8c02a1abbe97d5d43c4bb619cd09c389c574ad6cef3"
+    },
+    {
+      "file": "Auszug/Bilder/08-5a480790-b392-4fd5-9da4-5c7b6838c471.avif",
+      "url": "https://img.kwcdn.com/product/fancy/5a480790-b392-4fd5-9da4-5c7b6838c471.jpg?imageView2/2/w/800/q/70/format/avif",
+      "sourceId": "5a480790-b392-4fd5-9da4-5c7b6838c471",
+      "contentType": "image/avif",
+      "bytes": 69809,
+      "sha256": "888c4e1e596824b058d2ea44c451e74433c646e121244cc5f0e6f9959e4a3e0d"
+    },
+    {
+      "file": "Auszug/Bilder/09-72e3c4f1-ace8-4c90-bccd-49304e8d60a8.avif",
+      "url": "https://img.kwcdn.com/product/fancy/72e3c4f1-ace8-4c90-bccd-49304e8d60a8.jpg?imageView2/2/w/800/q/70/format/avif",
+      "sourceId": "72e3c4f1-ace8-4c90-bccd-49304e8d60a8",
+      "contentType": "image/avif",
+      "bytes": 68767,
+      "sha256": "8daf92492ada3d9401e04149d194bc722305cbc70df255ee521ee19544fae935"
+    },
+    {
+      "file": "Auszug/Bilder/10-d533ef0a-0951-4603-b175-0c59604eb74e.avif",
+      "url": "https://img.kwcdn.com/product/fancy/d533ef0a-0951-4603-b175-0c59604eb74e.jpg?imageView2/2/w/800/q/70/format/avif",
+      "sourceId": "d533ef0a-0951-4603-b175-0c59604eb74e",
+      "contentType": "image/avif",
+      "bytes": 56650,
+      "sha256": "a633b264f309efd97689a0cf1bebe79f7366ae7a37f029e526f9ac674baa96a7"
+    }
+  ]
+}

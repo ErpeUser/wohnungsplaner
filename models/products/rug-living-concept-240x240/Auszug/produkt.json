@@ -1,0 +1,90 @@
+{
+  "capturedOn": "2026-11-15",
+  "sourceUrl": "https://www.temu.com/goods.html?goods_id=607199740937372&sku_id=106769800014188",
+  "goodsId": "607199740937372",
+  "requestedSkuId": "106769800014188",
+  "placementId": "living-rug-concept",
+  "catalogId": "rug-living-concept-240x240",
+  "title": "Home Decor Samt Teppich 850G/M², Nordischer Creme Stil Teppich, Kurze Plüsch Feine Oberfläche, Maschinenwaschbar Und Leicht zu Reinigen, Geeignet für Wohnzimmer, Schlafzimmer, Nachttisch, Hauptschlafzimmer Bettende, Wintergarten, Warm Und Elegant, Mehrere Größen Verfügbar",
+  "seller": "RugifyHome",
+  "color": "A8447",
+  "selectedSizeLabel": "180*260cm/70.87×102.36in",
+  "availableSizeLabels": [
+    "90*150 cm/35,43 × 59,06 Zoll",
+    "120*160 cm/47.24 × 62.99 Zoll",
+    "160*200 cm/62,99 × 78,74 Zoll",
+    "180*260cm/70.87×102.36in",
+    "240*340 cm/94.49×133.86 Zoll",
+    "300*400 cm/118,11 × 157,48 Zoll"
+  ],
+  "priceSnapshot": {
+    "amount": 68.63,
+    "currency": "EUR",
+    "note": "Displayed item price on 2026-11-15; additional import-related fees indicated. Not a guaranteed checkout total."
+  },
+  "attributes": {
+    "material": "100% Polyester",
+    "care": "Maschinenwäsche",
+    "shape": "Rechteck",
+    "weave": "Stricken",
+    "pileType": "Schnittflor",
+    "arealWeightGPerM2": 850,
+    "recommendedUse": [
+      "Büro",
+      "Eingang",
+      "Innen"
+    ],
+    "origin": "Tianjin, China",
+    "articleId": "4GM3163922",
+    "supplierProductId": "549114676776"
+  },
+  "deliverySnapshot": "Vorbestellung. Lieferung: 5–13 Werktage",
+  "dimensions": {
+    "merchantSelectedCm": {
+      "width": 180,
+      "length": 260
+    },
+    "merchantThicknessImageMm": 5,
+    "existingPlannerCm": {
+      "width": 250,
+      "depth": 180,
+      "height": 2
+    },
+    "status": "conflict-with-existing-planner",
+    "note": "URL retains requested SKU; selected option is 180×260 cm. Existing planner says 180×250 cm and height 2 cm. Graphic says 5 mm thickness, not independently measured pile height. Source capture does not change geometry or saved placements."
+  },
+  "media": {
+    "uniqueImages": 10,
+    "gallerySlots": 16,
+    "detailSlots": 10,
+    "gallerySlotsToImageNumbers": [
+      1,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      6,
+      5,
+      4,
+      3,
+      2
+    ],
+    "note": "All 16 gallery slots inspected; repeated source URLs stored once. Detail section uses the same image family. No product video observed.",
+    "inventory": "image-inventory.json"
+  },
+  "capture": {
+    "firecrawl": "Security verification returned instead of product body; only product meta tags usable.",
+    "fallback": "Product data and exact image URLs read from already open Edge product tab; public CDN files downloaded and validated. No CAPTCHA solved.",
+    "limits": [
+      "No hidden merchant SKU API queried.",
+      "Merchant dimensions and claims are not physical measurements.",
+      "CAPTCHA images, recommendations, cart and account information excluded."
+    ]
+  }
+}

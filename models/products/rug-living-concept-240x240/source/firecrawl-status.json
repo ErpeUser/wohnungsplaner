@@ -1,0 +1,19 @@
+{
+  "requestedUrl": "https://www.temu.com/goods.html?goods_id=607199740937372&sku_id=106769800014188",
+  "landedUrl": "https://www.temu.com/goods.html?goods_id=607199740937372",
+  "capturedOn": "2026-11-15",
+  "provider": "Firecrawl",
+  "scrapeId": "01a1dd48-957c-766f-b1fb-6385cde16b48",
+  "httpStatus": 200,
+  "status": "security-verification-blocked",
+  "productMetadata": {
+    "title": "home decor velvet carpet 850g m   cream style rug short - Temu",
+    "description": "  deals on home decor velvet carpet 850g m   cream style rug short plush   machine washable and easy to clean suitable for living room bedroom bedside master bedroom bed end sunroom warm and elegant multiple sizes   on Temu. Shop on Temu to start saving.",
+    "canonicalUrl": "https://www.temu.com/home-decor-velvet-carpet-850g-m2--cream-style-rug-short-plush--machine-washable-and-easy-to-clean-suitable-for-living-room-bedroom-bedside-master-bedroom-bed-end-sunroom-warm-and-elegant-multiple-sizes--g-607199740937372.html"
+  },
+  "imagesAcceptedFromScrape": 0,
+  "reason": "Returned page body was a CAPTCHA, not the product content. Challenge images and session HTML were not archived as product references.",
+  "fallback": "Product data and exact image URLs were read from the user's already open Edge product tab; no CAPTCHA was solved.",
+  "interactStatus": "Firecrawl interact calls failed with INVALID_ARGUMENT; continuation reported the concurrent-job limit (2).",
+  "searchStatus": "Exact goods-ID search returned no indexed web or image results."
+}

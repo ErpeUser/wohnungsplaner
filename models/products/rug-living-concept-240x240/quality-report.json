@@ -5,28 +5,55 @@
   "identity": {
     "displayName": "Temu Vintage-Samtteppich A8447 · 180 × 250",
     "category": "rug",
-    "sourceConfidence": "catalog-or-folder-id"
+    "sourceConfidence": "exact-goods-id-url-and-visible-variant"
   },
   "referenceSources": {
-    "manifestSourceUrls": [],
-    "linkEntries": [
-      "# Keine externe Produktquelle im Datensatz hinterlegt."
+    "manifestSourceUrls": [
+      "https://www.temu.com/goods.html?goods_id=607199740937372&sku_id=106769800014188"
     ],
-    "status": "no-external-source-documented"
+    "linkEntries": [
+      "https://www.temu.com/goods.html?goods_id=607199740937372&sku_id=106769800014188"
+    ],
+    "status": "product-references-captured",
+    "captureReport": "source/firecrawl-status.json",
+    "productData": "Auszug/produkt.json"
   },
   "dimensions": {
-    "status": "not-verified-in-repository",
+    "status": "conflict-with-existing-planner",
     "verified": [],
-    "estimated": []
+    "estimated": [],
+    "merchantClaimCm": {
+      "width": 180,
+      "length": 260
+    },
+    "merchantThicknessMm": 5,
+    "existingPlannerCm": {
+      "width": 250,
+      "depth": 180,
+      "height": 2
+    }
   },
-  "assetFiles": [],
+  "assetFiles": [
+    "Auszug/Bilder/01-6869590d-600f-4b4b-9c69-fb314a583b9c.avif",
+    "Auszug/Bilder/02-8cd792ea-4b87-45ac-a3a7-bfbc3534713b.avif",
+    "Auszug/Bilder/03-e52e22af-d3ae-473b-92df-5eacea193c22.avif",
+    "Auszug/Bilder/04-744f168a-8985-4a3c-9f3f-936fbe60cfcc.avif",
+    "Auszug/Bilder/05-99a68a8b-ec52-4134-9338-c529190c21e3.avif",
+    "Auszug/Bilder/06-8f94f416-8134-4bab-8866-c628a6c7a89c.avif",
+    "Auszug/Bilder/07-d489637b-ddef-4bab-a389-a7ef427fc305.avif",
+    "Auszug/Bilder/08-5a480790-b392-4fd5-9da4-5c7b6838c471.avif",
+    "Auszug/Bilder/09-72e3c4f1-ace8-4c90-bccd-49304e8d60a8.avif",
+    "Auszug/Bilder/10-d533ef0a-0951-4603-b175-0c59604eb74e.avif"
+  ],
   "reconstruction": {
     "method": "parametric-runtime-preserved",
     "meshPresent": false,
     "meshFiles": []
   },
   "materials": {
-    "declared": [],
+    "declared": [
+      "rug-temu-vintage-cream"
+    ],
     "pbrTexturesPresent": false,
     "textureFiles": []
   },
@@ -37,15 +64,16 @@
   },
   "checks": {
     "manifestJson": "passed",
-    "linkManifestConsistency": "no-url-to-synchronize",
+    "linkManifestConsistency": "passed",
     "geometry": "not-run-no-mesh",
     "materials": "not-run-no-pbr-textures",
-    "viewerIntegration": "parametric-fallback-preserved"
+    "viewerIntegration": "existing private review reader discovers Auszug/Bilder automatically",
+    "referenceImages": "10 AVIF files decoded and visually inspected"
   },
   "limitations": [
-    "No mesh asset is present in this model folder; existing runtime GLBs remain outside models/** and are not copied into this folder.",
-    "No repository PBR texture set is present; material fidelity remains runtime-defined.",
-    "Exact dimensions and product identity require source-specific verification before a photorealistic asset can be claimed."
+    "Merchant selected size (180×260 cm) and 5 mm graphic conflict with existing 250×180×2 cm planner geometry; no migration performed.",
+    "Firecrawl product body was blocked by security verification; browser fallback documented.",
+    "Reference images do not constitute a reconstructed mesh or PBR texture set."
   ],
-  "auditedAt": "2026-11-12"
+  "auditedAt": "2026-11-15"
 }
