@@ -22,9 +22,10 @@ test("all manifest assets use the hash of their current bytes as the loader vers
   for (const asset of PLANNER_ASSET_MANIFEST.assets) await expectContentVersion(asset.path, asset.sha256);
 });
 
-test("the four corrected SVG revisions cannot drift from their actual files", async () => {
+test("the corrected SVG revisions cannot drift from their actual files", async () => {
   assert.deepEqual(Object.keys(assetRevisions).sort(), [
     "/planner-assets/textures/fabric/temu-easy-line-colorblock-rug.svg",
+    "/planner-assets/textures/fabric/temu-vintage-rug-607199740937372.svg",
     "/planner-assets/textures/tile/taupe-square.svg",
     "/planner-assets/textures/tile/white-rect.svg",
     "/planner-assets/textures/tile/white-square.svg",

@@ -1,4 +1,5 @@
 import { SHOPPING_ITEMS } from "./shopping-items.ts";
+import { plannerAssetUrl } from "../catalog/asset-url.ts";
 
 export function ShoppingListDrawer({ onClose }: { onClose(): void }) {
   const total = SHOPPING_ITEMS.reduce((sum, item) => sum + (item.price ?? 0) * (item.quantity ?? 1), 0);
@@ -15,7 +16,7 @@ export function ShoppingListDrawer({ onClose }: { onClose(): void }) {
             <div className={`planner-shopping__preview planner-shopping__preview--${item.type}`} aria-hidden="true">
               {/* External product sources stay in the link; the app serves its own previews. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              {item.imageUrl?.startsWith("/planner-assets/") ? <img src={item.imageUrl} alt="" loading="lazy" onError={(event) => { event.currentTarget.hidden = true; }} /> : null}
+              {item.imageUrl?.startsWith("/planner-assets/") ? <img src={plannerAssetUrl(item.imageUrl)} alt="" loading="lazy" onError={(event) => { event.currentTarget.hidden = true; }} /> : null}
               <i /><i /><i />
             </div>
             <div className="planner-shopping__copy">

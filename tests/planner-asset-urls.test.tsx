@@ -25,6 +25,7 @@ const imageRequests: string[] = [];
 const remotePath = "https://assets.example.test/imported-bed.glb?token=kept";
 const environmentPath = "/planner-assets/environment/studio-soft.hdr";
 const colorblockPath = "/planner-assets/textures/fabric/temu-easy-line-colorblock-rug.svg";
+const vintagePath = "/planner-assets/textures/fabric/temu-vintage-rug-607199740937372.svg";
 const weavePath = "/planner-assets/textures/fabric/weave.svg";
 const CASES = [
   ["bed-120", "bed", 5], ["chair-dining", "chair", 6], ["plant-medium", "plant", 6],
@@ -32,7 +33,7 @@ const CASES = [
 ] as const;
 
 beforeAll(async () => {
-  for (const path of [...PLANNER_ASSET_MANIFEST.assets.map((asset) => asset.path), colorblockPath]) {
+  for (const path of [...PLANNER_ASSET_MANIFEST.assets.map((asset) => asset.path), colorblockPath, vintagePath]) {
     const bytes = await readFile(resolve(process.cwd(), "public", path.slice(1)));
     bytesByPath.set(path, Uint8Array.from(bytes).buffer);
     expectedUrls.set(path, `${path}?v=${createHash("sha256").update(bytes).digest("hex")}`);
@@ -112,18 +113,21 @@ test("the versioned HDR URL still selects RGBELoader and supplies the actual sce
   } finally { await model.dispose(); }
 });
 
-test("the corrected colorblock SVG reaches ImageLoader with its hash while texture identity and repeat stay stable", async () => {
+test.each([
+  ["rug-temu-easy-line-colorblock", colorblockPath],
+  ["rug-temu-vintage-cream", vintagePath],
+])("%s reaches ImageLoader with its content hash while texture identity and repeat stay stable", async (materialId, path) => {
   const ready: string[] = [];
   const receive = (event: Event) => ready.push((event as CustomEvent<string>).detail);
   window.addEventListener(PLANNER_TEXTURE_READY_EVENT, receive);
   try {
-    const material = getPlannerMaterial("rug-temu-easy-line-colorblock");
+    const material = getPlannerMaterial(materialId);
     await Promise.resolve();
-    expect(imageRequests.filter((url) => url.startsWith(colorblockPath))).toEqual([expectedUrls.get(colorblockPath)]);
-    expect(getPlannerMaterial("rug-temu-easy-line-colorblock").map).toBe(material.map);
-    expect(material.map!.name).toBe("planner-texture-temu-easy-line-colorblock-rug.svg");
+    expect(imageRequests.filter((url) => url.startsWith(path))).toEqual([expectedUrls.get(path)]);
+    expect(getPlannerMaterial(materialId).map).toBe(material.map);
+    expect(material.map!.name).toBe(`planner-texture-${path.split("/").at(-1)}`);
     expect(material.map!.repeat.toArray()).toEqual([1, 1]);
-    expect(ready).toContain(colorblockPath);
+    expect(ready).toContain(path);
   } finally { window.removeEventListener(PLANNER_TEXTURE_READY_EVENT, receive); }
 });
 

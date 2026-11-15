@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { act, render, screen, waitFor, within } from "@testing-library/react";
@@ -36,6 +37,16 @@ import { PlannerWorkspace } from "../app/planner/workspace/planner-workspace.tsx
 import { ShoppingListDrawer } from "../app/planner/workspace/shopping-list-drawer.tsx";
 
 describe("PlannerWorkspace", () => {
+  test("loads the current rug artwork in the shopping preview after its contents change", () => {
+    render(<ShoppingListDrawer onClose={() => undefined} />);
+    const heading = screen.getByRole("heading", { name: "Vintage-Samtteppich Creme/Taupe A8447 · florales Ornament" });
+    const product = heading.closest("article");
+    assert.ok(product);
+    const path = "/planner-assets/textures/fabric/temu-vintage-rug-607199740937372.svg";
+    const hash = createHash("sha256").update(readFileSync(`public${path}`)).digest("hex");
+    assert.equal(product.querySelector("img")?.getAttribute("src"), `${path}?v=${hash}`);
+  });
+
   test("lists the measured bathroom and WC rug set with the supplied Temu link", () => {
     render(<ShoppingListDrawer onClose={() => undefined} />);
 

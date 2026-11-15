@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
@@ -172,26 +174,34 @@ describe("furniture interactions", () => {
   });
 
   test("renders individual 2D graphics for every existing product family", () => {
-    render(
-      <FurnitureLayer
-        document={DEFAULT_APARTMENT_DOCUMENT}
-        activeRoomId={null}
-        selectionId={null}
-        onSelect={vi.fn()}
-        onMove={vi.fn()}
-        onResize={vi.fn()}
-        onRotate={vi.fn()}
-      />,
-    );
-    for (const id of [
-      "plant-zimmer1-olive",
-      "bed-bliss-120",
-      "hallway-tejo-115",
-      "vanity-vicco-sherry-120",
-      "chair-temu-executive-ivory",
-      "nightstand-led-2drawer-white",
-      "rug-living-concept-240x240",
-    ]) expect(screen.getByTestId(`plan-graphic-${id}`)).toBeTruthy();
+    // Observe the real Image src setter: an unchanged path would reuse the old
+    // rug artwork even when the new SVG is present on the server.
+    const imageSources = vi.spyOn(HTMLImageElement.prototype, "src", "set");
+    try {
+      render(
+        <FurnitureLayer
+          document={DEFAULT_APARTMENT_DOCUMENT}
+          activeRoomId={null}
+          selectionId={null}
+          onSelect={vi.fn()}
+          onMove={vi.fn()}
+          onResize={vi.fn()}
+          onRotate={vi.fn()}
+        />,
+      );
+      for (const id of [
+        "plant-zimmer1-olive",
+        "bed-bliss-120",
+        "hallway-tejo-115",
+        "vanity-vicco-sherry-120",
+        "chair-temu-executive-ivory",
+        "nightstand-led-2drawer-white",
+        "rug-living-concept-240x240",
+      ]) expect(screen.getByTestId(`plan-graphic-${id}`)).toBeTruthy();
+      const rugPath = "/planner-assets/textures/fabric/temu-vintage-rug-607199740937372.svg";
+      const hash = createHash("sha256").update(readFileSync(`public${rugPath}`)).digest("hex");
+      expect(imageSources.mock.calls.map(([src]) => src).filter((src) => src.startsWith(rugPath))).toEqual([`${rugPath}?v=${hash}`]);
+    } finally { imageSources.mockRestore(); }
   });
 
   test("renders comparison tables from their current round or oval footprint", () => {

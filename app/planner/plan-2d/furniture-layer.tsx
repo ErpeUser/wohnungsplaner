@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { Circle, Ellipse, Group, Layer, Line, Path, Rect, Text, Transformer } from "react-konva";
 
 import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
+import { plannerAssetUrl } from "../catalog/asset-url.ts";
 import type { CommandResult } from "../domain/commands.ts";
 import type { PlannerDocumentV3, PlannerPlacement, Point2 } from "../domain/types.ts";
 import type { SnapGuide } from "../domain/snapping.ts";
@@ -780,7 +781,7 @@ function TemuVintageRugPlan({ width, depth }: { width: number; depth: number }) 
     const image = new window.Image();
     image.onload = () => setArt(image);
     image.onerror = () => setArt(null);
-    image.src = "/planner-assets/textures/fabric/temu-vintage-rug-607199740937372.svg";
+    image.src = plannerAssetUrl("/planner-assets/textures/fabric/temu-vintage-rug-607199740937372.svg");
     return () => { image.onload = null; image.onerror = null; };
   }, []);
   return (
