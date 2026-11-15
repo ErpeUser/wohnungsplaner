@@ -13,6 +13,27 @@ nicht. Sie laufen separat; der Produktionskanal behält seine Prüfungen.
 Für Änderungen an einzelnen Modellen oder Materialien ist lokal
 `npm run dev:review` der schnellste Weg: Aktualisierung ohne Container-Build.
 
+### Wiederverwendung zwischen Cloud-Build-Läufen
+
+Die Preview nutzt einen privaten, regionalen Cache in
+gs://wohnungsplaner-build-cache-EXAMPLE/v1/. Paketdateien und die fest
+gesetzten Node-/npm-Versionen bestimmen den Dependency-Key. Unveränderte
+Abhängigkeiten werden als fertiges Linux-node_modules wiederhergestellt:
+kein erneutes npm ci. Die schlanke Node-Build-Umgebung spart Image-Transfer.
+
+Ein weiterer Key umfasst Renderer-/Anwendungscode, Konfiguration, importiertes
+Asset-Manifest und öffentliche Dateipfade. Sind diese unverändert, wird der
+kompilierte Build wiederverwendet. Bestehende externe Textur-/Modelldateien
+werden dabei vor dem Verpacken aus dem aktuellen Checkout übernommen.
+Renderer-Code, importierte Manifestwerte oder neue Dateipfade benötigen einen
+neuen Anwendungsbuild, können aber die installierten Pakete wiederverwenden.
+Fehlender oder beschädigter Cache führt zu einem frischen Build.
+
+Cache-Schreiben läuft parallel zum Verpacken und blockiert den Deploy nicht.
+Der Bucket erlaubt nur privaten Objektzugriff und entfernt Einträge nach
+14 Tagen. Build-Logs zeigen PREVIEW_CACHE und PREVIEW_BUILD, darunter
+install=skipped und bei unveränderten Compiler-Eingaben compile=skipped.
+
 `_DEPLOY` steht in dieser Preview-Konfiguration standardmäßig auf `true`.
 Für einen reinen Prüflauf ausdrücklich `_DEPLOY=false` übergeben: Dann
 entfallen Image-Bau, Upload und Deploy. Die Docker-Schritte erhalten diesen

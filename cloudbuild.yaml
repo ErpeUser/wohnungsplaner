@@ -12,19 +12,30 @@ substitutions:
   _CONNECTION: wohnungsplaner-github
   _REPOSITORY: wohnungsplaner
   _DEPLOY: 'true'
+  _CACHE_BUCKET: wohnungsplaner-build-cache-EXAMPLE
 steps:
+  - id: cache-restore
+    name: gcr.io/google.com/cloudsdktool/google-cloud-cli:slim
+    env: ['_CACHE_BUCKET=${_CACHE_BUCKET}']
+    entrypoint: bash
+    args: ['scripts/cloud-preview-cache.sh', 'restore']
+
   - id: preview-build
-    name: node:22.22.2-bookworm
+    name: node:22.22.2-bookworm-slim
     env: ['CI=true']
     entrypoint: bash
-    args:
-      - -euc
-      - |
-        npx --yes npm@12.1.0 ci --ignore-scripts --no-audit --no-fund
-        npm run build
+    args: ['scripts/cloud-preview-cache.sh', 'build']
+
+  - id: cache-save
+    name: gcr.io/google.com/cloudsdktool/google-cloud-cli:slim
+    waitFor: ['preview-build']
+    env: ['_CACHE_BUCKET=${_CACHE_BUCKET}']
+    entrypoint: bash
+    args: ['scripts/cloud-preview-cache.sh', 'save']
 
   - id: image-build
     name: gcr.io/cloud-builders/docker
+    waitFor: ['preview-build']
     env: ['_DEPLOY=${_DEPLOY}']
     entrypoint: bash
     args:
@@ -36,6 +47,7 @@ steps:
 
   - id: image-push
     name: gcr.io/cloud-builders/docker
+    waitFor: ['image-build']
     env: ['_DEPLOY=${_DEPLOY}']
     entrypoint: bash
     args:
@@ -47,6 +59,7 @@ steps:
 
   - id: preview-deploy
     name: gcr.io/google.com/cloudsdktool/google-cloud-cli:slim
+    waitFor: ['image-push']
     env:
       - 'PROJECT_ID=$PROJECT_ID'
       - 'COMMIT_SHA=$COMMIT_SHA'
