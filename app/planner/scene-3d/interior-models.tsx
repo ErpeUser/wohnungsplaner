@@ -34,7 +34,7 @@ export function RefinedInteriorModel({item}:{item:Item}){
     case 'kitchen-worktop':return <KitchenWorktop item={item}/>;
     case 'kitchen-upper':return <KitchenUpper item={item}/>;
     case 'kitchen-corner-upper':return <KitchenCornerUpper item={item}/>;
-    case 'kitchen-backsplash-oak':return <Block size={item.size} finish="wood" radius={.002}/>;
+    case 'kitchen-backsplash-oak':return <Block size={item.size} finish="backsplash-wood" radius={.002}/>;
     case 'floor-zone-kitchen':return <KitchenTiles item={item}/>;
     default:return null;
   }

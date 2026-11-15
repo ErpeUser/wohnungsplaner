@@ -15,6 +15,7 @@ import { getChairModelForCatalogId } from "../chairs/chair-models.ts";
 import { normalizeCatalogGltf } from "./gltf-normalization.ts";
 import { createCatalogGltfMaterialCloner } from "./gltf-material-roles.ts";
 import { plannerAssetUrl } from "./asset-url.ts";
+import { createChairCushionGeometry } from "./chair-cushion-geometry.ts";
 
 const SHARED_BOX = new BoxGeometry(1, 1, 1);
 const SHARED_CYLINDER = new CylinderGeometry(0.5, 0.5, 1, 24);
@@ -1409,9 +1410,17 @@ function KaleoArmchair() {
   return <ComparisonChair variant="kaleo" materialId="fabric-kaleo-chenille" />;
 }
 
-function ChairUpholstery({ width, depth, height, seatHeight, seatWidth, seatDepth, armHeight, materialId, channels }: {
+function SoftChairSeat({ width, depth, seatHeight, material }: { width: number; depth: number; seatHeight: number; material: Material }) {
+  const geometry = useMemo(() => createChairCushionGeometry(width, depth), [width, depth]);
+  useEffect(() => () => geometry.dispose(), [geometry]);
+  return <mesh geometry={geometry} position={[0, seatHeight - 0.0275, 0.025]} castShadow receiveShadow dispose={null}>
+    <primitive object={material} attach="material" />
+  </mesh>;
+}
+
+function ChairUpholstery({ width, depth, height, seatHeight, seatWidth, seatDepth, armHeight, materialId, channels, softSeat = false }: {
   width: number; depth: number; height: number; seatHeight: number; seatWidth: number; seatDepth: number;
-  armHeight: number; materialId: string; channels: boolean;
+  armHeight: number; materialId: string; channels: boolean; softSeat?: boolean;
 }) {
   const { shell, rim } = useMemo(() => {
     // A continuous padded U shell gives the back and arms one smooth outline.
@@ -1479,7 +1488,8 @@ function ChairUpholstery({ width, depth, height, seatHeight, seatWidth, seatDept
   return <group>
     <mesh geometry={shell} castShadow receiveShadow><primitive object={fabric} attach="material" /></mesh>
     <mesh geometry={rim} castShadow><primitive object={fabric} attach="material" /></mesh>
-    <RoundedBox args={[seatWidth, 0.055, seatDepth]} radius={0.025} smoothness={6} position={[0, seatHeight - 0.0275, 0.025]} castShadow receiveShadow><primitive object={fabric} attach="material" /></RoundedBox>
+    {softSeat ? <SoftChairSeat width={seatWidth} depth={seatDepth} seatHeight={seatHeight} material={fabric} /> :
+      <RoundedBox args={[seatWidth, 0.055, seatDepth]} radius={0.025} smoothness={6} position={[0, seatHeight - 0.0275, 0.025]} castShadow receiveShadow><primitive object={fabric} attach="material" /></RoundedBox>}
     {channels ? [-1, 1].map((side) => <ChairStitch key={side} points={[
       [side * seatWidth * 0.22, seatHeight + 0.045, -depth * 0.32],
       [side * seatWidth * 0.22, (height + seatHeight) / 2, -depth * 0.355],
@@ -1520,7 +1530,7 @@ function ComparisonChair({ variant, materialId }: { variant: ComparisonChairVari
   const armless = variant === "faux-leather";
   const armHeight = armless ? seatHeight + 0.035 : (model.armHeightCm ? model.armHeightCm / 100 : seatHeight + 0.18);
   return <group scale={[1 / width, 1 / height, 1 / depth]}>
-    <ChairUpholstery width={width} depth={depth} height={height} seatHeight={seatHeight} seatWidth={model.seatCm.width / 100} seatDepth={model.seatCm.depth / 100} armHeight={armHeight} materialId={materialId} channels={variant !== "amber" && !armless} />
+    <ChairUpholstery width={width} depth={depth} height={height} seatHeight={seatHeight} seatWidth={model.seatCm.width / 100} seatDepth={model.seatCm.depth / 100} armHeight={armHeight} materialId={materialId} channels={variant !== "amber" && !armless} softSeat={variant === "kaleo" || variant === "amber"} />
     {variant === "kaleo" ? <KaleoDiscBase seatHeight={seatHeight} /> : variant === "amber" ? <group>
       <FurnitureBeam start={[0, 0.035, 0]} end={[0, seatHeight - 0.055, 0]} width={0.046} round />
       {[0, Math.PI / 2, Math.PI, Math.PI * 1.5].map((angle) => <FurnitureBeam key={angle} start={[0, 0.04, 0]} end={[Math.cos(angle) * width * 0.49, 0.018, Math.sin(angle) * depth * 0.49]} width={0.026} depth={0.034} />)}

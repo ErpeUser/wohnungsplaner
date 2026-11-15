@@ -13,12 +13,23 @@ function woodTexture(){
     data.set([213+grain+pore,180+grain*.86+pore,132+grain*.7+pore,255],(y*size+x)*4);
   }return pixels(data,size,size,true,'interior-natural-wood');
 }
+/** RoundedBox UVs are metres: horizontal, periodic detail at one tile per metre.
+ * Grain density is a rendering estimate; the shared wood finish stays unchanged. */
+function backsplashWoodTexture(){
+  const size=512,data=new Uint8Array(size*size*4);
+  for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+    const u=x/size*Math.PI*2,v=y/size*Math.PI*2,bend=Math.sin(u)*.28+Math.sin(u*3)*.1;
+    const grain=Math.sin(v*64+bend)*4.5+Math.sin(v*96+bend*.75)*1.4,pore=Math.sin(v*127+Math.sin(u*2)*.2)*.7;
+    data.set([213+grain+pore,180+grain*.86+pore,132+grain*.7+pore,255],(y*size+x)*4);
+  }return pixels(data,size,size,true,'interior-horizontal-backsplash-wood');
+}
 export function getInteriorMaterial(kind:string):MeshStandardMaterial{
   const cached=cache.get(kind);if(cached)return cached;let material:MeshStandardMaterial;
   switch(kind){
     case 'cotton':{const generated=createWafflePixels(512);material=new MeshPhysicalMaterial({color:'#ffffff',roughness:.97,metalness:0,sheen:.6,sheenColor:'#e2d4bd',sheenRoughness:.9,map:pixels(generated.color,generated.size,generated.size,true,'interior-waffle-albedo'),bumpMap:pixels(generated.height,generated.size,generated.size,false,'interior-cotton-linear-microheight'),bumpScale:.00055});break;}
     case 'cotton-edge':material=new MeshStandardMaterial({color:'#c9b18d',roughness:1});break;
     case 'wood':material=new MeshPhysicalMaterial({color:'#ffffff',roughness:.72,clearcoat:.06,map:woodTexture()});break;
+    case 'backsplash-wood':material=getInteriorMaterial('wood').clone();material.map=backsplashWoodTexture();break;
     case 'white-front':material=new MeshPhysicalMaterial({color:'#f5f4ef',roughness:.28,clearcoat:.3,clearcoatRoughness:.35});break;
     case 'carcass':material=new MeshStandardMaterial({color:'#e8e5df',roughness:.72});break;
     case 'black-iron':material=new MeshStandardMaterial({color:'#191a19',roughness:.52,metalness:.5});break;
