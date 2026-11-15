@@ -1,5 +1,15 @@
 # Cloud Run mit Google Cloud Build
 
+> **Seit 15.11.2026 auf Nutzerwunsch abgeschaltet:** Die Abrechnung aller vier
+> Google-Cloud-Projekte ist deaktiviert. Der Dienst `wohnungsplaner-preview`
+> und die Trigger `wohnungsplaner-main` / `wohnungsplaner-production` wurden
+> gelöscht. Die frühere Cloud-Run-Adresse ist offline; ein Push auf `main`
+> veröffentlicht dort keine neue Version. Ohne ausdrücklichen neuen Auftrag
+> keine Cloud-Ressourcen oder Abrechnung reaktivieren. Lokal:
+> `npm run dev:review` → http://127.0.0.1:3001.
+>
+> Die folgenden Abschnitte dokumentieren die frühere Einrichtung.
+
 GitHub ist das private Quellarchiv. Google Cloud Build ist mit
 `ErpeUser/wohnungsplaner` verbunden und startet bei jedem Push auf `main`.
 GitHub Actions übernimmt die visuellen Browser- und WebGL-Prüfungen separat.

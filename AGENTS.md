@@ -1,5 +1,15 @@
 # Codex repository instructions
 
+## Google Cloud abgeschaltet – Kostenstopp vom 15.11.2026
+
+Der Nutzer hat sämtliche kostenpflichtigen Google-Cloud-Ressourcen zur
+Entfernung freigegeben. Die Abrechnung aller vier vorhandenen Projekte ist
+deaktiviert; Cloud Run und die automatischen Cloud-Build-Trigger sind gelöscht.
+Keine Abrechnung, Cloud-Ressourcen, Deployments oder Trigger erneut aktivieren
+oder anlegen, solange der Nutzer dies nicht ausdrücklich neu beauftragt.
+GitHub bleibt das Quellarchiv; für die Anwendung die lokale Vorschau verwenden.
+Die folgenden Cloud-Preview-Anleitungen beschreiben die frühere Einrichtung.
+
 ## Standardbranch-only für KI-Agenten
 
 Für alle KI-Aufträge in diesem Repository ist `main` der einzige Arbeitszweig.
