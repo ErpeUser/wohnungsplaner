@@ -62,3 +62,10 @@ tsconfig.tsbuildinfo
 /public/planner-assets/private-reference/
 /.codex-temp/
 /public/planner-assets/reference/
+/public/planner-assets/local-sources/
+/public/reference-plan.png
+/public/*-handplan.png
+/public/*-plan-detail.png
+**/WhatsApp Image*
+**/WhatsApp Video*
+/release/
