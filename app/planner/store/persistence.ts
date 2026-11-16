@@ -324,13 +324,30 @@ export function createLocalStoragePlannerRepository(
   storage: Pick<Storage, "getItem" | "setItem" | "removeItem">,
   clock: () => Date = () => new Date(),
 ): PlannerRepository {
+  const original = storage as typeof storage & Partial<Pick<Storage, "key" | "length">>;
+  storage = {
+    getItem(key) {
+      const current = original.getItem(key);
+      if (current !== null || !key.startsWith("wohnung-planner-v3") || !original.key) return current;
+      const suffix = key.slice("wohnung-planner-v3".length);
+      for (let index = 0; index < (original.length ?? 0); index++) {
+        const candidate = original.key(index);
+        const match = candidate?.match(/^wohnung-top\d+-planner-v3(.*)$/);
+        if (candidate && match?.[1] === suffix) return original.getItem(candidate);
+      }
+      return null;
+    },
+    setItem: (key, value) => original.setItem(key, value),
+    removeItem: (key) => original.removeItem(key),
+  };
   return {
     load() {
       const raw = storage.getItem(PLANNER_STORAGE_KEY);
       if (raw === null) return emptyResult();
       const result = readStoredValue(raw);
       if (result.legacyBackupJson !== null) {
-        storage.setItem(PLANNER_MIGRATION_BACKUP_KEY, result.legacyBackupJson);
+        try { storage.setItem(PLANNER_MIGRATION_BACKUP_KEY, result.legacyBackupJson); }
+        catch { result.warnings.push("Die Sicherung konnte nicht gespeichert werden; dein vorhandener Plan bleibt erhalten."); }
       }
       return result;
     },
@@ -409,7 +426,7 @@ function readStoredValue(raw: string): MigrationResult {
       const normalized = normalizeLegacyV3Aliases(value);
       const parsed = parsePlannerDocument(normalized.document);
       const withRug = upgradeLivingRugMaterial(parsed);
-      if (isOlderBaselineModel(withRug)) {
+      if (!normalized.identityChanged && isOlderBaselineModel(withRug)) {
         return {
           document: rebaseBaselineModel(withRug),
           warnings: ["Das gespeicherte Möbel-Layout und die Bad-/WC-Materialien wurden auf den aktuellen Stand aktualisiert."],
@@ -450,8 +467,13 @@ function readStoredValue(raw: string): MigrationResult {
  * duplicate `loggia` room with the old 2.23 m² label. Normalize this alias
  * before strict geometry validation so the legacy save can be recovered.
  */
-function normalizeLegacyV3Aliases(value: object): { document: object; changed: boolean } {
+function normalizeLegacyV3Aliases(value: object): { document: object; changed: boolean; identityChanged?: boolean } {
   const record = value as Record<string, unknown>;
+  if (typeof record.id === "string" && /^wohnung-top-\d+-v3$/.test(record.id)) {
+    const renamed = { ...record, id: DEFAULT_APARTMENT_DOCUMENT.id };
+    const normalized = normalizeLegacyV3Aliases(renamed);
+    return { document: normalized.document, changed: true, identityChanged: true };
+  }
   const rooms = Array.isArray(record.rooms) ? record.rooms : [];
   const hasLoggia = rooms.some((room) => (
     room && typeof room === "object" && (room as { id?: unknown }).id === "loggia"

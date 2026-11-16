@@ -29,6 +29,28 @@ test("loads the default from empty storage and accepts a valid V3 document", () 
   assert.deepEqual(result.warnings, []);
 });
 
+test("loads an earlier apartment storage namespace without losing personal furniture or backups", () => {
+  const saved = documentNamed("Mein erhaltener Entwurf");
+  saved.id = "wohnung-top-73-v3";
+  const movedBed = saved.placements.find((item) => item.id === "zimmer1-bliss-bed")!;
+  movedBed.position.x += 0.2;
+  saved.placements = saved.placements.filter((item) => item.id !== "zimmer1-olive-plant");
+  const previousJson = JSON.stringify(saved);
+  const storage = new MemoryStorage({
+    "wohnung-top73-planner-v3": previousJson,
+    "wohnung-top73-planner-v3-backup": previousJson,
+  });
+  const repository = createLocalStoragePlannerRepository(storage, fixedClock);
+  const loaded = repository.load().document;
+  assert.equal(loaded.name, "Mein erhaltener Entwurf");
+  assert.equal(loaded.id, "wohnung-v3");
+  assert.deepEqual(loaded.placements, JSON.parse(previousJson).placements);
+  assert.equal(repository.restoreBackup()?.document.name, "Mein erhaltener Entwurf");
+  repository.save(loaded);
+  assert.equal(storage.getItem("wohnung-top73-planner-v3"), previousJson);
+  assert.equal(JSON.parse(storage.getItem("wohnung-planner-v3")!).name, "Mein erhaltener Entwurf");
+});
+
 test("persists the imported asset register across reload", () => {
   const storage = new MemoryStorage();
   const repository = createLocalStoragePlannerRepository(storage, fixedClock);
