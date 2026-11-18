@@ -1,0 +1,36 @@
+name: Canonical quality
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: canonical-quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify source layout and application
+    runs-on: windows-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install into Generated sibling
+        run: npm run workspace:prepare
+      - name: Verify canonical source and Git index
+        run: node scripts/git-guard.mjs --verify
+      - name: Build without directory links
+        run: npm run build
+      - name: Test and validate
+        run: npm run validate
+      - name: Check private references
+        run: npm run privacy:check:strict
+      - name: Verify no generated output in source
+        run: node scripts/git-guard.mjs --verify

@@ -28,6 +28,25 @@
 - Codex-/GitHub-Automation auf generierte Berichte in `../Wohnungsplaner_Generated/reports/github` begrenzen; keine versteckten PR-Pipelines oder Neben-Workflows im Projekt anlegen.
 - Änderungen erst als abgeschlossen melden, wenn der echte Desktop-Start und 2D/3D-Smoke-Test nach den letzten Änderungen bestehen.
 
+## Pflichtablauf jeder neuen Codex-/KI-Sitzung
+
+1. Im vorhandenen `Wohnung/wohnungsplaner` beginnen. Zuerst diese `AGENTS.md`, `README.md`, `package.json` und die betroffenen Module/Tests lesen. Projekt- und Generated-Pfad über `npm run workspace:doctor` bestätigen.
+2. `git rev-parse --show-toplevel`, `git status --short`, `git branch -vv` und `npm run github:status` ausführen. Nur bei sauberem Arbeitsbaum `npm run github:sync` (Fast-Forward) verwenden. Niemals ungesicherte Arbeit durch Pull/Checkout/Reset ersetzen.
+3. Vor einem Codeeingriff Abhängigkeiten, Imports, Persistenz, Datenmigrationen, 2D/3D, Runtime und Tests des betroffenen Moduls prüfen. Keine unnötigen Duplikate, Worktrees, Git-Repositories oder Prozess-/Projektkopien erzeugen.
+4. Nach Änderungen `npm run git:policy`, `npm run workspace:doctor`, `npm run build`, `npm run validate` und `npm run privacy:check:strict` ausführen. Bei UI-/3D-Änderungen zusätzlich einen echten 2D-/3D-Browsertest durchführen. `git status --short` und `npm run workspace:inventory` erneut prüfen.
+5. Nur beabsichtigte Dateien stagen; Git-Index durch Pre-Commit-Guard prüfen lassen. Kein Force-Push. Vor einem regulären Push führt der lokale Pre-Push-Hook Build, Validierung und Struktur-/Privatsphäre-Prüfung aus. Fehler beheben, nicht Hooks deaktivieren.
+6. Konflikte, ausstehende Reviews, nicht veröffentlichte Commits und fehlgeschlagene Checks ausdrücklich melden. Automatische PR-Merges und stilles Schließen nicht gemergter PRs sind verboten.
+
+## Technische Git-Schutzschichten und Grenzen
+
+- `npm run github:setup` bzw. `npm run github:status` richtet **nur für dieses Repository** `core.hooksPath=scripts/git-hooks`, `pull.ff=only` und `merge.ff=only` ein. Ein bereits abweichender Hooks-Pfad wird nicht überschrieben, sondern als Konflikt gemeldet.
+- `scripts/git-guard.mjs` verbietet Git-Index-Einträge für generierte Pfade, Umgebungsgeheimnisse und Symlinks und prüft die echte Geschwisterstruktur sowie die kanonische Remote-URL. `npm run git:policy` ist auch im automatischen Test enthalten.
+- Ein einziger CI-Workflow `.github/workflows/canonical-quality.yml` wiederholt auf GitHub Build, Layout, Tests und Privatsphäreprüfung. Keine weiteren Workflows ohne konkret belegten Bedarf.
+- GitHub-Branch-Protection für `main` erzwingt lineare Historie und verbietet Force-Pushes und Branch-Löschungen auch für Administratoren. PR-Pflicht und Required Status Checks sind ausdrücklich nicht aktiviert, um den direkten `main`-Ablauf nicht stillschweigend auf PRs umzustellen.
+- `npm run github:reconcile` ist **nur ein PR-Audit**; auch `github:sync` mergt niemals PRs. Das frühere automatische `--apply` ist untersagt. PRs nur nach inhaltlicher Freigabe, konfliktfreier Integration, CI- und Review-Prüfung manuell bearbeiten. GitHub löscht gemergte PR-Branches bei aktiviertem `delete_branch_on_merge` selbst.
+- Lokale Hooks lassen sich technisch umgehen; ein CI-Check **nach** einem Direkt-Push blockiert diesen Push nicht rückwirkend. Wirklich verpflichtende GitHub-Statuschecks **vor** jeder Integration erfordern einen vorab geprüften Commit, gewöhnlich über einen ausdrücklich genehmigten PR. Niemals bestehende Branch-Protection-Regeln umgehen.
+- Die Git-Verwaltung unter `Wohnungsplaner_Generated/git/repository` kann **nicht veröffentlichte Commits, Stashes, Reflogs oder weitere Referenzen** enthalten. Deshalb ist sie ohne geprüfte Sicherung **nicht bedenkenlos löschbar**, obwohl der übrige Generated-Inhalt wiederherstellbar ist. Vor jeder Gesamtlöschung sämtliche Git-Referenzen und den Remote-Abgleich prüfen.
+
 ## Niemals löschen oder in Generated ablegen
 
 - Dauerhafte Quellmodule, `package.json`, `package-lock.json`, TypeScript/Vite/Vitest/Playwright-Konfigurationen, Startdateien, Tests, Modelle, Asset-Manifeste, Produktoriginale, Copyright-/Lizenzangaben und eigene unersetzbare Inhalte.

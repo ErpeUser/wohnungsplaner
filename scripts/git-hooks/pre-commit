@@ -1,0 +1,5 @@
+#!/bin/sh
+# Local guard for permanent sources, staged files and symlinks.
+set -eu
+cd "$(git rev-parse --show-toplevel)"
+node scripts/git-guard.mjs --verify

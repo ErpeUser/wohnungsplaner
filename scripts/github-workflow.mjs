@@ -1,5 +1,5 @@
-// Safe single-main GitHub workflow. Git metadata is disposable, source is canonical.
-// Never commit/push, discard local changes, create branches or PRs automatically.
+// Safe single-main GitHub workflow. Git metadata is outside sources, but any unpublished
+// commits/stashes inside it must be preserved. No automatic commits, PR merges or pushes.
 import { execFileSync } from 'node:child_process';
 import { existsSync, lstatSync, mkdirSync, readFileSync, writeFileSync, unlinkSync } from 'node:fs';
 import path from 'node:path';
@@ -11,8 +11,8 @@ const gitDir=path.join(generatedRoot,'git','repository');
 const gitPointer=path.join(projectRoot,'.git');
 const reportDir=path.join(generatedRoot,'reports','github');
 const command=process.argv[2]??'status';
-// An explicit sync reconciles review-approved, CI-green PRs before fast-forwarding main.
-const apply=process.argv.includes('--apply')||command==='sync';
+// PR mergers require explicit human content review outside this script.
+const apply=process.argv.includes('--apply');
 
 prepareWorkspace();
 mkdirSync(reportDir,{recursive:true});
@@ -52,6 +52,14 @@ function ensureMetadata() {
     throw Error('Git origin points to another repository. Refusing automatic replacement: '+origin);
   }
   if(!origin)git('remote','add','origin',url);
+  const hooks=run('git.exe',['config','--local','--get','core.hooksPath'],true);
+  if(hooks && hooks.split(path.sep).join('/')!=='scripts/git-hooks') {
+    throw Error('Existing Git hooksPath differs; refusing to replace security hooks: '+hooks);
+  }
+  git('config','--local','core.hooksPath','scripts/git-hooks');
+  git('config','--local','pull.ff','only');
+  git('config','--local','merge.ff','only');
+  git('config','--local','push.default','simple');
 }
 function setup() {
   ensureMetadata();
@@ -96,19 +104,18 @@ function safeReconcile(){
       const value=c.conclusion??c.state??c.status;
       return value==='SUCCESS'||value==='NEUTRAL'||value==='SKIPPED';
     });
-    const ready=pr.baseRefName==='main'&&!pr.isDraft &&
+    const technicallyReady=pr.baseRefName==='main'&&!pr.isDraft &&
       pr.mergeable==='MERGEABLE'&&pr.reviewDecision==='APPROVED'&&passing;
     assessments.push({number:pr.number,title:pr.title,head:pr.headRefName,
       reviewDecision:pr.reviewDecision,mergeable:pr.mergeable,
-      checksTotal:checks.length,checksPass:passing,ready});
-    if(ready&&apply){
-      gh('pr','merge',String(pr.number),'-R',repo,'--squash','--delete-branch');
-    }
+      checksTotal:checks.length,checksPass:passing,technicallyReady,
+      contentReviewRequired:true});
   }
-  return snapshot('reconcile',{apply,openCount:prs.length,assessments,
-    merged:apply?assessments.filter(a=>a.ready).map(a=>a.number):[]});
+  return snapshot('reconcile',{openCount:prs.length,assessments,
+    merged:[],note:'Audit only. PR merges require a human relevance review and explicit GitHub action.'});
 }
 try{
+  if(apply)throw Error('--apply is disabled: review PR content and merge manually via GitHub after checks.');
   const metadata=setup();
   if(command==='setup')snapshot('setup',{metadata});
   else if(command==='status')snapshot('status',{metadata,openPrCount:reviewPrs().length});
@@ -120,15 +127,16 @@ try{
     } else {
       const reconciliation=safeReconcile();
       git('fetch','--prune','origin','main');
+      if(dirtyFiles().length)throw Error('Working tree changed during fetch; refusing fast-forward.');
       const ancestor=git('merge-base','HEAD','refs/remotes/origin/main');
       const local=git('rev-parse','HEAD');
       if(ancestor!==local)throw Error('Remote history diverges. Manual conflict review required.');
       git('merge','--ff-only','refs/remotes/origin/main');
-      snapshot('sync-success',{mergedPrs:reconciliation.merged,
+      snapshot('sync-success',{mergedPrs:[],
         assessedPrs:reconciliation.assessments});
     }
   }else if(command==='reconcile')safeReconcile();
-  else throw Error('Commands: setup | status | sync | reconcile [--apply]');
+  else throw Error('Commands: setup | status | sync | reconcile (audit only)');
 }catch(err){
   const message=String(err?.message??err);
   console.error(message);

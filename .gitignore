@@ -1,6 +1,15 @@
 # The complete generated workspace is disposable, never source-controlled.
 /Wohnungsplaner_Generated/
 # Defensive ignores for any temporary tool outputs; no junctions or links are used.
+/graphify-out/
+/build/
+/cache/
+/logs/
+/reports/
+/downloads/
+/tmp/
+/temp/
+/.cache/
 /node_modules/
 /dist/
 /.next/
@@ -13,5 +22,6 @@
 /playwright-report/
 *.tsbuildinfo
 *.log
+*.lnk
 .env*
 !.env.example

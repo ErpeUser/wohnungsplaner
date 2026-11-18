@@ -74,7 +74,9 @@ export function prepareWorkspace() {
   const guide = workspacePath('README-LOESCHBAR.txt');
   if (!existsSync(guide)) writeFileSync(guide, [
     'Wohnungsplaner: nur reproduzierbare Build-, Paket-, Cache- und Hilfsdateien',
-    'Der gesamte Ordner kann bei geschlossener Anwendung geloescht werden.',
+    'Git-Metadaten in git/repository koennen unveroeffentlichte Commits, Branches und Stashes enthalten.',
+    'Vor dem Loeschen des Ordners erst Git-Status, Remote und lokale Sonderreferenzen pruefen.',
+    'Ohne nachweisliche Sicherung niemals das ganze Verzeichnis loeschen.',
     'Dauerhafte Quellen, Programmstarts, Modelle und Konfiguration sind im Schwesterordner wohnungsplaner.',
     'Node.js 24+ und bei Neuinstallation Internetzugriff koennen erforderlich sein.',
     'Browser-Benutzerdaten und persoenliche Originaldateien liegen NICHT in diesem Ordner.',

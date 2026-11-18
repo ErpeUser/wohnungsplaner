@@ -19,7 +19,7 @@ Der Produktionsstand wird mit `npm run build` erstellt. `npm test` prüft Datenm
 
 Das Haus im Infobereich (gegebenenfalls unter **^**) zeigt Laden, Erreichbarkeit oder Fehler an. Doppelklick öffnet die App; das Kontextmenü bietet Öffnen, lokale Vorschau prüfen, Projektordner und **Wohnungsplaner beenden**. Beenden stoppt den eigenen lokalen Server.
 
-Der Desktopbetrieb ist **Git-frei und offline im Sinne von ohne GitHub-Synchronisierung**. Die Anwendung bleibt lokal unter `http://127.0.0.1:3001/` erreichbar; neue npm-Pakete werden nur bei fehlenden oder geänderten Abhängigkeiten aus dem Internet geladen. Die Startdatei `Wohnungsplaner starten.cmd` im Projektordner startet den lokalen Produktionsstand auf Port 3000 und erzeugt einen fehlenden Build automatisch. Logs und PID-Dateien liegen ausschließlich unter `../Wohnungsplaner_Generated/logs/local/`. Im Quellverzeichnis wird **keine** `.local`-Verknüpfung erzeugt.
+Der Desktopbetrieb ist **Git-frei und offline im Sinne von ohne GitHub-Synchronisierung**. Die Anwendung bleibt lokal unter `http://127.0.0.1:3001/` erreichbar; neue npm-Pakete werden nur bei fehlenden oder geänderten Abhängigkeiten aus dem Internet geladen. Die Startdatei `Wohnungsplaner starten.cmd` im Projektordner startet den lokalen Produktionsstand auf Port 3001 und erzeugt einen fehlenden Build automatisch. Das separate Skript `start-wohnungsplaner.ps1` verwendet Port 3000. Logs und PID-Dateien liegen ausschließlich unter `../Wohnungsplaner_Generated/logs/local/`. Im Quellverzeichnis wird **keine** `.local`-Verknüpfung erzeugt.
 
 ## Bedienung
 
@@ -85,7 +85,7 @@ Der Projektordner `Wohnung/wohnungsplaner` enthält den dauerhaften Code sowie O
 
 **Es gibt keinerlei Windows-Verzeichnisverknüpfungen im Quellordner.** Pakete liegen direkt in `../Wohnungsplaner_Generated/dependencies/node_modules`; der Build in `../Wohnungsplaner_Generated/build/dist`. Temporär von Frameworks erzeugte Quell-Caches werden automatisch geprüft und nach abgeschlossenen Werkzeugläufen entfernt. Für Git existiert nur die standardmäßige `.git`-**Textdatei** als Verweis auf die Git-Metadaten im generierten Geschwisterordner – kein NTFS-Link. Die App selbst braucht Git nicht.
 
-**Wenn die Anwendung und alle Test-/Entwicklungsprozesse geschlossen sind, kann `Wohnung/Wohnungsplaner_Generated` vollständig neu erzeugt werden.** Der nächste Start stellt Paket- und Builddateien automatisch wieder her; Browserdownloads bei `npm run visual:check` ebenso. Neuinstallationen benötigen ggf. Internet. Der Programmcode, `package.json`, `package-lock.json`, `tsconfig.json`, originale Fotos/GLBs, Manifeste, die Startskripte und Tests bleiben absichtlich außerhalb. Eigene, nicht ersetzbare Dateien niemals in `Wohnungsplaner_Generated` speichern. `npm run workspace:prepare` richtet die Ablage ein, `npm run workspace:doctor` prüft das linkfreie Layout. **Nicht `npm ci` direkt im Quellprojekt ausführen.**
+**Wiederherstellbar sind die generierten Build-, Cache- und Paketdaten, nicht zwangsläufig die Git-Metadaten unter `Wohnungsplaner_Generated/git/repository`.** Der nächste Start stellt Paket- und Builddateien automatisch wieder her; Browserdownloads bei `npm run visual:check` ebenso. Vor einer Gesamtlöschung des Generated-Ordners müssen unveröffentlichte Commits, Stashes und Reflogs geprüft und gesichert sein. Neuinstallationen benötigen ggf. Internet. Der Programmcode, `package.json`, `package-lock.json`, `tsconfig.json`, originale Fotos/GLBs, Manifeste, die Startskripte und Tests bleiben absichtlich außerhalb. Eigene, nicht ersetzbare Dateien niemals in `Wohnungsplaner_Generated` speichern. `npm run workspace:prepare` richtet die Ablage ein, `npm run workspace:doctor` prüft das linkfreie Layout. **Nicht `npm ci` direkt im Quellprojekt ausführen.**
 
 Identische Referenzbilder nutzen NTFS-Hardlinks: Sie belegen nur einmal Speicher, sind aber weiterhin unter allen benötigten Modell- und Produktpfaden erreichbar. Beim **In-place-Ändern** einer solchen Datei verändern sich alle Hardlinks; Bilder deshalb als unveränderliche Quellen behandeln oder durch Umbenennen gezielt ersetzen. Gemeinsame Hinweise stehen zentral in `models/README.md`.
 
@@ -110,3 +110,33 @@ npm run visual:check -- --model=chair-dining  # Beispiel: echtes Browser-/WebGL-
 npm-Caches, das temporäre Verzeichnis der über die npm-Skripte gestarteten Werkzeuge, Reports und Builddateien werden mit `scripts/workspace-exec.mjs` auf den internen Generated-Ordner geroutet. Globale Installationen von Node.js/npm, vom Betriebssystem verwaltete Caches und die persönlichen Browserdaten (gespeicherte Wohnungspläne) sind bewusst **nicht** Bestandteil dieses löschbaren Ordners.
 
 Für den abschließenden kombinierten Schnellcheck zusätzlich `npm run quality:check` verwenden (Quelllayout, Knip/Madge, TypeScript, ESLint, **Produktions-npm-Audit**, privater Asset-Schutz). Der separate Befehl `npm run security:prod` schreibt den aktuellen Audit unter `Wohnungsplaner_Generated/reports/security/` ab. `npm run validate` startet nun auch vier Sicherheits- und Pfadtests des Generated-Bootstraps. Alle Analysen sind wiederholbar; die Ergebnisse im Generated-Ordner sind bewusst löschbar.
+
+## Git, GitHub und Codex: dauerhafter Arbeitsablauf
+
+**Kanonisch ist ausschließlich dieses Repository auf dem Integrationszweig `main`.** Vor jeder Arbeit `AGENTS.md` lesen; Änderungen bleiben in den vorhandenen Quellen. Keine Kopien, Junctions, Symlinks, Worktrees, ungefragten Branches/PRs oder zusätzlichen Pipelines anlegen.
+
+```powershell
+# Einstieg – erst Zustand prüfen, nie vorhandene Änderungen überschreiben
+npm run workspace:doctor
+npm run github:status
+git status --short
+npm run github:sync             # NUR bei sauberem Working Tree; Fetch + FF-only
+
+# Nach einer Änderung – die passende fachliche UI-/3D-Prüfung ergänzen
+npm run git:policy
+npm run build
+npm run validate
+npm run privacy:check:strict
+npm run workspace:inventory
+git status --short
+```
+
+`npm run github:sync` führt **keine PR-Merges** aus und verwirft keine lokalen Änderungen. Sind lokale Commits voraus, divergiert der Verlauf oder besteht ein Konflikt, wird der Vorgang beendet und muss geprüft werden. `npm run github:reconcile` erstellt ausschließlich eine Übersicht offener PRs. Inhaltliche Prüfung, CI/Reviews und eventuelles Mergen/Schließen bleiben bewusst getrennte Entscheidungen. GitHub hat `delete_branch_on_merge` aktiviert; erfolgreich gemergte PR-Branches werden dort automatisch gelöscht.
+
+`npm run github:setup` oder `github:status` installiert die **lokalen Git-Hooks** (`scripts/git-hooks/`) in die Git-Konfiguration dieses Repositories und stellt `pull.ff=only` ein. Vor jedem Commit prüft ein Hook den Index auf temporäre Dateien, vertrauliche Umgebungsdateien und Links. Vor jedem Push laufen Strukturprüfung, Build, Validierung und Datenschutzprüfung. Zusätzlich gibt es **genau einen** GitHub-Actions-Workflow: `.github/workflows/canonical-quality.yml`. Er prüft eingehende Integrationen auf GitHub ohne weitere Deployment-Pipeline.
+
+**GitHub-Branch-Protection:** Für `main` gelten lineare Historie, Schutz gegen Force-Push und Löschung sowie Durchsetzung für Administratoren. PR-Pflicht und Required Status Checks sind nicht eingerichtet.
+
+**Sicherheitsgrenze:** Lokale Git-Hooks sind nicht serverseitig unveränderlich; bei direkten Pushes läuft GitHub-CI erst nach dem Push. Für eine serverseitig *vor* der Integration verpflichtende Testfreigabe wären GitHub Required Status Checks und im Regelfall ein vorab geprüfter PR erforderlich. Eine solche Umstellung würde den ausdrücklich gewünschten Direkt-`main`-Ablauf ändern und darf deshalb nicht stillschweigend erfolgen. Bereits vorhandene Schutzregeln haben immer Vorrang.
+
+**Git-Sicherung:** Die Verzeichnisse unter `Wohnungsplaner_Generated` sind überwiegend regenerierbar, **ausgenommen potenziell unveröffentlichte Informationen unter `git/repository`** (lokale Commits, Stashes, Reflogs). Das gesamte Generated-Verzeichnis niemals löschen, bevor `git status`, `git log`, sämtliche Referenzen und die Synchronisation mit dem Remote geprüft und gegebenenfalls gesichert wurden. Persönliche Browserdaten, Wohnungspläne und Modelloriginale sind ebenfalls niemals als Cache zu behandeln.
