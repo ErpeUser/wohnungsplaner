@@ -1,6 +1,12 @@
 $ErrorActionPreference = "Stop"
 
 $projectDirectory = Split-Path -Parent $MyInvocation.MyCommand.Path
+$generatedDirectory = Join-Path (Split-Path -Parent $projectDirectory) "Wohnungsplaner_Generated"
+# Force all npm downloads, logs and ephemeral subprocess files into the local project workspace.
+$env:npm_config_cache = Join-Path $generatedDirectory "cache\npm"
+$env:PLAYWRIGHT_BROWSERS_PATH = Join-Path $generatedDirectory "downloads\playwright"
+$env:TEMP = Join-Path $generatedDirectory "tmp"
+$env:TMP = $env:TEMP
 $plannerUrl = "http://127.0.0.1:3000/"
 $port = 3000
 $nodeCandidates = @(
@@ -35,16 +41,25 @@ if (-not (Test-PlannerReady)) {
   }
 
   $serverEntryPoint = Join-Path $projectDirectory "serve-local.mjs"
-  $serverBuild = Join-Path $projectDirectory "dist\server\index.js"
-  if (-not (Test-Path -LiteralPath $serverEntryPoint) -or -not (Test-Path -LiteralPath $serverBuild)) {
-    Add-Type -AssemblyName PresentationFramework
-    [System.Windows.MessageBox]::Show(
-      "Der lokale Build fehlt. Bitte den Wohnungsplaner einmal neu bauen.",
-      "Wohnungsplaner",
-      "OK",
-      "Error"
-    ) | Out-Null
-    exit 1
+  $serverBuild = Join-Path $generatedDirectory "build\dist\server\index.js"
+  if (-not (Test-Path -LiteralPath $serverEntryPoint)) {
+    throw "Der Server-Einstiegspunkt fehlt: $serverEntryPoint"
+  }
+  $vinextCli = Join-Path $generatedDirectory "dependencies\node_modules\vinext\dist\cli.js"
+  if (-not (Test-Path -LiteralPath $serverBuild) -or -not (Test-Path -LiteralPath $vinextCli)) {
+    # Reconstruct disposable dependencies and build output on the first start.
+    $npmPath = (Get-Command npm.cmd -ErrorAction Stop).Source
+    $workspaceSetup = Join-Path $projectDirectory "scripts\workspace-setup.mjs"
+    & $nodePath $workspaceSetup ensure
+    if ($LASTEXITCODE -ne 0) { throw "Arbeitsdaten oder Abhaengigkeiten konnten nicht vorbereitet werden." }
+    Push-Location $projectDirectory
+    try {
+      & $npmPath run build
+      if ($LASTEXITCODE -ne 0) { throw "Automatischer Wohnungsplaner-Build fehlgeschlagen." }
+    } finally { Pop-Location }
+    if (-not (Test-Path -LiteralPath $serverBuild)) {
+      throw "Der Build wurde nicht erzeugt: $serverBuild"
+    }
   }
 
   $processInfo = [System.Diagnostics.ProcessStartInfo]::new()

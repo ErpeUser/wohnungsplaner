@@ -1,6 +1,6 @@
 'use client';
 import { useMemo, type ComponentProps } from 'react';
-import { PlannerArchitecture as BaseArchitecture } from './architecture-base.tsx';
+import { PlannerArchitecture as BaseArchitecture } from './architecture/core';
 import { RefinedInteriorModel, hasRefinedInteriorModel } from './interior-models.tsx';
 import { InteriorFloor } from './interior-floors.tsx';
 import { partitionFloorRendering } from '../plan-2d/interior-plan-geometry.ts';

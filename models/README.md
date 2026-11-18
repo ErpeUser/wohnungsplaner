@@ -48,3 +48,23 @@ Die vier zuvor fehlenden Produktkategorien für die Tabellenordner sind als `tab
 ```
 
 Private Referenzfotos und Quellen bleiben außerhalb von `public/planner-assets/`. Exporte dürfen keine privaten Quell- oder Laufzeit-URLs enthalten.
+
+## Gemeinsame Dokumentation und Duplikate
+
+Die generische Beschreibung des Modellordners steht nur noch in dieser `models/README.md`; 128 identische Einzel-READMEs wurden aus den Modellordnern entfernt. Die pro Modell unterschiedlichen `manifest.json`, `quality-report.json` und `link.txt` bleiben eigene Dateien, weil Katalog-IDs und Quellpfade erhalten bleiben müssen.
+
+Gleiche Binärreferenzen (Bilder, HTML-Snapshots, öffentliches SVG) sind unter Windows als NTFS-Hardlinks konsolidiert. Ihre jeweiligen Pfade bleiben für App und Modell-Viewer gültig. Änderungen an einer hardverknüpften Datei wirken bei direktem Überschreiben auf alle Alias-Pfade; für unabhängige Änderungen eine neue Datei über eine atomare Ersetzung anlegen. Produktquellen niemals als regenerierbaren Buildcache behandeln.
+
+## Historische Modellrevisionen (nicht das V3-Persistenzschema)
+
+Die frühere unbenutzte Quelldatei `app/planner/domain/model-revision.ts` enthielt ausschließlich folgende historische Notizen. Sie wurde in diese zentrale Referenz übernommen; die Modellrevision ist **keine** aktive Schema-Versionsprüfung.
+
+| Revision | Historischer Stand |
+|---|---|
+| 0 | V3-Dokument ohne Modellrevision (vor dem AliExpress-Sofa) |
+| 1 | AliExpress-Relaxsofa und erster Wohnungsmodell-Visualstand |
+| 2 | Temu-Vintage-Teppich und Materialnormalisierung |
+| 3 | Bozan-Tischvergleich und aktuelle Essgruppe |
+| 4 | Kaleo-/Amber-Stuhlmaße und Gruppenmodell |
+| 5 | Bad/WC-, Vorraum- und Zimmer-1-Detailstand |
+| 6 | Aktueller maßhaltiger Modell- und Materialstand |

@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 
-const output = path.resolve('artifacts/visual/latest');
+const output = path.resolve('../Wohnungsplaner_Generated/reports/artifacts/visual/latest');
 const escape = (value: string) => value.replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]!);
 const git = (...args: string[]) => { try { return execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch { return 'unknown'; } };
 const formatError = (error: TestError) => (error.message ?? error.stack ?? 'Browser runner error').replace(/\u001b\[[0-9;]*m/g, '');

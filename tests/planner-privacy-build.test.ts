@@ -21,7 +21,8 @@ async function putFile(directory: string, relative: string, contents: string) {
 }
 
 function runScript(directory: string, script: string, ...args: string[]) {
-  return spawnSync(process.execPath, [script, ...args], { cwd: directory, encoding: "utf8", timeout: 10_000 });
+  return spawnSync(process.execPath, [script, ...args], { cwd: directory, encoding: "utf8", timeout: 10_000,
+    env: { ...process.env, PLANNER_BUILD_OUTPUT_ROOT: path.join(directory, "dist") } });
 }
 
 test("asset sync removes private generated references while preserving source files and public assets", async (t) => {

@@ -4,7 +4,10 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const buildMode = process.argv.includes("--build");
-const outputRoots = [path.join(root, "dist", "client"), path.join(root, "dist", "server")];
+const buildRoot = process.env.PLANNER_BUILD_OUTPUT_ROOT
+  ? path.resolve(process.env.PLANNER_BUILD_OUTPUT_ROOT)
+  : path.resolve(root, "..", "Wohnungsplaner_Generated", "build", "dist");
+const outputRoots = [path.join(buildRoot, "client"), path.join(buildRoot, "server")];
 const referenceDirectories = ["planner-assets/private-reference", "planner-assets/reference", "planner-assets/local-sources"];
 const privateRoots = buildMode
   ? outputRoots.flatMap((output) => [...referenceDirectories, ".codex-temp"].map((directory) => path.join(output, directory)))

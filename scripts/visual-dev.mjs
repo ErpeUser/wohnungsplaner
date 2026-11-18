@@ -1,5 +1,11 @@
-// Use the Node dev runtime for local filesystem references; workerd has its own filesystem.
+// Use the local development server without junctions or a source-tree node_modules.
+import { pathToFileURL } from 'node:url';
+import path from 'node:path';
+import { ensureDependencies, dependencyRoot } from './workspace-setup.mjs';
+
+ensureDependencies();
 process.env.PLANNER_REVIEW_DEV = '1';
 process.env.PLANNER_REVIEW_ENABLED = '1';
-process.argv.splice(1, Infinity, 'node_modules/vinext/dist/cli.js', 'dev', '--host', '127.0.0.1', '--port', '3001', '--strictPort');
-await import('../node_modules/vinext/dist/cli.js');
+const cli = path.join(dependencyRoot, 'vinext', 'dist', 'cli.js');
+process.argv.splice(1, Infinity, cli, 'dev', '--host', '127.0.0.1', '--port', '3001', '--strictPort');
+await import(pathToFileURL(cli).href);

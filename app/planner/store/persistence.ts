@@ -202,61 +202,6 @@ export function upgradeRetiredDiningGroup(document: PlannerDocumentV3): PlannerD
   });
 }
 
-/** Keep the live dining group complete even when an older save contains only three chairs. */
-export function ensureCurrentDiningGroupFourChairs(document: PlannerDocumentV3): PlannerDocumentV3 {
-  const table = document.placements.find((item) => item.id === "living-bozan-table");
-  if (!table) return document;
-
-  // Current documents carry this marker once the four-chair migration has run.
-  // A missing chair after that point is an explicit user deletion, not a
-  // reason to resurrect the placement on every hydrate.
-  const hasMigrationMarker = table.metadata?.notes?.some((note) => /Vier Kaleo-Armlehnstühle/i.test(note));
-  if (hasMigrationMarker) return document;
-
-  // Only recognize the known legacy layouts. Arbitrary custom positions must
-  // remain untouched so a saved plan can intentionally contain fewer chairs.
-  const legacyLayout = LEGACY_DINING_GROUP_POSITION_SETS.find((positions) => {
-    let matched = 0;
-    for (const [id, position] of positions) {
-      const item = document.placements.find((candidate) => candidate.id === id);
-      if (item
-        && Math.abs(item.position.x - position.x) < 0.001
-        && Math.abs(item.position.z - position.z) < 0.001) {
-        matched += 1;
-      }
-    }
-    return matched >= 3;
-  });
-  if (!legacyLayout) return document;
-
-  const missing = DEFAULT_APARTMENT_DOCUMENT.placements.filter((item) => (
-    item.id.startsWith("living-kaleo-chair-")
-      && !document.placements.some((candidate) => candidate.id === item.id)
-  ));
-  if (!missing.length) return document;
-
-  const baselineTable = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "living-bozan-table")!;
-  const referenceChair = document.placements.find((item) => item.id.startsWith("living-kaleo-chair-"));
-  const delta = { x: table.position.x - baselineTable.position.x, z: table.position.z - baselineTable.position.z };
-  return parsePlannerDocument({
-    ...document,
-    placements: [
-      ...document.placements,
-      ...missing.map((item) => ({
-        ...item,
-        position: { x: item.position.x + delta.x, z: item.position.z + delta.z },
-        ...(referenceChair ? {
-          catalogId: referenceChair.catalogId,
-          size: referenceChair.size,
-          materialVariants: referenceChair.materialVariants,
-          metadata: referenceChair.metadata,
-          groupId: table.groupId,
-        } : {}),
-      })),
-    ],
-  });
-}
-
 /**
  * Unlinks the living sofa and rug so each can be dragged independently.
  * Older default saves are still moved to the measured inner face of the

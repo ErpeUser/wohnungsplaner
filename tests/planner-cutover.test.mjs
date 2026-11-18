@@ -1,28 +1,22 @@
 import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import test, { after } from "node:test";
-import { unstable_dev } from "wrangler";
+import { startProductionServer } from "./support/local-production-server.mjs";
 
 const projectRoot = new URL("../", import.meta.url);
-let workerPromise;
+let serverPromise;
 
 async function getWorker() {
-  workerPromise ??= unstable_dev("dist/server/index.js", {
-    config: "dist/server/wrangler.json",
-    local: true,
-    logLevel: "none",
-    experimental: {
-      disableExperimentalWarning: true,
-      disableDevRegistry: true,
-      testMode: true,
-      watch: false,
-    },
-  });
-  return workerPromise;
+  serverPromise ??= startProductionServer();
+  const server=await serverPromise;
+  return { fetch: (target, options) => {
+    const url=new URL(target);
+    return server.fetch(url.pathname+url.search, options);
+  } };
 }
 
 after(async () => {
-  if (workerPromise) (await workerPromise).stop();
+  if (serverPromise) await (await serverPromise).stop();
 });
 
 test("the product root server-renders the V3 planner with a complete 2D fallback", async () => {

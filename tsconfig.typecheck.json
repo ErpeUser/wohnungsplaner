@@ -1,0 +1,44 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": [
+        "./*"
+      ],
+      "react": [
+        "../Wohnungsplaner_Generated/dependencies/node_modules/@types/react/index.d.ts"
+      ],
+      "react/*": [
+        "../Wohnungsplaner_Generated/dependencies/node_modules/@types/react/*"
+      ],
+      "react-dom": [
+        "../Wohnungsplaner_Generated/dependencies/node_modules/@types/react-dom/index.d.ts"
+      ],
+      "react-dom/*": [
+        "../Wohnungsplaner_Generated/dependencies/node_modules/@types/react-dom/*"
+      ],
+      "three": [
+        "../Wohnungsplaner_Generated/dependencies/node_modules/@types/three/index.d.ts"
+      ],
+      "vinext/server/*": [
+        "../Wohnungsplaner_Generated/dependencies/node_modules/vinext/dist/server/*"
+      ],
+      "vinext/types/augmentations": [
+        "../Wohnungsplaner_Generated/dependencies/node_modules/vinext/dist/shims/next-shims-augmentations.d.ts"
+      ],
+      "*": [
+        "../Wohnungsplaner_Generated/dependencies/node_modules/*"
+      ],
+      "chai": [
+        "../Wohnungsplaner_Generated/dependencies/node_modules/@types/chai/index.d.ts"
+      ],
+      "chai/*": [
+        "../Wohnungsplaner_Generated/dependencies/node_modules/@types/chai/*"
+      ]
+    },
+    "typeRoots": [
+      "../Wohnungsplaner_Generated/dependencies/node_modules/@types",
+      "../Wohnungsplaner_Generated/dependencies/node_modules"
+    ]
+  }
+}

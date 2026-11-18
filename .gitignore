@@ -1,71 +1,17 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# testing
-/coverage
-/artifacts/visual/
-
-# next.js
+# The complete generated workspace is disposable, never source-controlled.
+/Wohnungsplaner_Generated/
+# Defensive ignores for any temporary tool outputs; no junctions or links are used.
+/node_modules/
+/dist/
 /.next/
 /.vinext/
-/out/
-
-# misc
-.DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
-next-env.d.ts
-/dist/
 /.wrangler/
-/outputs/
-/work/
-
-# private, local-only room sources
-/local-sources/
-
-# local QA output and recoverable legacy archive
-/legacy-archive/
-/artifacts/product-references/*
-!/artifacts/product-references/source-manifest.json
-/.runtime/
 /.local/
-/tmp/
-/output/
-/git-meta/
-.superpowers/
+/artifacts/
+/coverage/
+/test-results/
+/playwright-report/
+*.tsbuildinfo
 *.log
-tsconfig.tsbuildinfo
-
-# private inspection media (never publish or package)
-/public/planner-assets/private-reference/
-/.codex-temp/
-/public/planner-assets/reference/
-/public/planner-assets/local-sources/
-/public/reference-plan.png
-/public/*-handplan.png
-/public/*-plan-detail.png
-**/WhatsApp Image*
-**/WhatsApp Video*
-/release/
+.env*
+!.env.example

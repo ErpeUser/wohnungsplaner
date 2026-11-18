@@ -2,6 +2,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { prepareWorkspace, workspacePath, collectOutputs, ensurePlaywrightBrowsers, dependencyRoot } from './workspace-setup.mjs';
 
 const root = path.resolve(fileURLToPath(new URL('..', import.meta.url)));
 process.chdir(root);
@@ -25,13 +26,10 @@ for (let index = 0; index < args.length; index++) {
 }
 if (process.env.VISUAL_VIEW && !['front', 'side', 'back', 'perspective'].includes(process.env.VISUAL_VIEW)) throw new Error('Unknown perspective; use front, side, back, or perspective');
 
-// Only this fixed output tree may be replaced. Refuse symbolic-link traversal.
-const output = path.resolve(root, 'artifacts/visual/latest');
-if (output !== path.join(root, 'artifacts', 'visual', 'latest')) throw new Error('Unsafe visual output directory');
-for (const relative of ['artifacts', 'artifacts/visual', 'artifacts/visual/latest']) {
-  const stat = await fs.lstat(path.join(root, relative)).catch((error) => { if (error.code !== 'ENOENT') throw error; });
-  if (stat?.isSymbolicLink()) throw new Error(`Refusing symbolic-link output: ${relative}`);
-}
+// All browser data and reports stay in the disposable sibling folder.
+prepareWorkspace();
+ensurePlaywrightBrowsers();
+const output = workspacePath('reports/artifacts/visual/latest');
 await fs.rm(output, { recursive: true, force: true });
 await fs.mkdir(path.join(output, 'report'), { recursive: true });
 if (process.env.VISUAL_BROWSER_CHANNEL) {
@@ -42,7 +40,7 @@ if (process.env.VISUAL_BROWSER_CHANNEL) {
   }
 }
 const selection = mode === 'all' ? [] : [mode === 'gui' ? 'planner.spec.ts' : 'models.spec.ts'];
-const child = spawn(process.execPath, ['node_modules/@playwright/test/cli.js', 'test', ...selection, ...forwarded], { stdio: 'inherit', env: process.env });
+const child = spawn(process.execPath, [path.join(dependencyRoot, '@playwright', 'test', 'cli.js'), 'test', ...selection, ...forwarded], { stdio: 'inherit', env: process.env });
 child.once('error', (error) => { console.error(error.message); process.exitCode = 1; });
 child.once('exit', (code) => {
   // Inventory is generated even after test failures; every gap remains visible.
@@ -51,4 +49,11 @@ child.once('exit', (code) => {
   });
   if (inventory.error) console.error(inventory.error);
   process.exitCode = (code ?? 1) || (inventory.status ?? 1);
+  try {
+    collectOutputs();
+    prepareWorkspace();
+  } catch (error) {
+    console.error('Could not relocate generated browser-build output:', error.message);
+    process.exitCode = 1;
+  }
 });

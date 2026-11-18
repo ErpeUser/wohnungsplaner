@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -18,7 +19,7 @@ async function putFile(directory: string, relative: string, contents: string) {
 }
 
 async function fixture(t: TestContext, shots: Array<[string, string]>) {
-  const temporary = path.join(process.cwd(), ".local");
+  const temporary = path.resolve(process.cwd(), "..", "Wohnungsplaner_Generated", "tmp");
   await mkdir(temporary, { recursive: true });
   const directory = await mkdtemp(path.join(temporary, "visual-inventory-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
@@ -45,10 +46,15 @@ async function fixture(t: TestContext, shots: Array<[string, string]>) {
 async function runInventory(directory: string, model = "", view = "") {
   const result = spawnSync(process.execPath, ["--import", loader, script, "models"], {
     cwd: directory, encoding: "utf8", timeout: 20_000,
-    env: { ...process.env, VISUAL_MODEL: model, VISUAL_VIEW: view, VISUAL_BROWSER_CHANNEL: "" },
+    env: { ...process.env, VISUAL_MODEL: model, VISUAL_VIEW: view, VISUAL_BROWSER_CHANNEL: "",
+      VISUAL_REPORT_ROOT: path.join(directory, "artifacts", "visual", "latest") },
   });
   assert.equal(result.error, undefined);
-  const manifest = JSON.parse(await readFile(path.join(directory, "artifacts/visual/latest/report/manifest.json"), "utf8"));
+  const manifestFile = path.join(directory, "artifacts/visual/latest/report/manifest.json");
+  if (!existsSync(manifestFile)) {
+    throw new Error("Inventory did not write manifest. EXIT=" + result.status + " STDOUT=" + result.stdout + " STDERR=" + result.stderr);
+  }
+  const manifest = JSON.parse(await readFile(manifestFile, "utf8"));
   return { result, manifest };
 }
 

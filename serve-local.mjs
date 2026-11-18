@@ -5,10 +5,13 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
-const serverRoot = path.join(root, "dist", "server");
-const clientRoot = path.join(root, "dist", "client");
+const generatedRoot = path.resolve(root, "..", "Wohnungsplaner_Generated");
+const serverRoot = path.join(generatedRoot, "build", "dist", "server");
+const clientRoot = path.join(generatedRoot, "build", "dist", "client");
 const publicRoot = path.join(root, "public");
-const pidFile = path.resolve(root, process.env.PLANNER_PID_FILE || ".local/codex-server.pid");
+const pidFile = process.env.PLANNER_PID_FILE
+  ? path.resolve(root, process.env.PLANNER_PID_FILE)
+  : path.join(generatedRoot, "logs", "local", "codex-server.pid");
 const writePidEnabled = process.env.PLANNER_WRITE_PID !== "0";
 const port = Number(process.env.PORT || 3000);
 const host = process.env.HOST || "127.0.0.1";
@@ -23,7 +26,7 @@ let ownsPidFile = false;
 
 async function loadRuntimeHandler() {
   try {
-    return (await import("./dist/server/index.js")).default;
+    return (await import(pathToFileURL(path.join(serverRoot, "index.js")).href)).default;
   } catch (error) {
     if (error?.code !== "ERR_UNSUPPORTED_ESM_URL_SCHEME" || !String(error?.message).includes("cloudflare:")) {
       runtimeError = error;

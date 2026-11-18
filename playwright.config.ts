@@ -1,4 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
+import { resolve } from 'node:path';
+// Direct Playwright CLI runs also store browser downloads in the generated tree.
+process.env.PLAYWRIGHT_BROWSERS_PATH = resolve(process.cwd(), '../Wohnungsplaner_Generated/downloads/playwright');
 
 const livePreview = process.env.VISUAL_USE_LIVE_PREVIEW === '1';
 const cloudChannel = process.env.VISUAL_BROWSER_CHANNEL === 'chrome' || process.env.VISUAL_BROWSER_CHANNEL === 'msedge'
@@ -11,7 +14,7 @@ export default defineConfig({
   retries: 0,
   timeout: 90_000,
   expect: { timeout: 15_000 },
-  outputDir: './artifacts/visual/latest/test-results',
+  outputDir: '../Wohnungsplaner_Generated/reports/artifacts/visual/latest/test-results',
   reporter: [['list'], ['./scripts/visual-reporter.ts']],
   use: {
     baseURL: livePreview ? 'http://127.0.0.1:3001' : 'http://127.0.0.1:3100',

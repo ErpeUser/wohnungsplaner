@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas, useThree, type RootState } from "@react-three/fiber";
-import { Component, Suspense, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 
 import type { PlannerDocumentV3, Point2 } from "../domain/types.ts";
@@ -257,27 +257,4 @@ function ThreeFallback({ message, onReturn2D }: { message: string; onReturn2D():
       <button type="button" onClick={onReturn2D}>Zu 2D</button>
     </div>
   );
-}
-
-export class Planner3DErrorBoundary extends Component<{
-  children: ReactNode;
-  onReturn2D(): void;
-}, { error: Error | null }> {
-  state = { error: null as Error | null };
-
-  static getDerivedStateFromError(error: Error) {
-    return { error };
-  }
-
-  render() {
-    if (this.state.error) {
-      return (
-        <ThreeFallback
-          message="Das 3D-Modul konnte nicht geladen werden. Deine Planung wurde nicht verändert."
-          onReturn2D={this.props.onReturn2D}
-        />
-      );
-    }
-    return this.props.children;
-  }
 }

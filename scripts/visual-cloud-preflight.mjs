@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { chromium } from 'playwright';
+import { chromium } from '@playwright/test';
 
-const output = path.resolve('artifacts/visual/latest/report');
+const output = path.resolve('../Wohnungsplaner_Generated/reports/artifacts/visual/latest/report');
 await fs.mkdir(output, { recursive: true });
 const channel = process.env.VISUAL_BROWSER_CHANNEL;
 const result = {
@@ -11,7 +11,7 @@ const result = {
 };
 let browser;
 try {
-  if (!['chrome', 'msedge'].includes(channel)) throw new Error('Choose a GitHub preinstalled browser: VISUAL_BROWSER_CHANNEL=chrome or msedge');
+  if (!['chrome', 'msedge'].includes(channel)) throw new Error('Choose a locally installed browser: VISUAL_BROWSER_CHANNEL=chrome or msedge');
   browser = await chromium.launch({
     channel,
     headless: true,

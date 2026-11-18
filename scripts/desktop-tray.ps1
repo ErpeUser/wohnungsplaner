@@ -5,7 +5,7 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 Add-Type -AssemblyName System.Net.Http
 [System.Windows.Forms.Application]::EnableVisualStyles()
-$localFolder = Join-Path $RepositoryRoot '.local'
+$localFolder = Join-Path (Split-Path -Parent $RepositoryRoot) 'Wohnungsplaner_Generated\logs\local'
 New-Item -ItemType Directory -Path $localFolder -Force | Out-Null
 $openSignal = Join-Path $localFolder 'desktop-open.signal'
 $stopSignal = Join-Path $localFolder 'desktop-stop.signal'
@@ -22,7 +22,14 @@ $script:healthClient = New-Object System.Net.Http.HttpClient
 $script:healthClient.Timeout = [TimeSpan]::FromSeconds(3)
 $script:lastHealth = [DateTime]::MinValue
 $icons = @{}
-$iconFolder = Join-Path $env:LOCALAPPDATA 'Wohnungsplaner'
+$iconFolder = Join-Path (Split-Path -Parent $RepositoryRoot) 'Wohnungsplaner_Generated\desktop'
+if (-not (Test-Path -LiteralPath (Join-Path $iconFolder 'ready.ico'))) {
+    New-Item -ItemType Directory -Path $iconFolder -Force | Out-Null
+    . (Join-Path $PSScriptRoot 'desktop-icons.ps1')
+    New-PlannerIcon '#E5A329' (Join-Path $iconFolder 'loading.ico')
+    New-PlannerIcon '#249B73' (Join-Path $iconFolder 'ready.ico')
+    New-PlannerIcon '#D24E4E' (Join-Path $iconFolder 'error.ico')
+}
 foreach ($name in @('loading','ready','error')) { $icons[$name] = New-Object System.Drawing.Icon (Join-Path $iconFolder "$name.ico") }
 $tray = New-Object System.Windows.Forms.NotifyIcon
 $tray.Icon = $icons.loading; $tray.Text = 'Wohnungsplaner - lädt'; $tray.Visible = $true
@@ -31,7 +38,7 @@ $statusItem = $menu.Items.Add('Wird gestartet …'); $statusItem.Enabled = $fals
 $warningItem = $menu.Items.Add(''); $warningItem.Enabled = $false; $warningItem.Visible = $false
 $null = $menu.Items.Add((New-Object System.Windows.Forms.ToolStripSeparator))
 $openItem = $menu.Items.Add('Wohnungsplaner öffnen')
-$updateItem = $menu.Items.Add('Jetzt aktualisieren')
+$updateItem = $menu.Items.Add('Lokale Vorschau prüfen')
 $folderItem = $menu.Items.Add('Projektordner öffnen')
 $exitItem = $menu.Items.Add('Wohnungsplaner beenden')
 $tray.ContextMenuStrip = $menu
@@ -92,7 +99,7 @@ $timer.Add_Tick({
             if ($script:phase -eq 'ready' -and -not $workerRunning -and $script:openWhenReady) { $script:openWhenReady = $false; Open-Planner }
         }
         $updateItem.Enabled = -not $workerRunning
-        if (-not $workerRunning -and ([DateTime]::Now - $script:lastUpdate).TotalMinutes -ge 5) { Start-PlannerWorker 'update' }
+        # Offlinebetrieb: keine periodische GitHub-Synchronisierung.
     } catch {
         $tray.Icon = $icons.error; $tray.Text = 'Wohnungsplaner - Fehler'
         $statusItem.Text = $_.Exception.Message

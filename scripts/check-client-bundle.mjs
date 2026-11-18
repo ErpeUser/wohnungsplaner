@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const manifestUrl = new URL("../dist/client/.vite/manifest.json", import.meta.url);
+const manifestUrl = new URL("../../Wohnungsplaner_Generated/build/dist/client/.vite/manifest.json", import.meta.url);
 const manifest = JSON.parse(await readFile(manifestUrl, "utf8"));
 const browserEntry = manifest["virtual:vinext-app-browser-entry"];
 const rootEntry = manifest["app/page.tsx"];

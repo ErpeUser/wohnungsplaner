@@ -1,10 +1,11 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
 import { REVIEW_MODELS } from '../app/planner/review/review-models.ts';
 
 const root = process.cwd();
-const output = path.join(root, 'artifacts', 'visual', 'latest');
+const output = process.env.VISUAL_REPORT_ROOT
+  ? path.resolve(process.env.VISUAL_REPORT_ROOT)
+  : path.resolve(root, '..', 'Wohnungsplaner_Generated', 'reports', 'artifacts', 'visual', 'latest');
 const reports = path.join(output, 'report');
 const mode = process.argv[2] ?? 'all';
 const standardAngles = ['front', 'side', 'back', 'perspective'];
@@ -14,7 +15,8 @@ const angles = viewFilter ? [viewFilter] : standardAngles;
 const safe = (s) => String(s).replace(/[^a-zA-Z0-9_-]/g, '-');
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (v) =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[v]);
-const commit = (() => { try { return execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(); } catch { return 'unverified'; } })();
+// This is a Git-free local application. Report the offline runtime, not a Git commit.
+const commit = 'offline';
 const viewer = new Map(REVIEW_MODELS.map((item) => [item.id, item]));
 const viewerByBuiltIn = new Map(REVIEW_MODELS.filter((item) => item.builtIn).map((item) => [item.builtIn.id, item]));
 const selectionError = modelFilter && !viewer.has(modelFilter)

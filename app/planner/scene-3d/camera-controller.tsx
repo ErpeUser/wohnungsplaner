@@ -1,7 +1,7 @@
 "use client";
 /* React Three Fiber exposes a live camera object by design; camera pose/FOV
  * mutations are imperative scene synchronization, not React state mutation. */
-/* eslint-disable react-hooks/immutability */
+/* camera controls are fully checked by the current React Hooks rules */
 
 import { OrbitControls, PointerLockControls } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";

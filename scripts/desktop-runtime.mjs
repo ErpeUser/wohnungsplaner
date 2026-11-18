@@ -1,168 +1,147 @@
+// Git-independent production desktop service; no .vinext dev state or source-tree caches.
 import { execFileSync, spawn } from 'node:child_process';
-import { createHash } from 'node:crypto';
-import { closeSync, existsSync, lstatSync, mkdirSync, openSync, readFileSync, writeFileSync, renameSync, unlinkSync } from 'node:fs';
+import { closeSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'node:fs';
+import { pathToFileURL, fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import {
+  ensureDependencies, prepareWorkspace, workspaceEnvironment, generatedRoot, projectRoot,
+} from './workspace-setup.mjs';
 
-export const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const local = path.join(repositoryRoot, '.local');
-const url = 'http://127.0.0.1:3001/';
-function git(root, args) {
-  return execFileSync('git', ['-C', root, ...args], {
-    encoding: 'utf8', timeout: 30000, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
-    env: { ...process.env, GIT_TERMINAL_PROMPT: '0', GCM_INTERACTIVE: 'never' },
-  }).trim();
+export const repositoryRoot = projectRoot;
+const local=path.join(generatedRoot,'logs','local');
+const build=path.join(generatedRoot,'build','dist','server','index.js');
+const entry=path.join(projectRoot,'serve-local.mjs');
+const url='http://127.0.0.1:3001/';
+const stateFile=path.join(local,'desktop-server.json');
+
+function readJson(file) {
+  try{return JSON.parse(readFileSync(file,'utf8'));}catch{return null;}
 }
-export function synchronizeRepository(root) {
-  const result = { changed: false, dependenciesChanged: false, skipped: false, warning: '' };
-  if (git(root, ['branch', '--show-current']) !== 'main') {
-    return { ...result, skipped: true, warning: 'Anderer Arbeitszweig aktiv: automatisches Update pausiert.' };
-  }
-  if (git(root, ['status', '--porcelain'])) {
-    return { ...result, skipped: true, warning: 'Lokale Änderungen bleiben erhalten; automatisches Update pausiert.' };
-  }
-  const before = git(root, ['rev-parse', 'HEAD']);
-  try {
-    git(root, ['fetch', 'origin', 'main']);
-    // Never merge, reset, stash, rebase, switch branches, or publish local work.
-    git(root, ['merge', '--ff-only', 'origin/main']);
-  } catch {
-    return { ...result, warning: 'GitHub-Update nicht möglich; vorhandene lokale Version wird verwendet.' };
-  }
-  const after = git(root, ['rev-parse', 'HEAD']);
-  return { ...result, changed: before !== after,
-    dependenciesChanged: before !== after && /^(package(-lock)?\.json)$/m.test(git(root, ['diff', '--name-only', before, after])),
-  };
+function atomicWrite(file,obj) {
+  const temp=file+'.tmp-'+process.pid;
+  writeFileSync(temp,JSON.stringify(obj,null,2)+'\n');
+  renameSync(temp,file);
 }
-function readJson(name) {
-  try { return JSON.parse(readFileSync(path.join(local, name), 'utf8')); } catch { return null; }
+function state(phase,message,extra={}) {
+  atomicWrite(path.join(local,'desktop-state.json'),{
+    phase,message,url,repositoryRoot,updatedAt:new Date().toISOString(),...extra,
+  });
 }
-function save(name, data) {
-  const target = path.join(local, name);
-  writeFileSync(`${target}.tmp`, JSON.stringify(data, null, 2));
-  renameSync(`${target}.tmp`, target);
-}
-function status(phase, message, extra = {}) {
-  save('desktop-state.json', { phase, message, url, repositoryRoot, updatedAt: new Date().toISOString(), ...extra });
-}
-function powershell(code) {
-  return execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-EncodedCommand', Buffer.from("$ProgressPreference = 'SilentlyContinue'; " + code, 'utf16le').toString('base64')],
-    { encoding: 'utf8', windowsHide: true, timeout: 15000, stdio: ['ignore', 'pipe', 'pipe'] });
+function powershell(script) {
+  return execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-EncodedCommand',
+    Buffer.from("$ProgressPreference = 'SilentlyContinue'; "+script,'utf16le').toString('base64')],{
+      encoding:'utf8',windowsHide:true,timeout:15000,stdio:['ignore','pipe','pipe'],
+    });
 }
 function processDetails(pid) {
-  if (!Number.isSafeInteger(pid) || pid <= 0) return null;
-  const details = powershell(`Get-CimInstance Win32_Process -Filter 'ProcessId = ${pid}' | Select-Object Name,CommandLine,@{Name='StartedAt';Expression={([DateTimeOffset]$_.CreationDate).ToUnixTimeMilliseconds()}} | ConvertTo-Json -Compress`).trim();
-  return details ? JSON.parse(details) : null;
-}
-export function clearStaleDevLock(root) {
-  const lockPath = path.join(root, '.vinext', 'dev', 'lock.json');
-  if (!existsSync(lockPath)) return false;
-  for (const relative of ['.vinext', '.vinext/dev', '.vinext/dev/lock.json']) {
-    if (lstatSync(path.join(root, relative)).isSymbolicLink()) throw new Error('Startsperre verweist außerhalb des Projektordners.');
-  }
-  let lock;
-  try { lock = JSON.parse(readFileSync(lockPath, 'utf8')); } catch { return false; }
-  if (typeof lock.cwd !== 'string' || path.resolve(lock.cwd).toLowerCase() !== path.resolve(root).toLowerCase() || !Number.isFinite(lock.startedAt)) return false;
-  const owner = processDetails(lock.pid);
-  // A live reused PID is not the process that created this old framework lock.
-  if (owner && owner.Name === 'node.exe' && !(owner.StartedAt > lock.startedAt)) return false;
-  unlinkSync(lockPath);
-  return true;
+  if(!Number.isSafeInteger(pid)||pid<=0)return null;
+  const text=powershell("Get-CimInstance Win32_Process -Filter 'ProcessId = "+pid+
+    "' | Select-Object Name,CommandLine | ConvertTo-Json -Compress").trim();
+  return text?JSON.parse(text):null;
 }
 export function acquireWorkerLock(folder) {
-  const lockPath = path.join(folder, 'desktop-worker.lock');
-  if (existsSync(lockPath)) {
-    let owner;
-    try { owner = JSON.parse(readFileSync(lockPath, 'utf8')); } catch { owner = null; }
-    const details = processDetails(owner?.pid);
-    if (details?.Name === 'node.exe' && details.CommandLine?.includes(fileURLToPath(import.meta.url))) return null;
-    unlinkSync(lockPath);
+  mkdirSync(folder,{recursive:true});
+  const lock=path.join(folder,'desktop-worker.lock');
+  if(existsSync(lock)){
+    const old=readJson(lock);
+    const p=processDetails(old?.pid);
+    if(p?.Name==='node.exe' && p.CommandLine?.includes(fileURLToPath(import.meta.url)))return null;
+    unlinkSync(lock);
   }
-  try {
-    const fd = openSync(lockPath, 'wx');
-    writeFileSync(fd, JSON.stringify({ pid: process.pid })); closeSync(fd);
-  } catch (error) {
-    if (error.code === 'EEXIST') return null;
-    throw error;
-  }
-  return () => { if (existsSync(lockPath)) unlinkSync(lockPath); };
+  try{
+    const fd=openSync(lock,'wx');
+    writeFileSync(fd,JSON.stringify({pid:process.pid}));
+    closeSync(fd);
+  }catch(error){if(error.code==='EEXIST')return null;throw error;}
+  return ()=>{if(existsSync(lock))unlinkSync(lock);};
 }
-function stopServer() {
-  const saved = readJson('desktop-server.json');
-  if (!Number.isSafeInteger(saved?.pid) || saved.pid <= 0) return;
-  const scriptPath = path.join(repositoryRoot, 'scripts', 'visual-dev.mjs');
-  const processInfo = processDetails(saved.pid);
-  if (!processInfo) return;
-  if (processInfo.Name !== 'node.exe' || !processInfo.CommandLine?.includes(scriptPath)) {
-    throw new Error('Gespeicherte Prozessnummer gehört nicht zum Wohnungsplaner. Prozess bleibt erhalten.');
-  }
-  execFileSync('taskkill.exe', ['/PID', String(saved.pid), '/T', '/F'], { windowsHide: true, stdio: 'pipe' });
-  unlinkSync(path.join(local, 'desktop-server.json'));
-  clearStaleDevLock(repositoryRoot);
+function isOwnedServer(saved) {
+  if(!Number.isSafeInteger(saved?.pid)||saved.pid<=0)return false;
+  const p=processDetails(saved.pid);
+  return p?.Name==='node.exe' && p.CommandLine?.includes(entry);
 }
 async function healthy() {
-  try {
-    const response = await fetch(url, { signal: AbortSignal.timeout(2500) });
+  try{
+    const response=await fetch(url,{signal:AbortSignal.timeout(3000)});
     return response.ok && /Raumplaner/.test(await response.text());
-  } catch { return false; }
+  }catch{return false;}
+}
+function portOwner() {
+  // PowerShell reports exit code 1 for a missing port on some Windows versions.
+  // An empty port is the normal precondition for starting the planner.
+  return powershell("$ErrorActionPreference='SilentlyContinue'; " +
+    "Get-NetTCPConnection -LocalPort 3001 -State Listen -ErrorAction SilentlyContinue | " +
+    "Select-Object -ExpandProperty OwningProcess -Unique; exit 0").trim();
+}
+function stopServer() {
+  const saved=readJson(stateFile);
+  if(!saved?.pid)return;
+  if(!isOwnedServer(saved)){
+    // Never stop an unrelated process just because its PID was reused.
+    if(processDetails(saved.pid))throw Error('Process ID belongs to another program; refusing termination.');
+    unlinkSync(stateFile);
+    return;
+  }
+  execFileSync('taskkill.exe',['/PID',String(saved.pid),'/T','/F'],{
+    windowsHide:true,stdio:'pipe',
+  });
+  if(existsSync(stateFile))unlinkSync(stateFile);
+}
+function ensureBuild(force=false) {
+  ensureDependencies();
+  if(!force && existsSync(build))return;
+  const env={...process.env,...workspaceEnvironment()};
+  execFileSync('cmd.exe',['/d','/s','/c','npm.cmd run build'],{
+    cwd:projectRoot,env,windowsHide:true,stdio:'inherit',timeout:600000,
+  });
+  if(!existsSync(build))throw Error('Production build missing after npm run build.');
 }
 async function startServer() {
-  if (await healthy()) {
-    const saved = readJson('desktop-server.json');
-    if (!Number.isSafeInteger(saved?.pid) || saved.pid <= 0) throw new Error('Port 3001 ist bereits belegt. Vorhandene Vorschau zuerst beenden.');
-    const listener = powershell("Get-NetTCPConnection -LocalPort 3001 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique").trim();
-    if (listener !== String(saved.pid)) throw new Error('Port 3001 gehört einer anderen Vorschau. Diese zuerst beenden.');
-    const info = processDetails(saved.pid);
-    if (info?.Name !== 'node.exe' || !info.CommandLine?.includes(path.join(repositoryRoot, 'scripts', 'visual-dev.mjs'))) {
-      throw new Error('Die laufende Vorschau gehört nicht zu diesem Projektordner.');
+  if(await healthy()){
+    const saved=readJson(stateFile);
+    if(!isOwnedServer(saved)||portOwner()!==String(saved.pid)){
+      throw Error('Port 3001 already belongs to an unknown server.');
     }
     return;
   }
-  clearStaleDevLock(repositoryRoot);
-  const out = openSync(path.join(local, 'desktop-server.log'), 'a');
-  const child = spawn(process.execPath, [path.join(repositoryRoot, 'scripts', 'visual-dev.mjs')], {
-    cwd: repositoryRoot, detached: true, windowsHide: true, stdio: ['ignore', out, out],
+  if(portOwner())throw Error('Port 3001 is occupied; refusing to replace another service.');
+  const out=openSync(path.join(local,'desktop-server.log'),'a');
+  const loader=pathToFileURL(path.join(projectRoot,'scripts','resolve-dependencies.mjs')).href;
+  const env={...process.env,...workspaceEnvironment(),PORT:'3001',HOST:'127.0.0.1',
+    PLANNER_PID_FILE:path.join(local,'desktop-server.pid'),
+    NODE_OPTIONS:[process.env.NODE_OPTIONS??'','--import='+loader].filter(Boolean).join(' ')};
+  const child=spawn(process.execPath,[entry],{
+    cwd:projectRoot,detached:true,windowsHide:true,stdio:['ignore',out,out],env,
   });
-  child.unref(); closeSync(out);
-  save('desktop-server.json', { pid: child.pid, startedAt: new Date().toISOString(), repositoryRoot });
-  for (let attempt = 0; attempt < 90; attempt++) {
-    if (await healthy()) return;
-    try { process.kill(child.pid, 0); } catch { throw new Error('Start fehlgeschlagen. Siehe .local/desktop-server.log.'); }
-    await new Promise(resolve => setTimeout(resolve, 1000));
+  child.unref();closeSync(out);
+  atomicWrite(stateFile,{pid:child.pid,startedAt:new Date().toISOString(),repositoryRoot});
+  for(let i=0;i<50;i++){
+    if(await healthy())return;
+    try{process.kill(child.pid,0);}catch{throw Error('Desktop server exited; see generated/logs/local/desktop-server.log');}
+    await new Promise(resolve=>setTimeout(resolve,700));
   }
-  throw new Error('Die Vorschau braucht zu lange. Siehe .local/desktop-server.log.');
+  throw Error('Desktop server could not become ready.');
 }
-export async function run(action) {
-  mkdirSync(local, { recursive: true });
-  const release = acquireWorkerLock(local);
-  if (!release) { process.exitCode = 2; return; }
-  try {
-    status('loading', action === 'stop' ? 'Wird beendet …' : 'Aktualisiert und lädt …');
-    if (action === 'stop') { stopServer(); status('stopped', 'Beendet'); return; }
-    if (!['start', 'update'].includes(action)) throw new Error('Unbekannter Startbefehl');
-    const update = synchronizeRepository(repositoryRoot);
-    // Restart for entrypoint/config changes too; HMR cannot reload the launcher itself.
-    if (update.changed) stopServer();
-    const lockHash = createHash('sha256').update(readFileSync(path.join(repositoryRoot, 'package-lock.json'))).digest('hex');
-    const installed = readJson('desktop-dependencies.json');
-    const install = !existsSync(path.join(repositoryRoot, 'node_modules', 'vinext', 'dist', 'cli.js')) ||
-      update.dependenciesChanged || (installed && installed.lockHash !== lockHash);
-    if (install) {
-      status('loading', 'Installiert aktualisierte Komponenten …');
-      stopServer();
-      const log = openSync(path.join(local, 'desktop-install.log'), 'a');
-      try {
-        execFileSync('cmd.exe', ['/d', '/s', '/c', 'npm ci --no-audit --no-fund'], {
-          cwd: repositoryRoot, windowsHide: true, timeout: 600000, stdio: ['ignore', log, log],
-        });
-      } finally { closeSync(log); }
-    }
-    save('desktop-dependencies.json', { lockHash });
-    status('loading', 'Wohnungsplaner lädt …', { warning: update.warning });
-    await startServer();
-    status('ready', 'Wohnungsplaner bereit', { warning: update.warning, commit: git(repositoryRoot, ['rev-parse', '--short', 'HEAD']) });
-  } catch (error) {
-    status('error', error.message); process.exitCode = 1;
-  } finally { release(); }
+export async function run(action='start') {
+  prepareWorkspace();
+  const release=acquireWorkerLock(local);
+  if(!release){process.exitCode=2;return;}
+  try{
+    state('loading',action==='stop'?'Wird beendet':'Lokale Anwendung wird vorbereitet');
+    if(action==='stop'){
+      stopServer();state('stopped','Wohnungsplaner beendet');
+    }else if(action==='start'||action==='update'){
+      if(action==='update')stopServer();
+      ensureBuild(action==='update');
+      await startServer();
+      state('ready','Wohnungsplaner bereit');
+    }else throw Error('Expected start, update or stop');
+  }catch(error){
+    state('error',error.message);
+    console.error(error);
+    process.exitCode=1;
+  }finally{release();}
 }
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await run(process.argv[2] || 'start');
+if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
+  await run(process.argv[2]??'start');
+}
