@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import React, { act, Suspense, type ReactNode } from "react";
@@ -36,7 +35,7 @@ beforeAll(async () => {
   for (const path of [...PLANNER_ASSET_MANIFEST.assets.map((asset) => asset.path), colorblockPath, vintagePath]) {
     const bytes = await readFile(resolve(process.cwd(), "public", path.slice(1)));
     bytesByPath.set(path, Uint8Array.from(bytes).buffer);
-    expectedUrls.set(path, `${path}?v=${createHash("sha256").update(bytes).digest("hex")}`);
+    expectedUrls.set(path, path);
   }
   bytesByPath.set(remotePath, bytesByPath.get("/planner-assets/models/bed.glb")!);
   // Exercise real GLTF/RGBE decoders and drei caches. Only the final transport
@@ -78,7 +77,7 @@ async function rendered(content: ReactNode) {
   return { scene: state!.scene, async dispose() { await act(async () => root.unmount()); } };
 }
 
-test.each(CASES)("%s passes the current %s content hash through the real GLTF loader and cache", async (catalogId, name, meshCount) => {
+test.each(CASES)("%s keeps a stable asset path through the real GLTF loader and cache", async (catalogId, name, meshCount) => {
   const path = `/planner-assets/models/${name}.glb`;
   const scene = createReviewScene(catalogId).scene;
   const first = await rendered(<Furniture3D scene={scene} selectionId={null} onSelect={() => {}} />);
@@ -94,7 +93,7 @@ test.each(CASES)("%s passes the current %s content hash through the real GLTF lo
   } finally { await second.dispose(); }
 });
 
-test("the versioned HDR URL still selects RGBELoader and supplies the actual scene environment", async () => {
+test("the stable HDR URL still selects RGBELoader and supplies the actual scene environment", async () => {
   const scene = createReviewScene("bed-120").scene;
   const model = await rendered(<PlannerLighting quality={qualitySettings("low")} scene={scene} />);
   try {
@@ -116,7 +115,7 @@ test("the versioned HDR URL still selects RGBELoader and supplies the actual sce
 test.each([
   ["rug-temu-easy-line-colorblock", colorblockPath],
   ["rug-temu-vintage-cream", vintagePath],
-])("%s reaches ImageLoader with its content hash while texture identity and repeat stay stable", async (materialId, path) => {
+])("%s reaches ImageLoader with a stable path while texture identity and repeat stay stable", async (materialId, path) => {
   const ready: string[] = [];
   const receive = (event: Event) => ready.push((event as CustomEvent<string>).detail);
   window.addEventListener(PLANNER_TEXTURE_READY_EVENT, receive);
@@ -131,7 +130,7 @@ test.each([
   } finally { window.removeEventListener(PLANNER_TEXTURE_READY_EVENT, receive); }
 });
 
-test("manifest textures share one versioned request across different material recipes", () => {
+test("manifest textures share one stable request across different material recipes", () => {
   const sand = getPlannerMaterial("fabric-sand");
   const sage = getPlannerMaterial("fabric-sage");
   expect(sand.map).toBe(sage.map);

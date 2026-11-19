@@ -226,6 +226,12 @@ test("serve-local sperrt private Referenzen auch bei kodierten oder doppelten Pf
   const publicAsset = await requestRaw(port, "/planner-assets/textures/oak%20sample.svg");
   assert.equal(publicAsset.status, 200);
   assert.equal(publicAsset.body, "<svg>public texture</svg>");
+  assert.match(publicAsset.headers["cache-control"] ?? "", /must-revalidate/);
+  assert.match(publicAsset.headers.etag ?? "", /^W\/\"/);
+  const revalidated = await requestRaw(port, "/planner-assets/textures/oak%20sample.svg", {
+    headers: { "If-None-Match": publicAsset.headers.etag },
+  });
+  assert.equal(revalidated.status, 304);
 
   for (const target of [
     "/planner-assets/reference/fixture.txt",

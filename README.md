@@ -139,6 +139,25 @@ Nach einem erfolgreichen Fast-Forward entscheidet `github:sync` anhand der tats�
 
 **GitHub-Branch-Protection:** Für `main` gelten lineare Historie, Schutz gegen Force-Push und Löschung sowie Durchsetzung für Administratoren. PR-Pflicht und Required Status Checks sind nicht eingerichtet.
 
+## Google Cloud Deployment
+
+Die öffentliche Website wird über Google Cloud Build, Artifact Registry und Cloud Run aus dem Branch `main` bereitgestellt. Der Trigger wird in der Google-Cloud-Konsole mit dem Repository `ErpeUser/wohnungsplaner`, dem Branch-Muster `^main$` und `cloudbuild.yaml` eingerichtet. Das Deployment verwendet `europe-west3`, request-basierte Abrechnung, `min=0`, `max=3`, 1 vCPU, 1 GiB RAM, Concurrency 40 und Startup-CPU-Boost.
+
+Vor dem Containerbau vergleicht `scripts/cloudbuild-plan.mjs` den aktuellen Commit mit seinem Vorgänger. Dokumentationsänderungen werden übersprungen. Der Austausch eines bestehenden Modells oder einer bestehenden Textur mit unverändertem Pfad, Asset-Typ, Katalogbezug, Maßstab und Render-Metadaten nutzt `Dockerfile.assets` und aktualisiert nur `public/planner-assets`. Neue Modelle, neue Asset-Pfade, neue Katalogeinträge, Maßänderungen und Änderungen an Anwendung, Server oder Paketkonfiguration verwenden `Dockerfile` und den vollständigen Produktionsbuild.
+
+Die Cloud-Build-Ausgaben liegen bei lokalen Läufen unter `../Wohnungsplaner_Generated/reports/cloudbuild`. Images werden mit dem Commit-SHA und zusätzlich mit `latest` markiert. Ein fehlendes Basis-Image führt automatisch zu einem vollständigen Erstbuild. Für die Einrichtung muss die Google-Cloud-Projekt-ID außerhalb des Repositories konfiguriert werden.
+
+Die einmalige Einrichtung verwendet diese Befehle mit der eigenen Projekt-ID:
+
+```powershell
+gcloud config set project PROJECT_ID
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com
+gcloud artifacts repositories create wohnungsplaner --repository-format=docker --location=europe-west3
+gcloud builds triggers create github --name=wohnungsplaner-main --repo-owner=ErpeUser --repo-name=wohnungsplaner --branch-pattern="^main$" --build-config=cloudbuild.yaml --region=global
+```
+
+Der Cloud-Build-Service-Account benötigt für dieses Projekt Schreibzugriff auf Artifact Registry, Cloud-Run-Deployment-Rechte und die Berechtigung zur Nutzung des Cloud-Run-Service-Accounts. Zugangsschlüssel werden nicht erzeugt; die Verbindung nutzt die Google-Cloud- und GitHub-Integration des Triggers.
+
 **Sicherheitsgrenze:** Lokale Git-Hooks sind nicht serverseitig unveränderlich; bei direkten Pushes läuft GitHub-CI erst nach dem Push. Für eine serverseitig *vor* der Integration verpflichtende Testfreigabe wären GitHub Required Status Checks und im Regelfall ein vorab geprüfter PR erforderlich. Eine solche Umstellung würde den ausdrücklich gewünschten Direkt-`main`-Ablauf ändern und darf deshalb nicht stillschweigend erfolgen. Bereits vorhandene Schutzregeln haben immer Vorrang.
 
 **Git-Sicherung:** Die Verzeichnisse unter `Wohnungsplaner_Generated` sind überwiegend regenerierbar, **ausgenommen potenziell unveröffentlichte Informationen unter `git/repository`** (lokale Commits, Stashes, Reflogs). Das gesamte Generated-Verzeichnis niemals löschen, bevor `git status`, `git log`, sämtliche Referenzen und die Synchronisation mit dem Remote geprüft und gegebenenfalls gesichert wurden. Persönliche Browserdaten, Wohnungspläne und Modelloriginale sind ebenfalls niemals als Cache zu behandeln.

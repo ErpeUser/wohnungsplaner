@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { act, render, screen, waitFor, within } from "@testing-library/react";
@@ -57,8 +56,7 @@ describe("PlannerWorkspace", () => {
     const product = heading.closest("article");
     assert.ok(product);
     const path = "/planner-assets/textures/fabric/temu-vintage-rug-607199740937372.svg";
-    const hash = createHash("sha256").update(readFileSync(`public${path}`)).digest("hex");
-    assert.equal(product.querySelector("img")?.getAttribute("src"), `${path}?v=${hash}`);
+    assert.equal(product.querySelector("img")?.getAttribute("src"), path);
   });
 
   test("lists the measured bathroom and WC rug set with the supplied Temu link", () => {

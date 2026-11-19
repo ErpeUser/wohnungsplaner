@@ -147,7 +147,8 @@ async function readStaticFile(file) {
   if (stat.size > MAX_STATIC_BYTES) {
     throw Object.assign(new Error("Static asset too large"), { statusCode: 413 });
   }
-  return { data: await fs.readFile(file), size: stat.size };
+  const etag = `W/\"${stat.size.toString(16)}-${Math.floor(stat.mtimeMs).toString(16)}\"`;
+  return { data: await fs.readFile(file), size: stat.size, etag };
 }
 
 function fail(res, statusCode, message, extraHeaders = {}) {
@@ -235,8 +236,10 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname.startsWith("/planner-assets/") || url.pathname.startsWith("/room-studies/") || url.pathname.startsWith("/zimmer1-") || url.pathname.startsWith("/vorraum-") || url.pathname === "/og-v2.png" || url.pathname === "/og.png" || url.pathname === "/favicon.svg") {
       const file = safePublicPath(url.pathname);
       if (!file) return fail(res, 400, "Bad public path");
-      const { data, size } = await readStaticFile(file);
-      return res.writeHead(200, { ...securityHeaders, "Content-Type": contentTypes[path.extname(file)] || "application/octet-stream", "Cache-Control": "public, max-age=3600", "Content-Length": size }).end(req.method === "HEAD" ? undefined : data);
+      const { data, size, etag } = await readStaticFile(file);
+      const headers = { ...securityHeaders, "Content-Type": contentTypes[path.extname(file)] || "application/octet-stream", "Cache-Control": "public, max-age=0, must-revalidate", ETag: etag, "Content-Length": size };
+      if (req.headers["if-none-match"] === etag) return res.writeHead(304, headers).end();
+      return res.writeHead(200, headers).end(req.method === "HEAD" ? undefined : data);
     }
     const handler = runtimeHandler ?? await runtimeHandlerPromise;
     if (!handler) {

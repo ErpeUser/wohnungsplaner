@@ -14,15 +14,15 @@ async function expectContentVersion(path: string, sha256: string) {
   assert.equal(sha256, actual, `${path} revision must change with its bytes`);
   const url = new URL(plannerAssetUrl(path), "https://test.invalid");
   assert.equal(url.pathname, path, "Only the request query changes; source paths remain stable");
-  assert.equal(url.search, `?v=${actual}`);
+  assert.equal(url.search, "");
 }
 
-test("all manifest assets use the hash of their current bytes as the loader version", async () => {
+test("all manifest assets keep stable request paths for overlay deployment", async () => {
   assert.equal(PLANNER_ASSET_MANIFEST.assets.length, 11);
   for (const asset of PLANNER_ASSET_MANIFEST.assets) await expectContentVersion(asset.path, asset.sha256);
 });
 
-test("the corrected SVG revisions cannot drift from their actual files", async () => {
+test("the corrected SVG revisions remain aligned with their actual files", async () => {
   assert.deepEqual(Object.keys(assetRevisions).sort(), [
     "/planner-assets/textures/fabric/temu-easy-line-colorblock-rug.svg",
     "/planner-assets/textures/fabric/temu-vintage-rug-607199740937372.svg",

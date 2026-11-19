@@ -42,3 +42,12 @@ test('GitHub sync cannot merge PRs automatically or use a non-FF merge', () => {
   assert.ok(script.includes('post-pull.json'));
   assert.ok(script.includes('desktop-runtime.mjs'));
 });
+
+test('Google Cloud deployment keeps production build decisions explicit', () => {
+  const planner = readFileSync(new URL('../scripts/cloudbuild-plan.mjs', import.meta.url), 'utf8');
+  const config = readFileSync(new URL('../cloudbuild.yaml', import.meta.url), 'utf8');
+  assert.ok(planner.includes("mode: 'assets'"));
+  assert.ok(planner.includes("mode: 'full'"));
+  assert.match(config, /Dockerfile\.assets/);
+  assert.match(config, /Dockerfile/);
+});

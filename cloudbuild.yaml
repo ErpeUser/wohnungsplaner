@@ -1,0 +1,82 @@
+substitutions:
+  _REGION: europe-west3
+  _REPOSITORY: wohnungsplaner
+  _SERVICE: wohnungsplaner
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+timeout: 1200s
+
+steps:
+  - id: plan-deployment
+    name: node:24-bookworm
+    entrypoint: bash
+    args:
+      - -ceu
+      - |
+        mkdir -p /workspace/Wohnungsplaner_Generated/reports/cloudbuild
+        node scripts/cloudbuild-plan.mjs "${COMMIT_SHA}" /workspace/deploy-plan.json
+        cp /workspace/deploy-plan.json /workspace/Wohnungsplaner_Generated/reports/cloudbuild/plan.json
+
+  - id: build-image
+    waitFor: [plan-deployment]
+    name: gcr.io/cloud-builders/docker
+    entrypoint: bash
+    args:
+      - -ceu
+      - |
+        mode=$(sed -n 's/.*"mode"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' /workspace/deploy-plan.json)
+        image="${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/${_SERVICE}"
+        if [ "$mode" = "skip" ]; then
+          echo "No production deployment required"
+          exit 0
+        fi
+        if [ "$mode" = "assets" ] && docker pull "$image:latest"; then
+          docker build --file Dockerfile.assets --build-arg "BASE_IMAGE=$image:latest" \
+            --tag "$image:${COMMIT_SHA}" --tag "$image:latest" .
+        else
+          docker build --file Dockerfile --tag "$image:${COMMIT_SHA}" --tag "$image:latest" .
+        fi
+        docker push "$image:${COMMIT_SHA}"
+        docker push "$image:latest"
+
+  - id: validate-assets
+    waitFor: [plan-deployment]
+    name: node:24-bookworm
+    entrypoint: bash
+    args:
+      - -ceu
+      - |
+        mode=$(sed -n 's/.*"mode"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' /workspace/deploy-plan.json)
+        if [ "$mode" = "assets" ] || [ "$mode" = "full" ]; then
+          npm run assets:check
+        else
+          echo "Asset validation skipped"
+        fi
+
+  - id: deploy-cloud-run
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -ceu
+      - |
+        mode=$(sed -n 's/.*"mode"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' /workspace/deploy-plan.json)
+        if [ "$mode" = "skip" ]; then
+          echo "Deployment skipped"
+          exit 0
+        fi
+        image="${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/${_SERVICE}:${COMMIT_SHA}"
+        gcloud run deploy "${_SERVICE}" \
+          --image "$image" \
+          --region "${_REGION}" \
+          --platform managed \
+          --allow-unauthenticated \
+          --port 8080 \
+          --cpu 1 \
+          --memory 1Gi \
+          --concurrency 40 \
+          --min 0 \
+          --max 3 \
+          --cpu-boost \
+          --set-env-vars HOST=0.0.0.0

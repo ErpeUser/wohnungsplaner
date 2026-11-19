@@ -1,6 +1,4 @@
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
@@ -248,8 +246,7 @@ describe("furniture interactions", () => {
         "rug-living-concept-240x240",
       ]) expect(screen.getByTestId(`plan-graphic-${id}`)).toBeTruthy();
       const rugPath = "/planner-assets/textures/fabric/temu-vintage-rug-607199740937372.svg";
-      const hash = createHash("sha256").update(readFileSync(`public${rugPath}`)).digest("hex");
-      expect(imageSources.mock.calls.map(([src]) => src).filter((src) => src.startsWith(rugPath))).toEqual([`${rugPath}?v=${hash}`]);
+      expect(imageSources.mock.calls.map(([src]) => src).filter((src) => src.startsWith(rugPath))).toEqual([rugPath]);
     } finally { imageSources.mockRestore(); }
   });
 
