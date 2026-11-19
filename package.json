@@ -70,7 +70,8 @@
     "github:setup": "node scripts/github-workflow.mjs setup",
     "github:status": "node scripts/github-workflow.mjs status",
     "github:sync": "node scripts/github-workflow.mjs sync",
-    "github:reconcile": "node scripts/github-workflow.mjs reconcile"
+    "github:reconcile": "node scripts/github-workflow.mjs reconcile",
+    "github:audit": "node scripts/github-workflow.mjs reconcile"
   },
   "dependencies": {
     "@react-three/drei": "10.7.9",

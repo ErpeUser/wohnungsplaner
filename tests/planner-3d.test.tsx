@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { DataTexture, NoColorSpace, SRGBColorSpace, Texture, TextureLoader } from "three";
+import { DataTexture, NoColorSpace, PerspectiveCamera, SRGBColorSpace, Texture, TextureLoader } from "three";
 import { describe, expect, test, vi } from "vitest";
 
 vi.mock("@react-three/fiber", () => ({
@@ -10,6 +10,26 @@ vi.mock("@react-three/fiber", () => ({
     <div data-testid="r3f-canvas" data-frameloop={String(frameloop)} data-dpr={JSON.stringify(dpr)} data-shadows={String(shadows)}>
       <canvas />
     </div>
+  ),
+  useFrame: vi.fn(),
+  useThree: () => ({
+    camera: new PerspectiveCamera(),
+    gl: { domElement: document.createElement("canvas") },
+    invalidate: vi.fn(),
+  }),
+}));
+
+vi.mock("@react-three/drei", () => ({
+  OrbitControls: (props: { enableRotate?: boolean; enablePan?: boolean; enableZoom?: boolean }) => (
+    <div
+      data-testid="mock-orbit-controls"
+      data-enable-rotate={String(props.enableRotate)}
+      data-enable-pan={String(props.enablePan)}
+      data-enable-zoom={String(props.enableZoom)}
+    />
+  ),
+  PointerLockControls: (props: { domElement?: HTMLElement }) => (
+    <div data-testid="mock-pointer-lock-controls" data-has-dom-element={String(Boolean(props.domElement))} />
   ),
 }));
 
@@ -23,7 +43,7 @@ vi.mock("../app/planner/scene-3d/lighting.tsx", () => ({
 
 import { DEFAULT_APARTMENT_DOCUMENT } from "../app/planner/domain/apartment-v3.ts";
 import { doorPose } from "../app/planner/domain/geometry.ts";
-import { createOrbitPose, orbitFovForRoom } from "../app/planner/scene-3d/camera-controller.tsx";
+import { CameraController, createOrbitPose, orbitFovForRoom } from "../app/planner/scene-3d/camera-controller.tsx";
 import { Planner3D } from "../app/planner/scene-3d/planner-3d.tsx";
 import { getPlannerMaterial, PLANNER_TEXTURE_READY_EVENT } from "../app/planner/scene-3d/materials.ts";
 import { qualitySettings, detectThreeSupport } from "../app/planner/scene-3d/quality.ts";
@@ -31,6 +51,41 @@ import { createSceneModel, furnitureRenderTransform, furnitureWorldPosition } fr
 import * as sceneModelModule from "../app/planner/scene-3d/scene-model.ts";
 
 describe("createSceneModel", () => {
+  test("binds pointer lock to the rendered canvas", () => {
+    const scene = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, null);
+
+    render(
+      <CameraController
+        document={DEFAULT_APARTMENT_DOCUMENT}
+        scene={scene}
+        mode="walk"
+        activeRoomId="wohnkueche"
+        reducedMotion={false}
+      />,
+    );
+
+    expect(screen.getByTestId("mock-pointer-lock-controls").getAttribute("data-has-dom-element")).toBe("true");
+  });
+
+  test("keeps the overview camera still for direct mouse navigation", () => {
+    const scene = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, null);
+
+    render(
+      <CameraController
+        document={DEFAULT_APARTMENT_DOCUMENT}
+        scene={scene}
+        mode="orbit"
+        activeRoomId={null}
+        reducedMotion={false}
+      />,
+    );
+
+    const controls = screen.getByTestId("mock-orbit-controls");
+    expect(controls.getAttribute("data-enable-rotate")).toBe("false");
+    expect(controls.getAttribute("data-enable-pan")).toBe("false");
+    expect(controls.getAttribute("data-enable-zoom")).toBe("false");
+  });
+
   test("uses deterministic data textures for light bathroom tiles", () => {
     const square = getPlannerMaterial("tile-white-square");
     const rectangular = getPlannerMaterial("tile-white-rect");

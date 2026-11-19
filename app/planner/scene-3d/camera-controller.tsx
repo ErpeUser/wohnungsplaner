@@ -374,17 +374,11 @@ export function CameraController({
     <OrbitControls
       makeDefault
       target={orbitTarget}
-      /*
-       * Keep the interaction contract explicit instead of relying on Drei's
-       * browser-dependent defaults.  In particular, some touchpads report a
-       * middle-button gesture as a secondary pointer and the old defaults
-       * made the canvas appear frozen in embedded Chromium views.  Left drag
-       * always orbits, the wheel zooms, and the secondary button pans.
-       */
+      /* Keep the overview camera static. Zoom and reset stay available through the overlay buttons. */
       enabled
-      enableRotate
-      enableZoom
-      enablePan
+      enableRotate={false}
+      enableZoom={false}
+      enablePan={false}
       screenSpacePanning
       zoomToCursor
       mouseButtons={{ LEFT: MOUSE.ROTATE, MIDDLE: MOUSE.DOLLY, RIGHT: MOUSE.PAN }}
@@ -425,7 +419,7 @@ function SafePointerLockControls() {
   // Drei still owns camera rotation after a successful lock. The deliberately
   // empty selector prevents its internal click handler from dropping the
   // requestPointerLock() promise, which caused the Chromium rejection overlay.
-  return <PointerLockControls makeDefault selector="#planner-pointer-lock-trigger-disabled" />;
+  return <PointerLockControls makeDefault domElement={gl.domElement} selector="#planner-pointer-lock-trigger-disabled" />;
 }
 
 function findValidGridPoint(document: PlannerDocumentV3, polygon: Point2[], activeRoomId: string | null) {

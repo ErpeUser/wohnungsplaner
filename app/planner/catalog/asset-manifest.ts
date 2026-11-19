@@ -53,10 +53,6 @@ export function resolveFurnitureAsset(
   return { kind: "gltf", itemId: item.id, asset };
 }
 
-export function plannerAsset(assetId: string) {
-  return PLANNER_ASSET_MANIFEST.assets.find((asset) => asset.id === assetId);
-}
-
 export async function verifyPlannerAssetBytes(asset: PlannerAsset, bytes: Uint8Array) {
   if (bytes.byteLength !== asset.byteLength) return false;
   const digestBuffer = bytes.buffer instanceof ArrayBuffer

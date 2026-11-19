@@ -95,8 +95,20 @@ function reviewPrs(){
     '--json','number,title,isDraft,mergeable,headRefName,baseRefName,reviewDecision,statusCheckRollup');
   return JSON.parse(json||'[]');
 }
+function reviewBranches(){
+  const raw=gh('api',`repos/${repo}/branches?per_page=100`,'--paginate','--slurp');
+  const pages=JSON.parse(raw||'[]');
+  const entries=Array.isArray(pages[0])?pages.flat():pages;
+  return entries.map(branch=>({name:branch.name,protected:Boolean(branch.protected),sha:branch.commit?.sha??null}));
+}
+function reviewRepository(){
+  const data=JSON.parse(gh('api',`repos/${repo}`));
+  return {visibility:data.visibility,defaultBranch:data.default_branch,archived:Boolean(data.archived),htmlUrl:data.html_url};
+}
 function safeReconcile(){
   const prs=reviewPrs();
+  const branches=reviewBranches();
+  const repository=reviewRepository();
   const assessments=[];
   for(const pr of prs){
     const checks=pr.statusCheckRollup??[];
@@ -111,14 +123,21 @@ function safeReconcile(){
       checksTotal:checks.length,checksPass:passing,technicallyReady,
       contentReviewRequired:true});
   }
-  return snapshot('reconcile',{openCount:prs.length,assessments,
+  return snapshot('reconcile',{repository,openCount:prs.length,branches,assessments,
     merged:[],note:'Audit only. PR merges require a human relevance review and explicit GitHub action.'});
 }
 try{
   if(apply)throw Error('--apply is disabled: review PR content and merge manually via GitHub after checks.');
   const metadata=setup();
   if(command==='setup')snapshot('setup',{metadata});
-  else if(command==='status')snapshot('status',{metadata,openPrCount:reviewPrs().length});
+  else if(command==='status'){
+    const prs=reviewPrs();
+    const branches=reviewBranches();
+    const repository=reviewRepository();
+    snapshot('status',{metadata,repository,openPrCount:prs.length,branches,
+      nonMainBranches:branches.filter(branch=>branch.name!=='main').map(branch=>branch.name),
+      openPullRequests:prs.map(pr=>({number:pr.number,title:pr.title,head:pr.headRefName,base:pr.baseRefName}))});
+  }
   else if(command==='sync'){
     const changed=dirtyFiles();
     if(changed.length){
@@ -126,6 +145,9 @@ try{
       process.exitCode=2;
     } else {
       const reconciliation=safeReconcile();
+      if(reconciliation.openCount>0||reconciliation.branches.some(branch=>branch.name!=='main')){
+        throw Error('Remote branches or open pull requests require explicit audit before sync.');
+      }
       git('fetch','--prune','origin','main');
       if(dirtyFiles().length)throw Error('Working tree changed during fetch; refusing fast-forward.');
       const ancestor=git('merge-base','HEAD','refs/remotes/origin/main');

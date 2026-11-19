@@ -113,7 +113,7 @@ Für den abschließenden kombinierten Schnellcheck zusätzlich `npm run quality:
 
 ## Git, GitHub und Codex: dauerhafter Arbeitsablauf
 
-**Kanonisch ist ausschließlich dieses Repository auf dem Integrationszweig `main`.** Vor jeder Arbeit `AGENTS.md` lesen; Änderungen bleiben in den vorhandenen Quellen. Keine Kopien, Junctions, Symlinks, Worktrees, ungefragten Branches/PRs oder zusätzlichen Pipelines anlegen.
+**Kanonisch ist ausschließlich das öffentliche Repository `ErpeUser/wohnungsplaner` auf dem Integrationszweig `main`.** Vor jeder Arbeit `AGENTS.md` lesen; Änderungen bleiben in den vorhandenen Quellen. Keine Kopien, Junctions, Symlinks, Worktrees, Nebenbranches oder Pull Requests anlegen. Generated-Arbeitsdaten und private Quellen bleiben außerhalb des öffentlichen Repositories.
 
 ```powershell
 # Einstieg – erst Zustand prüfen, nie vorhandene Änderungen überschreiben

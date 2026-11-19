@@ -1,5 +1,8 @@
 # The complete generated workspace is disposable, never source-controlled.
 /Wohnungsplaner_Generated/
+# Defensive match for an accidentally nested generated workspace.
+Wohnungsplaner_Generated/
+**/Wohnungsplaner_Generated/
 # Defensive ignores for any temporary tool outputs; no junctions or links are used.
 /graphify-out/
 /build/
@@ -25,3 +28,9 @@
 *.lnk
 .env*
 !.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+secrets*.json
