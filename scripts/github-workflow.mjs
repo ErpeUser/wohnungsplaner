@@ -4,6 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, lstatSync, mkdirSync, readFileSync, writeFileSync, unlinkSync } from 'node:fs';
 import path from 'node:path';
 import { projectRoot, generatedRoot, prepareWorkspace } from './workspace-setup.mjs';
+import { classifyChangedFiles } from './post-pull-decision.mjs';
 
 const repo='ErpeUser/wohnungsplaner';
 const url='https://github.com/ErpeUser/wohnungsplaner.git';
@@ -27,6 +28,7 @@ function run(bin,args,allowFailure=false){
 }
 const git=(...a)=>run('git.exe',a);
 const gh=(...a)=>run('gh.exe',a);
+const npm=(...a)=>run(process.platform==='win32'?'npm.cmd':'npm',a);
 function ensureMetadata() {
   if(existsSync(gitPointer)&&lstatSync(gitPointer).isSymbolicLink())throw Error('Git metadata cannot be an NTFS link');
   if(existsSync(gitPointer)){
@@ -126,6 +128,53 @@ function safeReconcile(){
   return snapshot('reconcile',{repository,openCount:prs.length,branches,assessments,
     merged:[],note:'Audit only. PR merges require a human relevance review and explicit GitHub action.'});
 }
+function writePostPullReport(report){
+  writeFileSync(path.join(reportDir,'post-pull.json'),JSON.stringify(report,null,2)+'\n');
+}
+function runPostPullActions(previousCommit,currentCommit,changedFiles){
+  const decision=classifyChangedFiles(changedFiles);
+  const report={at:new Date().toISOString(),action:'post-pull',previousCommit,currentCommit,
+    ...decision,status:'running',results:[],generatedRoot:'../Wohnungsplaner_Generated',
+    desktopArtifacts:'../Wohnungsplaner_Generated/desktop',
+    extensionNote:decision.extensionRefreshRequired
+      ? 'Extension-Dateien erkannt. Es gibt derzeit kein separates Extension-Paket oder Generator-Skript im Repository. Der Build wurde ausgeführt und die Extension-Änderung bleibt zur inhaltlichen Prüfung markiert.'
+      : null};
+  writePostPullReport(report);
+  try{
+    if(decision.buildRequired){
+      npm('run','build');
+      report.results.push({action:'build',status:'passed'});
+    }
+    if(decision.desktopAssetsRequired){
+      run('powershell.exe',['-NoLogo','-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass',
+        '-File',path.join(projectRoot,'scripts','refresh-desktop-assets.ps1')]);
+      report.results.push({action:'desktop-assets',status:'passed',destination:'../Wohnungsplaner_Generated/desktop'});
+    }
+    if(decision.browserSmokeRequired){
+      npm('run','test:browser');
+      report.results.push({action:'browser-smoke',status:'passed'});
+    }
+    if(decision.extensionRefreshRequired){
+      report.results.push({action:'extension-refresh',status:'review-required',
+        note:report.extensionNote});
+    }
+    if(decision.desktopRunRequired){
+      run(process.execPath,[path.join('scripts','desktop-runtime.mjs'),'stop']);
+      run(process.execPath,[path.join('scripts','desktop-runtime.mjs'),'start']);
+      report.results.push({action:'desktop-update-and-run',status:'passed',url:'http://127.0.0.1:3001/'});
+    }
+    report.status='completed';
+    report.completedAt=new Date().toISOString();
+    writePostPullReport(report);
+    return report;
+  }catch(error){
+    report.status='failed';
+    report.error=String(error?.message??error);
+    report.failedAt=new Date().toISOString();
+    writePostPullReport(report);
+    throw error;
+  }
+}
 try{
   if(apply)throw Error('--apply is disabled: review PR content and merge manually via GitHub after checks.');
   const metadata=setup();
@@ -153,9 +202,14 @@ try{
       const ancestor=git('merge-base','HEAD','refs/remotes/origin/main');
       const local=git('rev-parse','HEAD');
       if(ancestor!==local)throw Error('Remote history diverges. Manual conflict review required.');
+      const previousCommit=local;
       git('merge','--ff-only','refs/remotes/origin/main');
+      const currentCommit=git('rev-parse','HEAD');
+      const changedFiles=currentCommit===previousCommit?[]:git('diff','--name-only',`${previousCommit}..${currentCommit}`)
+        .split(/\r?\n/).filter(Boolean);
+      const postPull=runPostPullActions(previousCommit,currentCommit,changedFiles);
       snapshot('sync-success',{mergedPrs:[],
-        assessedPrs:reconciliation.assessments});
+        assessedPrs:reconciliation.assessments,postPull});
     }
   }else if(command==='reconcile')safeReconcile();
   else throw Error('Commands: setup | status | sync | reconcile (audit only)');

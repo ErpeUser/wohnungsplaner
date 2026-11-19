@@ -24,6 +24,13 @@ test('the real command launcher opens the tray directly without a Windows shortc
   assert.doesNotMatch(content,/[.]lnk|install-desktop[.]ps1/);
 });
 
+test('desktop refresh regenerates only disposable tray assets', () => {
+  const refresh=readFileSync(path.join(projectRoot,'scripts','refresh-desktop-assets.ps1'),'utf8');
+  assert.match(refresh,/Wohnungsplaner_Generated[\\/]desktop/);
+  assert.match(refresh,/New-PlannerIcon/);
+  assert.doesNotMatch(refresh,/[.]lnk|[.]exe|Start-Process/);
+});
+
 test('a stale lock belonging to another live process is safely recovered', async t => {
   const folder=mkdtempSync(path.join(generatedRoot,'tmp','planner-lock-'));
   t.after(()=>rmSync(folder,{recursive:true,force:true}));

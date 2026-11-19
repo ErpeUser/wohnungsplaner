@@ -38,4 +38,7 @@ test('GitHub sync cannot merge PRs automatically or use a non-FF merge', () => {
   assert.ok(script.includes('--apply is disabled'));
   assert.ok(script.includes('reviewBranches'));
   assert.ok(script.includes('Remote branches or open pull requests require explicit audit before sync.'));
+  assert.ok(script.includes('runPostPullActions'));
+  assert.ok(script.includes('post-pull.json'));
+  assert.ok(script.includes('desktop-runtime.mjs'));
 });

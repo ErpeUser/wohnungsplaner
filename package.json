@@ -61,6 +61,7 @@
     "visual:models": "node scripts/workspace-exec.mjs node scripts/visual-run.mjs models",
     "visual:check": "node scripts/workspace-exec.mjs node scripts/visual-run.mjs all",
     "dev:review": "node scripts/workspace-exec.mjs node scripts/visual-dev.mjs",
+    "desktop:refresh": "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File scripts/refresh-desktop-assets.ps1",
     "code:audit": "node scripts/code-audit.mjs",
     "security:prod": "node scripts/security-audit.mjs",
     "quality:check": "npm run git:policy && npm run workspace:test && npm run workspace:inventory && npm run code:audit && npm run security:prod && npm run privacy:check:strict",

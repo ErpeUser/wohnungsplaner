@@ -43,11 +43,12 @@ const knipConfig=path.join(toolsRoot,'knip.generated.json');
 writeFileSync(knipConfig,JSON.stringify({
   entry:[
     'app/page.tsx','app/layout.tsx','app/dev/**/*.{ts,tsx}',
-    'scripts/desktop-runtime.mjs','scripts/visual-run.mjs','scripts/workspace-setup.mjs',
+    'scripts/desktop-runtime.mjs','scripts/github-workflow.mjs','scripts/post-pull-decision.mjs',
+    'scripts/visual-run.mjs','scripts/workspace-setup.mjs',
     'scripts/security-audit.mjs','scripts/workspace-inventory.mjs','scripts/workspace-exec.mjs',
     // Loaded by NODE_OPTIONS and Playwright webServer: dynamic, but genuinely in use.
     'scripts/resolve-dependencies.mjs','scripts/visual-server.mjs',
-    'scripts/check-*.mjs','scripts/launch-desktop.ps1',
+    'scripts/check-*.mjs','scripts/launch-desktop.ps1','scripts/refresh-desktop-assets.ps1',
     'scripts/crawl-chair-sources.mjs','scripts/crawl-table-sources.mjs',
     'scripts/generate-planner-assets.mjs','scripts/prepare-planner-asset.mjs',
     'scripts/visual-cloud-preflight.mjs','scripts/visual-dev.mjs',
