@@ -29,6 +29,7 @@ for asset in manifest["assets"]:
     signed = json.loads(run([
         "gcloud", "storage", "sign-url", destination,
         "--duration=1h",
+        "--region=europe-west3",
         f"--impersonate-service-account={signer}",
         "--format=json",
     ]))
