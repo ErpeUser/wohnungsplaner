@@ -78,7 +78,7 @@ steps:
         project_number=$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')
         export PLANNER_LIVE_ASSET_BUCKET="${PROJECT_ID}-wohnungsplaner-assets"
         export PLANNER_LIVE_ASSET_SIGNER="${project_number}-compute@developer.gserviceaccount.com"
-        python3 scripts/publish-live-assets.py
+        /google-cloud-sdk/platform/bundledpythonunix/bin/python3 scripts/publish-live-assets.py
 
   - id: deploy-cloud-run
     name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
