@@ -87,7 +87,7 @@ const sourceOpenings: LegacyOpening[] = [
 
 const openings: PlannerOpening[] = sourceOpenings.map((source) => {
   const result = toPlannerOpening(source);
-  return result.id === "hall-bath-door" ? { ...result, visualOpenFraction: 0.5 } : result;
+  return result.id === "hall-bath-door" ? { ...result, visualOpenFraction: 1 } : result;
 });
 
 const defaultOpenDoorIds = new Set<string>(["hall-bath-door"]);
@@ -201,7 +201,7 @@ const builtIns: PlannerBuiltIn[] = [
   builtIn("z1-vanity-shelf-side-lower", "Eck-Wandregal Natur-Eiche · ca. 32 × 16 × 4 cm", "zimmer1", "storage", "zimmer1-desk-shelf-side-lower", 3.475, 0.84, 0.32, 0.16, 0.04, 90, "oak-light", 1.17, assumptionMetadata("Herstellerneutrale Wunschplanung: bewusst etwas kürzer und tiefer versetzt, damit die Ecke locker und nicht wie ein starres Regalsystem wirkt.")),
   builtIn("z1-entry-niche", "Schmale beleuchtete Eiche-Nische neben dem Schrank", "zimmer1", "storage", "zimmer1-entry-niche", 2.37, 3.255, 0.22, 0.13, 1.88, 180, "oak-light", 0.08, assumptionMetadata("Nur 22 cm breit und 13 cm tief, damit der Zugang frei bleibt; drei flache Ablagen und verdeckte warmweiße LED-Linie.")),
   builtIn("z1-wardrobe-top-decor", "Geflochtene Aufbewahrungsboxen auf dem Schrank", "zimmer1", "storage", "zimmer1-wardrobe-top-decor", 1.125, 3.02, 1.46, 0.42, 0.25, 180, "fabric-taupe", 2.2, assumptionMetadata("Drei niedrige, helle Flechtboxen nutzen die sichtbare Zone über dem Schrank; Gesamthöhe bleibt unter der 2,56-m-Decke.")),
-  builtIn("z1-nightstand-decor", "Kompakte Deko auf dem Nachttisch", "zimmer1", "other", "zimmer1-nightstand-decor", 0.22, 1.69, 0.3, 0.18, 0.22, 270, "ceramic-beige", 0.61, assumptionMetadata("Kleine warme Kugelleuchte und schmales Tablett; keine weiteren Objekte, damit Ladestation und Steckdosen nutzbar bleiben.")),
+  builtIn("z1-nightstand-decor", "Kompakte Deko auf dem Nachttisch", "zimmer1", "other", "zimmer1-nightstand-decor", 0.22, 1.69, 0.3, 0.18, 0.22, 270, "ceramic-beige", 0.61, assumptionMetadata("Schmales Tablett als einzige Deko; die integrierte Nachttischbeleuchtung bleibt frei und wird nicht durch eine zusätzliche Lampe ergänzt.")),
   builtIn(
     "hall-wall-decor",
     "Vorraum-Deko: größeres Bild und rundes Wandpflanzgefäß",

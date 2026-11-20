@@ -211,10 +211,15 @@ export function CameraController({
   const keys = useRef(new Set<string>());
   const walkPose = useMemo(
     () => createWalkStartPose(document, scene, activeRoomId),
-    [activeRoomId, document, scene],
+    // Door toggles replace the document object but must not reset a walking
+    // camera. The room selection is the intentional start-pose boundary.
+    [activeRoomId],
   );
   const [sceneCenterX, sceneCenterY, sceneCenterZ] = scene.center;
-  const orbitPose = useMemo(() => createOrbitPose(scene, activeRoomId), [activeRoomId, scene]);
+  const orbitPose = useMemo(
+    () => createOrbitPose(scene, activeRoomId),
+    [activeRoomId, sceneCenterX, sceneCenterY, sceneCenterZ, scene.bounds.maxX, scene.bounds.minX, scene.bounds.maxZ, scene.bounds.minZ],
+  );
   const orbitTarget = useMemo<[number, number, number]>(
     () => orbitPose.target,
     [orbitPose],
@@ -374,9 +379,9 @@ export function CameraController({
     <OrbitControls
       makeDefault
       target={orbitTarget}
-      /* Keep the overview camera static. Zoom and reset stay available through the overlay buttons. */
+      /* Dragging the overview remains available while zoom and reset stay in the overlay. */
       enabled
-      enableRotate={false}
+      enableRotate
       enableZoom={false}
       enablePan={false}
       screenSpacePanning

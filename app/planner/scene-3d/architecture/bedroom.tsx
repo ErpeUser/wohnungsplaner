@@ -317,11 +317,7 @@ export function Zimmer1NightstandDecor({ item }: { item: SceneObject<PlannerBuil
   return (
     <group>
       <RoundedBox args={[width * 0.42, 0.025, depth * 0.72]} radius={0.018} smoothness={4} position={[width * 0.2, -height / 2 + 0.018, 0]} castShadow><primitive object={getPlannerMaterial("oak-light")} attach="material" /></RoundedBox>
-      <mesh position={[-width * 0.2, -height * 0.18, 0]} scale={[0.055, height * 0.36, 0.055]} geometry={SHARED_CYLINDER} castShadow><primitive object={getPlannerMaterial("metal-satin")} attach="material" /></mesh>
-      <mesh position={[-width * 0.2, height * 0.2, 0]} scale={[0.14, 0.14, 0.14]} geometry={SHARED_SPHERE} castShadow>
-        <meshStandardMaterial color="#f3e4c8" emissive="#ffd49a" emissiveIntensity={0.78} roughness={0.56} />
-      </mesh>
-      <pointLight position={[-width * 0.2, height * 0.25, depth * 0.18]} color="#ffd5a0" intensity={0.18} distance={1.05} decay={2} />
+
     </group>
   );
 }

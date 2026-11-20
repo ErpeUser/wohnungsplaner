@@ -67,7 +67,7 @@ describe("createSceneModel", () => {
     expect(screen.getByTestId("mock-pointer-lock-controls").getAttribute("data-has-dom-element")).toBe("true");
   });
 
-  test("keeps the overview camera still for direct mouse navigation", () => {
+  test("allows direct mouse rotation in the overview", () => {
     const scene = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, null);
 
     render(
@@ -81,7 +81,7 @@ describe("createSceneModel", () => {
     );
 
     const controls = screen.getByTestId("mock-orbit-controls");
-    expect(controls.getAttribute("data-enable-rotate")).toBe("false");
+    expect(controls.getAttribute("data-enable-rotate")).toBe("true");
     expect(controls.getAttribute("data-enable-pan")).toBe("false");
     expect(controls.getAttribute("data-enable-zoom")).toBe("false");
   });
@@ -232,16 +232,16 @@ describe("createSceneModel", () => {
     expect(orbitFovForRoom("vorraum")).toBeGreaterThan(orbitFovForRoom("wohnkueche"));
   });
 
-  test("shows the hall bathroom door half open without changing its full 90 degree swing", () => {
+  test("shows the hall bathroom door fully open with its 90 degree swing", () => {
     const scene = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, "vorraum");
     const door = scene.doors.find((candidate) => candidate.id === "hall-bath-door");
 
     expect(DEFAULT_APARTMENT_DOCUMENT.doorStates["hall-bath-door"]).toBe("open");
     expect(door?.state).toBe("open");
-    const displayDelta = (door?.displayOpenAngle ?? 0) - (door?.baseAngle ?? 0);
     const fullDelta = (door?.openAngle ?? 0) - (door?.baseAngle ?? 0);
-    expect(Math.abs(Math.atan2(Math.sin(displayDelta), Math.cos(displayDelta)))).toBeCloseTo(Math.PI / 4, 5);
     expect(Math.abs(Math.atan2(Math.sin(fullDelta), Math.cos(fullDelta)))).toBeCloseTo(Math.PI / 2, 5);
+    const displayDelta = (door?.displayOpenAngle ?? 0) - (door?.baseAngle ?? 0);
+    expect(Math.abs(Math.atan2(Math.sin(displayDelta), Math.cos(displayDelta)))).toBeCloseTo(Math.PI / 2, 5);
   });
 
   test("keeps the photographed clock wall visible through the hall glass door", () => {

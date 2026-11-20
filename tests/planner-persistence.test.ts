@@ -299,7 +299,7 @@ test("refreshes an older solid hall-to-living door to the photographed glass doo
   assert.ok(result.warnings.some((warning) => /aktualisiert/i.test(warning)));
 });
 
-test("refreshes an older bathroom door to the requested half-open presentation once", () => {
+test("refreshes an older bathroom door to the requested fully open presentation once", () => {
   const old = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
   const door = old.openings.find((item) => item.id === "hall-bath-door")! as typeof old.openings[number] & { visualOpenFraction?: number };
   delete door.visualOpenFraction;
@@ -309,7 +309,7 @@ test("refreshes an older bathroom door to the requested half-open presentation o
   const result = createLocalStoragePlannerRepository(storage, fixedClock).load();
   const refreshed = result.document.openings.find((item) => item.id === "hall-bath-door") as typeof door;
 
-  assert.equal(refreshed.visualOpenFraction, 0.5);
+  assert.equal(refreshed.visualOpenFraction, 1);
   assert.equal(result.document.doorStates["hall-bath-door"], "open");
   assert.ok(result.warnings.some((warning) => /aktualisiert/i.test(warning)));
 });

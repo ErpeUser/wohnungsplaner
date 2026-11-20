@@ -195,7 +195,7 @@ function CameraOverlay({
   if (mode === "orbit") {
     return (
       <div className="planner-3d__camera planner-3d__camera--orbit" aria-label="3D-Ansicht steuern">
-        <span className="planner-3d__camera-help">Ansicht über Zoom- und Reset-Tasten steuern</span>
+        <span className="planner-3d__camera-help">Mit gedrückter Maustaste drehen · Zoom und Reset über die Tasten</span>
         <button type="button" aria-label="3D verkleinern" onClick={() => dispatchWalkCommand("zoom-out")}>−</button>
         <button type="button" aria-label="3D vergrößern" onClick={() => dispatchWalkCommand("zoom-in")}>+</button>
         <button type="button" aria-label="3D-Ansicht zurücksetzen" onClick={() => dispatchWalkCommand("reset")}>Ansicht zurücksetzen</button>

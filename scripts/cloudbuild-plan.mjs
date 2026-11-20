@@ -78,11 +78,15 @@ export function classifyDeployment({
 }
 
 function git(...args) {
-  return execFileSync('git.exe', args, { cwd: projectRoot, encoding: 'utf8', windowsHide: true }).trim();
+  const executable = process.platform === 'win32' ? 'git.exe' : 'git';
+  return execFileSync(executable, args, { cwd: projectRoot, encoding: 'utf8', windowsHide: true }).trim();
 }
 
 function readGitJson(ref, file) {
-  try { return JSON.parse(execFileSync('git.exe', ['show', `${ref}:${file}`], { cwd: projectRoot, encoding: 'utf8' })); }
+  try {
+    const executable = process.platform === 'win32' ? 'git.exe' : 'git';
+    return JSON.parse(execFileSync(executable, ['show', `${ref}:${file}`], { cwd: projectRoot, encoding: 'utf8' }));
+  }
   catch { return null; }
 }
 
