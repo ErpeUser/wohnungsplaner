@@ -141,7 +141,7 @@ Nach einem erfolgreichen Fast-Forward entscheidet `github:sync` anhand der tats�
 
 ## Google Cloud Deployment
 
-Die öffentliche Website wird über Google Cloud Build, Artifact Registry und Cloud Run aus dem Branch `main` bereitgestellt. Der Trigger wird in der Google-Cloud-Konsole mit dem Repository `ErpeUser/wohnungsplaner`, dem Branch-Muster `^main$` und `cloudbuild.yaml` eingerichtet. Das Deployment verwendet `europe-west3`, request-basierte Abrechnung, `min=0`, `max=3`, 1 vCPU, 1 GiB RAM, Concurrency 40 und Startup-CPU-Boost.
+Die öffentliche Website wird über Google Cloud Build, Artifact Registry und Cloud Run aus dem Branch `main` bereitgestellt. Der Trigger wird in der Google-Cloud-Konsole mit dem Repository `ErpeUser/wohnungsplaner`, dem Branch-Muster `^main$` und `cloudbuild.yaml` eingerichtet. Das Deployment verwendet `europe-west3`, request-basierte Abrechnung, `min=0`, `max=2`, 1 vCPU, 1 GiB RAM, Concurrency 40 und Startup-CPU-Boost.
 
 Vor dem Containerbau vergleicht `scripts/cloudbuild-plan.mjs` den aktuellen Commit mit seinem Vorgänger. Dokumentationsänderungen werden übersprungen. Der Austausch eines bestehenden Modells oder einer bestehenden Textur mit unverändertem Pfad, Asset-Typ, Katalogbezug, Maßstab und Render-Metadaten nutzt `Dockerfile.assets` und aktualisiert nur `public/planner-assets`. Neue Modelle, neue Asset-Pfade, neue Katalogeinträge, Maßänderungen und Änderungen an Anwendung, Server oder Paketkonfiguration verwenden `Dockerfile` und den vollständigen Produktionsbuild.
 

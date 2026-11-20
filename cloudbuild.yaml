@@ -79,6 +79,6 @@ steps:
           --memory 1Gi \
           --concurrency 40 \
           --min 0 \
-          --max 3 \
+          --max 2 \
           --cpu-boost \
           --set-env-vars HOST=0.0.0.0

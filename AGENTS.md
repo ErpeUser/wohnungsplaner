@@ -35,7 +35,7 @@
 - Codex-/GitHub-Automation auf generierte Berichte in `../Wohnungsplaner_Generated/reports/github` begrenzen; keine versteckten PR-Pipelines oder Neben-Workflows im Projekt anlegen.
 - Die Google-Cloud-Produktionsbereitstellung verwendet ausschließlich `cloudbuild.yaml` mit einem Cloud-Build-Trigger für `main`, Artifact Registry und Cloud Run. Die Google-Cloud-Projekt-ID, Billing-Informationen und Zugangsdaten bleiben außerhalb des Repositories.
 - `scripts/cloudbuild-plan.mjs` unterscheidet `skip`, `assets` und `full`. Der Austausch von Bytes eines bestehenden Modells oder einer bestehenden Textur bei unverändertem Asset-Pfad, Katalogbezug, Maßstab und Render-Metadaten verwendet den Asset-Overlay-Container ohne `npm run build`. Neue Asset-Identitäten, neue Katalogbindungen, Maßänderungen und Anwendungs-/Serveränderungen erzwingen den vollständigen Build.
-- Cloud Run startet mit request-basierter Abrechnung, `min=0`, `max=3`, 1 vCPU, 1 GiB RAM, Concurrency 40 und Startup-CPU-Boost. Der Server muss auf `0.0.0.0` und dem injizierten `PORT` lauschen.
+- Cloud Run startet mit request-basierter Abrechnung, `min=0`, `max=2`, 1 vCPU, 1 GiB RAM, Concurrency 40 und Startup-CPU-Boost. Der Server muss auf `0.0.0.0` und dem injizierten `PORT` lauschen.
 - Änderungen erst als abgeschlossen melden, wenn der echte Desktop-Start und 2D/3D-Smoke-Test nach den letzten Änderungen bestehen.
 
 ## Pflichtablauf jeder neuen Codex-/KI-Sitzung
