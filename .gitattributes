@@ -1,7 +1,2 @@
-*.glb binary
-*.hdr binary
-/public/planner-assets/**/*.svg text eol=lf
-/public/planner-assets/**/*.json text eol=lf
-
-# Keep shell hooks runnable after Windows checkouts.
-/scripts/git-hooks/* text eol=lf
+# Planner assets are hashed bytes. Preserve their exact line endings across hosts.
+public/planner-assets/** -text
