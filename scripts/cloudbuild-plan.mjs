@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -90,11 +90,48 @@ function readGitJson(ref, file) {
   catch { return null; }
 }
 
-function main() {
+async function readGithubJson(url) {
+  const response = await fetch(url, {
+    headers: {
+      accept: 'application/vnd.github+json',
+      'user-agent': 'wohnungsplaner-cloudbuild',
+    },
+  });
+  if (!response.ok) throw new Error(`GitHub API ${response.status} for ${url}`);
+  return response.json();
+}
+
+async function classifyFromGithub(commit) {
+  const repository = process.env.DEPLOY_REPOSITORY || 'ErpeUser/wohnungsplaner';
+  const commitInfo = await readGithubJson(`https://api.github.com/repos/${repository}/commits/${commit}`);
+  const parent = commitInfo.parents?.[0]?.sha;
+  const changedFiles = (commitInfo.files ?? []).map((file) => file.filename);
+  if (!parent || !changedFiles.length) throw new Error('GitHub commit history is incomplete');
+  let previousManifest = null;
+  try {
+    const response = await fetch(`https://raw.githubusercontent.com/${repository}/${parent}/public/planner-assets/manifest.json`);
+    if (response.ok) previousManifest = await response.json();
+  } catch {
+    previousManifest = null;
+  }
+  const currentManifest = JSON.parse(readFileSync(path.join(projectRoot, 'public', 'planner-assets', 'manifest.json'), 'utf8'));
+  return {
+    parent,
+    plan: classifyDeployment({
+      changedFiles,
+      previousManifest,
+      currentManifest,
+      previousImageAvailable: process.env.BASE_IMAGE_AVAILABLE !== 'false',
+    }),
+  };
+}
+
+async function main() {
   const commit = process.argv[2] || process.env.COMMIT_SHA || 'HEAD';
   const output = process.argv[3] || path.resolve(projectRoot, '..', 'Wohnungsplaner_Generated', 'reports', 'cloudbuild', 'plan.json');
   const parent = `${commit}^`;
   let plan;
+  let resolvedParent = parent;
   try {
     const changedFiles = git('diff', '--name-only', parent, commit).split(/\r?\n/).filter(Boolean);
     plan = classifyDeployment({
@@ -104,15 +141,27 @@ function main() {
       previousImageAvailable: process.env.BASE_IMAGE_AVAILABLE !== 'false',
     });
   } catch {
-    plan = classifyDeployment({
-      changedFiles: ['__cloudbuild_history_unavailable__'],
-      previousImageAvailable: false,
-    });
-    plan.reason = 'Git history is unavailable in the build workspace. A safe full build is required.';
+    try {
+      const github = await classifyFromGithub(commit);
+      plan = github.plan;
+      resolvedParent = github.parent;
+      plan.reason += ' GitHub commit metadata supplied the parent diff.';
+    } catch {
+      plan = classifyDeployment({
+        changedFiles: ['__cloudbuild_history_unavailable__'],
+        previousImageAvailable: false,
+      });
+      plan.reason = 'Git history and public GitHub commit metadata are unavailable. A safe full build is required.';
+    }
   }
   mkdirSync(path.dirname(output), { recursive: true });
-  writeFileSync(output, JSON.stringify({ ...plan, commit, parent, generatedAt: new Date().toISOString() }, null, 2) + '\n');
+  writeFileSync(output, JSON.stringify({ ...plan, commit, parent: resolvedParent, generatedAt: new Date().toISOString() }, null, 2) + '\n');
   console.log(JSON.stringify(plan));
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}
