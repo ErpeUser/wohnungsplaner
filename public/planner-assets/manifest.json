@@ -4,6 +4,23 @@
   "units": "metres",
   "assets": [
     {
+      "id": "model-chair-live-test-4",
+      "type": "model",
+      "path": "/planner-assets/models/chair-live-test-4.glb",
+      "mediaType": "model/gltf-binary",
+      "license": {
+        "spdx": "MIT",
+        "sourceUrl": "https://github.com/mrdoob/three.js/blob/dev/LICENSE",
+        "note": "Project-authored normalized geometry generated with Three.js primitives."
+      },
+      "sha256": "d98b7de04a3fda832ddedf830818e8394096ea30964e4fd4078e366bfd347040",
+      "byteLength": 130320,
+      "meterScale": 1,
+      "catalogIds": [
+        "chair-office"
+      ]
+    },
+    {
       "id": "model-chair-live-test-3",
       "type": "model",
       "path": "/planner-assets/models/chair-live-test-3.glb",
