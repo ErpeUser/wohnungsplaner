@@ -149,6 +149,8 @@ Vor dem Containerbau vergleicht `scripts/cloudbuild-plan.mjs` den aktuellen Comm
 
 Änderungen ausschließlich an `serve-local.mjs` oder `scripts/resolve-dependencies.mjs` verwenden `Dockerfile.runtime` und ersetzen nur die Produktionsserver-Dateien im bestehenden Image. Der lokale Pre-Push-Hook führt dafür gezielte Servertests aus. Dokumentationsänderungen überspringen den lokalen Build. Gemischte Änderungen bleiben im vollständigen Prüfpfad.
 
+Änderungen ausschließlich unter `public/planner-assets/` verwenden die schnelle `asset-live`-Spur. Cloud Build prüft Manifest und Hashes, legt die Dateien versioniert in einem privaten Cloud-Storage-Bucket ab und aktualisiert den aktiven Manifest-Zeiger mit kurzlebigen signierten URLs. Die PIN-geschützte Cloud-Run-Anwendung lädt dieses Manifest zur Laufzeit. Neue oder ersetzte Modelle und Texturen benötigen dadurch keinen Container-Build.
+
 Die Cloud-Build-Ausgaben liegen bei lokalen Läufen unter `../Wohnungsplaner_Generated/reports/cloudbuild`. Images werden mit dem Commit-SHA und zusätzlich mit `latest` markiert. Ein fehlendes Basis-Image führt automatisch zu einem vollständigen Erstbuild. Für die Einrichtung muss die Google-Cloud-Projekt-ID außerhalb des Repositories konfiguriert werden.
 
 Die einmalige Einrichtung verwendet diese Befehle mit der eigenen Projekt-ID:

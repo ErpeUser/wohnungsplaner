@@ -5,6 +5,8 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 
 import type { PlannerDocumentV3, Point2 } from "../domain/types.ts";
+import { loadPlannerAssetManifest, setPlannerAssetManifest } from "../catalog/asset-manifest.ts";
+import { setPlannerLiveAssetUrls } from "../catalog/asset-url.ts";
 import { PlannerArchitecture } from "./architecture.tsx";
 import { CameraController, createOrbitPose, dispatchWalkCommand, orbitFovForRoom, type CameraMode } from "./camera-controller.tsx";
 import { Furniture3D } from "./furniture.tsx";
@@ -52,6 +54,7 @@ export function Planner3D({
 }: Planner3DProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const [failure, setFailure] = useState<string | null>(null);
+  const [, setLiveAssetVersion] = useState(0);
   const reducedMotion = useReducedMotion();
   const support = useMemo(() => supportOverride ?? detectThreeSupport(), [supportOverride]);
   const tier = useMemo(() => qualityOverride ?? chooseQualityTier(), [qualityOverride]);
@@ -72,6 +75,17 @@ export function Planner3D({
     () => cutawayEnabled ? derivePerspectiveCutaway(scene, orbitCamera, selectionId) : EMPTY_CUTAWAY,
     [cutawayEnabled, orbitCamera, scene, selectionId],
   );
+
+  useEffect(() => {
+    let cancelled = false;
+    void loadPlannerAssetManifest().then((manifest) => {
+      if (cancelled) return;
+      setPlannerAssetManifest(manifest);
+      setPlannerLiveAssetUrls(manifest.assets);
+      setLiveAssetVersion((version) => version + 1);
+    });
+    return () => { cancelled = true; };
+  }, []);
   const updateOrbitCamera = useCallback((next: Point2) => {
     setOrbitCamera((previous) => (
       Math.hypot(next.x - previous.x, next.z - previous.z) < 0.015 ? previous : next

@@ -25,6 +25,7 @@ const sessionCookieName = "__session";
 const pinGateRequired = process.env.PLANNER_PIN_REQUIRED === "1";
 const accessPin = process.env.PLANNER_ACCESS_PIN || "";
 const cookieKey = process.env.PLANNER_COOKIE_KEY || "";
+const liveAssetManifestUrl = process.env.PLANNER_LIVE_ASSET_MANIFEST_URL || "";
 const requestBuckets = new Map();
 const authBuckets = new Map();
 let runtimeHandler;
@@ -248,6 +249,24 @@ async function readStaticFile(file) {
   return { data: await fs.readFile(file), size: stat.size, etag };
 }
 
+async function loadLiveAssetManifest() {
+  if (!liveAssetManifestUrl) return null;
+  const headers = {};
+  if (process.env.K_SERVICE) {
+    const tokenResponse = await fetch("http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token", {
+      headers: { "Metadata-Flavor": "Google" },
+    });
+    if (!tokenResponse.ok) throw new Error(`Metadata token failed: ${tokenResponse.status}`);
+    const token = await tokenResponse.json();
+    headers.Authorization = `Bearer ${token.access_token}`;
+  }
+  const response = await fetch(liveAssetManifestUrl, { headers, cache: "no-store" });
+  if (!response.ok) throw Object.assign(new Error(`Live asset manifest failed: ${response.status}`), { statusCode: response.status });
+  const manifest = await response.json();
+  if (!manifest || !Array.isArray(manifest.assets)) throw new Error("Live asset manifest is invalid");
+  return manifest;
+}
+
 function fail(res, statusCode, message, extraHeaders = {}) {
   res.writeHead(statusCode, {
     ...securityHeaders,
@@ -355,6 +374,17 @@ const server = http.createServer(async (req, res) => {
     }
     if (pinGateRequired && (!accessPin || !cookieKey)) return protectedResponse(req, res, 503);
     if (!hasValidSession(req)) return protectedResponse(req, res);
+    if (url.pathname === "/__codex/live-assets/manifest") {
+      const manifest = await loadLiveAssetManifest();
+      if (!manifest) return fail(res, 404, "Live asset manifest unavailable");
+      const body = JSON.stringify(manifest);
+      return res.writeHead(200, {
+        ...securityHeaders,
+        "Content-Type": "application/json; charset=utf-8",
+        "Cache-Control": "no-store",
+        "Content-Length": Buffer.byteLength(body),
+      }).end(req.method === "HEAD" ? undefined : body);
+    }
     if (url.pathname.startsWith("/assets/") || url.pathname.startsWith("/_next/")) {
       const file = safeClientPath(url.pathname);
       if (!file) return fail(res, 400, "Bad asset path");

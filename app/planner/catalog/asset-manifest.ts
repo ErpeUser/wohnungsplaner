@@ -18,6 +18,7 @@ export type PlannerAsset = {
   byteLength: number;
   meterScale: number;
   catalogIds?: string[];
+  url?: string;
 };
 
 export type PlannerAssetManifest = {
@@ -32,18 +33,36 @@ export type AssetResolution =
   | { kind: "parametric"; itemId: string; fallback: string; reason: "no-model" | "asset-unavailable" };
 
 export const PLANNER_ASSET_MANIFEST = manifestJson as PlannerAssetManifest;
+let activeManifest = PLANNER_ASSET_MANIFEST;
 
-const modelByCatalogId = new Map(
-  PLANNER_ASSET_MANIFEST.assets
-    .filter((asset) => asset.type === "model")
-    .flatMap((asset) => (asset.catalogIds ?? []).map((catalogId) => [catalogId, asset] as const)),
-);
+export function setPlannerAssetManifest(manifest: PlannerAssetManifest) {
+  activeManifest = manifest;
+}
+
+export function getPlannerAssetManifest() {
+  return activeManifest;
+}
+
+export async function loadPlannerAssetManifest(): Promise<PlannerAssetManifest> {
+  try {
+    const response = await fetch("/__codex/live-assets/manifest", { cache: "no-store" });
+    if (!response.ok) return PLANNER_ASSET_MANIFEST;
+    const manifest = await response.json() as PlannerAssetManifest;
+    if (!Array.isArray(manifest.assets)) return PLANNER_ASSET_MANIFEST;
+    return manifest;
+  } catch {
+    return PLANNER_ASSET_MANIFEST;
+  }
+}
 
 export function resolveFurnitureAsset(
   item: FurnitureCatalogItem,
   unavailableAssetIds: ReadonlySet<string> = new Set(),
 ): AssetResolution {
-  const asset = modelByCatalogId.get(item.id);
+  const asset = activeManifest.assets
+    .filter((candidate) => candidate.type === "model")
+    .flatMap((candidate) => (candidate.catalogIds ?? []).map((catalogId) => [catalogId, candidate] as const))
+    .find(([catalogId]) => catalogId === item.id)?.[1];
   if (!asset) {
     return { kind: "parametric", itemId: item.id, fallback: item.fallback3d, reason: "no-model" };
   }

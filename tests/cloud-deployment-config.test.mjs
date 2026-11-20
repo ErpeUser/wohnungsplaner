@@ -43,6 +43,7 @@ test('cloud build config constrains main deployment and instance cost', () => {
   const config = read('cloudbuild.yaml');
   assert.match(config, /cloudbuild-plan\.mjs/);
   assert.match(config, /Dockerfile\.assets/);
+  assert.match(config, /publish-live-assets\.py/);
   assert.match(config, /Dockerfile\.runtime/);
   assert.match(config, /npm run assets:check/);
   assert.match(config, /manual-\$\{BUILD_ID\}/);
@@ -52,4 +53,5 @@ test('cloud build config constrains main deployment and instance cost', () => {
   assert.match(config, /PLANNER_PIN_REQUIRED=1/);
   assert.match(config, /PLANNER_ACCESS_PIN=PLANNER_ACCESS_PIN:latest/);
   assert.match(config, /PLANNER_COOKIE_KEY=PLANNER_COOKIE_KEY:latest/);
+  assert.match(config, /PLANNER_LIVE_ASSET_MANIFEST_URL/);
 });

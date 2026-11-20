@@ -27,7 +27,7 @@ test('skips documentation-only commits', () => {
   assert.equal(plan.requiresAssetCheck, false);
 });
 
-test('uses the asset overlay for replacement bytes with unchanged asset identity', () => {
+test('publishes replacement bytes through the live asset lane', () => {
   const plan = classifyDeployment({
     changedFiles: [
       'public/planner-assets/models/chair.glb',
@@ -37,11 +37,11 @@ test('uses the asset overlay for replacement bytes with unchanged asset identity
     currentManifest: manifest({ sha256: 'new', byteLength: 120 }),
     previousImageAvailable: true,
   });
-  assert.equal(plan.mode, 'assets');
+  assert.equal(plan.mode, 'asset-live');
   assert.equal(plan.requiresAssetCheck, true);
 });
 
-test('requires a full build for a new model identity', () => {
+test('publishes a new model identity through the live asset lane', () => {
   const plan = classifyDeployment({
     changedFiles: [
       'public/planner-assets/models/new-chair.glb',
@@ -62,7 +62,7 @@ test('requires a full build for a new model identity', () => {
     },
     previousImageAvailable: true,
   });
-  assert.equal(plan.mode, 'full');
+  assert.equal(plan.mode, 'asset-live');
 });
 
 test('requires a full build for application or geometry changes', () => {
@@ -76,14 +76,14 @@ test('uses the runtime overlay for server-only changes', () => {
   assert.equal(classifyDeployment({ changedFiles: ['scripts/resolve-dependencies.mjs'] }).mode, 'runtime');
 });
 
-test('falls back to a full build when the asset base image is missing', () => {
+test('publishes assets without depending on a container base image', () => {
   const plan = classifyDeployment({
     changedFiles: ['public/planner-assets/textures/fabric/rug.svg'],
     previousManifest: manifest(),
     currentManifest: manifest(),
     previousImageAvailable: false,
   });
-  assert.equal(plan.mode, 'full');
+  assert.equal(plan.mode, 'asset-live');
 });
 
 test('CLI creates the generated report directory before writing its plan', () => {

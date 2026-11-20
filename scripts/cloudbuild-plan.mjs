@@ -69,10 +69,10 @@ export function classifyDeployment({
     return { mode: 'full', changedFiles: files, reason: 'Application, source, configuration, or deployment files changed.', requiresAssetCheck: true };
   }
   if (files.every(isAssetOnlyFile) && sameAssetIdentity(previousManifest, currentManifest)) {
-    if (!previousImageAvailable) {
-      return { mode: 'full', changedFiles: files, reason: 'Asset base image is unavailable.', requiresAssetCheck: true };
-    }
-    return { mode: 'assets', changedFiles: files, reason: 'Only existing asset bytes or their hashes changed.', requiresAssetCheck: true };
+    return { mode: 'asset-live', changedFiles: files, reason: 'Only existing asset bytes or their hashes changed.', requiresAssetCheck: true };
+  }
+  if (files.every(isAssetOnlyFile)) {
+    return { mode: 'asset-live', changedFiles: files, reason: 'Only planner assets or their manifest changed.', requiresAssetCheck: true };
   }
   return { mode: 'full', changedFiles: files, reason: 'Asset structure or deployment metadata changed.', requiresAssetCheck: true };
 }

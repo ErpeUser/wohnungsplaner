@@ -33,6 +33,10 @@ steps:
           echo "No production deployment required"
           exit 0
         fi
+        if [ "$mode" = "asset-live" ]; then
+          echo "Live asset publication runs in its dedicated step"
+          exit 0
+        fi
         if [ "$mode" = "runtime" ] && docker pull "$image:latest"; then
           docker build --file Dockerfile.runtime --build-arg "BASE_IMAGE=$image:latest" \
             --tag "$image:$tag" --tag "$image:latest" .
@@ -53,11 +57,28 @@ steps:
       - -ceu
       - |
         mode=$(sed -n 's/.*"mode"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' /workspace/deploy-plan.json)
-        if [ "$mode" = "assets" ] || [ "$mode" = "full" ]; then
+        if [ "$mode" = "asset-live" ] || [ "$mode" = "full" ]; then
           npm run assets:check
         else
           echo "Asset validation skipped"
         fi
+
+  - id: publish-live-assets
+    waitFor: [validate-assets]
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -ceu
+      - |
+        mode=$(sed -n 's/.*"mode"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' /workspace/deploy-plan.json)
+        if [ "$mode" != "asset-live" ]; then
+          echo "Live asset publication skipped"
+          exit 0
+        fi
+        project_number=$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')
+        export PLANNER_LIVE_ASSET_BUCKET="${PROJECT_ID}-wohnungsplaner-assets"
+        export PLANNER_LIVE_ASSET_SIGNER="${project_number}-compute@developer.gserviceaccount.com"
+        python3 scripts/publish-live-assets.py
 
   - id: deploy-cloud-run
     name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
@@ -66,7 +87,7 @@ steps:
       - -ceu
       - |
         mode=$(sed -n 's/.*"mode"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' /workspace/deploy-plan.json)
-        if [ "$mode" = "skip" ]; then
+        if [ "$mode" = "skip" ] || [ "$mode" = "asset-live" ]; then
           echo "Deployment skipped"
           exit 0
         fi
@@ -84,5 +105,5 @@ steps:
           --min 0 \
           --max 2 \
           --cpu-boost \
-          --set-env-vars HOST=0.0.0.0,PLANNER_PIN_REQUIRED=1 \
+          --set-env-vars HOST=0.0.0.0,PLANNER_PIN_REQUIRED=1,PLANNER_LIVE_ASSET_MANIFEST_URL=https://storage.googleapis.com/${PROJECT_ID}-wohnungsplaner-assets/current.json \
           --set-secrets PLANNER_ACCESS_PIN=PLANNER_ACCESS_PIN:latest,PLANNER_COOKIE_KEY=PLANNER_COOKIE_KEY:latest
