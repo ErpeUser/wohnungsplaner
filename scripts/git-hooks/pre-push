@@ -2,9 +2,7 @@
 # No branch copies or unreviewed pushes. GitHub independently repeats quality checks.
 set -eu
 cd "$(git rev-parse --show-toplevel)"
-node scripts/git-guard.mjs --pre-push
-npm run workspace:doctor
-npm run build
-npm run validate
-npm run privacy:check:strict
+push_refs=$(cat)
+printf '%s\n' "$push_refs" | node scripts/git-guard.mjs --pre-push
+printf '%s\n' "$push_refs" | node scripts/pre-push-check.mjs
 node scripts/git-guard.mjs --verify

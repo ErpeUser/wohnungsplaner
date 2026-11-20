@@ -12,6 +12,7 @@ const fullPrefixes = [
   'vite.config.ts', 'vitest.config.ts', 'playwright.config.ts', 'tsconfig',
   'Dockerfile', 'cloudbuild.yaml', '.dockerignore', 'AGENTS.md', 'README.md',
 ];
+const runtimeFiles = new Set(['serve-local.mjs', 'scripts/resolve-dependencies.mjs']);
 
 function normalizePath(value) {
   return String(value).trim().replaceAll('\\', '/').replace(/^\.\//, '');
@@ -57,6 +58,12 @@ export function classifyDeployment({
   const files = uniquePaths(changedFiles);
   if (!files.length || files.every(isSkipFile)) {
     return { mode: 'skip', changedFiles: files, reason: 'No production files changed.', requiresAssetCheck: false };
+  }
+  if (files.every((file) => runtimeFiles.has(file))) {
+    if (!previousImageAvailable) {
+      return { mode: 'full', changedFiles: files, reason: 'Runtime base image is unavailable.', requiresAssetCheck: true };
+    }
+    return { mode: 'runtime', changedFiles: files, reason: 'Only the production server runtime changed.', requiresAssetCheck: false };
   }
   if (files.some(isFullFile)) {
     return { mode: 'full', changedFiles: files, reason: 'Application, source, configuration, or deployment files changed.', requiresAssetCheck: true };

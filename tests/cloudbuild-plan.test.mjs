@@ -71,6 +71,11 @@ test('requires a full build for application or geometry changes', () => {
   }
 });
 
+test('uses the runtime overlay for server-only changes', () => {
+  assert.equal(classifyDeployment({ changedFiles: ['serve-local.mjs'] }).mode, 'runtime');
+  assert.equal(classifyDeployment({ changedFiles: ['scripts/resolve-dependencies.mjs'] }).mode, 'runtime');
+});
+
 test('falls back to a full build when the asset base image is missing', () => {
   const plan = classifyDeployment({
     changedFiles: ['public/planner-assets/textures/fabric/rug.svg'],
@@ -89,7 +94,7 @@ test('CLI creates the generated report directory before writing its plan', () =>
       cwd: process.cwd(), encoding: 'utf8', windowsHide: true,
     });
     assert.equal(result.status, 0, result.stderr);
-    assert.equal(JSON.parse(readFileSync(output, 'utf8')).mode, 'full');
+    assert.ok(['full', 'runtime'].includes(JSON.parse(readFileSync(output, 'utf8')).mode));
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }

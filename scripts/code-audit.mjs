@@ -43,7 +43,7 @@ const knipConfig=path.join(toolsRoot,'knip.generated.json');
 writeFileSync(knipConfig,JSON.stringify({
   entry:[
     'app/page.tsx','app/layout.tsx','app/dev/**/*.{ts,tsx}',
-    'scripts/cloudbuild-plan.mjs','scripts/desktop-runtime.mjs','scripts/github-workflow.mjs',
+    'scripts/cloudbuild-plan.mjs','scripts/pre-push-check.mjs','scripts/desktop-runtime.mjs','scripts/github-workflow.mjs',
     'scripts/post-pull-decision.mjs',
     'scripts/visual-run.mjs','scripts/workspace-setup.mjs',
     'scripts/security-audit.mjs','scripts/workspace-inventory.mjs','scripts/workspace-exec.mjs',

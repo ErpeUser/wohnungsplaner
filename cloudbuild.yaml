@@ -33,7 +33,10 @@ steps:
           echo "No production deployment required"
           exit 0
         fi
-        if [ "$mode" = "assets" ] && docker pull "$image:latest"; then
+        if [ "$mode" = "runtime" ] && docker pull "$image:latest"; then
+          docker build --file Dockerfile.runtime --build-arg "BASE_IMAGE=$image:latest" \
+            --tag "$image:$tag" --tag "$image:latest" .
+        elif [ "$mode" = "assets" ] && docker pull "$image:latest"; then
           docker build --file Dockerfile.assets --build-arg "BASE_IMAGE=$image:latest" \
             --tag "$image:$tag" --tag "$image:latest" .
         else

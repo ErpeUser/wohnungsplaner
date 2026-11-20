@@ -21,6 +21,14 @@ test('asset overlay copies only runtime planner assets from an existing image', 
   assert.doesNotMatch(dockerfile, /npm run build/);
 });
 
+test('runtime overlay replaces only the production server files', () => {
+  const dockerfile = read('Dockerfile.runtime');
+  assert.match(dockerfile, /ARG BASE_IMAGE/);
+  assert.match(dockerfile, /serve-local\.mjs/);
+  assert.match(dockerfile, /resolve-dependencies\.mjs/);
+  assert.doesNotMatch(dockerfile, /npm run build/);
+});
+
 test('docker context excludes generated and private local data', () => {
   const ignore = read('.dockerignore');
   for (const entry of ['Wohnungsplaner_Generated/', 'node_modules/', '.env*', '*.pem', '*.key']) {
@@ -32,6 +40,7 @@ test('cloud build config constrains main deployment and instance cost', () => {
   const config = read('cloudbuild.yaml');
   assert.match(config, /cloudbuild-plan\.mjs/);
   assert.match(config, /Dockerfile\.assets/);
+  assert.match(config, /Dockerfile\.runtime/);
   assert.match(config, /npm run assets:check/);
   assert.match(config, /manual-\$\{BUILD_ID\}/);
   assert.match(config, /--min 0/);

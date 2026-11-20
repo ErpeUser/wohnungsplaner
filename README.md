@@ -145,6 +145,8 @@ Die öffentliche Website wird über Google Cloud Build, Artifact Registry und Cl
 
 Vor dem Containerbau vergleicht `scripts/cloudbuild-plan.mjs` den aktuellen Commit mit seinem Vorgänger. Dokumentationsänderungen werden übersprungen. Der Austausch eines bestehenden Modells oder einer bestehenden Textur mit unverändertem Pfad, Asset-Typ, Katalogbezug, Maßstab und Render-Metadaten nutzt `Dockerfile.assets` und aktualisiert nur `public/planner-assets`. Neue Modelle, neue Asset-Pfade, neue Katalogeinträge, Maßänderungen und Änderungen an Anwendung, Server oder Paketkonfiguration verwenden `Dockerfile` und den vollständigen Produktionsbuild.
 
+Änderungen ausschließlich an `serve-local.mjs` oder `scripts/resolve-dependencies.mjs` verwenden `Dockerfile.runtime` und ersetzen nur die Produktionsserver-Dateien im bestehenden Image. Der lokale Pre-Push-Hook führt dafür gezielte Servertests aus. Dokumentationsänderungen überspringen den lokalen Build. Gemischte Änderungen bleiben im vollständigen Prüfpfad.
+
 Die Cloud-Build-Ausgaben liegen bei lokalen Läufen unter `../Wohnungsplaner_Generated/reports/cloudbuild`. Images werden mit dem Commit-SHA und zusätzlich mit `latest` markiert. Ein fehlendes Basis-Image führt automatisch zu einem vollständigen Erstbuild. Für die Einrichtung muss die Google-Cloud-Projekt-ID außerhalb des Repositories konfiguriert werden.
 
 Die einmalige Einrichtung verwendet diese Befehle mit der eigenen Projekt-ID:

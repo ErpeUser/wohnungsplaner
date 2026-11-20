@@ -1,0 +1,5 @@
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+COPY serve-local.mjs /app/wohnungsplaner/serve-local.mjs
+COPY scripts/resolve-dependencies.mjs /app/wohnungsplaner/scripts/resolve-dependencies.mjs

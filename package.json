@@ -41,7 +41,7 @@
     "workspace:reset": "node scripts/workspace-setup.mjs install",
     "workspace:doctor": "node scripts/workspace-setup.mjs doctor",
     "workspace:inventory": "node scripts/workspace-inventory.mjs",
-    "workspace:test": "node scripts/workspace-exec.mjs node --test tests/workspace-layout.test.mjs tests/git-policy.test.mjs tests/post-pull-decision.test.mjs tests/cloudbuild-plan.test.mjs tests/cloud-deployment-config.test.mjs tests/desktop-launcher.test.mjs",
+    "workspace:test": "node scripts/workspace-exec.mjs node --test tests/workspace-layout.test.mjs tests/git-policy.test.mjs tests/post-pull-decision.test.mjs tests/cloudbuild-plan.test.mjs tests/cloud-deployment-config.test.mjs tests/desktop-launcher.test.mjs tests/pre-push-check.test.mjs",
     "workspace:browsers": "node scripts/workspace-setup.mjs browsers",
     "dev": "node scripts/workspace-exec.mjs vinext dev --host 127.0.0.1 --port 3000 --strictPort",
     "build": "node scripts/workspace-exec.mjs vinext build && node sync-client-assets.mjs",
