@@ -16,7 +16,8 @@ WORKDIR /app/wohnungsplaner
 COPY --from=builder /app/wohnungsplaner/serve-local.mjs ./serve-local.mjs
 COPY --from=builder /app/wohnungsplaner/public ./public
 COPY --from=builder /app/wohnungsplaner/scripts/resolve-dependencies.mjs ./scripts/resolve-dependencies.mjs
-COPY --from=builder /app/Wohnungsplaner_Generated /app/Wohnungsplaner_Generated
+COPY --from=builder /app/Wohnungsplaner_Generated/build/dist /app/Wohnungsplaner_Generated/build/dist
+RUN mkdir -p /app/Wohnungsplaner_Generated/dependencies/node_modules
 
 EXPOSE 8080
 CMD ["node", "serve-local.mjs"]

@@ -11,6 +11,9 @@ test('full container builds Node 24 output and starts the Cloud Run server', () 
   assert.match(dockerfile, /HOST=0\.0\.0\.0/);
   assert.match(dockerfile, /PORT=8080/);
   assert.match(dockerfile, /serve-local\.mjs/);
+  assert.match(dockerfile, /Wohnungsplaner_Generated[\\/]build[\\/]dist/);
+  assert.match(dockerfile, /mkdir -p \/app\/Wohnungsplaner_Generated\/dependencies\/node_modules/);
+  assert.doesNotMatch(dockerfile, /COPY --from=builder \/app\/Wohnungsplaner_Generated \/app\/Wohnungsplaner_Generated/);
 });
 
 test('asset overlay copies only runtime planner assets from an existing image', () => {
