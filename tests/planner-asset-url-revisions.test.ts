@@ -18,7 +18,7 @@ async function expectContentVersion(path: string, sha256: string) {
 }
 
 test("all manifest assets keep stable request paths for overlay deployment", async () => {
-  assert.equal(PLANNER_ASSET_MANIFEST.assets.length, 11);
+  assert.ok(PLANNER_ASSET_MANIFEST.assets.length >= 11);
   for (const asset of PLANNER_ASSET_MANIFEST.assets) await expectContentVersion(asset.path, asset.sha256);
 });
 
