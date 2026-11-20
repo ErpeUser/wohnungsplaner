@@ -33,6 +33,7 @@ test('cloud build config constrains main deployment and instance cost', () => {
   assert.match(config, /cloudbuild-plan\.mjs/);
   assert.match(config, /Dockerfile\.assets/);
   assert.match(config, /npm run assets:check/);
+  assert.match(config, /manual-\$\{BUILD_ID\}/);
   assert.match(config, /--min 0/);
   assert.match(config, /--max 3/);
   assert.match(config, /--region "\$\{_REGION\}"/);
