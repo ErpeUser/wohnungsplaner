@@ -57,7 +57,9 @@ steps:
       - -ceu
       - |
         mode=$(sed -n 's/.*"mode"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' /workspace/deploy-plan.json)
-        if [ "$mode" = "asset-live" ] || [ "$mode" = "full" ]; then
+        if [ "$mode" = "asset-live" ]; then
+          node scripts/check-planner-assets.mjs
+        elif [ "$mode" = "full" ]; then
           npm run assets:check
         else
           echo "Asset validation skipped"

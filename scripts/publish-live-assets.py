@@ -2,6 +2,7 @@ import json
 import os
 import pathlib
 import subprocess
+from concurrent.futures import ThreadPoolExecutor
 
 root = pathlib.Path(__file__).resolve().parents[1]
 generated = root.parent / "Wohnungsplaner_Generated" / "reports" / "cloudbuild"
@@ -21,7 +22,7 @@ def run(args):
 
 manifest = json.loads((asset_root / "manifest.json").read_text(encoding="utf-8"))
 assets = []
-for asset in manifest["assets"]:
+def publish_asset(asset):
     relative = asset["path"].removeprefix("/planner-assets/")
     source = asset_root / relative
     destination = f"gs://{bucket}/{release}/{relative}"
@@ -37,7 +38,11 @@ for asset in manifest["assets"]:
     url = entry.get("signed_url") or entry.get("url")
     if not url:
         raise RuntimeError(f"Keine signierte URL für {relative}")
-    assets.append({**asset, "url": url})
+    return {**asset, "url": url}
+
+
+with ThreadPoolExecutor(max_workers=min(8, len(manifest["assets"]))) as executor:
+    assets = list(executor.map(publish_asset, manifest["assets"]))
 
 generated.mkdir(parents=True, exist_ok=True)
 output = generated / "live-manifest.json"
