@@ -225,7 +225,7 @@ function pinPage(errorMessage = "") {
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Wohnungsplaner Zugang</title>
 <style>body{font-family:system-ui,sans-serif;background:#f4f0e9;color:#2b2926;display:grid;place-items:center;min-height:100vh;margin:0}.card{background:#fff;max-width:22rem;width:calc(100% - 2rem);padding:2rem;border-radius:1rem;box-shadow:0 1rem 3rem #2b292626}h1{margin-top:0;font-size:1.4rem}label{display:block;margin:1rem 0 .4rem}input{box-sizing:border-box;width:100%;padding:.75rem;border:1px solid #a9a096;border-radius:.5rem;font-size:1rem}button{margin-top:1rem;width:100%;padding:.75rem;border:0;border-radius:.5rem;background:#3c4b43;color:#fff;font-size:1rem;cursor:pointer}.error{color:#9b2c2c}</style></head>
-<body><main class="card"><h1>Wohnungsplaner Cloud Run</h1><p>Bitte PIN eingeben, um die Website zu öffnen.</p>${message}<form method="post" action="/__codex/auth"><label for="pin">PIN</label><input id="pin" name="pin" type="password" inputmode="numeric" autocomplete="current-password" required autofocus><button type="submit">Öffnen</button></form></main></body></html>`;
+<body><main class="card"><h1>Wohnungsplaner Cloud Run Schnellpfad</h1><p>Bitte PIN eingeben, um die Website zu öffnen.</p>${message}<form method="post" action="/__codex/auth"><label for="pin">PIN</label><input id="pin" name="pin" type="password" inputmode="numeric" autocomplete="current-password" required autofocus><button type="submit">Öffnen</button></form></main></body></html>`;
 }
 
 function protectedResponse(req, res, status = 401, message = "") {
