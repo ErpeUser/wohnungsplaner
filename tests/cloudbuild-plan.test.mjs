@@ -94,7 +94,7 @@ test('CLI creates the generated report directory before writing its plan', () =>
       cwd: process.cwd(), encoding: 'utf8', windowsHide: true,
     });
     assert.equal(result.status, 0, result.stderr);
-    assert.ok(['full', 'runtime'].includes(JSON.parse(readFileSync(output, 'utf8')).mode));
+    assert.ok(['full', 'runtime', 'asset-live'].includes(JSON.parse(readFileSync(output, 'utf8')).mode));
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }
