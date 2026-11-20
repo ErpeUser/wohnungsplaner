@@ -41,7 +41,8 @@ function classifyLocalPush(changedFiles) {
 
 function run(command, args) {
   const program = process.platform === 'win32' && command === 'npm' ? 'npm.cmd' : command;
-  const result = spawnSync(program, args, { cwd: projectRoot, stdio: 'inherit', windowsHide: true });
+  const result = spawnSync(program, args, { cwd: projectRoot, stdio: 'inherit', windowsHide: true, shell: process.platform === 'win32' });
+  if (result.error) console.error(result.error.message);
   if (result.status !== 0) process.exit(result.status || 1);
 }
 
