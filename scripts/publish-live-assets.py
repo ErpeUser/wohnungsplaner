@@ -8,7 +8,7 @@ generated = root.parent / "Wohnungsplaner_Generated" / "reports" / "cloudbuild"
 asset_root = root / "public" / "planner-assets"
 bucket = os.environ["PLANNER_LIVE_ASSET_BUCKET"]
 signer = os.environ["PLANNER_LIVE_ASSET_SIGNER"]
-release = os.environ.get("COMMIT_SHA") or os.environ.get("BUILD_ID") or "manual"
+release = os.environ.get("PLANNER_LIVE_ASSET_RELEASE") or os.environ.get("BUILD_ID") or "manual"
 
 
 def run(args):
