@@ -99,6 +99,68 @@ test("serve-local startet mit Node-Shim und setzt Schutzheader", async (t) => {
   assert.doesNotMatch(traversal.body, /\"scripts\"/);
 });
 
+test("PIN-Gate schützt die Website mit einem signierten __session-Cookie", async (t) => {
+  const port = 48000 + (process.pid % 1000);
+  const child = spawn(process.execPath, ["serve-local.mjs"], {
+    env: {
+      ...process.env,
+      HOST: "127.0.0.1",
+      PORT: String(port),
+      PLANNER_WRITE_PID: "0",
+      PLANNER_PIN_REQUIRED: "1",
+      PLANNER_ACCESS_PIN: "test-pin-09",
+      PLANNER_COOKIE_KEY: "test-cookie-key-that-is-long-enough-for-hmac",
+    },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  t.after(async () => {
+    if (child.exitCode === null && child.signalCode === null) {
+      const exited = once(child, "exit");
+      child.kill("SIGTERM");
+      await exited;
+    }
+  });
+
+  await waitForServer(child, `http://127.0.0.1:${port}/__codex/health`);
+  const locked = await fetch(`http://127.0.0.1:${port}/`);
+  assert.equal(locked.status, 401);
+  assert.match(await locked.text(), /PIN/);
+
+  const wrong = await fetch(`http://127.0.0.1:${port}/__codex/auth`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: "pin=falsch",
+    redirect: "manual",
+  });
+  assert.equal(wrong.status, 401);
+  assert.equal(wrong.headers.get("set-cookie"), null);
+
+  const login = await fetch(`http://127.0.0.1:${port}/__codex/auth`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: "pin=test-pin-09",
+    redirect: "manual",
+  });
+  assert.equal(login.status, 303);
+  const cookie = login.headers.get("set-cookie");
+  assert.match(cookie ?? "", /^__session=[^;]+;/);
+  assert.match(cookie ?? "", /HttpOnly/);
+  assert.match(cookie ?? "", /Secure/);
+  assert.match(cookie ?? "", /SameSite=Lax/);
+  assert.match(cookie ?? "", /Max-Age=2592000/);
+
+  const unlocked = await fetch(`http://127.0.0.1:${port}/`, {
+    headers: { Cookie: cookie.split(";", 1)[0] },
+  });
+  assert.equal(unlocked.status, 200);
+  assert.match(await unlocked.text(), /Raumplaner/);
+
+  const tampered = await fetch(`http://127.0.0.1:${port}/`, {
+    headers: { Cookie: `${cookie.split(";", 1)[0]}x` },
+  });
+  assert.equal(tampered.status, 401);
+});
+
 test("serve-local akzeptiert HOST für Container-Netzwerkschnittstellen", async (t) => {
   const port = 37000 + (process.pid % 1000);
   const child = spawn(process.execPath, ["serve-local.mjs"], {

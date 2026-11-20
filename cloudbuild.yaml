@@ -81,4 +81,5 @@ steps:
           --min 0 \
           --max 2 \
           --cpu-boost \
-          --set-env-vars HOST=0.0.0.0
+          --set-env-vars HOST=0.0.0.0,PLANNER_PIN_REQUIRED=1 \
+          --set-secrets PLANNER_ACCESS_PIN=PLANNER_ACCESS_PIN:latest,PLANNER_COOKIE_KEY=PLANNER_COOKIE_KEY:latest

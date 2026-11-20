@@ -37,4 +37,7 @@ test('cloud build config constrains main deployment and instance cost', () => {
   assert.match(config, /--min 0/);
   assert.match(config, /--max 2/);
   assert.match(config, /--region "\$\{_REGION\}"/);
+  assert.match(config, /PLANNER_PIN_REQUIRED=1/);
+  assert.match(config, /PLANNER_ACCESS_PIN=PLANNER_ACCESS_PIN:latest/);
+  assert.match(config, /PLANNER_COOKIE_KEY=PLANNER_COOKIE_KEY:latest/);
 });
