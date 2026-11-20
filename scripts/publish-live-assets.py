@@ -12,7 +12,11 @@ release = os.environ.get("PLANNER_LIVE_ASSET_RELEASE") or os.environ.get("BUILD_
 
 
 def run(args):
-    return subprocess.run(args, cwd=root, check=True, text=True, capture_output=True).stdout.strip()
+    try:
+        return subprocess.run(args, cwd=root, check=True, text=True, capture_output=True).stdout.strip()
+    except subprocess.CalledProcessError as error:
+        print(error.stderr, flush=True)
+        raise
 
 
 manifest = json.loads((asset_root / "manifest.json").read_text(encoding="utf-8"))
