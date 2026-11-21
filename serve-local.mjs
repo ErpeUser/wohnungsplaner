@@ -26,6 +26,9 @@ const pinGateRequired = process.env.PLANNER_PIN_REQUIRED === "1";
 const accessPin = process.env.PLANNER_ACCESS_PIN || "";
 const cookieKey = process.env.PLANNER_COOKIE_KEY || "";
 const liveAssetManifestUrl = process.env.PLANNER_LIVE_ASSET_MANIFEST_URL || "";
+const liveAssetBucket = process.env.PLANNER_LIVE_ASSET_BUCKET || (() => {
+  try { return new URL(liveAssetManifestUrl).pathname.split("/").filter(Boolean)[0] || ""; } catch { return ""; }
+})();
 const requestBuckets = new Map();
 const authBuckets = new Map();
 let runtimeHandler;
@@ -267,6 +270,37 @@ async function loadLiveAssetManifest() {
   return manifest;
 }
 
+function liveAssetPath(manifest, assetPath) {
+  const asset = manifest.assets.find((candidate) => candidate.path === assetPath);
+  if (!asset || !manifest.release || !/^[a-zA-Z0-9._-]+$/.test(manifest.release)) return null;
+  const relative = asset.path.replace(/^\/planner-assets\//, "");
+  if (!relative || relative.includes("..") || path.posix.normalize(relative) !== relative) return null;
+  return `${manifest.release}/${relative}`;
+}
+
+async function serveLiveAsset(req, res, manifest, assetPath) {
+  if (!liveAssetBucket) return fail(res, 404, "Live asset bucket unavailable");
+  const object = liveAssetPath(manifest, assetPath);
+  if (!object) return fail(res, 404, "Live asset not found");
+  const tokenResponse = await fetch("http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token", {
+    headers: { "Metadata-Flavor": "Google" },
+  });
+  if (!tokenResponse.ok) throw new Error(`Metadata token failed: ${tokenResponse.status}`);
+  const token = await tokenResponse.json();
+  const objectUrl = `https://storage.googleapis.com/storage/v1/b/${encodeURIComponent(liveAssetBucket)}/o/${encodeURIComponent(object)}?alt=media`;
+  const response = await fetch(objectUrl, { headers: { Authorization: `Bearer ${token.access_token}` } });
+  if (!response.ok) return fail(res, response.status === 404 ? 404 : 502, "Live asset unavailable");
+  const data = Buffer.from(await response.arrayBuffer());
+  if (data.length > MAX_STATIC_BYTES) return fail(res, 413, "Asset ist zu groß.");
+  const headers = {
+    ...securityHeaders,
+    "Content-Type": response.headers.get("content-type") || contentTypes[path.extname(assetPath)] || "application/octet-stream",
+    "Cache-Control": "private, max-age=300, must-revalidate",
+    "Content-Length": data.length,
+  };
+  return res.writeHead(200, headers).end(req.method === "HEAD" ? undefined : data);
+}
+
 function fail(res, statusCode, message, extraHeaders = {}) {
   res.writeHead(statusCode, {
     ...securityHeaders,
@@ -377,13 +411,24 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === "/__codex/live-assets/manifest") {
       const manifest = await loadLiveAssetManifest();
       if (!manifest) return fail(res, 404, "Live asset manifest unavailable");
-      const body = JSON.stringify(manifest);
+      const body = JSON.stringify({
+        ...manifest,
+        assets: manifest.assets.map((asset) => ({
+          ...asset,
+          url: `/__codex/live-assets/file?path=${encodeURIComponent(asset.path)}`,
+        })),
+      });
       return res.writeHead(200, {
         ...securityHeaders,
         "Content-Type": "application/json; charset=utf-8",
         "Cache-Control": "no-store",
         "Content-Length": Buffer.byteLength(body),
       }).end(req.method === "HEAD" ? undefined : body);
+    }
+    if (url.pathname === "/__codex/live-assets/file") {
+      const manifest = await loadLiveAssetManifest();
+      if (!manifest) return fail(res, 404, "Live asset manifest unavailable");
+      return serveLiveAsset(req, res, manifest, url.searchParams.get("path") || "");
     }
     if (url.pathname.startsWith("/assets/") || url.pathname.startsWith("/_next/")) {
       const file = safeClientPath(url.pathname);
