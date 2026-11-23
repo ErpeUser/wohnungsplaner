@@ -23,7 +23,7 @@ function legacySavedPlan() {
   const wardrobe = saved.placements.find((item) => item.id === "hall-tejo-wardrobe")!;
   wardrobe.catalogId = "hallway-tejo-115";
   wardrobe.materialVariants = { main: "tejo-cashmere" };
-  wardrobe.position = { x: -1.79, z: 7.92 };
+  wardrobe.position = { x: -1.77, z: 7.92 };
 
   const chair = saved.placements.find((item) => item.id === "zimmer1-chair")!;
   chair.catalogId = "chair-temu-executive-ivory";
@@ -64,7 +64,7 @@ test("actual browser preparation upgrades missing photo objects from an existing
 
   const wardrobe = next.placements.find((item) => item.id === "hall-tejo-wardrobe")!;
   assert.equal(wardrobe.catalogId, "hallway-brown-mirror-bench-115");
-  assert.deepEqual(wardrobe.position, { x: -1.79, z: 7.92 });
+  assert.deepEqual(wardrobe.position, { x: -1.77, z: 7.92 });
   const chair = next.placements.find((item) => item.id === "zimmer1-chair")!;
   assert.equal(chair.catalogId, "chair-aliexpress-xuegw-1005012445521181");
   assert.deepEqual(chair.position, { x: 2.91, z: 0.91 });
