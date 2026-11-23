@@ -182,6 +182,7 @@ export function CatalogPanel({
             <span>
               <strong>{item.name}</strong>
               <small>{formatSize(item.defaultSize.width)} × {formatSize(item.defaultSize.depth)} cm</small>
+                {item.sourceUrl ? <a href={item.sourceUrl} target="_blank" rel="noreferrer" className="planner-catalog__source">Quelle ↗</a> : null}
             </span>
             <button
               type="button"

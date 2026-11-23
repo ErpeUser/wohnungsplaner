@@ -167,7 +167,7 @@ const builtIns: PlannerBuiltIn[] = [
   }),
   builtIn("living-slats", "Holzlamellen auf dunklem Träger", "wohnkueche", "other", "living-slat-wall", 4.3636, 6.5579, 1.052, 0.035, 2.54, 72.23, "slat-oak-dark", 0),
   builtIn("living-moss", "Moosfeld an Lamellenwand", "wohnkueche", "other", "living-moss-panel", 4.3208, 6.5716, 1.01, 0.055, 0.78, 72.23, "moss-green", 0.99),
-  builtIn("living-clock", "Silberne Wanduhr", "wohnkueche", "other", "living-clock", 4.2827, 6.5838, 0.52, 0.065, 0.52, 72.23, "metal-satin", 1.17),
+  builtIn("living-clock", "Silberne Wanduhr mit profiliertem Rahmen", "wohnkueche", "other", "living-clock", 4.2827, 6.5838, 0.36, 0.08, 0.5, 72.23, "metal-satin", 1.17),
   builtIn("living-panel-light", "Wandleuchte über Moosfeld", "wohnkueche", "other", "living-wall-light", 4.316, 6.573, 0.23, 0.12, 0.24, 72.23, "white-matte", 2.13),
   builtIn("living-tv-slats", "Holzlamellenwand auf dem exakt 195 cm breiten Wandfeld", "wohnkueche", "other", "living-slat-wall", 0.2, 7.975, 1.95, 0.06, 2.54, 270, "slat-oak-dark", 0, {
     source: "Nutzermessung der Wand zwischen Vorraumtür und Zimmer-2-Wand · 02.11.2026",

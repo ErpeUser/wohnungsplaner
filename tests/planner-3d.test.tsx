@@ -547,6 +547,28 @@ describe("3D quality and resilience", () => {
     assert.equal(JSON.stringify(DEFAULT_APARTMENT_DOCUMENT), documentBefore);
   });
 
+  test("offers a user-triggered fullscreen control for the 3D canvas", async () => {
+    const user = userEvent.setup();
+    render(
+      <Planner3D
+        document={DEFAULT_APARTMENT_DOCUMENT}
+        activeRoomId={null}
+        selectionId={null}
+        onSelect={vi.fn()}
+        onReturn2D={vi.fn()}
+        quality="low"
+        supportOverride={{ supported: true, webgl2: true }}
+      />,
+    );
+    const host = screen.getByTestId("r3f-canvas").parentElement as HTMLDivElement;
+    const requestFullscreen = vi.fn(() => Promise.resolve());
+    Object.defineProperty(host, "requestFullscreen", { value: requestFullscreen, configurable: true });
+    const button = screen.getByRole("button", { name: "3D-Vollbild öffnen" });
+    expect(button.getAttribute("aria-pressed")).toBe("false");
+    await user.click(button);
+    expect(requestFullscreen).toHaveBeenCalledOnce();
+  });
+
   test("shows the same stable fallback when WebGL2 is unavailable", async () => {
     const user = userEvent.setup();
     const onReturn2D = vi.fn();

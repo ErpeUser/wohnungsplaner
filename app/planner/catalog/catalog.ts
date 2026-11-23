@@ -1,35 +1,6 @@
-import type { Size3 } from "../domain/types.ts";
-
-export type FurnitureCategory = "Schlafen" | "Sitzen" | "Arbeiten" | "Aufbewahren" | "Tische" | "Licht/Deko";
-export type FurnitureResizeRule = "fixed" | "uniform" | "free";
-export type FurnitureRenderMode = "auto" | "gltf" | "parametric";
-
-export type FurnitureMaterial = {
-  id: string;
-  label: string;
-  color: string;
-};
-
-export type ProductRealismSpec = {
-  sourceLabel: string;
-  dimensions: string;
-  confidence: "verified" | "estimated";
-  construction: readonly string[];
-};
-
-export type FurnitureCatalogItem = {
-  id: string;
-  name: string;
-  category: FurnitureCategory;
-  description: string;
-  defaultSize: Size3;
-  resize: FurnitureResizeRule;
-  symbol: "bed" | "storage" | "desk" | "chair" | "sofa" | "table" | "rug" | "light" | "plant";
-  fallback3d: string;
-  renderMode: FurnitureRenderMode;
-  materials: FurnitureMaterial[];
-  realism?: ProductRealismSpec;
-};
+import { DEKO_CATALOG } from "./deko-catalog.ts";
+import type { FurnitureCatalogItem, FurnitureCategory, FurnitureMaterial, FurnitureResizeRule, ProductRealismSpec } from "./catalog-types.ts";
+export type { FurnitureCatalogItem, FurnitureCategory, FurnitureMaterial, FurnitureRenderMode, FurnitureResizeRule, ProductRealismSpec } from "./catalog-types.ts";
 
 const WOOD = [
   { id: "oak-natural", label: "Eiche natur", color: "#b98a5e" },
@@ -332,6 +303,7 @@ export const FURNITURE_CATALOG: FurnitureCatalogItem[] = [
   item("floor-lamp", "Stehleuchte", "Licht/Deko", "Schlanke Leselampe", [0.38, 0.38, 1.65], "fixed", "light", "lamp", WOOD),
   item("plant-medium", "Pflanze", "Licht/Deko", "Mittelgroße Zimmerpflanze", [0.55, 0.55, 1.15], "uniform", "plant", "plant", WOOD),
   item("plant-zimmer1-olive", "Olivpflanze Zimmer 1", "Licht/Deko", "Schlanke 110-cm-Pflanze im matten beigefarbenen Topf", [0.42, 0.42, 1.1], "fixed", "plant", "plant", ZIMMER1_PLANT),
+  ...DEKO_CATALOG,
 ];
 
 export function filterFurnitureCatalog(query: string, category: FurnitureCategory | "Alle") {

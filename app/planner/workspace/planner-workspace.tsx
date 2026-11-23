@@ -8,12 +8,14 @@ import type { PlannerDocumentV3 } from '../domain/types.ts';
 import { createPlannerStore, type PlannerStore } from '../store/planner-store.ts';
 import { createLocalStoragePlannerRepository, PLANNER_STORAGE_KEY, PLANNER_BACKUP_KEY, type PlannerRepository, upgradeLivingSofaRugGroup, upgradeRetiredDiningGroup } from '../store/persistence.ts';
 import { readRefinedInterior } from '../store/interior-upgrade.ts';
+import { projectPublicApartmentDocument } from '../domain/public-scene.ts';
 
 function prepare(document: PlannerDocumentV3): PlannerDocumentV3 {
   if (document.id !== DEFAULT_APARTMENT_DOCUMENT.id) return document;
   const existing = new Set(document.builtIns.map(item => item.id));
   const missing = DEFAULT_APARTMENT_DOCUMENT.builtIns.filter(item => INTERIOR_UPDATES[item.id] && !existing.has(item.id));
-  return refineRoomLayout(missing.length ? { ...document, builtIns: [...document.builtIns, ...missing] } : document);
+  const refined = refineRoomLayout(missing.length ? { ...document, builtIns: [...document.builtIns, ...missing] } : document);
+  return projectPublicApartmentDocument(refined);
 }
 
 function browserRepository(): PlannerRepository | undefined {

@@ -55,6 +55,7 @@ export function Planner3D({
   const hostRef = useRef<HTMLDivElement>(null);
   const [failure, setFailure] = useState<string | null>(null);
   const [contextLost, setContextLost] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [, setLiveAssetVersion] = useState(0);
   const reducedMotion = useReducedMotion();
   const support = useMemo(() => supportOverride ?? detectThreeSupport(), [supportOverride]);
@@ -116,6 +117,40 @@ export function Planner3D({
       canvas.removeEventListener("webglcontextrestored", onContextRestored);
     };
   }, [support.supported]);
+
+  const toggleFullscreen = useCallback(() => {
+    const element = hostRef.current as (HTMLDivElement & { webkitRequestFullscreen?: () => Promise<void> | void }) | null;
+    if (!element) return;
+    const fullscreenDocument = globalThis.document;
+    const current = fullscreenDocument.fullscreenElement
+      ?? (fullscreenDocument as Document & { webkitFullscreenElement?: Element | null }).webkitFullscreenElement
+      ?? null;
+    if (current === element) {
+      const exit = (fullscreenDocument as Document & { webkitExitFullscreen?: () => Promise<void> | void }).exitFullscreen
+        ?? (fullscreenDocument as Document & { webkitExitFullscreen?: () => Promise<void> | void }).webkitExitFullscreen;
+      if (exit) void Promise.resolve(exit.call(fullscreenDocument)).catch(() => undefined);
+      return;
+    }
+    const request = element.requestFullscreen ?? element.webkitRequestFullscreen;
+    if (request) void Promise.resolve(request.call(element)).catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
+    const sync = () => {
+      const fullscreenDocument = globalThis.document;
+      const current = fullscreenDocument.fullscreenElement
+        ?? (fullscreenDocument as Document & { webkitFullscreenElement?: Element | null }).webkitFullscreenElement
+        ?? null;
+      setIsFullscreen(current === hostRef.current);
+    };
+    globalThis.document.addEventListener("fullscreenchange", sync);
+    globalThis.document.addEventListener("webkitfullscreenchange", sync);
+    sync();
+    return () => {
+      globalThis.document.removeEventListener("fullscreenchange", sync);
+      globalThis.document.removeEventListener("webkitfullscreenchange", sync);
+    };
+  }, []);
 
   if (!support.supported || failure) {
     return (
@@ -186,6 +221,7 @@ export function Planner3D({
           onOrbitCameraChange={updateOrbitCamera}
         />
       </Canvas>
+      <FullscreenToolbar isFullscreen={isFullscreen} onToggle={toggleFullscreen} />
       <CameraOverlay
         mode={cameraMode}
         cutawayAvailable={cutawayAvailable}
@@ -200,6 +236,22 @@ export function Planner3D({
         </div>
       ) : null}
       <div className="planner-3d__quality" aria-hidden="true">3D · {tier === "high" ? "Hoch" : tier === "balanced" ? "Ausgewogen" : "Effizient"}</div>
+    </div>
+  );
+}
+
+function FullscreenToolbar({ isFullscreen, onToggle }: { isFullscreen: boolean; onToggle(): void }) {
+  return (
+    <div className="planner-3d__topbar" role="toolbar" aria-label="3D-Ansicht">
+      <span>{isFullscreen ? "3D · Vollbild" : "3D · Ansicht"}</span>
+      <button
+        type="button"
+        aria-pressed={isFullscreen}
+        aria-label={isFullscreen ? "Vollbild schließen" : "3D-Vollbild öffnen"}
+        onClick={onToggle}
+      >
+        {isFullscreen ? "Vollbild schließen" : "Vollbild"}
+      </button>
     </div>
   );
 }

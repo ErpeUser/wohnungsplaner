@@ -234,23 +234,24 @@ describe("authored procedural surface colours", () => {
 });
 
 describe("photographed fixed fixture silhouettes", () => {
-  test("the living-room clock retains its configured size and has solid square frame corners", async () => {
+  test("the living-room clock keeps its portrait proportions and layered profile", async () => {
     const model = await architectureScene("clock");
     try {
       const bounds = new THREE.Box3().setFromObject(model.scene);
-      expect(bounds.max.x - bounds.min.x).toBeCloseTo(0.52, 4);
-      expect(bounds.max.y - bounds.min.y).toBeCloseTo(0.52, 4);
-      expect(bounds.max.z - bounds.min.z).toBeCloseTo(0.065, 4);
-      for (const x of [-0.22, 0.22]) for (const y of [0.04, 0.48]) {
+      expect(bounds.max.x - bounds.min.x).toBeCloseTo(0.36, 4);
+      expect(bounds.max.y - bounds.min.y).toBeCloseTo(0.50, 4);
+      expect(bounds.max.z - bounds.min.z).toBeGreaterThan(0.072);
+      expect(bounds.max.z - bounds.min.z).toBeLessThan(0.105);
+      for (const x of [-0.14, 0.14]) for (const y of [0.08, 0.42]) {
         expect(ray(model.scene, [x, y, 1], [0, 0, -1]).length).toBeGreaterThan(0);
       }
     } finally { await model.dispose(); }
   });
 
-  test("the clock has a light square dial behind its hands", async () => {
+  test("the clock has a light portrait dial behind its hands", async () => {
     const model = await architectureScene("clock");
     try {
-      const dial = ray(model.scene, [0.16, 0.42, 1], [0, 0, -1])[0];
+      const dial = ray(model.scene, [0.08, 0.33, 1], [0, 0, -1])[0];
       expect(dial).toBeDefined();
       expect(((dial.object as THREE.Mesh).material as THREE.Material).name).toBe("planner-material-white-matte");
     } finally { await model.dispose(); }

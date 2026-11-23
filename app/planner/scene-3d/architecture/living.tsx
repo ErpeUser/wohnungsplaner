@@ -110,23 +110,46 @@ export function MossPanel({ item }: { item: SceneObject<PlannerBuiltIn> }) {
 export function WallClock({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   const [width, height, depth] = item.size;
   const silver = getPlannerMaterial("metal-satin");
+  const dark = getPlannerMaterial("metal-dark");
+  const dial = getPlannerMaterial("white-matte");
+  const markerRadius = Math.min(width, height) * 0.025;
   return (
-    <group>
-      {/* The reference shows a square, profiled silver frame. Its relief is simplified. */}
-      <mesh position={[0, 0, -depth * 0.4]} scale={[width, height, depth * 0.2]} geometry={SHARED_BOX} castShadow><primitive object={silver} attach="material" /></mesh>
-      {[-1, 1].map((side) => (
-        <group key={side}>
-          <mesh position={[side * width * 0.435, 0, depth * 0.1]} scale={[width * 0.13, height, depth * 0.8]} geometry={SHARED_BOX} castShadow><primitive object={silver} attach="material" /></mesh>
-          <mesh position={[0, side * height * 0.435, depth * 0.1]} scale={[width * 0.74, height * 0.13, depth * 0.8]} geometry={SHARED_BOX} castShadow><primitive object={silver} attach="material" /></mesh>
-          <mesh position={[side * width * 0.3725, 0, depth * 0.37]} scale={[width * 0.035, height * 0.78, depth * 0.18]} geometry={SHARED_BOX}><primitive object={silver} attach="material" /></mesh>
-          <mesh position={[0, side * height * 0.3725, depth * 0.37]} scale={[width * 0.71, height * 0.035, depth * 0.18]} geometry={SHARED_BOX}><primitive object={silver} attach="material" /></mesh>
-        </group>
-      ))}
-      <mesh position={[0, 0, depth * 0.4]} scale={[width * 0.7, height * 0.7, depth * 0.08]} geometry={SHARED_BOX}><primitive object={getPlannerMaterial("white-matte")} attach="material" /></mesh>
-      <mesh position={[0, height * 0.08, depth * 0.47]} rotation={[0, 0, -0.45]} scale={[width * 0.048, height * 0.25, depth * 0.025]} geometry={SHARED_BOX}><primitive object={getPlannerMaterial("metal-dark")} attach="material" /></mesh>
-      <mesh position={[width * 0.06, -height * 0.02, depth * 0.47]} rotation={[0, 0, 1.1]} scale={[width * 0.038, height * 0.18, depth * 0.025]} geometry={SHARED_BOX}><primitive object={getPlannerMaterial("metal-dark")} attach="material" /></mesh>
-      <mesh name={`clock-roman-numerals-${item.id}`} position={[0, 0, depth * 0.445]} scale={[width, height, 1]} geometry={CLOCK_NUMERALS} dispose={null}>
-        <primitive object={getPlannerMaterial("metal-dark")} attach="material" />
+    <group name={`wall-clock-${item.id}`}>
+      {/* The reference has a portrait, layered silver frame rather than a flat square. */}
+      <mesh scale={[width, height, depth * 0.72]} position={[0, 0, -depth * 0.14]} geometry={SHARED_BOX} castShadow receiveShadow>
+        <primitive object={silver} attach="material" />
+      </mesh>
+      <mesh scale={[width * 0.88, height * 0.9, depth * 0.34]} position={[0, 0, depth * 0.2]} geometry={SHARED_BOX} castShadow>
+        <primitive object={dark} attach="material" />
+      </mesh>
+      <mesh scale={[width * 0.82, height * 0.84, depth * 0.25]} position={[0, 0, depth * 0.34]} geometry={SHARED_BOX} castShadow>
+        <primitive object={silver} attach="material" />
+      </mesh>
+      <mesh scale={[width * 0.7, height * 0.72, depth * 0.1]} position={[0, 0, depth * 0.47]} geometry={SHARED_BOX} receiveShadow>
+        <primitive object={dial} attach="material" />
+      </mesh>
+      {Array.from({ length: 12 }, (_, index) => {
+        const angle = (index / 12) * Math.PI * 2;
+        const x = Math.sin(angle) * width * 0.245;
+        const y = Math.cos(angle) * height * 0.285;
+        const major = index % 3 === 0;
+        return (
+          <mesh key={`clock-marker-${index}`} position={[x, y, depth * 0.55]} rotation={[0, 0, -angle]} scale={[major ? width * 0.026 : width * 0.014, major ? height * 0.08 : height * 0.05, depth * 0.035]} geometry={SHARED_BOX}>
+            <primitive object={dark} attach="material" />
+          </mesh>
+        );
+      })}
+      <mesh position={[0, 0, depth * 0.57]} rotation={[0, 0, -0.55]} scale={[width * 0.042, height * 0.24, depth * 0.035]} geometry={SHARED_BOX} castShadow>
+        <primitive object={dark} attach="material" />
+      </mesh>
+      <mesh position={[width * 0.025, -height * 0.015, depth * 0.575]} rotation={[0, 0, 0.96]} scale={[width * 0.025, height * 0.3, depth * 0.03]} geometry={SHARED_BOX} castShadow>
+        <primitive object={dark} attach="material" />
+      </mesh>
+      <mesh position={[0, 0, depth * 0.61]} scale={[markerRadius, markerRadius, depth * 0.05]} geometry={SHARED_SPHERE} castShadow>
+        <primitive object={silver} attach="material" />
+      </mesh>
+      <mesh name={`clock-roman-numerals-${item.id}`} position={[0, 0, depth * 0.585]} scale={[width, height, 1]} geometry={CLOCK_NUMERALS} dispose={null}>
+        <primitive object={dark} attach="material" />
       </mesh>
     </group>
   );

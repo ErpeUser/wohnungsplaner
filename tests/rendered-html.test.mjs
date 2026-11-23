@@ -20,7 +20,9 @@ test("the offline production server renders the planner root",async()=>{
   assert.match(html,/Raumplaner/);
   assert.match(html,/2D-Ansicht/);
   assert.match(html,/Export &amp; Import/);
-  assert.match(html,/59,49/);
+  // The public starter scene omits Zimmer 1, the dedicated 3D verification
+  // room. The canonical document and exports retain its official area.
+  assert.match(html,/47,13/);
   assert.match(html,/WNF/);
 });
 

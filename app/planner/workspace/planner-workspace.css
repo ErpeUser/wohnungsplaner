@@ -538,6 +538,14 @@
 .planner-catalog__symbol--rug { background: #92a49c; }
 .planner-catalog__symbol--sofa { background: #b39a84; }
 .planner-catalog__symbol--storage { background: #ad8058; }
+.planner-catalog__source {
+  display: inline-block;
+  margin-top: 3px;
+  color: var(--accent);
+  font: 650 9px/1.1 var(--font-geist-mono), ui-monospace, monospace;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
 
 .planner-panel__note {
   padding: 11px;
@@ -751,6 +759,58 @@
   inset: 8px 0 0 8px;
   overflow: hidden;
   background: #d9d7d0;
+}
+
+.planner-3d:fullscreen,
+.planner-3d:-webkit-full-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  width: 100vw;
+  height: 100svh;
+  background: #d9d7d0;
+}
+
+.planner-3d__topbar {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 7px 6px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  color: #e7efed;
+  background: rgba(21, 35, 37, 0.82);
+  box-shadow: 0 10px 28px rgba(17, 28, 30, 0.18);
+  backdrop-filter: blur(10px);
+  font: 650 9px/1 var(--font-geist-mono), ui-monospace, monospace;
+}
+
+.planner-3d__topbar button {
+  min-height: 36px;
+  padding: 0 11px;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 5px;
+  color: #f8f5ef;
+  background: rgba(255, 255, 255, 0.1);
+  font: 680 10px/1 var(--font-geist-sans), sans-serif;
+  cursor: pointer;
+}
+
+.planner-3d__topbar button:hover,
+.planner-3d__topbar button:focus-visible {
+  border-color: #e9b28c;
+  background: rgba(233, 178, 140, 0.18);
+  outline: 2px solid #f2c8aa;
+  outline-offset: 2px;
+}
+
+.planner-3d__topbar button[aria-pressed="true"] {
+  border-color: rgba(233, 178, 140, 0.76);
+  background: rgba(233, 178, 140, 0.24);
 }
 
 .planner-3d canvas {
@@ -2219,6 +2279,19 @@
     gap: 4px;
     max-width: calc(100% - 16px);
     padding: 8px;
+  }
+
+  .planner-3d__topbar {
+    top: 8px;
+    right: 8px;
+    padding-left: 8px;
+  }
+
+  .planner-3d__topbar > span { display: none; }
+
+  .planner-3d__topbar button {
+    min-height: 44px;
+    padding-inline: 12px;
   }
 
   .planner-3d__camera--orbit .planner-3d__camera-help,
