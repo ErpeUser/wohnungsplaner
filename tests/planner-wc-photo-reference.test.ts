@@ -60,7 +60,8 @@ test("renders warm-ivory tiled inward-facing panels on all WC walls only", () =>
   const first = marbleTileBuffers(0.98, 2.56, 0, "wc");
   assert.equal(first.positions.length, first.uvs.length / 2 * 3);
   assert.ok(first.positions.length > 0);
-  assert.equal(wcMarbleWallBounds(wc.walls.find(w=>!w.roomIds.includes("wc")) ?? ({ id: "other", roomIds: [] } as (typeof wc.walls)[number]), wc.walls[0].segments[0]), null);
+  const wall = wc.walls.find(w => w.roomIds.includes("wc"))!;
+  assert.equal(wcMarbleWallBounds({ ...wall, roomIds: [] }, wall.segments[0]), null);
 });
 
 test("keeps the former WC onyx product as an unpriced alternative and adds only the selected board",()=>{
@@ -71,7 +72,7 @@ test("keeps the former WC onyx product as an unpriced alternative and adds only 
   assert.equal(wood[0].quantity,1);
   assert.match(wood[0].url ?? "", /007326000408/);
   const onyx=SHOPPING_ITEMS.find(x=>x.id==="601099584128261")!;
-  assert.match(onyx.amountLabel??"","Alternative");
+  assert.match(onyx.amountLabel??"",/Alternative/);
   assert.equal(onyx.price,null);
   assert.equal(SHOPPING_ITEMS.some(x=>x.id==="builtin-wc-shelf-styling"),false);
 });
