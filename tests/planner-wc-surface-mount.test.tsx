@@ -1,13 +1,16 @@
 import React, { act } from "react";
 import { createRoot, extend, type RootState } from "@react-three/fiber";
-import { ExtrudeGeometry, Group, Mesh, MeshBasicMaterial, Raycaster, Vector3, type Object3D, type WebGLRenderer } from "three";
+import { BufferAttribute, BufferGeometry, ExtrudeGeometry, Group, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, PlaneGeometry, Raycaster, Vector3, type Object3D, type WebGLRenderer } from "three";
 import { expect, test } from "vitest";
 
 import { DEFAULT_APARTMENT_DOCUMENT } from "../app/planner/domain/apartment-v3.ts";
 import { PlannerArchitecture } from "../app/planner/scene-3d/architecture.tsx";
 import { createSceneModel, type SceneModel } from "../app/planner/scene-3d/scene-model.ts";
 
-extend({ Group, Mesh, ExtrudeGeometry, MeshBasicMaterial });
+extend({
+  Group, Mesh, ExtrudeGeometry, MeshBasicMaterial,
+  BufferAttribute, BufferGeometry, MeshPhysicalMaterial, MeshStandardMaterial, PlaneGeometry,
+});
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 async function renderPanels(scene: SceneModel, selectedId: string | null = null) {
@@ -94,7 +97,7 @@ test("moves the selected WC outline with its panel while preserving normal depth
       const panel = model.scene.getObjectByName(`${item.catalogId}-${item.id}`)!;
       const outline = panel.parent!.children.find((object) => object instanceof Mesh && !Array.isArray(object.material) && object.material.wireframe) as Mesh;
       expect(outline).toBeDefined();
-      expect(extentAlong(outline, new Vector3(0, 0, 1)).max).toBeGreaterThan(4.16);
+      expect(extentAlong(outline, new Vector3(0, 0, 1)).max).toBeGreaterThan(scene.walls[0].start.z + scene.walls[0].thickness / 2);
       expect((outline.material as MeshBasicMaterial).depthTest).toBe(true);
     } finally { await model.dispose(); }
   }

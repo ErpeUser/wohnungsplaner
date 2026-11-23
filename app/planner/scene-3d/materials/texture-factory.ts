@@ -636,7 +636,7 @@ export function loadPlannerTexture(path: string) {
   texture.colorSpace = SRGBColorSpace;
   texture.wrapS = RepeatWrapping;
   texture.wrapT = RepeatWrapping;
-  if (path.endsWith("/temu-white-gold-601100207687761.webp")) {
+  if (path.endsWith("/temu-white-gold-601100207687761.webp") || path.endsWith("/temu-celadon-onyx-601099584128261.webp")) {
     texture.anisotropy = 8;
   } else if (path.includes("temu-easy-line-colorblock-rug") || path.includes("hall-rug-") || path.includes("temu-bath-rug-") || path.includes("temu-vintage-rug-")) {
     texture.repeat.set(1, 1);

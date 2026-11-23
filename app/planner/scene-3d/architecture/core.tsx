@@ -1,7 +1,7 @@
 "use client";
 
 import { BalconyArchitecture, isBalconyExteriorWall } from "./balcony";
-import { BathMarbleSurface, bathMarbleWallBounds } from "./bath-marble";
+import { MarbleTileSurface, bathMarbleWallBounds, wcMarbleWallBounds } from "./marble-tiles";
 import { BathMat, BathRoundMirror, BathShowerCurtain, BathShowerRod, BathShowerSet, BathTiledFinish, BathTowelHookRail, ScoutBasinCabinet, ScoutWasherCabinet, Washbasin, WcBrush, WcFlushPlate, WcPaperHolder, WcRevisionPanel } from "./bathroom";
 import { DeskLedMirror, WallpaperFinish, WindowCurtain, Zimmer1DeskAccessories, Zimmer1DeskShelf, Zimmer1EntryNiche, Zimmer1EntrySlimArt, Zimmer1HeadboardLed, Zimmer1HeadboardSconces, Zimmer1LayeredCurtain, Zimmer1NightstandDecor, Zimmer1WallArtPair, Zimmer1WardrobeTopDecor, ZimmerWallPanel } from "./bedroom";
 import { DoorAssembly, DoorFrame } from "./doors";
@@ -97,7 +97,8 @@ function WallSegmentMesh({ wall, segment, bathtub }: {
   const base = getPlannerMaterial(wall.materialId);
   const positive = getPlannerMaterial(wall.sideMaterialIds[0]);
   const negative = getPlannerMaterial(wall.sideMaterialIds[1]);
-  const marble = bathtub && bathMarbleWallBounds(wall, segment, bathtub);
+  const bathMarble = bathtub && bathMarbleWallBounds(wall, segment, bathtub);
+  const wcMarble = wcMarbleWallBounds(wall, segment);
   return (
     <>
       <mesh
@@ -109,9 +110,14 @@ function WallSegmentMesh({ wall, segment, bathtub }: {
         castShadow
         receiveShadow
       />
-      {marble && (
-        <group position={marble.position} rotation={[0, Math.PI / 2, 0]}>
-          <BathMarbleSurface width={marble.width} height={marble.height} />
+      {bathMarble && (
+        <group position={bathMarble.position} rotation={[0, Math.PI / 2, 0]}>
+          <MarbleTileSurface width={bathMarble.width} height={bathMarble.height} />
+        </group>
+      )}
+      {wcMarble && (
+        <group position={wcMarble.position} rotation={[0, wcMarble.rotationY, 0]}>
+          <MarbleTileSurface width={wcMarble.width} height={wcMarble.height} finish="wc" />
         </group>
       )}
     </>

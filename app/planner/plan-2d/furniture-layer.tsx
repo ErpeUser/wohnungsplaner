@@ -340,6 +340,26 @@ function FurnitureSymbol({
     );
   }
 
+  if (placement.catalogId === "chair-aliexpress-xuegw-1005012445521181") {
+    return (
+      <Group data-testid="plan-graphic-chair-aliexpress-xuegw-1005012445521181">
+        {[0, 1, 2, 3, 4].map((index) => {
+          const angle = index * 2 * Math.PI / 5 + Math.PI / 2;
+          const x = Math.cos(angle) * width * 0.46;
+          const y = Math.sin(angle) * depth * 0.46;
+          return (
+            <Group key={index}>
+              <Line points={[0, 0, x, y]} stroke="#696962" strokeWidth={0.024} lineCap="round" />
+              <Circle x={x} y={y} radius={0.02} fill="#3d3e3e" />
+            </Group>
+          );
+        })}
+        <Rect x={-width * 0.36} y={-depth * 0.32} width={width * 0.72} height={depth * 0.68} fill={fill} stroke="#8f867b" strokeWidth={0.018} cornerRadius={0.08} />
+        <Rect x={-width * 0.29} y={-depth * 0.46} width={width * 0.58} height={depth * 0.23} fill={fill} stroke="#8f867b" strokeWidth={0.018} cornerRadius={0.06} />
+      </Group>
+    );
+  }
+
   if (placement.catalogId === "chair-temu-executive-ivory") {
     return (
       <Group data-testid="plan-graphic-chair-temu-executive-ivory">

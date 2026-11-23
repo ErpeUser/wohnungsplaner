@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { DEFAULT_APARTMENT_DOCUMENT } from "../app/planner/domain/apartment-v3.ts";
-import { bathMarbleTileBuffers, bathMarbleWallBounds } from "../app/planner/scene-3d/architecture/bath-marble.tsx";
+import { marbleTileBuffers, bathMarbleWallBounds, wcMarbleWallBounds } from "../app/planner/scene-3d/architecture/marble-tiles.tsx";
 import { createSceneModel } from "../app/planner/scene-3d/scene-model.ts";
 
 test("tiles the complete bathtub wall from corner to corner and floor to ceiling", () => {
@@ -24,7 +24,7 @@ test("tiles the complete bathtub wall from corner to corner and floor to ceiling
 });
 
 test("uses a 60 × 30 cm module and crops the finish at the surface edges", () => {
-  const { positions, uvs } = bathMarbleTileBuffers(1.6, 0.53);
+  const { positions, uvs } = marbleTileBuffers(1.6, 0.53);
   assert.equal(positions.length / 18, 7);
   assert.ok(Math.abs(positions[3] - positions[0] - 0.59925) < 1e-6);
   assert.ok(Math.abs(positions[7] - positions[1] - 0.29925) < 1e-6);
@@ -38,11 +38,28 @@ test("uses a 60 × 30 cm module and crops the finish at the surface edges", () =
 });
 
 test("fills the complete 185 × 256 cm wall without left, right, top or bottom slivers", () => {
-  const { positions } = bathMarbleTileBuffers(1.85, 2.56);
+  const { positions } = marbleTileBuffers(1.85, 2.56);
   const xs = positions.filter((_, index) => index % 3 === 0);
   const ys = positions.filter((_, index) => index % 3 === 1);
   assert.ok(Math.abs(Math.min(...xs) + 0.925) < 1e-6);
   assert.ok(Math.abs(Math.max(...xs) - 0.925) < 1e-6);
   assert.ok(Math.abs(Math.min(...ys) + 1.28) < 1e-6);
   assert.ok(Math.abs(Math.max(...ys) - 1.28) < 1e-6);
+});
+
+test("finishes only the full rear WC wall on the room-facing side", () => {
+  for (const roomId of [null, "wc"]) {
+    const scene = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, roomId);
+    const surfaces = scene.walls.flatMap((wall) => wall.segments
+      .map((segment) => wcMarbleWallBounds(wall, segment))).filter(Boolean);
+    assert.equal(surfaces.length, 1);
+    const surface = surfaces[0]!;
+    assert.ok(Math.abs(surface.width - 1.09) < 1e-6);
+    assert.equal(surface.height, 2.56);
+    assert.ok(Math.abs(surface.position[0] - (-1.875)) < 1e-6);
+    assert.ok(Math.abs(surface.position[2] - 4.2005) < 1e-6);
+  }
+  const tiles = marbleTileBuffers(0.9, 2.56, 0, "wc");
+  const firstTileWidth = tiles.positions[3] - tiles.positions[0];
+  assert.ok(Math.abs(firstTileWidth - 0.449625) < 1e-6);
 });

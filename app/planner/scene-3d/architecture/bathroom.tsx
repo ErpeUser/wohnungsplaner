@@ -4,7 +4,7 @@ import type { PlannerBuiltIn } from "../../domain/types.ts";
 import { getPlannerMaterial } from "../materials.ts";
 import type { SceneObject } from "../scene-model.ts";
 import { SHARED_BOX, SHARED_CIRCLE, SHARED_CYLINDER, SHARED_MIRROR_LED, SHARED_PLANE, SHARED_TORUS } from "../shared/architecture-primitives.ts";
-import { BathMarbleSurface } from "./bath-marble";
+import { MarbleTileSurface } from "./marble-tiles";
 
 
 
@@ -18,7 +18,7 @@ export function BathTiledFinish({ item }: { item: SceneObject<PlannerBuiltIn> })
         <mesh scale={item.size} geometry={SHARED_BOX} material={tile} castShadow receiveShadow />
         {/* Local −Z faces into the room at the installed 90° rotation. */}
         <group position={[0, 0, -depth / 2 - 0.002]} rotation={[0, Math.PI, 0]}>
-          <BathMarbleSurface width={width} height={height} patternOffset={3} />
+          <MarbleTileSurface width={width} height={height} patternOffset={3} />
         </group>
       </group>
     );

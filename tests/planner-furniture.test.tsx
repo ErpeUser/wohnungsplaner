@@ -94,6 +94,14 @@ describe("furniture catalog", () => {
 
 describe("furniture interactions", () => {
   const chair = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "zimmer1-chair")!;
+  const legacyChair = {
+    ...chair,
+    id: "temu-executive-catalog-example",
+    catalogId: "chair-temu-executive-ivory",
+    position: { x: 2.96, z: 0.92 },
+    size: { width: 0.64, depth: 0.51, height: 1.14 },
+    materialVariants: { main: "leather-ivory" },
+  };
 
   test("creates a catalog placement with real dimensions and material", () => {
     const item = FURNITURE_CATALOG.find((candidate) => candidate.id === "sofa-3seat")!;
@@ -226,7 +234,7 @@ describe("furniture interactions", () => {
     const wardrobe = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "hall-tejo-wardrobe")!;
     const exampleDocument = {
       ...DEFAULT_APARTMENT_DOCUMENT,
-      placements: [...DEFAULT_APARTMENT_DOCUMENT.placements, {
+      placements: [...DEFAULT_APARTMENT_DOCUMENT.placements, legacyChair, {
         ...wardrobe, id: "tejo-catalog-example", catalogId: "hallway-tejo-115", materialVariants: { main: "tejo-cashmere" },
       }],
     };
@@ -250,6 +258,7 @@ describe("furniture interactions", () => {
         "bed-bliss-120",
         "hallway-tejo-115",
         "vanity-vicco-sherry-120",
+        "chair-temu-executive-ivory",
         "chair-aliexpress-xuegw-1005012445521181",
         "nightstand-led-2drawer-white",
         "rug-living-concept-240x240",
