@@ -102,7 +102,7 @@ describe("inspector editing", () => {
     const chooser = screen.getByRole("combobox", { name: "Stuhl auswählen" });
     expect(chooser.querySelector("option:checked")?.getAttribute("value")).toBe("living-kaleo-chair-east");
     expect(within(chooser).getAllByRole("option").map((option) => option.textContent)).toEqual([
-      "Stuhl 1 · Armlehnstuhl Kaleo", "Stuhl 2 · Armlehnstuhl Kaleo", "Stuhl 3 · Armlehnstuhl Kaleo", "Stuhl 4 · Armlehnstuhl Kaleo",
+      "Stuhl 1 · WOLTU Chenille Drehstuhl · AliExpress", "Stuhl 2 · WOLTU Chenille Drehstuhl · AliExpress", "Stuhl 3 · WOLTU Chenille Drehstuhl · AliExpress", "Stuhl 4 · WOLTU Chenille Drehstuhl · AliExpress",
     ]);
 
     for (const id of ["living-kaleo-chair-west", "living-kaleo-chair-south", "living-kaleo-chair-north"]) {
@@ -112,8 +112,8 @@ describe("inspector editing", () => {
       expect(store.getState().canUndo).toBe(false);
     }
     const inspector = screen.getByRole("region", { name: "Eigenschaften" });
-    expect(inspector.querySelector(".planner-selection-summary strong")?.textContent).toBe("Stuhl 4 · Armlehnstuhl Kaleo");
-    expect(inspector.querySelector(".planner-model-switcher__current strong")?.textContent).toBe("Stuhl 4 · Armlehnstuhl Kaleo");
+    expect(inspector.querySelector(".planner-selection-summary strong")?.textContent).toBe("Stuhl 4 · WOLTU Chenille Drehstuhl · AliExpress");
+    expect(inspector.querySelector(".planner-model-switcher__current strong")?.textContent).toBe("Stuhl 4 · WOLTU Chenille Drehstuhl · AliExpress");
 
     await user.selectOptions(screen.getByRole("combobox", { name: "Stuhlmodell" }), "temu-faux-leather-metal");
     await user.click(screen.getByRole("button", { name: "Auf diesen Stuhl anwenden" }));

@@ -191,10 +191,10 @@ describe("PlannerWorkspace", () => {
     const chooser = screen.getByRole("combobox", { name: "Planobjekt auswählen" });
     const list = screen.getByLabelText("Planobjekte als Liste");
     for (const [id, label] of [
-      ["living-kaleo-chair-west", "Stuhl 1 · Armlehnstuhl Kaleo"],
-      ["living-kaleo-chair-east", "Stuhl 2 · Armlehnstuhl Kaleo"],
-      ["living-kaleo-chair-south", "Stuhl 3 · Armlehnstuhl Kaleo"],
-      ["living-kaleo-chair-north", "Stuhl 4 · Armlehnstuhl Kaleo"],
+      ["living-kaleo-chair-west", "Stuhl 1 · WOLTU Chenille Drehstuhl · AliExpress"],
+      ["living-kaleo-chair-east", "Stuhl 2 · WOLTU Chenille Drehstuhl · AliExpress"],
+      ["living-kaleo-chair-south", "Stuhl 3 · WOLTU Chenille Drehstuhl · AliExpress"],
+      ["living-kaleo-chair-north", "Stuhl 4 · WOLTU Chenille Drehstuhl · AliExpress"],
     ]) {
       expect(within(chooser).getByRole("option", { name: label }).getAttribute("value")).toBe(id);
       expect(within(list).getByRole("button", { name: label })).toBeTruthy();
