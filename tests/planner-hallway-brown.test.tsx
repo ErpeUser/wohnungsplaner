@@ -80,13 +80,13 @@ describe("brown entry wardrobe photo reference", () => {
     const wardrobe = old.placements.find((entry) => entry.id === "hall-tejo-wardrobe")!;
     wardrobe.catalogId = "hallway-tejo-115";
     wardrobe.materialVariants = { main: "tejo-cashmere" };
-    wardrobe.position = { x: -1.75, z: 7.92 };
+    wardrobe.position = { x: -1.75, z: 7.88 };
     wardrobe.rotation = 175;
     const updated = upgradeHallPhotoReference(old);
     const actual = updated.placements.find((entry) => entry.id === wardrobe.id)!;
     expect(actual.catalogId).toBe(ID);
     expect(actual.materialVariants?.main).toBe("hallway-walnut-brown");
-    expect(actual.position).toEqual({ x: -1.75, z: 7.92 });
+    expect(actual.position).toEqual({ x: -1.75, z: 7.88 });
     expect(actual.rotation).toBe(175);
     expect(actual.size).toEqual(wardrobe.size);
     expect(upgradeHallPhotoReference(updated)).toBe(updated);

@@ -221,13 +221,20 @@ describe("furniture interactions", () => {
   });
 
   test("renders individual 2D graphics for every existing product family", () => {
+    const wardrobe = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "hall-tejo-wardrobe")!;
+    const exampleDocument = {
+      ...DEFAULT_APARTMENT_DOCUMENT,
+      placements: [...DEFAULT_APARTMENT_DOCUMENT.placements, {
+        ...wardrobe, id: "tejo-catalog-example", catalogId: "hallway-tejo-115", materialVariants: { main: "tejo-cashmere" },
+      }],
+    };
     // Observe the real Image src setter: an unchanged path would reuse the old
     // rug artwork even when the new SVG is present on the server.
     const imageSources = vi.spyOn(HTMLImageElement.prototype, "src", "set");
     try {
       render(
         <FurnitureLayer
-          document={DEFAULT_APARTMENT_DOCUMENT}
+          document={exampleDocument}
           activeRoomId={null}
           selectionId={null}
           onSelect={vi.fn()}

@@ -6,7 +6,7 @@ const item=(id:string)=>{const found=SHOPPING_ITEMS.find(i=>i.id===id);assert.ok
 test('preserves every existing shopping article without duplicate identities',()=>{
  for(const id of existingIds)assert.equal(SHOPPING_ITEMS.filter(i=>i.id===id).length,1,id);
  assert.equal(new Set(SHOPPING_ITEMS.map(i=>i.id)).size,SHOPPING_ITEMS.length);
- assert.equal(SHOPPING_ITEMS.length,existingIds.length+4);
+ assert.equal(SHOPPING_ITEMS.length,existingIds.length+5);
 });
 test('four hooks cost one supplied pack and describe a single horizontal row',()=>{
  const hooks=item('607039887632432');assert.equal(hooks.price,6.36);assert.equal(hooks.quantity,1);
@@ -49,5 +49,13 @@ test('includes the exact selected Temu A8447 180 x 250 cm vintage rug',()=>{
 test('adds the purchased living room rug to the known-priced subtotal',()=>{
  const total=SHOPPING_ITEMS.reduce((sum,i)=>sum+(i.price??0)*(i.quantity??1),0);
  assert.equal(Math.round(total*100),213180);
- assert.equal(SHOPPING_ITEMS.filter(i=>i.url).length,20);
+ assert.equal(SHOPPING_ITEMS.filter(i=>i.url).length,21);
+});
+test('adds the 30-piece white-gold marble wall tile set for the bathroom',()=>{
+ const tile=item('601100207687761');
+ assert.equal(tile.room,'Bad');
+ assert.equal(tile.quantity,30);
+ assert.match(tile.dimensions,/30 × 60 cm/);
+ assert.match(tile.amountLabel??'',/30 Stück/);
+ assert.match(tile.url??'',/601100207687761/);
 });

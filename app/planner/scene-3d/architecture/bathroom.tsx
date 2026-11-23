@@ -4,6 +4,7 @@ import type { PlannerBuiltIn } from "../../domain/types.ts";
 import { getPlannerMaterial } from "../materials.ts";
 import type { SceneObject } from "../scene-model.ts";
 import { SHARED_BOX, SHARED_CIRCLE, SHARED_CYLINDER, SHARED_MIRROR_LED, SHARED_PLANE, SHARED_TORUS } from "../shared/architecture-primitives.ts";
+import { BathMarbleSurface } from "./bath-marble";
 
 
 
@@ -11,6 +12,17 @@ import { SHARED_BOX, SHARED_CIRCLE, SHARED_CYLINDER, SHARED_MIRROR_LED, SHARED_P
 export function BathTiledFinish({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   const [width, height, depth] = item.size;
   const tile = getPlannerMaterial(item.materialId);
+  if (item.roomId === "bad" && item.catalogId === "bath-tub-apron") {
+    return (
+      <group name={`bath-tiled-finish-${item.source.id}`}>
+        <mesh scale={item.size} geometry={SHARED_BOX} material={tile} castShadow receiveShadow />
+        {/* Local −Z faces into the room at the installed 90° rotation. */}
+        <group position={[0, 0, -depth / 2 - 0.002]} rotation={[0, Math.PI, 0]}>
+          <BathMarbleSurface width={width} height={height} patternOffset={3} />
+        </group>
+      </group>
+    );
+  }
   const grout = getPlannerMaterial("tile-grout");
   const vertical = height > 0.06;
   const joint = vertical ? Math.min(0.012, depth * 0.12) : Math.min(0.006, width * 0.02);
