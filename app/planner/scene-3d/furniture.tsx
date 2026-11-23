@@ -22,6 +22,7 @@ import { CatalogModelGeometry, hasCatalogModelGeometry } from "./catalog-model-g
 import { createCatalogGltfMaterialCloner } from "./gltf-material-roles.ts";
 import { normalizeCatalogGltf } from "./gltf-normalization.ts";
 import { getPlannerMaterial } from "./materials.ts";
+import { DecorativeProxy } from "./furniture/decorative-proxy.tsx";
 import { furnitureRenderTransform, furnitureWorldPosition, type SceneModel, type SceneObject } from "./scene-model.ts";
 
 export function Furniture3D({
@@ -223,6 +224,9 @@ function ParametricFurniture({ fallback, materialId, catalogId, size }: { fallba
         <mesh position={[0, 0.66, 0]} scale={[0.86, 0.7, 0.86]} geometry={SHARED_SPHERE} castShadow><primitive object={getPlannerMaterial("leaf-green")} attach="material" /></mesh>
       </group>
     );
+  }
+  if (fallback === "decor" || fallback === "shelf") {
+    return <DecorativeProxy catalogId={catalogId} fallback={fallback} materialId={materialId} />;
   }
   if (fallback === "sofa") return <StandardSofa />;
   if (fallback === "table") return <DetailedTable materialId={materialId} />;
