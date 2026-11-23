@@ -131,7 +131,8 @@ const BASELINE_VISUAL_PLACEMENT_REFRESH_IDS = new Set([
   "zimmer1-temu-shaggy-rug",
   // The rug gets a targeted material migration so customized coordinates survive.
   "zimmer1-desk",
-  "zimmer1-chair",
+  // The chair has its own one-time product migration so locally moved chairs
+  // are not reset to default coordinates during a visual baseline rebase.
   "zimmer1-led-nightstand",
   "zimmer1-olive-plant",
   "living-chicago-sofa",
@@ -372,22 +373,25 @@ function readStoredValue(raw: string): MigrationResult {
       const parsed = parsePlannerDocument(normalized.document);
       const withRug = upgradeLivingRugMaterial(parsed);
       const withHall = upgradeHallPhotoReference(withRug);
-      if (!normalized.identityChanged && isOlderBaselineModel(withHall)) {
+      const withChair = upgradeZimmer1Chair(withHall);
+      if (!normalized.identityChanged && isOlderBaselineModel(withChair)) {
         return {
-          document: rebaseBaselineModel(withHall),
+          document: rebaseBaselineModel(withChair),
           warnings: ["Das gespeicherte Möbel-Layout und die Bad-/WC-Materialien wurden auf den aktuellen Stand aktualisiert."],
           legacyBackupJson: raw,
           unmapped: [],
         };
       }
-      if (normalized.changed || withHall !== parsed) {
+      if (normalized.changed || withChair !== parsed) {
         return {
-          document: withHall,
+          document: withChair,
           warnings: [normalized.changed
             ? "Das gespeicherte Dokument wurde auf die zusammengeführte Balkon-/Loggia-Struktur aktualisiert."
-            : withHall !== withRug
-              ? "Die Vorraumgarderobe wurde anhand der braunen Fotoreferenz aktualisiert; Position und Maße bleiben erhalten."
-              : "Der vorhandene Wohnzimmerteppich wurde auf das neue Temu-Design aktualisiert; Position und Drehung bleiben erhalten."],
+            : withChair !== withHall
+              ? "Der Stuhl in Zimmer 1 wurde auf das neue AliExpress-Modell aktualisiert; Position und Drehung bleiben erhalten."
+              : withHall !== withRug
+                ? "Die Vorraumgarderobe wurde anhand der braunen Fotoreferenz aktualisiert; Position und Maße bleiben erhalten."
+                : "Der vorhandene Wohnzimmerteppich wurde auf das neue Temu-Design aktualisiert; Position und Drehung bleiben erhalten."],
           legacyBackupJson: raw,
           unmapped: [],
         };
@@ -469,6 +473,27 @@ function normalizeLegacyV3Aliases(value: object): { document: object; changed: b
     viewPreferences: preferences ? { ...preferences, activeRoomId: activeRoomId ? "balkon" : preferences.activeRoomId } : record.viewPreferences,
   };
   return { document: normalized, changed: true };
+}
+
+/** Switch only the previous default Zimmer-1 chair, preserving custom positions,
+ * rotations, and any genuinely user-resized bounding box. Alternative product
+ * selections remain untouched. */
+export function upgradeZimmer1Chair(document: PlannerDocumentV3): PlannerDocumentV3 {
+  if (document.id !== DEFAULT_APARTMENT_DOCUMENT.id) return document;
+  const current = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "zimmer1-chair");
+  const previous = document.placements.find((item) => item.id === "zimmer1-chair");
+  if (!current || !previous || previous.catalogId !== "chair-temu-executive-ivory") return document;
+  const wasDefaultSize = previous.size.width === 0.64 && previous.size.depth === 0.51 && previous.size.height === 1.14;
+  return parsePlannerDocument({
+    ...document,
+    placements: document.placements.map((item) => item.id === previous.id ? {
+      ...item,
+      catalogId: current.catalogId,
+      size: wasDefaultSize ? current.size : item.size,
+      materialVariants: current.materialVariants,
+      metadata: current.metadata,
+    } : item),
+  });
 }
 
 /** Adopt the brown hall photo without moving a locally adjusted wardrobe.

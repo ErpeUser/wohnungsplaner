@@ -2,6 +2,7 @@
 
 import { BlissBed, DetailedBed } from "./furniture/beds.tsx";
 import { ComparisonChair, KaleoArmchair, PhotoOfficeChair, TemuIvoryExecutiveChair } from "./furniture/chairs.tsx";
+import { XuegwAdjustableDeskChair } from "./furniture/xuegw-chair.tsx";
 import { DetailedCabinet, DetailedDresser, DetailedFloorLamp, DetailedLowboard, DetailedShelf, LedChargingNightstand, PhotoDesk, PhotoWardrobe, StandardPlant, StandardWardrobe, TejoHallway, Zimmer1OlivePlant } from "./furniture/decor.tsx";
 import { BrownHallwayMirrorBench } from "./furniture/hallway-brown.tsx";
 import { DetailStrip, SHARED_BOX, SHARED_CYLINDER, SHARED_SPHERE } from "./furniture/primitives.tsx";
@@ -195,6 +196,7 @@ function ParametricFurniture({ fallback, materialId, catalogId, size }: { fallba
   if (catalogId === "plant-zimmer1-olive") return <Zimmer1OlivePlant />;
   if (catalogId === "vanity-vicco-sherry-120") return <ViccoSherryVanity />;
   if (catalogId === "chair-temu-executive-ivory") return <TemuIvoryExecutiveChair />;
+  if (catalogId === "chair-aliexpress-xuegw-1005012445521181") return <XuegwAdjustableDeskChair materialId={materialId} />;
   if (catalogId.startsWith("bed-")) return <DetailedBed materialId={materialId} />;
   if (catalogId === "wardrobe-200") return <StandardWardrobe materialId={materialId} />;
   if (catalogId === "wardrobe-225") return <PhotoWardrobe />;

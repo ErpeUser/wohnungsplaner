@@ -45,6 +45,12 @@ const KALEO_BEIGE = [
 const TEMU_SWIVEL_SAND = [
   { id: "fabric-temu-sand", label: "Polsterstoff Sand", color: "#d5c7b6" },
 ];
+const XUEGW_UPHOLSTERY = [
+  { id: "fabric-ecru", label: "Ecru/Creme · Planungsfarbe", color: "#eee6d9" },
+  { id: "fabric-sand", label: "Sandbeige · Alternative", color: "#c4aa8e" },
+  { id: "fabric-blush", label: "Altrosa · Alternative", color: "#e1a9b2" },
+  { id: "fabric-anthracite", label: "Anthrazit · Alternative", color: "#4c5252" },
+];
 const TEMU_LEATHER_CREAM = [
   { id: "leather-temu-cream", label: "Kunstleder Creme", color: "#e9dfd2" },
 ];
@@ -213,6 +219,12 @@ const PRODUCT_REALISM: Record<string, ProductRealismSpec> = {
     confidence: "estimated",
     construction: ["cremefarbenes Kunstleder", "hohe Rückenlehne und Kopfstütze", "gepolsterte Armlehnen", "ausziehbare Fußstütze und verchromtes Fünfsternuntergestell"],
   },
+  "chair-aliexpress-xuegw-1005012445521181": {
+    sourceLabel: "AliExpress Art. 1005012445521181 · Produkttitel aus Nutzerlink (Galerie nicht verifiziert)",
+    dimensions: "Planmodell ca. 62 × 53 × 92 cm · nur Schätzmaß, Händlermaße und gewählte Variante nicht bestätigt",
+    confidence: "estimated",
+    construction: ["gepolsterter, leicht gerundeter Sitz mit separater Rückenlehne", "höhenverstellbare Drehmechanik und Bedienhebel", "Fünfsternfuß mit Rollen als realistische Modellannahme", "ecrufarbener Bezug als Planungsfarbe; Ausführung und Details vor Kauf bestätigen"],
+  },
   "nightstand-led-2drawer-white": {
     sourceLabel: "Temu Produktbild / Art. 601100375290552",
     dimensions: "ca. 39,6 × 30 × 60,4 cm",
@@ -262,7 +274,7 @@ const PRODUCT_REALISM: Record<string, ProductRealismSpec> = {
 // Generic catalog items stay on the local GLB path automatically.
 export const PHOTO_FIRST_IDS: ReadonlySet<string> = new Set([
   "bed-bliss-120", "wardrobe-225", "vanity-vicco-sherry-120",
-  "chair-temu-executive-ivory", "chair-kaleo-chenille-beige", "chair-temu-swivel-upholstered", "chair-temu-faux-leather-metal", "chair-temu-velvet-swivel-arm", "chair-amber-chenille-beige", "sofa-sectional-photo",
+  "chair-temu-executive-ivory", "chair-aliexpress-xuegw-1005012445521181", "chair-kaleo-chenille-beige", "chair-temu-swivel-upholstered", "chair-temu-faux-leather-metal", "chair-temu-velvet-swivel-arm", "chair-amber-chenille-beige", "sofa-sectional-photo",
   "sofa-chicago-206", "sofa-aliexpress-142", "sofa-aliexpress-142-open", "dining-table-bozan-110", "nightstand-led-2drawer-white",
   "hallway-tejo-115", "hallway-brown-mirror-bench-115", "dining-table-aliexpress-100-140", "dining-table-temu-606997-120-160", "dining-table-temu-609726-110-150", "dining-table-kaufland-567080013-120-160", "rug-gala-shaggy-2505-100x200", "rug-temu-shaggy-white-120x200",
   "rug-temu-easy-line-120x180", "rug-temu-easy-line-140x200", "rug-temu-rabbit-ivory-100x180",
@@ -289,6 +301,7 @@ export const FURNITURE_CATALOG: FurnitureCatalogItem[] = [
   item("desk-standard", "Schreibtisch", "Arbeiten", "Gerader Arbeitstisch", [1.3, 0.65, 0.75], "free", "desk", "desk", WOOD),
   item("vanity-vicco-sherry-120", "Schminktisch Sherry mit LED-Spiegel", "Arbeiten", "Vorhandener Vicco Sherry in Weiß/Gold mit fünf Schubladen und 110 × 70 cm LED-Spiegel", [1.2, 0.55, 1.45], "fixed", "desk", "desk", SHERRY_WHITE_GOLD),
   item("chair-temu-executive-ivory", "Chefsessel Creme mit Fußstütze", "Arbeiten", "Hoch gepolsterter cremefarbener Drehstuhl mit Kopfstütze, ausziehbarer Fußstütze, gepolsterten Armlehnen und verchromtem Fünfsternfuß", [0.64, 0.51, 1.14], "fixed", "chair", "office-chair", TEMU_EXECUTIVE_IVORY),
+  { ...item("chair-aliexpress-xuegw-1005012445521181", "XUEGW gepolsterter Drehstuhl · AliExpress", "Arbeiten", "Kompakter, höhenverstellbarer Schreibtisch- und Schminktischstuhl mit Rückenlehne, Drehfuß und leisen Rollen; Modellmaße geschätzt", [0.62, 0.53, 0.92], "fixed", "chair", "office-chair", XUEGW_UPHOLSTERY), sourceUrl: "https://de.aliexpress.com/item/1005012445521181.html" },
   item("chair-office", "Bürostuhl", "Arbeiten", "Drehstuhl mit Armlehnen", [0.62, 0.62, 1.05], "fixed", "chair", "office-chair", FABRIC),
   item("wardrobe-200", "Kleiderschrank", "Aufbewahren", "Vier Türen, 60 cm tief", [2, 0.6, 2.2], "free", "storage", "wardrobe", WOOD),
   item("wardrobe-225", "Kleiderschrank 225", "Aufbewahren", "Fotobelegter Schrank, 225 cm breit", [2.25, 0.62, 2.2], "free", "storage", "wardrobe", WOOD),
