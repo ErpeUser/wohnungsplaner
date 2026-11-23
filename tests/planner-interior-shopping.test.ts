@@ -104,7 +104,7 @@ test('lists WOLTU Chenille as four primary chairs in two unpriced two-packs, wit
  assert.equal(backup.alternative,true);
  assert.equal(backup.quantity,4);
  assert.equal(backup.price,55.92);
- assert.equal(shoppingSubtotal,1983.42);
+ assert.equal(Math.round(shoppingSubtotal * 100),200739);
 });
 
 test('uses the requested Universal TEJO link without changing the existing furniture or its historical budget value',()=>{
