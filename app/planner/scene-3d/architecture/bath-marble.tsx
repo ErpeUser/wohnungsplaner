@@ -13,8 +13,8 @@ export function bathMarbleWallBounds(
   segment: SceneWallSegment,
   tub: SceneObject<PlannerBuiltIn>,
 ) {
-  const [tubX, tubY, tubZ] = tub.position;
-  const [tubWidth, tubHeight, tubLength] = tub.size;
+  const [tubX] = tub.position;
+  const [tubWidth] = tub.size;
   const tubBack = tubX - tubWidth / 2;
   const wallFace = wall.start.x + wall.thickness / 2;
   if (!wall.roomIds.includes(tub.roomId)
@@ -23,15 +23,14 @@ export function bathMarbleWallBounds(
 
   const [, y, z] = segment.position;
   const [length, height] = segment.size;
-  const start = Math.max(z - length / 2, tubZ - tubLength / 2);
-  const end = Math.min(z + length / 2, tubZ + tubLength / 2);
-  const bottom = Math.max(y - height / 2, tubY + tubHeight / 2);
-  const top = y + height / 2;
-  if (end - start < 0.001 || top - bottom < 0.001) return null;
+  if (length <= 0.001 || height <= 0.001) return null;
+  // Tile the complete solid bathroom wall segment rather than cropping it to
+  // the 160-cm tub and the space above its rim. Segment geometry already
+  // excludes openings, so the finish stops at the wall corners and door cuts.
   return {
-    width: end - start,
-    height: top - bottom,
-    position: [wallFace + 0.002, (top + bottom) / 2, (start + end) / 2] as const,
+    width: length,
+    height,
+    position: [wallFace + 0.002, y, z] as const,
   };
 }
 
@@ -43,10 +42,12 @@ export function bathMarbleTileBuffers(width: number, height: number, patternOffs
     const shift = row % 2 ? TILE_WIDTH / 2 : 0;
     for (let column = 0; column * TILE_WIDTH - shift < width; column++) {
       const x = column * TILE_WIDTH - shift;
-      const left = Math.max(0, x + JOINT / 2);
-      const right = Math.min(width, x + TILE_WIDTH - JOINT / 2);
-      const bottom = Math.max(0, y + JOINT / 2);
-      const top = Math.min(height, y + TILE_HEIGHT - JOINT / 2);
+      // Leave joints between tiles, never a grout-colored slit at the
+      // outer wall perimeter (including its cropped final row/column).
+      const left = x <= 0 ? 0 : x + JOINT / 2;
+      const right = x + TILE_WIDTH >= width ? width : x + TILE_WIDTH - JOINT / 2;
+      const bottom = y === 0 ? 0 : y + JOINT / 2;
+      const top = y + TILE_HEIGHT >= height ? height : y + TILE_HEIGHT - JOINT / 2;
       if (left >= right || bottom >= top) continue;
 
       const variant = (row * 3 + column * 5 + Math.floor(row / 2) + patternOffset) % 8;
