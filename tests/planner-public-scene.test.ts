@@ -5,18 +5,17 @@ import { DEFAULT_APARTMENT_DOCUMENT } from "../app/planner/domain/apartment-v3.t
 import { getFurnitureCatalogItem } from "../app/planner/catalog/catalog.ts";
 import { projectPublicApartmentDocument } from "../app/planner/domain/public-scene.ts";
 
-test("public projection removes the Zimmer-1 test room from the starter scene only", () => {
+test("public projection keeps the complete apartment including Zimmer 1", () => {
     const projected = projectPublicApartmentDocument(DEFAULT_APARTMENT_DOCUMENT);
 
     assert.equal(DEFAULT_APARTMENT_DOCUMENT.rooms.some((room) => room.id === "zimmer1"), true);
-    assert.equal(projected.rooms.some((room) => room.id === "zimmer1"), false);
-    assert.equal(projected.rooms.length, DEFAULT_APARTMENT_DOCUMENT.rooms.length - 1);
-    assert.equal(projected.builtIns.every((item) => item.roomId !== "zimmer1"), true);
-    assert.equal(projected.fixtures.every((item) => item.roomId !== "zimmer1"), true);
-    assert.equal(projected.placements.every((item) => item.roomId !== "zimmer1"), true);
-    assert.equal(projected.openings.some((opening) => opening.id === "zimmer1-window"), false);
-    assert.equal(projected.openings.some((opening) => opening.id === "zimmer1-door"), false);
-    assert.equal(projected.viewPreferences.activeRoomId, null);
+    assert.equal(projected.rooms.some((room) => room.id === "zimmer1"), true);
+    assert.equal(projected.rooms.length, DEFAULT_APARTMENT_DOCUMENT.rooms.length);
+    assert.equal(projected.builtIns.length, DEFAULT_APARTMENT_DOCUMENT.builtIns.length);
+    assert.equal(projected.fixtures.length, DEFAULT_APARTMENT_DOCUMENT.fixtures.length);
+    assert.equal(projected.placements.length, DEFAULT_APARTMENT_DOCUMENT.placements.length);
+    assert.equal(projected.openings.some((opening) => opening.id === "zimmer1-window"), true);
+    assert.equal(projected.openings.some((opening) => opening.id === "zimmer1-door"), true);
 });
 
 test("public catalogue keeps Zimmer-1 products and all 42 desktop references", () => {

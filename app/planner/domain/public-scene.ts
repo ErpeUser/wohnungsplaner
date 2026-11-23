@@ -1,20 +1,13 @@
 import type { PlannerDocumentV3 } from "./types.ts";
 
-/** Zimmer 1 is retained in the canonical planning source for migrations and catalogue references. */
-const PUBLIC_REMOVED_ROOM_IDS = new Set(["zimmer1"]);
-
 /**
  * Projects the canonical apartment into the public starter scene.
  *
- * The source document intentionally remains complete: old exports, migration
- * code and product references still need the test room. Only the document fed
- * to the normal workspace is reduced, so Zimmer 1's products stay available in
- * the catalogue without appearing in the public scene.
+ * The public workspace uses the complete canonical apartment so every supplied
+ * room, including Zimmer 1, remains available alongside its catalogue products.
  */
 export function projectPublicApartmentDocument(document: PlannerDocumentV3): PlannerDocumentV3 {
-  const visibleRoomIds = new Set(document.rooms
-    .map((room) => room.id)
-    .filter((roomId) => !PUBLIC_REMOVED_ROOM_IDS.has(roomId)));
+  const visibleRoomIds = new Set(document.rooms.map((room) => room.id));
   const rooms = document.rooms.filter((room) => visibleRoomIds.has(room.id));
   const walls = document.walls
     .map((wall) => ({ ...wall, roomIds: wall.roomIds.filter((roomId) => visibleRoomIds.has(roomId)) }))
