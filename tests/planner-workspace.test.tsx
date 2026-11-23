@@ -199,7 +199,7 @@ describe("PlannerWorkspace", () => {
       expect(within(chooser).getByRole("option", { name: label }).getAttribute("value")).toBe(id);
       expect(within(list).getByRole("button", { name: label })).toBeTruthy();
     }
-    expect(within(chooser).getByRole("option", { name: "Chefsessel Creme mit Fußstütze" }).getAttribute("value")).toBe("zimmer1-chair");
+    expect(within(chooser).getByRole("option", { name: "XUEGW gepolsterter Drehstuhl · AliExpress" }).getAttribute("value")).toBe("zimmer1-chair");
     expect(store.getState().document).toBe(initialDocument);
     expect(store.getState().canUndo).toBe(false);
   });

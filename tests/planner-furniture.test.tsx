@@ -107,8 +107,10 @@ describe("furniture interactions", () => {
     const document = { ...DEFAULT_APARTMENT_DOCUMENT, placements: [chair] };
     const snapped = resolvePlacementMove(document, chair, { x: 2.713, z: 0.937 });
     const free = resolvePlacementMove(document, chair, { x: 2.713, z: 0.937 }, { disableGrid: true });
-    assert.deepEqual(snapped.position, { x: 2.72, z: 0.935 });
-    assert.deepEqual(free.position, { x: 2.72, z: 0.935 });
+    // The new 62-cm chair is 2 cm narrower than the old 64-cm Temu model;
+    // both interactions still snap its left edge to the same object guide.
+    assert.deepEqual(snapped.position, { x: 2.71, z: 0.935 });
+    assert.deepEqual(free.position, { x: 2.71, z: 0.935 });
     assert.ok(snapped.guides.some((guide) => guide.kind === "object"));
   });
 
@@ -248,7 +250,7 @@ describe("furniture interactions", () => {
         "bed-bliss-120",
         "hallway-tejo-115",
         "vanity-vicco-sherry-120",
-        "chair-temu-executive-ivory",
+        "chair-aliexpress-xuegw-1005012445521181",
         "nightstand-led-2drawer-white",
         "rug-living-concept-240x240",
       ]) expect(screen.getByTestId(`plan-graphic-${id}`)).toBeTruthy();
