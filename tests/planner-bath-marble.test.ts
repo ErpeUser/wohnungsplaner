@@ -82,5 +82,6 @@ test("finishes every WC-facing tiled wall without crossing into the neighboring 
   }
   const tiles = marbleTileBuffers(0.9, 2.56, 0, "wc");
   const firstTileWidth = tiles.positions[3] - tiles.positions[0];
-  assert.ok(Math.abs(firstTileWidth - 0.449625) < 1e-6);
+  // The warmer ceramic finish uses a 1.5-mm joint instead of 0.75 mm.
+  assert.ok(Math.abs(firstTileWidth - 0.44925) < 1e-6);
 });
