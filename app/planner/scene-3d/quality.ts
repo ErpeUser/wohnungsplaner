@@ -15,8 +15,11 @@ export type ThreeSupport = {
 
 const QUALITY: Record<QualityTier, QualitySettings> = {
   low: { dpr: [1, 1.25], shadows: false, shadowMapSize: 512, effects: false },
-  balanced: { dpr: [1, 1.75], shadows: true, shadowMapSize: 1024, effects: false },
-  high: { dpr: [1, 2], shadows: true, shadowMapSize: 2048, effects: true },
+  // A capped backbuffer keeps mobile fill-rate and battery use predictable;
+  // CSS pixels remain crisp while WebGL is not asked to render every native
+  // device pixel on dense phone displays.
+  balanced: { dpr: [1, 1.5], shadows: true, shadowMapSize: 1024, effects: false },
+  high: { dpr: [1, 1.75], shadows: true, shadowMapSize: 2048, effects: true },
 };
 
 export function qualitySettings(tier: QualityTier): QualitySettings {

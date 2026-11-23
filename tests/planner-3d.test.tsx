@@ -43,7 +43,15 @@ vi.mock("../app/planner/scene-3d/lighting.tsx", () => ({
 
 import { DEFAULT_APARTMENT_DOCUMENT } from "../app/planner/domain/apartment-v3.ts";
 import { doorPose } from "../app/planner/domain/geometry.ts";
-import { CameraController, createOrbitPose, orbitFovForRoom } from "../app/planner/scene-3d/camera-controller.tsx";
+import {
+  attachTouchLookControls,
+  clampTouchPitch,
+  CameraController,
+  createOrbitPose,
+  orbitFovForRoom,
+  rotateWalkCameraForTouch,
+  TOUCH_PITCH_LIMIT,
+} from "../app/planner/scene-3d/camera-controller.tsx";
 import { Planner3D } from "../app/planner/scene-3d/planner-3d.tsx";
 import { getPlannerMaterial, PLANNER_TEXTURE_READY_EVENT } from "../app/planner/scene-3d/materials.ts";
 import { qualitySettings, detectThreeSupport } from "../app/planner/scene-3d/quality.ts";
@@ -65,6 +73,87 @@ describe("createSceneModel", () => {
     );
 
     expect(screen.getByTestId("mock-pointer-lock-controls").getAttribute("data-has-dom-element")).toBe("true");
+  });
+
+  test("uses touch pointer capture for first-person look and releases cancelled gestures", () => {
+    const canvas = document.createElement("canvas");
+    const setPointerCapture = vi.fn();
+    const hasPointerCapture = vi.fn(() => true);
+    const releasePointerCapture = vi.fn();
+    Object.defineProperties(canvas, {
+      setPointerCapture: { value: setPointerCapture },
+      hasPointerCapture: { value: hasPointerCapture },
+      releasePointerCapture: { value: releasePointerCapture },
+    });
+    const camera = new PerspectiveCamera();
+    const invalidate = vi.fn();
+    const cleanup = attachTouchLookControls(canvas, camera, invalidate);
+    const pointer = (type: string, pointerType: string, pointerId: number, clientX: number, clientY: number) => {
+      const event = new Event(type, { bubbles: true, cancelable: true });
+      Object.defineProperties(event, {
+        pointerType: { value: pointerType },
+        pointerId: { value: pointerId },
+        clientX: { value: clientX },
+        clientY: { value: clientY },
+      });
+      return event;
+    };
+
+    canvas.dispatchEvent(pointer("pointerdown", "touch", 7, 100, 100));
+    canvas.dispatchEvent(pointer("pointermove", "mouse", 7, 200, 200));
+    expect(invalidate).not.toHaveBeenCalled();
+    canvas.dispatchEvent(pointer("pointermove", "touch", 7, 180, 40));
+    expect(setPointerCapture).toHaveBeenCalledWith(7);
+    expect(invalidate).toHaveBeenCalledOnce();
+    expect(camera.rotation.y).toBeCloseTo(-0.32);
+    expect(camera.rotation.x).toBeCloseTo(0.24);
+    expect(camera.rotation.x).toBeLessThanOrEqual(TOUCH_PITCH_LIMIT);
+
+    canvas.dispatchEvent(pointer("pointercancel", "touch", 7, 180, 40));
+    expect(releasePointerCapture).toHaveBeenCalledWith(7);
+    canvas.dispatchEvent(pointer("pointermove", "touch", 7, 200, 20));
+    expect(invalidate).toHaveBeenCalledOnce();
+    canvas.dispatchEvent(pointer("pointerdown", "touch", 8, 20, 20));
+    canvas.dispatchEvent(pointer("lostpointercapture", "touch", 8, 20, 20));
+    expect(releasePointerCapture).toHaveBeenCalledWith(8);
+    cleanup();
+  });
+
+  test("clamps touch pitch in both directions", () => {
+    const canvas = document.createElement("canvas");
+    const camera = new PerspectiveCamera();
+    const cleanup = attachTouchLookControls(canvas, camera, vi.fn());
+    const pointer = (type: string, pointerId: number, clientY: number) => {
+      const event = new Event(type, { cancelable: true });
+      Object.defineProperties(event, {
+        pointerType: { value: "touch" },
+        pointerId: { value: pointerId },
+        clientX: { value: 0 },
+        clientY: { value: clientY },
+      });
+      return event;
+    };
+
+    canvas.dispatchEvent(pointer("pointerdown", 1, 0));
+    canvas.dispatchEvent(pointer("pointermove", 1, -10000));
+    expect(camera.rotation.x).toBeCloseTo(TOUCH_PITCH_LIMIT);
+    canvas.dispatchEvent(pointer("pointerup", 1, -10000));
+    canvas.dispatchEvent(pointer("pointerdown", 2, 0));
+    canvas.dispatchEvent(pointer("pointermove", 2, 10000));
+    expect(camera.rotation.x).toBeCloseTo(-TOUCH_PITCH_LIMIT);
+    cleanup();
+  });
+
+  test("keeps the touch camera helper in YXZ order with bounded pitch", () => {
+    expect(clampTouchPitch(TOUCH_PITCH_LIMIT * 2)).toBe(TOUCH_PITCH_LIMIT);
+    expect(clampTouchPitch(-TOUCH_PITCH_LIMIT * 2)).toBe(-TOUCH_PITCH_LIMIT);
+    const camera = new PerspectiveCamera();
+    rotateWalkCameraForTouch(camera, 50, -25);
+    expect(camera.rotation.order).toBe("YXZ");
+    expect(camera.rotation.y).toBeCloseTo(-0.2);
+    expect(camera.rotation.x).toBeCloseTo(0.1);
+    expect(camera.rotation.x).toBeGreaterThanOrEqual(-TOUCH_PITCH_LIMIT);
+    expect(camera.rotation.x).toBeLessThanOrEqual(TOUCH_PITCH_LIMIT);
   });
 
   test("allows direct mouse rotation in the overview", () => {
