@@ -11,7 +11,7 @@ import { Floor } from "./floors";
 import { KitchenBacksplash, KitchenBase, KitchenCornerBase, KitchenCornerUpper, KitchenFloorZone, KitchenFridge, KitchenHob, KitchenHood, KitchenMicrowave, KitchenOven, KitchenSink, KitchenUpper, KitchenWorktop } from "./kitchen";
 import { LivingFloatingCabinet, LivingTelevision, MossPanel, VorraumWallDecor, WallClock, WallLight } from "./living";
 import { WindowAssembly } from "./windows";
-import { SHARED_BOX, SHARED_CYLINDER, SHARED_SPHERE, SHARED_TORUS, VORRAUM_PLANT_TEXTURE } from "../shared/architecture-primitives";
+import { SHARED_BOX, SHARED_CYLINDER, VORRAUM_PLANT_TEXTURE } from "../shared/architecture-primitives";
 
 import { RoundedBox } from "@react-three/drei";
 import { useMemo } from "react";

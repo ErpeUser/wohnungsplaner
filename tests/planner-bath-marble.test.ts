@@ -47,17 +47,38 @@ test("fills the complete 185 × 256 cm wall without left, right, top or bottom s
   assert.ok(Math.abs(Math.max(...ys) - 1.28) < 1e-6);
 });
 
-test("finishes only the full rear WC wall on the room-facing side", () => {
+test("finishes every WC-facing tiled wall without crossing into the neighboring rooms", () => {
   for (const roomId of [null, "wc"]) {
     const scene = createSceneModel(DEFAULT_APARTMENT_DOCUMENT, roomId);
-    const surfaces = scene.walls.flatMap((wall) => wall.segments
-      .map((segment) => wcMarbleWallBounds(wall, segment))).filter(Boolean);
-    assert.equal(surfaces.length, 1);
-    const surface = surfaces[0]!;
-    assert.ok(Math.abs(surface.width - 1.09) < 1e-6);
-    assert.equal(surface.height, 2.56);
-    assert.ok(Math.abs(surface.position[0] - (-1.875)) < 1e-6);
-    assert.ok(Math.abs(surface.position[2] - 4.2005) < 1e-6);
+    const wcWalls = scene.walls.filter(wall => wall.roomIds.includes("wc"));
+    const tiled = wcWalls.flatMap(wall => wall.segments.map(segment => ({
+      wall, segment, surface: wcMarbleWallBounds(wall, segment),
+    })));
+    assert.equal(wcWalls.length, 4);
+    assert.ok(tiled.length >= 4, "opening-specific wall segments are all tiled");
+    assert.ok(tiled.every(({ surface }) => surface !== null));
+    for (const { wall, segment, surface } of tiled) {
+      assert.ok(surface);
+      assert.equal(surface.width, segment.size[0]);
+      assert.equal(surface.height, segment.size[1]);
+      const inward = {
+        x: -1.875 - segment.position[0],
+        z: 4.91 - segment.position[2],
+      };
+      const facing = {
+        x: surface.position[0] - segment.position[0],
+        z: surface.position[2] - segment.position[2],
+      };
+      assert.ok(inward.x * facing.x + inward.z * facing.z > 0,
+        `tile faces into WC at ${wall.id}`);
+    }
+    for (const other of scene.walls.filter(wall => !wall.roomIds.includes("wc"))) {
+      for (const segment of other.segments) assert.equal(wcMarbleWallBounds(other, segment), null);
+    }
+    const rear = tiled.find(({ wall }) => wall.id === "wall-wc-1-1");
+    assert.ok(rear?.surface);
+    assert.equal(rear.surface.width, 1.09);
+    assert.equal(rear.surface.height, 2.56);
   }
   const tiles = marbleTileBuffers(0.9, 2.56, 0, "wc");
   const firstTileWidth = tiles.positions[3] - tiles.positions[0];
