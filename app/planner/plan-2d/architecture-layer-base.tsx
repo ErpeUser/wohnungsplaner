@@ -404,7 +404,9 @@ function planObjectColor(catalogId: string | undefined, kind: string) {
   if (catalogId === "zimmer1-headboard-led") return "#f2bd78";
   if (catalogId === "zimmer1-headboard-sconces") return "#c89d62";
   if (catalogId === "zimmer1-layered-curtain") return "#c9b6a4";
-  if (catalogId?.startsWith("zimmer1-desk-shelf-") || catalogId === "zimmer1-entry-niche") return "#c99d68";
+  if (catalogId === "zimmer1-desk-shelf-main") return "#b17d4f";
+  if (catalogId?.startsWith("zimmer1-desk-shelf-side-")) return "#d0a66b";
+  if (catalogId === "zimmer1-entry-niche") return "#c99d68";
   if (catalogId === "zimmer1-wardrobe-top-decor") return "#c6ae8e";
   if (catalogId === "zimmer1-desk-accessories" || catalogId === "zimmer1-nightstand-decor") return "#d7c8b4";
   if (catalogId === "vorraum-wall-decor") return "#c6ae8e";
