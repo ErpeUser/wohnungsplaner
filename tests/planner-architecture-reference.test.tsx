@@ -117,8 +117,8 @@ test("the WC plate has two broad light rockers separated by a recessed vertical 
     expect(bounds.getSize(new Vector3()).x).toBeCloseTo(0.24, 4);
     expect(bounds.getSize(new Vector3()).y).toBeCloseTo(0.16, 4);
     expect(bounds.getSize(new Vector3()).z).toBeCloseTo(0.035, 4);
-    expect(bounds.getCenter(new Vector3()).x).toBeCloseTo(-1.97, 4);
-    expect(bounds.getCenter(new Vector3()).z).toBeCloseTo(4.115, 4);
+    expect(bounds.getCenter(new Vector3()).x).toBeCloseTo(flush.position[0], 4);
+    expect(bounds.getCenter(new Vector3()).z).toBeCloseTo(flush.position[2], 4);
     expect(bounds.min.y).toBeCloseTo(1.02, 4);
   } finally { await model.dispose(); }
 });

@@ -32,7 +32,9 @@ const roomOutlines: RoomOutlineInput[] = [
     point(-2.42, 8.2), point(-0.09, 8.2), point(-0.09, 10.05), point(-2.42, 10.05),
   ]),
   room("wc", "WC", 1.42, true, "porcelain-light-taupe", [
-    point(-2.42, 4.1), point(-1.52, 4.1), point(-1.52, 5.68), point(-2.42, 5.68),
+    // Wall centerlines. Clear dimensions are 0.98 m between the finished
+    // side walls and approximately 1.42 m to the inside entrance plane.
+    point(-2.42, 4.14), point(-1.33, 4.14), point(-1.33, 5.68), point(-2.42, 5.68),
   ]),
   // The Vermietungsplan labels the 2.23 m² loggia as epoxy resin and the
   // adjoining 3.80 m² balcony as the same hard-wearing exterior finish.  The
@@ -51,7 +53,11 @@ const wallGraph = buildWallGraph(roomOutlines);
 // documents, so pin this measured apartment to its documented height here.
 // This keeps wall tops, ceiling lights and the room-finish references on the
 // same datum without changing the generic graph builder.
-for (const wall of wallGraph.walls) wall.height = 2.56;
+for (const wall of wallGraph.walls) {
+  wall.height = 2.56;
+  // The WC and storage room share one 10 cm partition.
+  if (wall.roomIds.includes("wc") && wall.roomIds.includes("abstellraum")) wall.thickness = 0.10;
+}
 
 type LegacyOpening = {
   id: string;
@@ -152,15 +158,15 @@ const builtIns: PlannerBuiltIn[] = [
     confidence: "estimated",
     notes: ["Vier einzelne runde Naturholz-Wandplatten mit mattschwarzen gebogenen Haken in einer 2×2-Anordnung auf der bestehenden freien Badezimmerwand. Anordnung ca. 36 × 34 cm; reale Hakendurchmesser und die Eignung der Klebemontage auf den Fliesen vor Montage prüfen."],
   }),
-  builtIn("wc-pan", "Wand-WC", "wc", "sanitary", "sanitary-wall-wc", -1.97, 4.4, 0.38, 0.58, 0.42, 0, "#f5f4f0", 0.18),
-  builtIn("wc-flush", "WC-Betätigungsplatte", "wc", "sanitary", "wc-flush-plate", -1.97, 4.115, 0.24, 0.035, 0.16, 0, "metal-satin", 1.02),
-  builtIn("wc-revision", "WC-Revisionsfeld", "wc", "sanitary", "wc-revision-panel", -1.97, 4.11, 0.42, 0.03, 0.3, 0, "tile-white-rect", 1.68),
-  builtIn("wc-mat", "WC-Teppich · beige Baumwoll-Waffelstruktur · 77 × 46 cm", "wc", "other", "wc-mat", -1.97, 5.25, 0.77, 0.46, 0.018, 0, "temu-bath-rug-woven", 0.012, {
+  builtIn("wc-pan", "Wand-WC", "wc", "sanitary", "sanitary-wall-wc", -1.87, 4.44, 0.38, 0.58, 0.42, 0, "#f5f4f0", 0.18),
+  builtIn("wc-flush", "WC-Betätigungsplatte", "wc", "sanitary", "wc-flush-plate", -1.87, 4.155, 0.24, 0.035, 0.16, 0, "metal-satin", 1.02),
+  builtIn("wc-revision", "WC-Revisionsfeld", "wc", "sanitary", "wc-revision-panel", -1.87, 4.15, 0.42, 0.03, 0.3, 0, "tile-white-rect", 1.68),
+  builtIn("wc-mat", "WC-Teppich · beige Baumwoll-Waffelstruktur · 77 × 46 cm", "wc", "other", "wc-mat", -1.87, 5.25, 0.77, 0.46, 0.018, 0, "temu-bath-rug-woven", 0.012, {
     source: "Vom Nutzer bereitgestelltes Temu-Produktbild · Art. 606121368598635",
     confidence: "confirmed",
     notes: ["WC-Teppich exakt 77 × 46 cm mit 1-cm-Waffelrelief; um 90° gedreht, sodass die 77-cm-Seite quer vor dem Wand-WC liegt."],
   }),
-  builtIn("wc-paper-holder", "Eiche-Eisen-Ablage mit Toilettenpapierhalter · Temu", "wc", "other", "wc-paper-holder", -1.61, 4.8, 0.33, 0.15, 0.25, 90, "wc-holder-solid-oak", 0.68, {
+  builtIn("wc-paper-holder", "Eiche-Eisen-Ablage mit Toilettenpapierhalter · Temu", "wc", "other", "wc-paper-holder", -1.455, 4.8, 0.33, 0.15, 0.25, 90, "wc-holder-solid-oak", 0.68, {
     source: "Nutzerfotos, Temu Art. 601100249492431 · SKU 17595354506975",
     confidence: "estimated",
     notes: ["Foto-Maße: unteres Holzbrett 17 × 14 cm; Eisenhalter 15 cm; Verbindungssteg 9 cm. Oberes Holzbrett baugleich als Visualisierungsannahme.", "Bestehende rechte WC-Seitenwand, oberes Ablageniveau ca. 92 cm. 33 × 15 × 25 cm Gesamt-Bounding-Box und Montagehöhe geschätzt, vor Bestellung und Montage an Wand und WC-Abständen prüfen.", "Kein zweiter Papierhalter und keine zusätzlichen Dekoartikel aus dem Werbefoto."],
@@ -263,7 +269,7 @@ const DECORATIVE_BUILT_IN_IDS = new Set([
 const finalBuiltIns = builtIns.map((item) => item.id === "builtin-bath-mat"
   ? { ...item, position: { x: -1.25, z: 8.8 }, rotation: 90, materialVariants: { ...item.materialVariants, main: "temu-bath-rug-woven" }, collision: "decorative" as const }
   : item.id === "builtin-wc-mat"
-    ? { ...item, position: { x: -1.97, z: 5.25 }, rotation: 0, materialVariants: { ...item.materialVariants, main: "temu-bath-rug-woven" }, collision: "decorative" as const }
+    ? { ...item, position: { x: -1.87, z: 5.25 }, rotation: 0, materialVariants: { ...item.materialVariants, main: "temu-bath-rug-woven" }, collision: "decorative" as const }
   : item.id === "builtin-bath-basin-cabinet-scout"
     ? { ...item, position: { ...item.position, z: 9.8 } }
     : item.id === "builtin-bath-washer-cabinet-scout"
@@ -303,8 +309,8 @@ const fixtures: PlannerFixture[] = [
   fixture("z2-outlet", "Steckdose Südwand", "zimmer2", "outlet", 1.8, 11.74, 0.3),
   fixture("bath-light", "Lichtauslass Decke", "bad", "ceiling-light", -1.32, 8.92, 2.56),
   fixture("bath-outlet", "Feuchtraum-Steckdose Waschtisch", "bad", "outlet", -1.22, 9.98, 1.12),
-  fixture("wc-light", "Lichtauslass Decke", "wc", "ceiling-light", -1.97, 5.08, 2.56),
-  fixture("wc-switch", "Lichtschalter WC", "wc", "switch", -1.56, 5.62, 1.05, 90),
+  fixture("wc-light", "Lichtauslass Decke", "wc", "ceiling-light", -1.87, 5.08, 2.56),
+  fixture("wc-switch", "Lichtschalter WC", "wc", "switch", -1.40, 5.62, 1.05, 90),
   fixture("store-light", "Lichtauslass Decke", "abstellraum", "ceiling-light", -0.76, 5.08, 2.56),
   fixture("store-switch", "Lichtschalter Abstellraum", "abstellraum", "switch", -0.22, 5.62, 1.05, 90),
   fixture("balcony-outlet", "Außensteckdose an der Fassadenwand", "balkon", "outlet", 3.64, 11.15, 0.3, -90),

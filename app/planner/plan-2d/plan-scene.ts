@@ -7,6 +7,7 @@ import type {
   Point2,
 } from "../domain/types.ts";
 import { deriveRoomPolygon } from "../domain/wall-graph.ts";
+import { getWcClearOutline } from "../domain/wc-layout.ts";
 
 export type PlanRoomDescriptor = {
   id: string;
@@ -201,7 +202,7 @@ export function createPlanScene(
       }))
     : [];
   const dimensions = options.overlays.dimensions
-    ? rooms.flatMap((room) => createRoomDimensions(room))
+    ? rooms.flatMap((room) => createRoomDimensions(room, dimensionOutline(document, room)))
     : [];
 
   return {
@@ -350,16 +351,31 @@ function boundsFromScene(
   };
 }
 
-function createRoomDimensions(room: PlanRoomDescriptor): PlanDimensionDescriptor[] {
-  if (room.points.length < 2) return [];
-  const center = room.points.reduce(
-    (sum, point) => ({ x: sum.x + point.x / room.points.length, z: sum.z + point.z / room.points.length }),
+function dimensionOutline(document: PlannerDocumentV3, room: PlanRoomDescriptor): Point2[] {
+  if (room.id === "wc") return getWcClearOutline(document) ?? room.points;
+  if (room.id !== "abstellraum") return room.points;
+
+  // The shared partition is split at the WC corners, but the storage wall
+  // still has one continuous dimension.
+  const points = room.points;
+  return points.filter((point, index) => {
+    const previous = points[(index + points.length - 1) % points.length];
+    const next = points[(index + 1) % points.length];
+    return Math.abs((point.x - previous.x) * (next.z - point.z)
+      - (point.z - previous.z) * (next.x - point.x)) > 0.001;
+  });
+}
+
+function createRoomDimensions(room: PlanRoomDescriptor, points: Point2[]): PlanDimensionDescriptor[] {
+  if (points.length < 2) return [];
+  const center = points.reduce(
+    (sum, point) => ({ x: sum.x + point.x / points.length, z: sum.z + point.z / points.length }),
     { x: 0, z: 0 },
   );
   const offset = 0.22;
 
-  return room.points.flatMap((wallStart, index) => {
-    const wallEnd = room.points[(index + 1) % room.points.length];
+  return points.flatMap((wallStart, index) => {
+    const wallEnd = points[(index + 1) % points.length];
     const dx = wallEnd.x - wallStart.x;
     const dz = wallEnd.z - wallStart.z;
     const length = Math.hypot(dx, dz);

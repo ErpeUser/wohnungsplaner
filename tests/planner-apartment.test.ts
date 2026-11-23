@@ -174,7 +174,7 @@ test("places the supplied woven rugs in the bathroom and WC at measured sizes", 
   assert.ok(wcMat);
   assert.deepEqual(bathMat.size, { width: 1.22, depth: 0.61, height: 0.018 });
   assert.deepEqual(wcMat.size, { width: 0.77, depth: 0.46, height: 0.018 });
-  assert.deepEqual(wcMat.position, { x: -1.97, z: 5.25 });
+  assert.deepEqual(wcMat.position, { x: -1.87, z: 5.25 });
   assert.equal(wcMat.rotation, 0, "77-cm-Seite liegt quer im WC");
   assert.equal(bathMat.materialVariants?.main, "temu-bath-rug-woven");
   assert.equal(wcMat.materialVariants?.main, "temu-bath-rug-woven");
@@ -234,7 +234,7 @@ test("places the original Temu oak-and-iron shelf on the WC side wall with photo
   assert.equal(holder.roomId, "wc");
   assert.equal(holder.id, "builtin-wc-paper-holder");
   assert.deepEqual(holder.size, { width: 0.33, depth: 0.15, height: 0.25 });
-  assert.deepEqual(holder.position, { x: -1.61, z: 4.8 });
+  assert.deepEqual(holder.position, { x: -1.455, z: 4.8 });
   assert.equal(holder.rotation, 90);
   assert.equal(holder.elevation, 0.68);
   assert.equal(holder.materialVariants?.main, "wc-holder-solid-oak");

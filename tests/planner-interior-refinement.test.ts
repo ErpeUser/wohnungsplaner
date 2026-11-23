@@ -11,7 +11,7 @@ test('bath runner moves toward the basin, keeping the supplied 122 x 61 x 1 cm',
   const item=get('builtin-bath-mat');assert.deepEqual(item.position,{x:-1.25,z:8.99});assert.equal(item.rotation,90);assert.deepEqual(item.size,{width:1.22,depth:.61,height:.01});
 });
 test('WC mat extends from the toilet rather than across the room',()=>{
-  const item=get('builtin-wc-mat');assert.equal(item.rotation,90);assert.deepEqual(item.position,{x:-1.97,z:5.15});assert.equal(item.size.width,.77);assert.equal(item.size.depth,.46);
+  const item=get('builtin-wc-mat');assert.equal(item.rotation,90);assert.deepEqual(item.position,{x:-1.87,z:5.15});assert.equal(item.size.width,.77);assert.equal(item.size.depth,.46);
 });
 test('paper holder is on the opposite WC wall and faces inward',()=>{
   const item=get('builtin-wc-paper-holder');assert.equal(item.position.x,-2.285);assert.equal(item.rotation,270);
