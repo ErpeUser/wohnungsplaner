@@ -224,9 +224,18 @@ export function Zimmer1DeskShelf({ item }: { item: SceneObject<PlannerBuiltIn> }
   const [width, height, depth] = item.size;
   const isMain = item.catalogId === "zimmer1-desk-shelf-main";
   const isUpperSide = item.catalogId === "zimmer1-desk-shelf-side-upper";
+  const isSkateWotan = item.materialId === "oak-wotan";
+  const face = getPlannerMaterial(isSkateWotan ? "oak-wotan" : "oak-artisan");
+  const edge = getPlannerMaterial(isSkateWotan ? "oak-wotan-edge" : "oak-artisan-edge");
   return (
-    <group>
-      <RoundedBox args={[width, height, depth]} radius={0.018} smoothness={4} castShadow receiveShadow><primitive object={getPlannerMaterial("oak-light")} attach="material" /></RoundedBox>
+    <group name={"wallboard-" + item.source.id}>
+      {/* Real product thickness: SKATE 18 mm, SIMPLE 38 mm. */}
+      <RoundedBox args={[width, height, depth]} radius={Math.min(0.004, height * 0.18)} smoothness={3} castShadow receiveShadow>
+        <primitive object={face} attach="material" />
+      </RoundedBox>
+      <mesh geometry={SHARED_BOX} scale={[width * 0.99, height * 0.65, 0.0015]} position={[0, 0, depth / 2 + 0.0004]} castShadow>
+        <primitive object={edge} attach="material" />
+      </mesh>
       {isMain ? (
         <>
           <group position={[-width * 0.38, height / 2 + 0.095, 0]}>

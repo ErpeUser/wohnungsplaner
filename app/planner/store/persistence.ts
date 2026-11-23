@@ -57,9 +57,6 @@ const BASELINE_VISUAL_REFRESH_IDS = new Set([
   "builtin-z1-headboard-led",
   "builtin-z1-headboard-sconces",
   "builtin-z1-layered-curtain",
-  "builtin-z1-vanity-shelf-main",
-  "builtin-z1-vanity-shelf-side-upper",
-  "builtin-z1-vanity-shelf-side-lower",
   "builtin-z1-entry-niche",
   "builtin-z1-wardrobe-top-decor",
   "builtin-z1-nightstand-decor",
@@ -376,19 +373,22 @@ function readStoredValue(raw: string): MigrationResult {
       const withChair = upgradeZimmer1Chair(withHall);
       const withDining = upgradeDiningChairsToWoltu(withChair);
       const withWc = upgradeWcPhotoReference(withDining);
-      if (!normalized.identityChanged && isOlderBaselineModel(withWc)) {
+      const withWallboards = upgradeZimmer1VanityWallboards(withWc);
+      if (!normalized.identityChanged && isOlderBaselineModel(withWallboards)) {
         return {
-          document: rebaseBaselineModel(withWc),
+          document: rebaseBaselineModel(withWallboards),
           warnings: ["Das gespeicherte Möbel-Layout und die Bad-/WC-Materialien wurden auf den aktuellen Stand aktualisiert."],
           legacyBackupJson: raw,
           unmapped: [],
         };
       }
-      if (normalized.changed || withWc !== parsed) {
+      if (normalized.changed || withWallboards !== parsed) {
         return {
-          document: withWc,
+          document: withWallboards,
           warnings: [normalized.changed
             ? "Das gespeicherte Dokument wurde auf die zusammengeführte Balkon-/Loggia-Struktur aktualisiert."
+            : withWallboards !== withWc
+              ? "Die drei Wandboards der Schminkecke wurden auf die ausgewählten Möbelix-Produkte aktualisiert; andere Möbelpositionen bleiben erhalten."
             : withWc !== withDining
               ? "Die WC-Fotoreferenz mit Eiche-Artisan-Regal, Schacht und Lüftung wurde übernommen; sonstige Möbelpositionen bleiben erhalten."
               : withDining !== withChair
@@ -584,6 +584,43 @@ export function upgradeWcPhotoReference(document: PlannerDocumentV3): PlannerDoc
       ...missing,
     ],
   });
+}
+
+/** Update only three uncustomized old vanity wallboards in saved documents.
+ * Preserve positions customized by the user and every unrelated furniture item. */
+export function upgradeZimmer1VanityWallboards(document: PlannerDocumentV3): PlannerDocumentV3 {
+  if (document.id !== DEFAULT_APARTMENT_DOCUMENT.id) return document;
+  const old: Record<string, { width: number; depth: number; height: number; x: number; z: number }> = {
+    "builtin-z1-vanity-shelf-main": { width: 1.12, depth: 0.19, height: 0.045, x: 2.96, z: 0.095 },
+    "builtin-z1-vanity-shelf-side-upper": { width: 0.36, depth: 0.16, height: 0.04, x: 3.475, z: 0.49 },
+    "builtin-z1-vanity-shelf-side-lower": { width: 0.32, depth: 0.16, height: 0.04, x: 3.475, z: 0.84 },
+  };
+  const chosen = new Map(DEFAULT_APARTMENT_DOCUMENT.builtIns
+    .filter((item) => Object.hasOwn(old, item.id)).map((item) => [item.id, item]));
+  let changed = false;
+  const builtIns = document.builtIns.map((item) => {
+    const before = old[item.id];
+    const next = chosen.get(item.id);
+    if (!before || !next || item.catalogId !== next.catalogId || item.materialVariants?.main !== "oak-light"
+      || item.size.width !== before.width || item.size.depth !== before.depth || item.size.height !== before.height) return item;
+    changed = true;
+    return {
+      ...item,
+      label: next.label,
+      size: { ...next.size },
+      position: {
+        ...item.position,
+        x: item.position.x === before.x ? next.position.x : item.position.x,
+        z: item.position.z === before.z ? next.position.z : item.position.z,
+      },
+      materialVariants: { ...item.materialVariants, main: next.materialVariants?.main ?? "oak-artisan" },
+      metadata: next.metadata,
+    };
+  });
+  const present = new Set(builtIns.map((item) => item.id));
+  const missing = [...chosen.values()].filter((item) => !present.has(item.id));
+  return !changed && missing.length === 0 ? document
+    : parsePlannerDocument({ ...document, builtIns: [...builtIns, ...missing] });
 }
 
 /** Migrate the retired concept fabric without resetting the user's rug placement. */

@@ -88,6 +88,14 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
     material.bumpScale = 0.009;
     material.color.set("#ffffff");
     material.needsUpdate = true;
+  } else if (materialId === "oak-wotan" || materialId === "oak-wotan-edge") {
+    // Distinct warm Wotan oak grain for the selected SKATE wallboard.
+    const grain = loadProductGrainTexture(materialId, materialId === "oak-wotan" ? [177, 125, 79] : [131, 86, 52], 0.72, 0.027);
+    material.map = grain;
+    material.bumpMap = asBumpMap(grain);
+    material.bumpScale = 0.009;
+    material.color.set("#ffffff");
+    material.needsUpdate = true;
   } else if (materialId === "oak-bozan-directional" || materialId === "oak-bozan-edge") {
     const oak = loadProductWoodTexture(materialId);
     material.map = oak;

@@ -75,6 +75,8 @@ export const RECIPES: Record<string, MaterialRecipe> = {
   "oak-bozan-directional": { color: "#b78352", roughness: 0.62, clearcoat: 0.08, clearcoatRoughness: 0.7 },
   "oak-bozan-edge": { color: "#8d603c", roughness: 0.68 },
   "oak-light": { color: "#c99d68", roughness: 0.7, clearcoat: 0.04, clearcoatRoughness: 0.78 },
+  "oak-wotan": { color: "#b17d4f", roughness: 0.67, clearcoat: 0.05, clearcoatRoughness: 0.8 },
+  "oak-wotan-edge": { color: "#835634", roughness: 0.72 },
   walnut: { color: "#704c35", roughness: 0.62 },
   "white-matte": { color: "#f4f2ec", roughness: 0.72 },
   "vinyl-cashmere-cream": { color: "#d9cdb8", roughness: 0.58, clearcoat: 0.08, clearcoatRoughness: 0.72 },
