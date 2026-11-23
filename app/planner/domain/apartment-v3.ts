@@ -124,14 +124,14 @@ const builtIns: PlannerBuiltIn[] = [
   builtIn("kitchen-microwave", "Integrierte Mikrowelle über der Spüle", "wohnkueche", "kitchen", "kitchen-microwave", 1.468, 3.73, 0.5, 0.08, 0.32, 0, "metal-satin", 1.73),
   builtIn("kitchen-fridge", "Schwarzer 60-cm-Kühlschrank in der 65,9-cm-Nische", "wohnkueche", "kitchen", "kitchen-fridge", 2.068, 3.795, 0.6, 0.65, 2.04, 0, "cabinet-black"),
   builtIn("bath-tub", "Badewanne", "bad", "sanitary", "sanitary-bathtub", -2.06, 9.19, 0.72, 1.6, 0.56, 0, "#f3f2ee"),
-  builtIn("bath-tub-apron", "Geflieste Wannenverkleidung", "bad", "sanitary", "bath-tub-apron", -1.685, 9.19, 1.6, 0.035, 0.53, 90, "tile-white-square", 0.015),
-  builtIn("bath-tub-end-ledge", "Gefliester Wannenkopf mit Ablage", "bad", "sanitary", "bath-tub-end-ledge", -2.06, 9.99, 0.74, 0.14, 0.54, 0, "tile-white-square", 0.01),
-  builtIn("bath-tub-side-apron", "Vollständig gefliester Wandabschluss neben der Badewanne", "bad", "sanitary", "bath-tub-side-apron", -2.06, 8.295, 0.74, 0.19, 0.55, 0, "tile-white-square", 0.01),
+  builtIn("bath-tub-apron", "Geflieste Wannenverkleidung", "bad", "sanitary", "bath-tub-apron", -1.685, 9.19, 1.6, 0.035, 0.548, 90, "tile-white-square", 0.012),
+  builtIn("bath-tub-end-ledge", "Gefliester Wannenkopf mit Ablage", "bad", "sanitary", "bath-tub-end-ledge", -2.06, 9.99, 0.74, 0.14, 0.548, 0, "tile-white-square", 0.012),
+  builtIn("bath-tub-side-apron", "Vollständig gefliester Wandabschluss neben der Badewanne", "bad", "sanitary", "bath-tub-side-apron", -2.06, 8.305, 0.74, 0.21, 0.55, 0, "tile-white-square", 0.01),
   builtIn("bath-basin", "Wandwaschbecken", "bad", "sanitary", "sanitary-washbasin", -1.22, 9.79, 0.6, 0.42, 0.18, 0, "#f5f4f0", 0.77),
   builtIn("bath-basin-cabinet-scout", "Scout Waschbeckenunterschrank · 60 × 56 × 34 cm", "bad", "storage", "bath-basin-cabinet-scout", -1.22, 9.88, 0.6, 0.34, 0.56, 180, "cashmere-matte", 0.02),
   builtIn("bath-washer", "Waschmaschine", "bad", "sanitary", "appliance-washer", -0.42, 9.72, 0.6, 0.6, 0.86, 180, "#f4f4f1"),
   builtIn("bath-washer-cabinet-scout", "Scout Waschmaschinenschrank · 63 × 191 × 24 cm", "bad", "storage", "bath-washer-cabinet-scout", -0.42, 9.92, 0.63, 0.24, 1.91, 180, "cashmere-matte"),
-  builtIn("bath-shower-set", "Chrom-Wannenarmatur und Handbrause links an der langen Fliesenwand", "bad", "sanitary", "bath-shower-set", -2.34, 9.62, 0.12, 0.12, 1.18, 90, "metal-satin", 0.82),
+  builtIn("bath-shower-set", "Chrom-Wannenarmatur und Handbrause · mittig über der Wanne an der Spiegelwand", "bad", "sanitary", "bath-shower-set", -2.06, 9.975, 0.12, 0.12, 1.18, 180, "metal-satin", 0.82),
   // Neutrale, maßstäbliche Bad-Dekoplatzhalter; später direkt durch Nutzerdateien ersetzbar.
   builtIn("bath-round-mirror", "Runder Spiegel über dem Waschtisch · Ø 60 cm", "bad", "other", "bath-round-mirror", -1.22, 9.91, 0.6, 0.045, 0.6, 0, "mirror-glass", 1.34, {
     source: "Bad-Inspirationsbild und vorhandene 60-cm-Waschtischposition",
@@ -151,7 +151,7 @@ const builtIns: PlannerBuiltIn[] = [
   builtIn("bath-shower-curtain", "Duschvorhang Stoff Beige · 180 × 200 cm", "bad", "other", "bath-shower-curtain", -1.64, 9.19, 1.8, 0.018, 2.0, -90, "temu-shower-curtain-beige", 0.16, {
     source: "Vom Nutzer bereitgestelltes Temu-Produktbild · Art. 601100062257123",
     confidence: "confirmed",
-    notes: ["Temu Art. 601100062257123 · SKU 17594540656721 · 12 Metallhaken · waschbarer, blickdichter beiger Stoff 180 × 200 cm ohne Quasten; glatte Saumabschlüsse und weiche vertikale Falten, Unterkante ca. 16 cm über dem Boden."],
+    notes: ["Temu Art. 601100062257123 · SKU 17594540656721 · 12 Metallhaken · waschbarer, blickdichter beiger Stoff 180 × 200 cm ohne Quasten; im 3D halb geöffnet (ca. 90 cm Vorhangpaket links, ca. 90 cm Einstieg frei); glatte Saumabschlüsse und weiche Falten, Unterkante ca. 16 cm über dem Boden."],
   }),
   builtIn("bath-towel-hook-rail", "4 einzelne Rundhaken · Eiche natur / Schwarz · 2 × 2", "bad", "other", "bath-towel-hooks-wood-black", -0.16, 8.72, 0.36, 0.09, 0.34, 90, "bath-hook-oak-natural", 1.3, {
     source: "Nutzerbild und Temu Art. 607039887632432 · SKU 118446205486445 · 4er-Pack",

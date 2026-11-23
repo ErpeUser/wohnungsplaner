@@ -147,11 +147,12 @@ test("keeps the hall intercom and entry-side switch on the same wall axis", () =
   assert.ok(Math.abs(intercom.position.z - entrySwitch.position.z) <= 0.25);
 });
 
-test("keeps the Zimmer 1 plan door visible by default and the photographed shower on the tub wall", () => {
+test("mounts the chromed bathtub shower centrally above the tub on the mirror wall", () => {
   assert.equal(DEFAULT_APARTMENT_DOCUMENT.doorStates["zimmer1-door"], "closed");
   const shower = DEFAULT_APARTMENT_DOCUMENT.builtIns.find((item) => item.catalogId === "bath-shower-set");
-  assert.deepEqual(shower?.position, { x: -2.34, z: 9.62 });
-  assert.equal(shower?.rotation, 90);
+  assert.deepEqual(shower?.position, { x: -2.06, z: 9.975 });
+  assert.equal(shower?.rotation, 180);
+  assert.match(shower?.label ?? "", /Spiegelwand/);
 });
 
 test("keeps the supplied Temu bath dimensions and the selected vintage wallpaper material", () => {

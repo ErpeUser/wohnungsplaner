@@ -263,14 +263,15 @@ export function BathShowerCurtain({ item }: { item: SceneObject<PlannerBuiltIn> 
   const cloth = getPlannerMaterial("temu-shower-curtain-beige");
   const seam = getPlannerMaterial("shower-curtain-hem-beige");
   const silver = getPlannerMaterial("chrome-polished");
-  const step = width / hookCount;
-  // Opaque washable textile, 180×200 cm; the document positions the hem
-  // 16 cm above floor and the hooks just below the 218-cm curtain rod.
-  // Draw rippling vertical sections with alternating front/back peaks.
-  return <group name="temu-beige-curtain-180x200">
+  // Keep the actual 180-cm-wide fabric and all twelve hooks, but gather the
+  // panel onto the left half of the full-length rod. The other half is open.
+  // Each panel retains additional depth and alternating ripples for soft folds.
+  const gatheredWidth = width / 2;
+  const step = gatheredWidth / hookCount;
+  return <group name="temu-beige-curtain-half-open">
     {Array.from({ length: hookCount }, (_, index) => (
       <group key={`pleat-${index}`} position={[-width / 2 + step * (index + 0.5), 0, 0]}>
-        <RoundedBox args={[step * 1.035, height - 0.026, Math.max(0.012, depth * 0.8)]}
+        <RoundedBox args={[step * 1.13, height - 0.026, Math.max(0.035, depth * 1.6)]}
           position={[0, -0.004, Math.sin(index * 1.13) * 0.022]} rotation={[0, Math.sin(index * 1.13) * 0.10, 0]}
           radius={0.006} smoothness={3} castShadow receiveShadow>
           <primitive object={cloth} attach="material" />
