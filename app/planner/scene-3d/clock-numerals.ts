@@ -7,7 +7,7 @@ const STROKES: Record<string, readonly (readonly [number, number, number, number
   X: [[-0.45, 0.5, 0.45, -0.5], [-0.45, -0.5, 0.45, 0.5]],
 };
 
-/** Authored Roman marks for the existing square dial, without image or font assets.
+/** Authored Roman marks for the portrait dial, without image or font assets.
  * Lettering and spacing are estimated; coordinates stay inside the dial's 0.7 envelope. */
 export function createRomanClockNumeralGeometry() {
   const positions: number[] = [];
