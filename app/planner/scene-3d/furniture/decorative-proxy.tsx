@@ -7,6 +7,30 @@ type ProxyProps = {
   materialId: string;
 };
 
+const MIRROR_IDS = new Set(["deko-aliexpress-06", "deko-temu-03"]);
+const FRAMED_ART_IDS = new Set([
+  "deko-aliexpress-09",
+  "deko-aliexpress-14",
+  "deko-aliexpress-19",
+  "deko-temu-01",
+]);
+const PANEL_IDS = new Set([
+  "deko-aliexpress-03",
+  "deko-aliexpress-04",
+  "deko-aliexpress-08",
+  "deko-aliexpress-10",
+  "deko-aliexpress-16",
+  "deko-aliexpress-17",
+  "deko-aliexpress-20",
+  "deko-temu-02",
+  "deko-temu-06",
+  "deko-temu-09",
+  "deko-temu-11",
+  "deko-temu-16",
+  "deko-temu-17",
+  "deko-temu-18",
+]);
+
 function ProxyMesh({
   position,
   scale,
@@ -107,11 +131,11 @@ export function DecorativeProxy({ catalogId, fallback, materialId }: ProxyProps)
   if (fallback === "lamp") return <WallLightProxy catalogId={catalogId} materialId={materialId} />;
   if (fallback === "plant") return <PlantProxy catalogId={catalogId} materialId={materialId} />;
 
-  if (catalogId.includes("spiegel") || catalogId.includes("acryl")) return <WallFrame materialId={materialId} mirror />;
-  if (catalogId.includes("poster") || catalogId.includes("bilder") || catalogId.includes("berg") || catalogId.includes("boho")) {
-    return <WallFrame materialId={materialId} square={catalogId.includes("boho")} />;
+  if (MIRROR_IDS.has(catalogId)) return <WallFrame materialId={materialId} mirror />;
+  if (FRAMED_ART_IDS.has(catalogId)) {
+    return <WallFrame materialId={materialId} square={catalogId === "deko-temu-01"} />;
   }
-  if (catalogId.includes("wand") || catalogId.includes("folie") || catalogId.includes("fliesen") || catalogId.includes("paneele") || catalogId.includes("filz")) {
+  if (PANEL_IDS.has(catalogId)) {
     return <ProxyMesh position={[0, 0.5, 0]} scale={[0.92, 0.84, 0.035]} materialId={materialId} />;
   }
   return <SmallSculptureProxy catalogId={catalogId} materialId={materialId} />;
