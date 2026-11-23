@@ -1,3 +1,6 @@
+import type { PlannerDocumentV3 } from "../domain/types.ts";
+import { getSelectedWcWallboardOption, wallboardDimensionLabel } from "../domain/wc-wallboards.ts";
+
 /** Supplied articles retained; unpriced hall entries are planning placeholders. */
 export type ShoppingItem = {
   id: string;
@@ -13,7 +16,7 @@ export type ShoppingItem = {
   generic?: boolean;
   /** Alternative catalogue choice: shown but excluded from the planned purchase subtotal. */
   alternative?: boolean;
-  type: "washer" | "basin" | "bed" | "rug" | "camel-rug" | "hallway-rug" | "sofa" | "hallway" | "table" | "chair" | "vinyl" | "mirror" | "appliance" | "decor";
+  type: "washer" | "basin" | "bed" | "rug" | "camel-rug" | "hallway-rug" | "sofa" | "hallway" | "table" | "chair" | "vinyl" | "mirror" | "appliance" | "decor" | "wallboard";
   retailer: string;
 };
 
@@ -33,7 +36,7 @@ export const SHOPPING_ITEMS: ShoppingItem[] = [
   {"id": "601099532250952", "name": "Kunstkaninchen-Plüschteppich Elfenbein", "room": "Zimmer 1", "dimensions": "100 × 180 cm · einfarbig · dichter Kunstkaninchen-Plüsch · Elfenbein", "price": null, "quantity": 1, "amountLabel": "1 Stück · Variante 100 × 180 cm / Elfenbein · SKU 17592283638107", "imageUrl": "https://img.kwcdn.com/product/fancy/24fbeb33-a33d-452e-a545-2a62168e7da4.jpg", "url": "https://www.temu.com/goods.html?_bg_fs=1&goods_id=601099532250952&sku_id=17592283638107&_oak_page_source=501&page_source=10037&top_gallery_url=https%3A%2F%2Fimg.kwcdn.com%2Fproduct%2Ffancy%2F24fbeb33-a33d-452e-a545-2a62168e7da4.jpg", "type": "camel-rug", "retailer": "Temu"},
   {"id": "607246280935328", "name": "Vorraumteppich Taupe-Kreisbögen", "room": "Vorraum", "dimensions": "120 × 180 cm · Samt · warmes Taupe/Creme · geometrische Kreisbögen", "price": 39.46, "quantity": 1, "amountLabel": "1 Stück · gewählte SKU 105780749538479", "imageUrl": "https://img.kwcdn.com/product/open/ef8fa5769f22493ea60088b637079477-goods.jpeg", "url": "https://www.temu.com/goods.html?_bg_fs=1&goods_id=607246280935328&sku_id=105780749538479&_oak_page_source=501&page_source=10037&top_gallery_url=https%3A%2F%2Fimg.kwcdn.com%2Fproduct%2Fopen%2Fef8fa5769f22493ea60088b637079477-goods.jpeg", "type": "hallway-rug", "retailer": "Temu"},
   {"id": "601100249492431", "name": "Wandablage aus Naturholz und schwarzem Eisen mit Toilettenpapierhalter", "room": "WC", "dimensions": "Holzbrett 17 × 14 cm · 15-cm-Papierhalter · 9-cm-Verbindungssteg · Gesamtmaß vor Montage prüfen", "price": 9.75, "quantity": 1, "amountLabel": "1 Stück · Holz natur / schwarzes Eisen · SKU 17595354506975 · 9,75 €", "imageUrl": "/planner-assets/products/temu-wc-paper-holder-601100249492431.svg", "url": "https://www.temu.com/goods.html?_bg_fs=1&goods_id=601100249492431&sku_id=17595354506975&_oak_page_source=501&page_source=10037&top_gallery_url=https%3A%2F%2Fimg.kwcdn.com%2Fproduct%2Ffancy%2F0aac879c-84e0-4e9a-9220-87e2e075ce21.jpg", "type": "decor", "retailer": "Temu"},
-  {"id":"007326000408","name":"Wandboard Simple · 80 cm Eiche Artisan Dekor","room":"WC","dimensions":"80 × 3,8 × 23,5 cm (B/H/T) · foliertes MDF · Eiche Artisan Dekor · bis ca. 10 kg · Befestigungsmaterial enthalten","price":14.99,"quantity":1,"amountLabel":"1 Stück · Möbelix Art. 007326000408 · oberhalb der WC-Spülung · Preis vor Kauf prüfen","url":"https://www.moebelix.at/p/wandboard-simple-b-80-cm-eiche-artisan-dekor-007326000408","type":"decor","retailer":"Möbelix"},
+  {"id":"007326000408","name":"Wandboard Simple · 80 cm Eiche Artisan Dekor","room":"WC","dimensions":"80 × 3,8 × 23,5 cm (B/H/T) · foliertes MDF · Eiche Artisan Dekor · bis ca. 10 kg · Befestigungsmaterial enthalten","price":14.99,"quantity":1,"amountLabel":"1 Stück · Möbelix Art. 007326000408 · oberhalb der WC-Spülung · Preis vor Kauf prüfen","url":"https://www.moebelix.at/p/wandboard-simple-b-80-cm-eiche-artisan-dekor-007326000408","type":"wallboard","retailer":"Möbelix"},
   {"id": "606121368598635", "name": "Badematten-Set Waffelstruktur Beige", "room": "Bad / WC", "dimensions": "Bad 122 × 61 cm · WC 77 × 46 cm · Florhöhe 1 cm", "price": null, "quantity": 2, "amountLabel": "2 Stück · Bad 122 × 61 cm · WC 77 × 46 cm", "imageUrl": "/planner-assets/products/temu-bath-rug-606121368598635.png", "url": "https://www.temu.com/goods.html?goods_id=606121368598635&sku_id=102680185861178", "type": "rug", "retailer": "Temu"},
   {"id": "1005012793801128", "name": "WOLTU LED-Nachttisch · Weiß · 2 Schubladen", "room": "Zimmer 1", "dimensions": "ca. 39,6 × 30 × 60,4 cm · weißer Korpus · LED-Fach · USB-Ladefunktion · ausziehbare Ablage", "price": 60.31, "quantity": 1, "amountLabel": "1 Stück · weiße Variante · Produktvariante und Maße vor Bestellung prüfen", "imageUrl": "https://ae-pic-a1.aliexpress-media.com/kf/Sc8ef7db1cae4450aa593c8f968a4cebf8.jpg", "url": "https://de.aliexpress.com/item/1005012793801128.html", "type": "decor", "retailer": "AliExpress"},
   {"id": "601100207687761", "name": "3D-Marmor-Wandfliesen Weißgold · 30 × 60 cm", "room": "Bad", "dimensions": "30 × 60 cm · weißer Marmor mit grau-goldener Maserung · selbstklebende Schaumstoff-Wandpaneele", "price": null, "quantity": 30, "amountLabel": "30 Stück · für Wannenwand und sichtbare Wannenfront", "imageUrl": "https://img.kwcdn.com/product/fancy/54501dd0-0728-435f-9693-eb7b2a6e8239.jpg", "url": "https://www.temu.com/at/20-30-50-stuck-3d-marmor-wandfliesen-tapete-selbstklebende-schaumstoff-wandpaneele-verdicktes-design-heimdekoration-wandaufkleber-abziehen-und-aufkleben-leicht-zu-reinigen-und-zuschneiden--fur-die-renovierung-von-badezimmern-wohnzimmern-kuchen-schlafzimmern-g-601100207687761.html", "type": "vinyl", "retailer": "Temu"},
@@ -68,3 +71,27 @@ export const SHOPPING_ITEMS: ShoppingItem[] = [
 
 /** Only selected products enter the planned subtotal; backup chairs remain browsable. */
 export const shoppingSubtotal = SHOPPING_ITEMS.reduce((sum, item) => sum + (item.alternative ? 0 : (item.price ?? 0) * (item.quantity ?? 1)), 0);
+
+/** One selected WC board; non-selected alternatives are excluded from the list and subtotal. */
+export function shoppingItemsForDocument(document: Pick<PlannerDocumentV3, "builtIns">): ShoppingItem[] {
+  const option = getSelectedWcWallboardOption(document);
+  if (option.id === "simple-80") return SHOPPING_ITEMS;
+  return SHOPPING_ITEMS.map((item) => item.id === "007326000408" ? {
+    ...item,
+    id: option.articleId,
+    name: option.name,
+    retailer: option.retailer,
+    url: option.sourceUrl,
+    price: option.price,
+    type: "wallboard" as const,
+    quantity: 1,
+    dimensions: `${wallboardDimensionLabel(option)} (B/H/T) · ${option.finish} · Belastbarkeit bis ${option.loadKg} kg`,
+    amountLabel: `1 Stück · ${option.retailer} Art. ${option.articleId} · oberhalb der WC-Spülung · Preis vor Kauf prüfen`,
+  } : item);
+}
+
+export function shoppingSubtotalForDocument(document: Pick<PlannerDocumentV3, "builtIns">): number {
+  return Math.round(shoppingItemsForDocument(document).reduce(
+    (sum, item) => sum + (item.alternative ? 0 : (item.price ?? 0) * (item.quantity ?? 1)), 0,
+  ) * 100) / 100;
+}

@@ -4,6 +4,7 @@ import { BalconyArchitecture, isBalconyExteriorWall } from "./balcony";
 import { MarbleTileSurface, bathMarbleWallBounds, wcMarbleWallBounds } from "./marble-tiles";
 import { BathMat, BathRoundMirror, BathShowerCurtain, BathShowerRod, BathShowerSet, BathTiledFinish, BathTowelHookRail, ScoutBasinCabinet, ScoutWasherCabinet, Washbasin, WcBrush, WcFlushPlate, WcPaperHolder, WcRevisionPanel } from "./bathroom";
 import { WcArtisanWallboard, WcWallVent, WcShelfStyling, WcWallHungPan } from "./wc-reference";
+import { isWcWallboardCatalogId } from "../../domain/wc-wallboards.ts";
 import { DeskLedMirror, WallpaperFinish, WindowCurtain, Zimmer1DeskAccessories, Zimmer1DeskShelf, Zimmer1EntryNiche, Zimmer1EntrySlimArt, Zimmer1HeadboardLed, Zimmer1HeadboardSconces, Zimmer1LayeredCurtain, Zimmer1NightstandDecor, Zimmer1WallArtPair, Zimmer1WardrobeTopDecor, ZimmerWallPanel } from "./bedroom";
 import { DoorAssembly, DoorFrame } from "./doors";
 import { FixtureMarker } from "./fixtures";
@@ -222,7 +223,7 @@ function ParametricBuiltIn({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   if (item.catalogId === "bath-tub-apron" || item.catalogId === "bath-tub-end-ledge" || item.catalogId === "bath-tub-side-apron") return <BathTiledFinish item={item} />;
   if (item.catalogId === "wc-flush-plate") return <WcFlushPlate item={item} />;
   if (item.catalogId === "wc-revision-panel") return <WcRevisionPanel item={item} />;
-  if (item.catalogId === "wc-artisan-wallboard-80") return <WcArtisanWallboard item={item} />;
+  if (isWcWallboardCatalogId(item.catalogId)) return <WcArtisanWallboard item={item} />;
   if (item.catalogId === "wc-wall-ventilation") return <WcWallVent item={item} />;
   if (item.catalogId === "wc-shelf-styling") return <WcShelfStyling item={item} />;
   if (item.catalogId === "wall-finish-vintage-fabric-wallpaper") return <WallpaperFinish item={item} />;
