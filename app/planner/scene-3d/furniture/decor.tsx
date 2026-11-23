@@ -58,7 +58,7 @@ export function StandardPlant() {
 
 
 export function WoltuAliExpressNightstand() {
-  const body = getPlannerMaterial("metal-dark");
+  const body = getPlannerMaterial("white-matte");
   const white = getPlannerMaterial("white-matte");
   const black = getPlannerMaterial("screen-black");
 

@@ -452,14 +452,14 @@ const placements: PlannerPlacement[] = [
     0.3,
     0.604,
     270,
-    "metal-dark",
+    "white-matte",
     {
       source: "AliExpress Produktseite · Art. 1005012793801128",
       confidence: "estimated",
       notes: [
         "WOLTU-Ausführung mit zwei Schubladen, offenem blauem LED-Fach, ausziehbarer Ablage und integrierter USB-/Ladefunktion.",
         "Die Produktseite bestätigt die Bauform; 39,6 × 30 × 60,4 cm bleiben als realistische Planungsmaße geschätzt, bis das Maßblatt vorliegt.",
-        "An die Wand hinter dem Kopfteil geschoben und nach Nutzerkorrektur um 180° gewendet. Schwarz als Hauptvariante passend zur Produktabbildung.",
+        "An die Wand hinter dem Kopfteil geschoben und nach Nutzerkorrektur um 180° gewendet. Weiße Variante wie vom Nutzer gewünscht, schwarze Lade- und Detailflächen bleiben als Kontrast.",
       ],
     },
   ),

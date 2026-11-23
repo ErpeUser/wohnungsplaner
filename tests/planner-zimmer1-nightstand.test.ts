@@ -31,7 +31,7 @@ test("keeps the former LED nightstand model available while placing the selected
   assert.ok(nightstand);
   assert.equal(nightstand.catalogId, selected.id);
   assert.deepEqual(nightstand.size, selected.defaultSize);
-  assert.equal(nightstand.materialVariants?.main, "metal-dark");
+  assert.equal(nightstand.materialVariants?.main, "white-matte");
   assert.match(nightstand.metadata?.source ?? "", /1005012793801128/);
   assert.ok(inspectPlacement(DEFAULT_APARTMENT_DOCUMENT, nightstand).hard.length === 0);
 });
@@ -47,7 +47,7 @@ test("keeps the former catalog model available alongside the selected WOLTU plac
   assert.equal(nightstand.roomId, "zimmer1");
   assert.deepEqual(nightstand.position, { x: 0.22, z: 1.76 });
   assert.equal(nightstand.rotation, 270);
-  assert.equal(nightstand.materialVariants?.main, "metal-dark");
+  assert.equal(nightstand.materialVariants?.main, "white-matte");
   assert.equal(nightstand.metadata?.confidence, "estimated");
   assert.ok(inspectPlacement(DEFAULT_APARTMENT_DOCUMENT, nightstand).hard.length === 0);
 });
@@ -60,6 +60,6 @@ test("migrates an older saved nightstand placement to the selected AliExpress mo
   const migrated = upgradeWoltuNightstandPlacement(legacy);
   const nightstand = migrated.placements.find((item) => item.id === "zimmer1-led-nightstand")!;
   assert.equal(nightstand.catalogId, "nightstand-aliexpress-woltu-1005012793801128");
-  assert.equal(nightstand.materialVariants?.main, "metal-dark");
+  assert.equal(nightstand.materialVariants?.main, "white-matte");
   assert.equal(upgradeWoltuNightstandPlacement(migrated), migrated);
 });

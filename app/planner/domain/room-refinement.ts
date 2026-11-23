@@ -24,7 +24,7 @@ export function upgradeWoltuNightstandPlacement<T extends { id: string; placemen
       ...placement,
       catalogId: 'nightstand-aliexpress-woltu-1005012793801128',
       size: { width: 0.396, depth: 0.3, height: 0.604 },
-      materialVariants: { ...placement.materialVariants, main: 'metal-dark' },
+      materialVariants: { ...placement.materialVariants, main: 'white-matte' },
     };
   });
   return changed ? { ...document, placements } : document;
