@@ -153,6 +153,7 @@ export function Planner3D({
         }}
       >
         <PlannerTextureInvalidator />
+        <PlannerContextRecovery />
         <color attach="background" args={[activeRoomId === "balkon" ? "#dbe9ed" : "#e4e2dc"]} />
         <Suspense fallback={null}>
           <PlannerLighting quality={quality} scene={scene} />
@@ -211,6 +212,18 @@ function PlannerTextureInvalidator() {
     window.addEventListener(PLANNER_TEXTURE_READY_EVENT, redraw);
     return () => window.removeEventListener(PLANNER_TEXTURE_READY_EVENT, redraw);
   }, [invalidate]);
+
+  return null;
+}
+
+function PlannerContextRecovery() {
+  const { gl, invalidate } = useThree();
+
+  useEffect(() => {
+    const redraw = () => invalidate();
+    gl.domElement.addEventListener("webglcontextrestored", redraw);
+    return () => gl.domElement.removeEventListener("webglcontextrestored", redraw);
+  }, [gl, invalidate]);
 
   return null;
 }
