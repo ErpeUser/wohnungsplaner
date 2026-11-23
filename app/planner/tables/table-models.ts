@@ -39,7 +39,7 @@ export type TableModel = {
 
 const ALIEXPRESS_URL = "https://de.aliexpress.com/item/1005013489223528.html?gatewayAdapt=glo2deu";
 const TEMU_STORAGE_URL = "https://www.temu.com/at/g-606997911062061.html";
-const KAUFLAND_URL = "https://www.kaufland.at/product/567080013/";
+const VENTE_UNIQUE_URL = "https://www.vente-unique.de/p/ausziehbarer-esstisch-120-160x80-cm-ovaler-esstisch-aus-holz-verdickte-tischplatte-mdf-metall-braun";
 const TEMU_UNKNOWN_URL = "https://www.temu.com/at/g-609726356120319.html";
 
 export const TABLE_MODELS: readonly TableModel[] = [
@@ -122,12 +122,12 @@ export const TABLE_MODELS: readonly TableModel[] = [
   },
   {
     id: "kaufland-567080013-120-160",
-    name: "Kaufland · Flieks Strukturfuß",
-    shortName: "Kaufland 120 → 160",
+    name: "Vente-Unique · Ausziehtisch mit Strukturfuß",
+    shortName: "Vente-Unique 120 → 160",
     catalogId: "dining-table-kaufland-567080013-120-160",
-    sourceUrl: KAUFLAND_URL,
+    sourceUrl: VENTE_UNIQUE_URL,
     sourceStatus: "confirmed",
-    sourceLabel: "Kaufland.at Produkt 567080013 · Maßgrafik und Galerie",
+    sourceLabel: "Vente-Unique Art. 5034153 · Bezugslink; Maßgrafik und gespeicherte Bildbelege aus der bisherigen Kaufland-Referenz",
     sourceNotes: [
       "Die Galerie nennt 120–160 × 80 × 75,5 cm, 1,8 cm Plattenstärke, 60-cm-Endstücke und ein 40-cm-Mittelblatt.",
       "Das Produkt ist ein ovaler MDF-/Holzdekor-Tisch mit zwei separaten, vertikal geriffelten Querwangen (je 10,8 × 51,2 cm) und 60 kg Belastbarkeit.",

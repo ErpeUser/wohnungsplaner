@@ -106,3 +106,11 @@ test('lists WOLTU Chenille as four primary chairs in two unpriced two-packs, wit
  assert.equal(backup.price,55.92);
  assert.equal(shoppingSubtotal,1983.42);
 });
+
+test('uses the requested Universal TEJO link without changing the existing furniture or its historical budget value',()=>{
+ const garderobe=item('2778003504');
+ assert.equal(garderobe.url,'https://www.universal.at/p/AKLBB1960169298?sku=4744664566-0-1960169298&nav-c=112013');
+ assert.equal(garderobe.retailer,'Universal');
+ assert.equal(garderobe.name,'Garderobe Tejo Beige/Kaschmir');
+ assert.equal(garderobe.price,399.2);
+});

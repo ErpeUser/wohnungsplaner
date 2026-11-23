@@ -145,7 +145,7 @@ describe("PlannerWorkspace", () => {
     ]);
     await user.selectOptions(model, "kaufland-567080013-120-160");
     expect(screen.getByText("120 × 80 × 75,5 cm")).toBeTruthy();
-    expect(screen.getByRole("link", { name: /Originalquelle.*Kaufland/i }).getAttribute("href")).toBe("https://www.kaufland.at/product/567080013/");
+    expect(screen.getByRole("link", { name: /Originalquelle.*Vente-Unique/i }).getAttribute("href")).toBe("https://www.vente-unique.de/p/ausziehbarer-esstisch-120-160x80-cm-ovaler-esstisch-aus-holz-verdickte-tischplatte-mdf-metall-braun");
 
     await user.selectOptions(screen.getByRole("combobox", { name: "Ausziehzustand" }), "extended");
     expect(screen.getByText("160 × 80 × 75,5 cm")).toBeTruthy();

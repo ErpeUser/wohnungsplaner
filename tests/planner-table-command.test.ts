@@ -31,7 +31,7 @@ test("wechselt den Esstisch atomar und bewahrt Gruppe, Position und Drehung", ()
   assert.equal(updated.groupId, baseTable.groupId);
   assert.deepEqual(updated.position, baseTable.position);
   assert.equal(updated.rotation, baseTable.rotation);
-  assert.match(updated.metadata?.source ?? "", /Kaufland.at Produkt 567080013/);
+  assert.match(updated.metadata?.source ?? "", /Vente-Unique Art\. 5034153/);
 });
 
 test("weist unbekannte Produkte und harte Geometrien zurück ohne Teiländerung", () => {

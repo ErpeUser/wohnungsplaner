@@ -35,6 +35,8 @@ test("führt alle vier gecrawlten Tischquellen mit belegten Größenständen", (
   assert.deepEqual(getTableVariant(kaufland!, "closed")?.sizeCm, { width: 120, depth: 80, height: 75.5 });
   assert.deepEqual(getTableVariant(kaufland!, "extended")?.sizeCm, { width: 160, depth: 80, height: 75.5 });
   assert.equal(kaufland?.sourceStatus, "confirmed");
+  assert.equal(kaufland?.sourceUrl, "https://www.vente-unique.de/p/ausziehbarer-esstisch-120-160x80-cm-ovaler-esstisch-aus-holz-verdickte-tischplatte-mdf-metall-braun");
+  assert.equal(kaufland?.shortName, "Vente-Unique 120 → 160");
 });
 
 test("konvertiert Zentimeter ohne Rundungsfehler für die Planungsgeometrie", () => {
