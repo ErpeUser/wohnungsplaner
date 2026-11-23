@@ -57,6 +57,63 @@ export function StandardPlant() {
 
 
 
+export function WoltuAliExpressNightstand() {
+  const body = getPlannerMaterial("metal-dark");
+  const white = getPlannerMaterial("white-matte");
+  const black = getPlannerMaterial("screen-black");
+
+  return (
+    <group>
+      <RoundedBox args={[0.94, 0.63, 0.78]} radius={0.025} smoothness={5} position={[0, 0.315, 0]} castShadow receiveShadow>
+        <primitive object={body} attach="material" />
+      </RoundedBox>
+      <RoundedBox args={[1, 0.07, 0.84]} radius={0.025} smoothness={5} position={[0, 0.92, 0]} castShadow receiveShadow>
+        <primitive object={body} attach="material" />
+      </RoundedBox>
+
+      <RoundedBox args={[0.84, 0.22, 0.035]} radius={0.012} smoothness={4} position={[0, 0.68, 0.402]} castShadow receiveShadow>
+        <primitive object={body} attach="material" />
+      </RoundedBox>
+      <RoundedBox args={[0.84, 0.22, 0.035]} radius={0.012} smoothness={4} position={[0, 0.3, 0.402]} castShadow receiveShadow>
+        <primitive object={body} attach="material" />
+      </RoundedBox>
+      {[-0.08, 0.08].map((x) => (
+        <mesh key={x} position={[x, 0.68, 0.426]} scale={[0.022, 0.018, 0.018]} geometry={SHARED_BOX}>
+          <primitive object={black} attach="material" />
+        </mesh>
+      ))}
+      {[-0.08, 0.08].map((x) => (
+        <mesh key={x} position={[x, 0.3, 0.426]} scale={[0.022, 0.018, 0.018]} geometry={SHARED_BOX}>
+          <primitive object={black} attach="material" />
+        </mesh>
+      ))}
+
+      <RoundedBox args={[0.82, 0.17, 0.05]} radius={0.01} smoothness={4} position={[0, 0.5, 0.402]} castShadow receiveShadow>
+        <primitive object={white} attach="material" />
+      </RoundedBox>
+      <mesh position={[0, 0.5, 0.43]} scale={[0.78, 0.055, 0.028]} geometry={SHARED_BOX} receiveShadow>
+        <meshStandardMaterial color="#73c9ff" emissive="#1998e8" emissiveIntensity={0.95} roughness={0.35} />
+      </mesh>
+      <pointLight position={[0, 0.52, 0.48]} color="#46b9ff" intensity={0.18} distance={0.7} decay={2} />
+
+      <RoundedBox args={[0.7, 0.045, 0.34]} radius={0.012} smoothness={4} position={[0, 0.79, 0.24]} castShadow receiveShadow>
+        <primitive object={body} attach="material" />
+      </RoundedBox>
+      <RoundedBox args={[0.34, 0.035, 0.2]} radius={0.01} smoothness={3} position={[0, 0.985, -0.08]} castShadow receiveShadow>
+        <primitive object={body} attach="material" />
+      </RoundedBox>
+      <RoundedBox args={[0.12, 0.02, 0.23]} radius={0.008} smoothness={3} position={[0, 1.01, -0.08]} rotation={[0.1, 0, 0]} castShadow>
+        <primitive object={black} attach="material" />
+      </RoundedBox>
+      {[-0.18, 0.18].map((x) => (
+        <mesh key={x} position={[x, 1.005, -0.07]} scale={[0.07, 0.012, 0.07]} geometry={SHARED_CYLINDER} castShadow>
+          <primitive object={black} attach="material" />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
 export function LedChargingNightstand() {
   const white = getPlannerMaterial("white-lacquer");
   const dark = getPlannerMaterial("metal-dark");

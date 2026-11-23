@@ -3,7 +3,7 @@
 import { BlissBed, DetailedBed } from "./furniture/beds.tsx";
 import { ComparisonChair, KaleoArmchair, PhotoOfficeChair, TemuIvoryExecutiveChair } from "./furniture/chairs.tsx";
 import { XuegwAdjustableDeskChair } from "./furniture/xuegw-chair.tsx";
-import { DetailedCabinet, DetailedDresser, DetailedFloorLamp, DetailedLowboard, DetailedShelf, LedChargingNightstand, PhotoDesk, PhotoWardrobe, StandardPlant, StandardWardrobe, TejoHallway, Zimmer1OlivePlant } from "./furniture/decor.tsx";
+import { DetailedCabinet, DetailedDresser, DetailedFloorLamp, DetailedLowboard, DetailedShelf, LedChargingNightstand, PhotoDesk, PhotoWardrobe, StandardPlant, StandardWardrobe, TejoHallway, WoltuAliExpressNightstand, Zimmer1OlivePlant } from "./furniture/decor.tsx";
 import { BrownHallwayMirrorBench } from "./furniture/hallway-brown.tsx";
 import { DetailStrip, SHARED_BOX, SHARED_CYLINDER, SHARED_SPHERE } from "./furniture/primitives.tsx";
 import { GalaShaggyRug, LivingIvoryGreigeRug, StandardWovenRug, TemuEasyLineRug, TemuIvoryRabbitRug, TemuWhiteShaggyRug } from "./furniture/rugs.tsx";
@@ -188,6 +188,7 @@ function ParametricFurniture({ fallback, materialId, catalogId, size }: { fallba
   if (catalogId === "chair-temu-velvet-swivel-arm") return <ComparisonChair variant="velvet-swivel" materialId={materialId} />;
   if (catalogId === "chair-amber-chenille-beige") return <ComparisonChair variant="amber" materialId={materialId} />;
   if (catalogId === "nightstand-led-2drawer-white") return <LedChargingNightstand />;
+  if (catalogId === "nightstand-aliexpress-woltu-1005012793801128") return <WoltuAliExpressNightstand />;
   if (catalogId === "rug-temu-easy-line-120x180" || catalogId === "rug-temu-easy-line-140x200") return <TemuEasyLineRug materialId={materialId} />;
   if (catalogId === "rug-temu-rabbit-ivory-100x180") return <TemuIvoryRabbitRug />;
   if (catalogId === "rug-living-concept-240x240") return <LivingIvoryGreigeRug />;

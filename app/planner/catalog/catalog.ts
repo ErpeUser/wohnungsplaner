@@ -275,7 +275,7 @@ const PRODUCT_REALISM: Record<string, ProductRealismSpec> = {
 export const PHOTO_FIRST_IDS: ReadonlySet<string> = new Set([
   "bed-bliss-120", "wardrobe-225", "vanity-vicco-sherry-120",
   "chair-temu-executive-ivory", "chair-aliexpress-xuegw-1005012445521181", "chair-kaleo-chenille-beige", "chair-temu-swivel-upholstered", "chair-temu-faux-leather-metal", "chair-temu-velvet-swivel-arm", "chair-amber-chenille-beige", "sofa-sectional-photo",
-  "sofa-chicago-206", "sofa-aliexpress-142", "sofa-aliexpress-142-open", "dining-table-bozan-110", "nightstand-led-2drawer-white",
+  "sofa-chicago-206", "sofa-aliexpress-142", "sofa-aliexpress-142-open", "dining-table-bozan-110", "nightstand-led-2drawer-white", "nightstand-aliexpress-woltu-1005012793801128",
   "hallway-tejo-115", "hallway-brown-mirror-bench-115", "dining-table-aliexpress-100-140", "dining-table-temu-606997-120-160", "dining-table-temu-609726-110-150", "dining-table-kaufland-567080013-120-160", "rug-gala-shaggy-2505-100x200", "rug-temu-shaggy-white-120x200",
   "rug-temu-easy-line-120x180", "rug-temu-easy-line-140x200", "rug-temu-rabbit-ivory-100x180",
   "rug-living-concept-240x240", "plant-zimmer1-olive",
@@ -287,6 +287,7 @@ export const FURNITURE_CATALOG: FurnitureCatalogItem[] = [
   item("bed-160", "Doppelbett 160", "Schlafen", "Doppelbett mit gepolstertem Kopfteil", [1.6, 2, 0.62], "free", "bed", "bed", FABRIC),
   item("nightstand", "Nachttisch", "Schlafen", "Kompakter Nachttisch", [0.45, 0.4, 0.52], "fixed", "storage", "cabinet", WOOD),
   item("nightstand-led-2drawer-white", "LED-Nachttisch mit Ladestation", "Schlafen", "Kompakter weißer Nachttisch mit zwei Schubladen, beleuchtetem Ablagefach, zwei Steckdosen und USB-Ladeanschlüssen", [0.396, 0.3, 0.604], "fixed", "storage", "cabinet", LED_NIGHTSTAND_WHITE),
+  item("nightstand-aliexpress-woltu-1005012793801128", "WOLTU LED-Nachttisch · AliExpress", "Schlafen", "Schwarzer/weißer WOLTU-Nachttisch mit zwei Schubladen, offenem LED-Fach, ausziehbarer Ablage und USB-Ladefunktion", [0.396, 0.3, 0.604], "fixed", "storage", "cabinet", [{ id: "metal-dark", label: "Schwarz matt", color: "#171a20" }, { id: "white-matte", label: "Weiß matt", color: "#f4f2ec" }]),
   item("sofa-3seat", "Sofa", "Sitzen", "Dreisitzer mit realer Sitztiefe", [2.2, 0.92, 0.82], "uniform", "sofa", "sofa", FABRIC),
   item("sofa-aliexpress-142", "Creme-Relaxsofa AliExpress · 142 cm", "Sitzen", "Zweisitzer mit Lendenkissen, breiten Armlehnen und zwei ausziehbaren Fußstützen", [1.42, 0.9, 0.865], "fixed", "sofa", "sofa", ALI_SOFA_IVORY),
   item("sofa-aliexpress-142-open", "Creme-Relaxsofa · ausgezogen 172 cm", "Sitzen", "Dasselbe Sofa mit ausgefahrenen Fußstützen und 172 cm Tiefenbedarf", [1.42, 1.72, 0.865], "fixed", "sofa", "sofa", ALI_SOFA_IVORY),

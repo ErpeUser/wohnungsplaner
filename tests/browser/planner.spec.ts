@@ -132,6 +132,16 @@ test('WC renders the celadon onyx rear wall and lists 20 panels', async ({ page 
   await expect(page.getByText('20 Stück · für die mittlere WC-Rückwand', { exact: true })).toBeVisible();
 });
 
+test('Zimmer 1 renders the AliExpress WOLTU nightstand in 3D', async ({ page }, info) => {
+  await startPlanner(page);
+  await page.getByRole('combobox', { name: 'Raum', exact: true }).selectOption('zimmer1');
+  await page.getByRole('button', { name: '3D-Ansicht', exact: true }).click();
+  const canvas = page.locator('canvas[aria-label="3D-Planungsfläche"]');
+  await expect(canvas).toHaveAttribute('data-render-ready', 'true', { timeout: 60_000 });
+  await assertRendered(page, canvas);
+  await screenshot(page, info, 'zimmer1-woltu-nightstand');
+});
+
 test('2D and 3D render real pixels and can switch back', async ({ page }, info) => {
   test.setTimeout(180_000);
   await startPlanner(page);

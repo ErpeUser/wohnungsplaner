@@ -17,21 +17,36 @@ test("uses warm taupe only on the wall directly behind the Zimmer 1 bed", () => 
   assert.equal(accent.rotation, 90);
 });
 
-test("places the compact two-drawer LED nightstand beside the Bliss headboard", () => {
-  const catalogItem = getFurnitureCatalogItem("nightstand-led-2drawer-white");
+test("keeps the former LED nightstand model available while placing the selected AliExpress WOLTU model", () => {
+  const former = getFurnitureCatalogItem("nightstand-led-2drawer-white");
+  const selected = getFurnitureCatalogItem("nightstand-aliexpress-woltu-1005012793801128");
   const nightstand = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "zimmer1-led-nightstand");
 
-  assert.ok(catalogItem);
-  assert.deepEqual(catalogItem.defaultSize, { width: 0.396, depth: 0.3, height: 0.604 });
-  assert.equal(catalogItem.resize, "fixed");
-
+  assert.ok(former);
+  assert.ok(selected);
+  assert.deepEqual(selected.defaultSize, { width: 0.396, depth: 0.3, height: 0.604 });
+  assert.equal(selected.resize, "fixed");
+  assert.equal(selected.symbol, "storage");
   assert.ok(nightstand);
+  assert.equal(nightstand.catalogId, selected.id);
+  assert.deepEqual(nightstand.size, selected.defaultSize);
+  assert.equal(nightstand.materialVariants?.main, "metal-dark");
+  assert.match(nightstand.metadata?.source ?? "", /1005012793801128/);
+  assert.ok(inspectPlacement(DEFAULT_APARTMENT_DOCUMENT, nightstand).hard.length === 0);
+});
+
+test("keeps the former catalog model available alongside the selected WOLTU placement", () => {
+  const former = getFurnitureCatalogItem("nightstand-led-2drawer-white");
+  const nightstand = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "zimmer1-led-nightstand");
+
+  assert.ok(former);
+  assert.deepEqual(former.defaultSize, { width: 0.396, depth: 0.3, height: 0.604 });
+  assert.ok(nightstand);
+  assert.equal(nightstand.catalogId, "nightstand-aliexpress-woltu-1005012793801128");
   assert.equal(nightstand.roomId, "zimmer1");
   assert.deepEqual(nightstand.position, { x: 0.22, z: 1.76 });
-  assert.deepEqual(nightstand.size, catalogItem.defaultSize);
   assert.equal(nightstand.rotation, 270);
-  assert.equal(nightstand.materialVariants?.main, "white-matte");
+  assert.equal(nightstand.materialVariants?.main, "metal-dark");
   assert.equal(nightstand.metadata?.confidence, "estimated");
-  assert.ok(nightstand.metadata?.notes?.some((note) => /Temu.*Bild/i.test(note)));
-  assert.deepEqual(inspectPlacement(DEFAULT_APARTMENT_DOCUMENT, nightstand).hard, []);
+  assert.ok(inspectPlacement(DEFAULT_APARTMENT_DOCUMENT, nightstand).hard.length === 0);
 });
