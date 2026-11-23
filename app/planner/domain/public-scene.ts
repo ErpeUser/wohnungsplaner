@@ -1,37 +1,61 @@
+import { DEFAULT_APARTMENT_DOCUMENT } from "./apartment-v3.ts";
+import { parsePlannerDocument } from "./schema.ts";
 import type { PlannerDocumentV3 } from "./types.ts";
 
-/**
- * Projects the canonical apartment into the public starter scene.
- *
- * The public workspace uses the complete canonical apartment so every supplied
- * room, including Zimmer 1, remains available alongside its catalogue products.
- */
-export function projectPublicApartmentDocument(document: PlannerDocumentV3): PlannerDocumentV3 {
-  const visibleRoomIds = new Set(document.rooms.map((room) => room.id));
-  const rooms = document.rooms.filter((room) => visibleRoomIds.has(room.id));
-  const walls = document.walls
-    .map((wall) => ({ ...wall, roomIds: wall.roomIds.filter((roomId) => visibleRoomIds.has(roomId)) }))
-    .filter((wall) => wall.roomIds.length > 0);
-  const wallIds = new Set(walls.map((wall) => wall.id));
-  const openings = document.openings
-    .map((opening) => ({ ...opening, roomIds: opening.roomIds?.filter((roomId) => visibleRoomIds.has(roomId)) }))
-    .filter((opening) => (opening.roomIds?.length ?? 0) > 0 && wallIds.has(opening.wallId));
-  const openingIds = new Set(openings.map((opening) => opening.id));
+const BEDROOM_ID = "zimmer1";
 
-  return {
+function restoreBedroomConnections<T extends { id: string; roomIds?: string[] }>(
+  saved: readonly T[],
+  canonical: readonly T[],
+): T[] {
+  const byId = new Map(saved.map((item) => [item.id, item]));
+  for (const item of canonical) {
+    const index = item.roomIds?.indexOf(BEDROOM_ID) ?? -1;
+    if (index < 0) continue;
+    const existing = byId.get(item.id);
+    if (!existing) {
+      byId.set(item.id, structuredClone(item));
+    } else if (!existing.roomIds?.includes(BEDROOM_ID)) {
+      const roomIds = [...(existing.roomIds ?? [])];
+      roomIds.splice(index, 0, BEDROOM_ID);
+      byId.set(item.id, { ...existing, roomIds });
+    }
+  }
+  return [...byId.values()];
+}
+
+/** Repair browser saves created by the former public projection without Zimmer 1. */
+export function projectPublicApartmentDocument(document: PlannerDocumentV3): PlannerDocumentV3 {
+  const canonical = DEFAULT_APARTMENT_DOCUMENT;
+  const roomIds = new Set(document.rooms.map((room) => room.id));
+  if (document.id !== canonical.id || roomIds.has(BEDROOM_ID)
+    || canonical.rooms.some((room) => room.id !== BEDROOM_ID && !roomIds.has(room.id))) return document;
+
+  const bedroom = canonical.rooms.find((room) => room.id === BEDROOM_ID);
+  if (!bedroom) return document;
+  const rooms = [...document.rooms];
+  rooms.splice(rooms.findIndex((room) => room.id === "zimmer2"), 0, structuredClone(bedroom));
+
+  const inBedroom = (item: { roomId: string }) => item.roomId === BEDROOM_ID;
+  const doorStates = { ...document.doorStates };
+  for (const opening of canonical.openings) {
+    if (opening.kind === "door" && opening.roomIds?.includes(BEDROOM_ID)) {
+      doorStates[opening.id] ??= canonical.doorStates[opening.id];
+    }
+  }
+
+  const restored = {
     ...document,
-    walls,
     rooms,
-    openings,
-    builtIns: document.builtIns.filter((item) => visibleRoomIds.has(item.roomId)),
-    fixtures: document.fixtures.filter((item) => visibleRoomIds.has(item.roomId)),
-    placements: document.placements.filter((item) => visibleRoomIds.has(item.roomId)),
-    doorStates: Object.fromEntries(Object.entries(document.doorStates).filter(([openingId]) => openingIds.has(openingId))),
-    viewPreferences: {
-      ...document.viewPreferences,
-      activeRoomId: document.viewPreferences.activeRoomId && visibleRoomIds.has(document.viewPreferences.activeRoomId)
-        ? document.viewPreferences.activeRoomId
-        : null,
-    },
+    walls: restoreBedroomConnections(document.walls, canonical.walls),
+    openings: restoreBedroomConnections(document.openings, canonical.openings),
+    builtIns: [...document.builtIns, ...structuredClone(canonical.builtIns.filter(inBedroom))],
+    fixtures: [...document.fixtures, ...structuredClone(canonical.fixtures.filter(inBedroom))],
+    placements: [...document.placements, ...structuredClone(canonical.placements.filter(inBedroom))],
+    doorStates,
   };
+  // Imported plans may use custom wall geometry. Do not replace a valid plan with an incompatible merge.
+  try { parsePlannerDocument(restored); }
+  catch { return document; }
+  return restored;
 }
