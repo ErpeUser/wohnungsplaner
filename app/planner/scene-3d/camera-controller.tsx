@@ -36,6 +36,8 @@ const EYE_HEIGHT = 1.62;
 const DEFAULT_WALK_FOV = 42;
 const MIN_WALK_FOV = 24;
 const MAX_WALK_FOV = 72;
+export const TOUCH_LOOK_SENSITIVITY = 0.004;
+export const TOUCH_PITCH_LIMIT = Math.PI / 2.35;
 
 export function orbitFovForRoom(activeRoomId: string | null) {
   return activeRoomId === "vorraum" ? 46 : 42;
@@ -53,6 +55,100 @@ export function walkZoomCommandForKey(event: Pick<KeyboardEvent, "code" | "key">
   if (event.code === "NumpadAdd" || event.key === "+") return "zoom-in" as const;
   if (event.code === "NumpadSubtract" || event.key === "-") return "zoom-out" as const;
   return null;
+}
+
+export function clampTouchPitch(pitch: number, limit = TOUCH_PITCH_LIMIT) {
+  return Math.max(-limit, Math.min(limit, pitch));
+}
+
+/** Apply a single-finger touch delta to a first-person camera. */
+export function rotateWalkCameraForTouch(
+  camera: PerspectiveCamera,
+  deltaX: number,
+  deltaY: number,
+  sensitivity = TOUCH_LOOK_SENSITIVITY,
+) {
+  // PointerLockControls uses YXZ. Reordering preserves the current quaternion
+  // while keeping yaw and pitch independently addressable for touch input.
+  camera.rotation.reorder("YXZ");
+  camera.rotation.y -= deltaX * sensitivity;
+  camera.rotation.x = clampTouchPitch(camera.rotation.x - deltaY * sensitivity);
+  camera.updateMatrixWorld();
+}
+
+/**
+ * Installs a touch-only look gesture on the rendered canvas.
+ *
+ * Pointer capture keeps a gesture alive when a finger leaves the canvas. Both
+ * cancellation paths release the active pointer so a later touch can start a
+ * fresh gesture without a stuck camera.
+ */
+export function attachTouchLookControls(
+  element: HTMLElement,
+  camera: PerspectiveCamera,
+  invalidate: () => void,
+  sensitivity = TOUCH_LOOK_SENSITIVITY,
+) {
+  let activePointerId: number | null = null;
+  let lastX = 0;
+  let lastY = 0;
+
+  const releaseCapture = (pointerId: number) => {
+    try {
+      if (element.hasPointerCapture(pointerId)) element.releasePointerCapture(pointerId);
+    } catch {
+      // The browser may have released the capture before dispatching the
+      // cancellation event. There is nothing left to clean up in that case.
+    }
+  };
+
+  const onPointerDown = (event: PointerEvent) => {
+    if (event.pointerType !== "touch" || activePointerId !== null) return;
+    activePointerId = event.pointerId;
+    lastX = event.clientX;
+    lastY = event.clientY;
+    try {
+      element.setPointerCapture(event.pointerId);
+    } catch {
+      // Pointer capture is unavailable in a few embedded WebViews. The
+      // gesture still works while the finger remains over the canvas.
+    }
+    event.preventDefault();
+  };
+
+  const onPointerMove = (event: PointerEvent) => {
+    if (event.pointerType !== "touch" || activePointerId !== event.pointerId) return;
+    const deltaX = event.clientX - lastX;
+    const deltaY = event.clientY - lastY;
+    lastX = event.clientX;
+    lastY = event.clientY;
+    if (deltaX === 0 && deltaY === 0) return;
+    rotateWalkCameraForTouch(camera, deltaX, deltaY, sensitivity);
+    event.preventDefault();
+    invalidate();
+  };
+
+  const releasePointer = (event: PointerEvent) => {
+    if (activePointerId !== event.pointerId) return;
+    activePointerId = null;
+    releaseCapture(event.pointerId);
+  };
+
+  element.addEventListener("pointerdown", onPointerDown, { passive: false });
+  element.addEventListener("pointermove", onPointerMove, { passive: false });
+  element.addEventListener("pointerup", releasePointer);
+  element.addEventListener("pointercancel", releasePointer);
+  element.addEventListener("lostpointercapture", releasePointer);
+
+  return () => {
+    element.removeEventListener("pointerdown", onPointerDown);
+    element.removeEventListener("pointermove", onPointerMove);
+    element.removeEventListener("pointerup", releasePointer);
+    element.removeEventListener("pointercancel", releasePointer);
+    element.removeEventListener("lostpointercapture", releasePointer);
+    if (activePointerId !== null) releaseCapture(activePointerId);
+    activePointerId = null;
+  };
 }
 
 export function createOrbitPose(scene: SceneModel, activeRoomId: string | null): OrbitPose {
@@ -213,11 +309,13 @@ export function CameraController({
     () => createWalkStartPose(document, scene, activeRoomId),
     // Door toggles replace the document object but must not reset a walking
     // camera. The room selection is the intentional start-pose boundary.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- preserve the walk camera while doors or furniture update
     [activeRoomId],
   );
   const [sceneCenterX, sceneCenterY, sceneCenterZ] = scene.center;
   const orbitPose = useMemo(
     () => createOrbitPose(scene, activeRoomId),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- scalar scene bounds are the complete pose inputs
     [activeRoomId, sceneCenterX, sceneCenterY, sceneCenterZ, scene.bounds.maxX, scene.bounds.minX, scene.bounds.maxZ, scene.bounds.minZ],
   );
   const orbitTarget = useMemo<[number, number, number]>(
@@ -404,10 +502,19 @@ export function CameraController({
 
 function SafePointerLockControls() {
   const { gl } = useThree();
+  const lastTouchAt = useRef(0);
   useEffect(() => {
     const canvas = gl.domElement;
 
-    const lockPointer = () => {
+    const noteTouch = (event: PointerEvent) => {
+      if (event.pointerType === "touch") lastTouchAt.current = performance.now();
+    };
+
+    const lockPointer = (event: MouseEvent) => {
+      const pointerType = "pointerType" in event ? (event as PointerEvent).pointerType : "";
+      // A tap should rotate the camera through the touch fallback, never open
+      // a pointer-lock prompt that mobile browsers cannot satisfy.
+      if (pointerType === "touch" || performance.now() - lastTouchAt.current < 500) return;
       try {
         const request = canvas.requestPointerLock();
         if (request) void request.catch(() => undefined);
@@ -417,14 +524,30 @@ function SafePointerLockControls() {
       }
     };
 
+    canvas.addEventListener("pointerdown", noteTouch);
     canvas.addEventListener("click", lockPointer);
-    return () => canvas.removeEventListener("click", lockPointer);
+    return () => {
+      canvas.removeEventListener("pointerdown", noteTouch);
+      canvas.removeEventListener("click", lockPointer);
+    };
   }, [gl.domElement]);
 
   // Drei still owns camera rotation after a successful lock. The deliberately
   // empty selector prevents its internal click handler from dropping the
   // requestPointerLock() promise, which caused the Chromium rejection overlay.
-  return <PointerLockControls makeDefault domElement={gl.domElement} selector="#planner-pointer-lock-trigger-disabled" />;
+  return (
+    <>
+      <PointerLockControls makeDefault domElement={gl.domElement} selector="#planner-pointer-lock-trigger-disabled" />
+      <TouchLookControls />
+    </>
+  );
+}
+
+function TouchLookControls() {
+  const { camera, gl, invalidate } = useThree();
+
+  useEffect(() => attachTouchLookControls(gl.domElement, camera as PerspectiveCamera, invalidate), [camera, gl.domElement, invalidate]);
+  return null;
 }
 
 function findValidGridPoint(document: PlannerDocumentV3, polygon: Point2[], activeRoomId: string | null) {

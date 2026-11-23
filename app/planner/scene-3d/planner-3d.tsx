@@ -54,6 +54,7 @@ export function Planner3D({
 }: Planner3DProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const [failure, setFailure] = useState<string | null>(null);
+  const [contextLost, setContextLost] = useState(false);
   const [, setLiveAssetVersion] = useState(0);
   const reducedMotion = useReducedMotion();
   const support = useMemo(() => supportOverride ?? detectThreeSupport(), [supportOverride]);
@@ -102,10 +103,18 @@ export function Planner3D({
     if (!canvas) return;
     const onContextLost = (event: Event) => {
       event.preventDefault();
-      setFailure("Der 3D-Kontext wurde unterbrochen. Deine Planung ist unverändert gespeichert.");
+      setContextLost(true);
+    };
+    const onContextRestored = () => {
+      setContextLost(false);
+      setFailure(null);
     };
     canvas.addEventListener("webglcontextlost", onContextLost);
-    return () => canvas.removeEventListener("webglcontextlost", onContextLost);
+    canvas.addEventListener("webglcontextrestored", onContextRestored);
+    return () => {
+      canvas.removeEventListener("webglcontextlost", onContextLost);
+      canvas.removeEventListener("webglcontextrestored", onContextRestored);
+    };
   }, [support.supported]);
 
   if (!support.supported || failure) {
@@ -132,7 +141,11 @@ export function Planner3D({
           near: 0.05,
           far: 80,
         }}
-        gl={{ antialias: tier !== "low", alpha: false, powerPreference: "high-performance" }}
+        gl={{
+          antialias: tier !== "low",
+          alpha: false,
+          powerPreference: tier === "high" ? "high-performance" : "low-power",
+        }}
         onCreated={(state) => {
           configureRenderer(state);
           state.gl.domElement.tabIndex = 0;
@@ -178,6 +191,13 @@ export function Planner3D({
         cutawayEnabled={cutawayEnabled}
         onToggleCutaway={() => setAutomaticCutaway((current) => !current)}
       />
+      {contextLost ? (
+        <div className="planner-3d__context-alert" role="alert">
+          <strong>3D-Kontext wurde unterbrochen</strong>
+          <span>Der Grafik-Kontext wurde unterbrochen. Deine Planung ist unverändert gespeichert.</span>
+          <button type="button" onClick={onReturn2D}>Zu 2D</button>
+        </div>
+      ) : null}
       <div className="planner-3d__quality" aria-hidden="true">3D · {tier === "high" ? "Hoch" : tier === "balanced" ? "Ausgewogen" : "Effizient"}</div>
     </div>
   );
@@ -209,7 +229,7 @@ function CameraOverlay({
   if (mode === "orbit") {
     return (
       <div className="planner-3d__camera planner-3d__camera--orbit" aria-label="3D-Ansicht steuern">
-        <span className="planner-3d__camera-help">Mit gedrückter Maustaste drehen · Zoom und Reset über die Tasten</span>
+        <span className="planner-3d__camera-help">Ziehen zum Drehen · Zoom und Reset über die Bedienelemente</span>
         <button type="button" aria-label="3D verkleinern" onClick={() => dispatchWalkCommand("zoom-out")}>−</button>
         <button type="button" aria-label="3D vergrößern" onClick={() => dispatchWalkCommand("zoom-in")}>+</button>
         <button type="button" aria-label="3D-Ansicht zurücksetzen" onClick={() => dispatchWalkCommand("reset")}>Ansicht zurücksetzen</button>
@@ -228,7 +248,7 @@ function CameraOverlay({
   }
   return (
     <div className="planner-3d__camera" aria-label="Rundgangsteuerung">
-      <span>Klicken zum Umsehen · WASD zum Gehen · +/− zum Zoomen</span>
+      <span>Im Bild ziehen zum Umsehen · WASD oder Pfeile zum Gehen · +/− zum Zoomen</span>
       <div>
         <button type="button" aria-label="Vorwärts" onClick={() => dispatchWalkCommand("forward")}>↑</button>
         <button type="button" aria-label="Links" onClick={() => dispatchWalkCommand("left")}>←</button>
