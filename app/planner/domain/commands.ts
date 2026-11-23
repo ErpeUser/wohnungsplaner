@@ -1,4 +1,5 @@
 import { inspectPlacement, type CollisionHit } from "./collisions.ts";
+import { WC_WALLBOARD_BUILTIN_ID, WC_WALLBOARD_STYLING_ID, WC_REAR_WALL_WIDTH_CM, findWcWallboardOption, wallboardDimensionLabel, type WcWallboardOptionId } from "./wc-wallboards.ts";
 import { getTableModelForCatalogId, metresFromCentimetres } from "../tables/table-models.ts";
 import { isKnownMaterialId } from "./material-registry.ts";
 import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
@@ -12,6 +13,7 @@ import type {
 } from "./types.ts";
 
 export type PlannerCommand =
+  | { type: "setWcWallboard"; optionId: WcWallboardOptionId }
   | { type: "registerAsset"; asset: PlannerAssetRecord }
   | { type: "removeAsset"; assetId: string }
   | { type: "addPlacement"; placement: PlannerPlacement }
@@ -56,6 +58,48 @@ export function applyPlannerCommand(
   command: PlannerCommand,
 ): CommandResult {
   switch (command.type) {
+    case "setWcWallboard": {
+      const option = findWcWallboardOption(command.optionId);
+      if (!option) return reject(document, "invalid", "Dieses WC-Wandboard ist nicht verfügbar.");
+      const board = document.builtIns.find((item) => item.id === WC_WALLBOARD_BUILTIN_ID);
+      if (!board || board.roomId !== "wc") return reject(document, "not-found", "Das WC-Wandboard wurde nicht gefunden.");
+      if (board.catalogId === option.catalogId) return accept(document);
+      if (option.widthCm > WC_REAR_WALL_WIDTH_CM) return reject(document, "invalid", "Das Wandboard ist für die WC-Rückwand zu breit.");
+
+      // Anchor the rear edge to the same wall as depth changes.
+      const depth = option.depthCm / 100;
+      const height = option.heightCm / 100;
+      const rearEdge = board.position.z - board.size.depth / 2;
+      const centerZ = Number((rearEdge + depth / 2).toFixed(4));
+      const boardTop = Number(((board.elevation ?? 0) + height).toFixed(4));
+      const builtIns = document.builtIns.map((item) => {
+        if (item.id === WC_WALLBOARD_BUILTIN_ID) return {
+          ...item,
+          label: option.name,
+          catalogId: option.catalogId,
+          size: { width: option.widthCm / 100, height, depth },
+          position: { ...item.position, z: centerZ },
+          materialVariants: { ...item.materialVariants, main: option.materialId },
+          metadata: {
+            source: `${option.retailer} Art. ${option.articleId} · Händlermaße`,
+            confidence: "confirmed" as const,
+            notes: [
+              `${wallboardDimensionLabel(option)} (B/H/T) · ${option.finish} · Traglast laut Anbieter bis ${option.loadKg} kg.`,
+              `Mittig an der ${WC_REAR_WALL_WIDTH_CM}-cm-WC-Rückwand: beidseitig je ${(WC_REAR_WALL_WIDTH_CM - option.widthCm) / 2} cm Abstand.`,
+              "Unterkante ca. 201,5 cm; Wandbefestigung und Tragfähigkeit vor Montage prüfen.",
+            ],
+          },
+        };
+        if (item.id === WC_WALLBOARD_STYLING_ID) return {
+          ...item,
+          position: { ...item.position, x: board.position.x, z: centerZ },
+          elevation: boardTop,
+        };
+        return item;
+      });
+      return accept({ ...document, updatedAt: timestamp(), builtIns });
+    }
+
     case "registerAsset": {
       if ((document.assets ?? []).some((asset) => asset.assetId === command.asset.assetId)) {
         return reject(document, "duplicate-id", `Das Asset ${command.asset.assetId} ist bereits registriert.`);

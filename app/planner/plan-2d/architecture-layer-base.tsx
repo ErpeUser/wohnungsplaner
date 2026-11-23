@@ -310,11 +310,11 @@ function BuiltInDetail({ item }: { item: PlanObjectDescriptor }) {
       })}
     </Group>;
   }
-  if (id === "wc-artisan-wallboard-80") {
-    // Source-specific 80 x 23.5 cm top view: thin oak foil with visible banding.
+  if (id === "wc-artisan-wallboard-80" || id === "wc-boxxx-wallboard-90" || id === "wc-livetastic-wallboard-90") {
+    // Source-specific plan footprint: 80 or 90 cm wide, 20 or 23.5 cm deep.
     return <Group listening={false}>
       <Line points={[box.minX, box.minZ, box.maxX, box.minZ, box.maxX, box.maxZ, box.minX, box.maxZ]}
-        closed fill="#c9a06f" stroke="#98704b" strokeWidth={0.009} />
+        closed fill={id === "wc-livetastic-wallboard-90" ? "#b8875d" : id === "wc-boxxx-wallboard-90" ? "#cda977" : "#c9a06f"} stroke="#98704b" strokeWidth={0.009} />
       <Line points={[box.minX + width * 0.08, box.minZ + depth * 0.22,
         box.maxX - width * 0.08, box.minZ + depth * 0.22]}
         stroke="#ae8155" strokeWidth={0.006} opacity={0.62} />
@@ -397,6 +397,8 @@ function planObjectColor(catalogId: string | undefined, kind: string) {
   if (catalogId === "zimmer1-desk-mirror") return "#cbdadd";
   if (catalogId === "wc-paper-holder") return "#d7b68b";
   if (catalogId === "wc-artisan-wallboard-80") return "#c9a06f";
+  if (catalogId === "wc-boxxx-wallboard-90") return "#cda977";
+  if (catalogId === "wc-livetastic-wallboard-90") return "#b8875d";
   if (catalogId === "wc-wall-ventilation" || catalogId === "wc-revision-panel") return "#efe5d8";
   if (catalogId === "wc-shelf-styling") return "#9fa988";
   if (catalogId === "zimmer1-wall-art-pair") return "#c99d68";
@@ -404,7 +406,9 @@ function planObjectColor(catalogId: string | undefined, kind: string) {
   if (catalogId === "zimmer1-headboard-led") return "#f2bd78";
   if (catalogId === "zimmer1-headboard-sconces") return "#c89d62";
   if (catalogId === "zimmer1-layered-curtain") return "#c9b6a4";
-  if (catalogId?.startsWith("zimmer1-desk-shelf-") || catalogId === "zimmer1-entry-niche") return "#c99d68";
+  if (catalogId === "zimmer1-desk-shelf-main") return "#b17d4f";
+  if (catalogId?.startsWith("zimmer1-desk-shelf-side-")) return "#d0a66b";
+  if (catalogId === "zimmer1-entry-niche") return "#c99d68";
   if (catalogId === "zimmer1-wardrobe-top-decor") return "#c6ae8e";
   if (catalogId === "zimmer1-desk-accessories" || catalogId === "zimmer1-nightstand-decor") return "#d7c8b4";
   if (catalogId === "vorraum-wall-decor") return "#c6ae8e";

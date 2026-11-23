@@ -12,8 +12,10 @@ import { SHARED_BOX, SHARED_CYLINDER, SHARED_PLANE, SHARED_SPHERE, SHARED_TORUS 
  */
 export function WcArtisanWallboard({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   const [width, height, depth] = item.size;
-  const edge = getPlannerMaterial("oak-artisan-edge");
-  const veneer = getPlannerMaterial("oak-artisan");
+  const edge = getPlannerMaterial(item.catalogId === "wc-livetastic-wallboard-90"
+    ? "wc-holder-oak-edge"
+    : item.catalogId === "wc-boxxx-wallboard-90" ? "oak-bozan-edge" : "oak-artisan-edge");
+  const veneer = getPlannerMaterial(item.materialId || "oak-artisan");
   return (
     <group name="wc-artisan-simple-wallboard">
       <RoundedBox args={[width, height, depth]} radius={0.004} smoothness={4} castShadow receiveShadow>

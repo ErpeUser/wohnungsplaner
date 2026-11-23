@@ -2401,3 +2401,46 @@
     forced-color-adjust: auto;
   }
 }
+
+
+/* WC shelf choice: a measured wood-swatch selector in the existing material-board palette. */
+.planner-built-in-options { display: grid; gap: 12px; }
+.planner-wallboards { margin: 12px 0; padding: 12px; border: 1px solid #d7d2c8; border-radius: 9px; background: #faf8f4; }
+.planner-wallboards__heading { display: flex; align-items: start; justify-content: space-between; gap: 8px; padding-bottom: 11px; }
+.planner-wallboards__heading h3 { margin: 0 0 4px; font-size: 13px; color: #203034; letter-spacing: -0.01em; }
+.planner-wallboards__heading p { margin: 0; color: #667171; font-size: 10px; line-height: 1.45; }
+.planner-wallboards__count { flex: none; padding: 4px 6px; background: #e6e0d5; border-radius: 4px; color: #536164; font-size: 9px; }
+.planner-wallboards__options { display: grid; gap: 7px; }
+.planner-wallboard-choice { overflow: hidden; border: 1px solid #ddd7cc; border-radius: 7px; background: #fffdfa; }
+.planner-wallboard-choice[data-selected="true"] { border-color: #274c52; box-shadow: 0 0 0 1px #274c52; }
+.planner-wallboard-choice__select { display: grid; grid-template-columns: 66px minmax(0, 1fr) auto; gap: 9px; align-items: center; width: 100%; min-height: 73px; padding: 9px; text-align: left; border: 0; border-radius: 6px; color: #203034; background: transparent; cursor: pointer; }
+.planner-wallboard-choice__select:hover { background: #f4f0e8; }
+.planner-wallboard-choice__select:focus-visible { outline: 3px solid #d18c57; outline-offset: -3px; }
+.planner-wallboard-choice__sample { display: flex; align-items: center; justify-content: center; width: 66px; height: 54px; padding: 8px 5px; border: 1px solid #e5ddd0; border-radius: 4px; background: #eae5dc; }
+.planner-wallboard-choice__sample-board { display: block; position: relative; flex: none; max-width: 100%; border-radius: 2px; box-shadow: 0 4px 0 #7f6247, 0 7px 9px rgba(48, 37, 26, 0.22); }
+.planner-wallboard-choice__sample-board::after { content: ""; position: absolute; inset: 0; opacity: .22; background: repeating-linear-gradient(174deg, transparent 0 5px, #faf3df 6px 7px, transparent 8px 13px, #795333 14px 15px); }
+.planner-wallboard-choice__body { display: grid; min-width: 0; gap: 3px; }
+.planner-wallboard-choice__body strong { font-size: 11px; line-height: 1.25; }
+.planner-wallboard-choice__measure { font-size: 10px; font-weight: 680; color: #805a39; font-variant-numeric: tabular-nums; }
+.planner-wallboard-choice__body small { font-size: 9px; line-height: 1.4; color: #667171; }
+.planner-wallboard-choice__price { display: grid; justify-items: end; gap: 7px; align-self: stretch; align-content: center; white-space: nowrap; }
+.planner-wallboard-choice__price strong { font-size: 11px; font-variant-numeric: tabular-nums; }
+.planner-wallboard-choice__price small { font-size: 9px; font-weight: 650; color: #667171; }
+.planner-wallboard-choice[data-selected="true"] .planner-wallboard-choice__price small { color: #274c52; }
+.planner-wallboard-choice__source { display: block; width: fit-content; margin: 0 9px 9px auto; color: #274c52; font-size: 10px; text-decoration: underline; text-underline-offset: 2px; }
+.planner-wallboard-choice__source:focus-visible { outline: 2px solid #d18c57; outline-offset: 3px; }
+.planner-wallboards__fit { margin: 11px 0 0; padding-top: 10px; border-top: 1px solid #e0d9ce; color: #536164; font-size: 10px; line-height: 1.5; }
+.planner-wallboards--compact { padding: 9px; margin: 0; }
+.planner-wallboards--compact .planner-wallboard-choice__select { grid-template-columns: 54px minmax(0, 1fr) auto; gap: 6px; padding: 6px; }
+.planner-wallboards--compact .planner-wallboard-choice__sample { width: 54px; height: 50px; padding: 5px 3px; }
+.planner-shopping__preview--wallboard { background: linear-gradient(#e9e0d1, #d5b992); }
+.planner-shopping__preview--wallboard::before { top: 37px; right: 9px; left: 9px; height: 26px; border-radius: 2px; background: repeating-linear-gradient(174deg, #c8a377 0 8px, #d8b78b 9px 11px, #b68a5e 12px 16px); box-shadow: 0 7px 0 #8c6646, 0 13px 10px rgba(68,47,32,.25); }
+.planner-shopping__preview--wallboard::after, .planner-shopping__preview--wallboard i { display: none; }
+@media (max-width: 430px) {
+  .planner-wallboards { padding: 9px; }
+  .planner-wallboard-choice__select { grid-template-columns: 54px minmax(0, 1fr) auto; gap: 6px; padding: 6px; }
+  .planner-wallboard-choice__sample { width: 54px; height: 48px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .planner-wallboard-choice__select { scroll-behavior: auto; }
+}

@@ -10,6 +10,8 @@ import { getChairModelForCatalogId } from "../chairs/chair-models.ts";
 import { getTableModelForCatalogId, metresFromCentimetres } from "../tables/table-models.ts";
 import { TableComparisonPanel } from "./table-comparison-panel.tsx";
 import { ModelImage, referenceKind } from "./model-evidence.tsx";
+import { WC_WALLBOARD_BUILTIN_ID } from "../domain/wc-wallboards.ts";
+import { WcWallboardPicker } from "./wc-wallboard-picker.tsx";
 import { DINING_CHAIR_IDS, placementLabel } from "./placement-label.ts";
 import "./model-switcher.css";
 
@@ -32,9 +34,12 @@ export function InspectorPanel({ document, selectionId, dispatch, select }: Insp
         <p>{selected ? "Position und Maß präzise anpassen." : builtIn ? "Fest eingebautes Element." : "Element im Plan auswählen."}</p>
       </header>
       {selected ? <PlacementFields key={selected.id} document={document} placement={selected} dispatch={dispatch} select={select} /> : builtIn ? (
-        <div className="planner-locked-state">
-          <span aria-hidden="true">◆</span>
-          <div><strong>{builtIn.label}</strong><p>Bestand · gegen Verschieben und Entfernen geschützt</p></div>
+        <div className="planner-built-in-options">
+          <div className="planner-locked-state">
+            <span aria-hidden="true">◆</span>
+            <div><strong>{builtIn.label}</strong><p>Fest positioniert · gegen Verschieben und Entfernen geschützt</p></div>
+          </div>
+          {builtIn.id === WC_WALLBOARD_BUILTIN_ID ? <WcWallboardPicker document={document} dispatch={dispatch} compact /> : null}
         </div>
       ) : (
         <div className="planner-empty-state">

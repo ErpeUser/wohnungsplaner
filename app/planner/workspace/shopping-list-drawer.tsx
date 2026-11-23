@@ -1,17 +1,22 @@
-import { SHOPPING_ITEMS, shoppingSubtotal } from "./shopping-items.ts";
+import { SHOPPING_ITEMS, shoppingSubtotal, shoppingItemsForDocument, shoppingSubtotalForDocument } from "./shopping-items.ts";
+import type { PlannerDocumentV3 } from "../domain/types.ts";
+import type { PlannerCommand, CommandResult } from "../domain/commands.ts";
+import { WcWallboardPicker } from "./wc-wallboard-picker.tsx";
 import { plannerAssetUrl } from "../catalog/asset-url.ts";
 
-export function ShoppingListDrawer({ onClose }: { onClose(): void }) {
-  const total = shoppingSubtotal;
+export function ShoppingListDrawer({ onClose, document, dispatch }: { onClose(): void; document?: PlannerDocumentV3; dispatch?: (command: PlannerCommand) => CommandResult }) {
+  const items = document ? shoppingItemsForDocument(document) : SHOPPING_ITEMS;
+  const total = document ? shoppingSubtotalForDocument(document) : shoppingSubtotal;
   return (
     <aside id="planner-shopping-list" className="planner-details planner-shopping" role="dialog" aria-modal="true" aria-labelledby="planner-shopping-title" tabIndex={-1}>
       <header>
         <div><span className="planner-kicker">Ausstattung</span><h2 id="planner-shopping-title">Einkaufsliste</h2></div>
         <button type="button" aria-label="Einkaufsliste schließen" onClick={onClose}>×</button>
       </header>
-      <p className="planner-shopping__intro">WOLTU Chenille ist der Hauptstuhl (zwei 2er-Sets). Bisherige Stühle bleiben als Backup sichtbar und zählen nicht zur Zwischensumme. Unbestätigte Maße und Preise sind gekennzeichnet.</p>
+      <p className="planner-shopping__intro">WOLTU Chenille ist der Hauptstuhl (zwei 2er-Sets). Bisherige Stühle bleiben als Backup sichtbar und zählen nicht zur Zwischensumme. Beim WC-Wandboard zählt ausschließlich die gewählte Variante. Unbestätigte Maße und Preise sind gekennzeichnet.</p>
+      {document && dispatch ? <WcWallboardPicker document={document} dispatch={dispatch} /> : null}
       <div className="planner-shopping__items">
-        {SHOPPING_ITEMS.map((item) => (
+        {items.map((item) => (
           <article key={item.id} className="planner-shopping__item">
             <div className={`planner-shopping__preview planner-shopping__preview--${item.type}`} aria-hidden="true">
               {/* External product sources stay in the link; the app serves its own previews. */}
