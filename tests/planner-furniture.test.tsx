@@ -115,10 +115,10 @@ describe("furniture interactions", () => {
     const document = { ...DEFAULT_APARTMENT_DOCUMENT, placements: [chair] };
     const snapped = resolvePlacementMove(document, chair, { x: 2.713, z: 0.937 });
     const free = resolvePlacementMove(document, chair, { x: 2.713, z: 0.937 }, { disableGrid: true });
-    // The new 62-cm chair is 2 cm narrower than the old 64-cm Temu model;
-    // both interactions still snap its left edge to the same object guide.
-    assert.deepEqual(snapped.position, { x: 2.71, z: 0.935 });
-    assert.deepEqual(free.position, { x: 2.71, z: 0.935 });
+    // The real-sized SKATE/SIMPLE wallboards shift nearby object guides.
+    // Both modes prefer the same object edges over grid rounding.
+    assert.deepEqual(snapped.position, { x: 2.68, z: 0.958 });
+    assert.deepEqual(free.position, { x: 2.68, z: 0.958 });
     assert.ok(snapped.guides.some((guide) => guide.kind === "object"));
   });
 
