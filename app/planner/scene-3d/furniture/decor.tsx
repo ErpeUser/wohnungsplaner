@@ -312,59 +312,109 @@ export function getWardrobeFrontLayout() {
 
 
 export function PhotoWardrobe() {
+  // MID.YOU FLY: five hinged bays with a full-height central mirror, two
+  // two-drawer banks, silver bow handles and the existing white/cashmere finish.
+  // All dimensions here are normalized to the catalog's 225 × 210 × 58 cm.
   const white = getPlannerMaterial("white-lacquer");
   const frame = getPlannerMaterial("wardrobe-frame-silver");
   const metal = getPlannerMaterial("metal-satin");
   const modules = getWardrobeFrontLayout();
-  const moduleBoundaries = modules.slice(0, -1).map((module) => module.center + module.width / 2);
-  const upperHandleXs = [-0.31, -0.29, 0.29, 0.31];
+  const boundaries = modules.slice(0, -1).map((module) => module.center + module.width / 2);
+  const doorHandles = [-0.32, -0.28, 0.075, 0.28, 0.32];
+  const drawerRows = [0.102, 0.251];
+
   return (
-    <group>
-      <mesh position={[0, 0.5, 0]} scale={[0.99, 1, 0.96]} geometry={SHARED_BOX} castShadow receiveShadow><primitive object={white} attach="material" /></mesh>
-      <mesh position={[0, 0.025, 0.03]} scale={[1.01, 0.05, 0.99]} geometry={SHARED_BOX} castShadow><primitive object={white} attach="material" /></mesh>
-      <mesh position={[-0.493, 0.5, 0.01]} scale={[0.026, 1, 0.98]} geometry={SHARED_BOX} castShadow><primitive object={white} attach="material" /></mesh>
-      <mesh position={[0.493, 0.5, 0.01]} scale={[0.026, 1, 0.98]} geometry={SHARED_BOX} castShadow><primitive object={white} attach="material" /></mesh>
-      {modules.map((module, index) => {
-        return (
-          <group key={index} position={[module.center, 0, 0.493]}>
-            {module.kind === "drawers" ? (
-              <>
-                <RoundedBox args={[module.width - 0.012, 0.665, 0.028]} radius={0.006} smoothness={2} position={[0, 0.6425, 0]} castShadow receiveShadow>
-                  <primitive object={white} attach="material" />
-                </RoundedBox>
-                {[0.095, 0.245].map((y) => (
-                  <group key={y}>
-                    <RoundedBox args={[module.width - 0.014, 0.14, 0.034]} radius={0.006} smoothness={2} position={[0, y, 0.006]} castShadow receiveShadow>
-                      <primitive object={getPlannerMaterial(module.finish)} attach="material" />
-                    </RoundedBox>
-                    <mesh position={[0, y, 0.037]} scale={[module.width * 0.5, 0.014, 0.014]} geometry={SHARED_CYLINDER} rotation={[0, 0, Math.PI / 2]} castShadow><primitive object={metal} attach="material" /></mesh>
-                  </group>
-                ))}
-              </>
-            ) : (
-              <RoundedBox args={[module.width - 0.012, 0.955, 0.028]} radius={0.006} smoothness={2} position={[0, 0.5, 0]} castShadow receiveShadow>
-                <primitive object={getPlannerMaterial(module.finish)} attach="material" />
+    <group name="mid-you-fly-wardrobe-custom-finish">
+      {/* Real cabinet envelope: no decorative geometry above 210 cm. */}
+      <mesh name="wardrobe-carcass" position={[0, 0.5, 0]} scale={[0.991, 0.97, 0.90]} geometry={SHARED_BOX} castShadow receiveShadow>
+        <primitive object={white} attach="material" />
+      </mesh>
+      <mesh name="wardrobe-plinth" position={[0, 0.029, 0.005]} scale={[0.988, 0.058, 0.925]} geometry={SHARED_BOX} castShadow receiveShadow>
+        <primitive object={white} attach="material" />
+      </mesh>
+      {[-0.489, 0.489].map((x) => (
+        <mesh key={x} position={[x, 0.505, -0.007]} scale={[0.018, 0.965, 0.925]} geometry={SHARED_BOX} castShadow receiveShadow>
+          <primitive object={white} attach="material" />
+        </mesh>
+      ))}
+      {modules.map((module, index) => (
+        <group key={index} name={`wardrobe-bay-${index + 1}`} position={[module.center, 0, 0.462]}>
+          {module.kind === "drawers" ? (
+            <>
+              {/* Top of the two drawer columns remains the original white lacquer. */}
+              <RoundedBox args={[module.width - 0.012, 0.622, 0.025]} radius={0.004} smoothness={4} position={[0, 0.656, 0]} castShadow receiveShadow>
+                <primitive object={white} attach="material" />
               </RoundedBox>
-            )}
-          </group>
-        );
-      })}
-      {moduleBoundaries.map((x) => (
-        <mesh key={x} position={[x, 0.5, 0.509]} scale={[0.005, 0.955, 0.012]} geometry={SHARED_BOX} castShadow>
+              {drawerRows.map((y, row) => (
+                <group key={row} name={`wardrobe-cashmere-drawer-${index}-${row}`}>
+                  <RoundedBox args={[module.width - 0.014, 0.143, 0.034]} radius={0.004} smoothness={4} position={[0, y, 0.008]} castShadow receiveShadow>
+                    <primitive object={getPlannerMaterial(module.finish)} attach="material" />
+                  </RoundedBox>
+                  {/* Horizontal three-part bow handle with two stand-offs. */}
+                  <group name={`wardrobe-drawer-bow-handle-${index}-${row}`} position={[0, y - 0.042, 0.034]}>
+                    <mesh position={[0, 0, 0.002]} rotation={[0, 0, Math.PI / 2]} scale={[0.011, 0.104, 0.011]} geometry={SHARED_CYLINDER} castShadow>
+                      <primitive object={metal} attach="material" />
+                    </mesh>
+                    {[-0.047, 0.047].map((x) => (
+                      <mesh key={x} position={[x, 0, -0.006]} scale={[0.011, 0.011, 0.019]} geometry={SHARED_BOX} castShadow>
+                        <primitive object={metal} attach="material" />
+                      </mesh>
+                    ))}
+                  </group>
+                </group>
+              ))}
+              {/* Thin shadow gaps clarify four independent sliding drawers. */}
+              {[0.029, 0.178, 0.328].map((y) => (
+                <mesh key={y} position={[0, y, 0.028]} scale={[module.width - 0.018, 0.0025, 0.004]} geometry={SHARED_BOX}>
+                  <primitive object={frame} attach="material" />
+                </mesh>
+              ))}
+            </>
+          ) : module.kind === "mirror" ? (
+            <>
+              <RoundedBox args={[module.width - 0.012, 0.944, 0.022]} radius={0.004} smoothness={4} position={[0, 0.505, 0]} castShadow receiveShadow>
+                <primitive object={white} attach="material" />
+              </RoundedBox>
+              <mesh name="wardrobe-full-height-center-mirror" position={[0, 0.505, 0.015]} scale={[module.width - 0.027, 0.915, 0.008]} geometry={SHARED_BOX} castShadow receiveShadow>
+                <primitive object={getPlannerMaterial("mirror-glass")} attach="material" />
+              </mesh>
+              {/* Minimal silver edge at both sides of the tall mirrored panel. */}
+              {[-1, 1].map((side) => (
+                <mesh key={side} position={[side * (module.width - 0.027) / 2, 0.505, 0.021]} scale={[0.002, 0.915, 0.005]} geometry={SHARED_BOX}>
+                  <primitive object={frame} attach="material" />
+                </mesh>
+              ))}
+            </>
+          ) : (
+            <RoundedBox args={[module.width - 0.012, 0.944, 0.025]} radius={0.004} smoothness={4} position={[0, 0.505, 0]} castShadow receiveShadow>
+              <primitive object={getPlannerMaterial(module.finish)} attach="material" />
+            </RoundedBox>
+          )}
+        </group>
+      ))}
+      {boundaries.map((x) => (
+        <mesh key={x} name="wardrobe-vertical-seam" position={[x, 0.505, 0.483]} scale={[0.0042, 0.943, 0.012]} geometry={SHARED_BOX} castShadow>
           <primitive object={frame} attach="material" />
         </mesh>
       ))}
-      {upperHandleXs.map((x) => (
-        <mesh key={x} position={[x, 0.58, 0.535]} scale={[0.014, 0.16, 0.014]} geometry={SHARED_CYLINDER} castShadow>
-          <primitive object={metal} attach="material" />
-        </mesh>
+      {doorHandles.map((x, index) => (
+        <group key={index} name={`wardrobe-door-bow-handle-${index}`} position={[x, 0.585, 0.482]}>
+          <mesh name="wardrobe-door-grip" position={[0, 0, 0.012]} scale={[0.009, 0.177, 0.009]} geometry={SHARED_CYLINDER} castShadow>
+            <primitive object={metal} attach="material" />
+          </mesh>
+          {[-0.07, 0.07].map((y) => (
+            <mesh key={y} position={[0, y, 0.006]} scale={[0.013, 0.013, 0.023]} geometry={SHARED_BOX} castShadow>
+              <primitive object={metal} attach="material" />
+            </mesh>
+          ))}
+        </group>
       ))}
-      <mesh position={[0, 1.008, 0]} scale={[1.02, 0.025, 1.01]} geometry={SHARED_BOX} castShadow><primitive object={white} attach="material" /></mesh>
+      <mesh name="wardrobe-top-cap" position={[0, 0.989, 0]} scale={[1, 0.022, 0.947]} geometry={SHARED_BOX} castShadow receiveShadow>
+        <primitive object={white} attach="material" />
+      </mesh>
     </group>
   );
 }
-
-
 
 export function PhotoDesk() {
   const white = getPlannerMaterial("white-matte");

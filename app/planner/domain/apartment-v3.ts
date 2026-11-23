@@ -248,7 +248,7 @@ const builtIns: PlannerBuiltIn[] = [
     notes: ["B/H/T 23,5 × 3,8 × 23,5 cm · foliertes MDF · Eiche Artisan Dekor · max. 10 kg.", "Unteres von zwei identischen quadratischen Wandboards an der seitlichen Wand; Position ist eine Planungsannahme.", "Befestigungsmaterial enthalten."],
   }),
   builtIn("z1-entry-niche", "Schmale beleuchtete Eiche-Nische neben dem Schrank", "zimmer1", "storage", "zimmer1-entry-niche", 2.37, 3.255, 0.22, 0.13, 1.88, 180, "oak-light", 0.08, assumptionMetadata("Nur 22 cm breit und 13 cm tief, damit der Zugang frei bleibt; drei flache Ablagen und verdeckte warmweiße LED-Linie.")),
-  builtIn("z1-wardrobe-top-decor", "Geflochtene Aufbewahrungsboxen auf dem Schrank", "zimmer1", "storage", "zimmer1-wardrobe-top-decor", 1.125, 3.02, 1.46, 0.42, 0.25, 180, "fabric-taupe", 2.2, assumptionMetadata("Drei niedrige, helle Flechtboxen nutzen die sichtbare Zone über dem Schrank; Gesamthöhe bleibt unter der 2,56-m-Decke.")),
+  builtIn("z1-wardrobe-top-decor", "Geflochtene Aufbewahrungsboxen auf dem Schrank", "zimmer1", "storage", "zimmer1-wardrobe-top-decor", 1.125, 3.02, 1.46, 0.42, 0.25, 180, "fabric-taupe", 2.1, assumptionMetadata("Drei niedrige, helle Flechtboxen stehen auf der nun 210 cm hohen Schrankoberseite und bleiben unter der 2,56-m-Decke.")),
   builtIn("z1-nightstand-decor", "Kompakte Deko auf dem Nachttisch", "zimmer1", "other", "zimmer1-nightstand-decor", 0.22, 1.69, 0.3, 0.18, 0.22, 270, "ceramic-beige", 0.61, assumptionMetadata("Schmales Tablett als einzige Deko; die integrierte Nachttischbeleuchtung bleibt frei und wird nicht durch eine zusätzliche Lampe ergänzt.")),
   builtIn(
     "hall-wall-decor",
@@ -386,7 +386,16 @@ const placements: PlannerPlacement[] = [
       ],
     },
   ),
-  placement("zimmer1-wardrobe", "zimmer1", "wardrobe-225", 1.19, 2.96, 2.25, 0.62, 2.2, 180, "white-matte"),
+  placement("zimmer1-wardrobe", "zimmer1", "wardrobe-225", 1.19, 2.98, 2.25, 0.58, 2.10, 180, "white-matte", {
+    source: "Möbelix · MID.YOU FLY · Art. 001787045908 · Form und Maße bestätigt, Bestandsfarbe beibehalten",
+    confidence: "confirmed",
+    notes: [
+      "B/H/T 225 × 210 × 58 cm laut Möbelix; die Rückkante bleibt trotz geringerer Tiefe an ihrer bisherigen Wandposition.",
+      "Fünf Drehtüren mit mittigem langem Spiegel und silberfarbenen Bügelgriffen.",
+      "Zwei Schubladenmodule mit je zwei Fronten: alle vier behalten die vorhandene kaschmir-/cremefarbene Folie statt des grauen Graphits.",
+      "Bestehender Schrank: keine Aufnahme in die Einkaufsliste.",
+    ],
+  }),
   placement(
     "zimmer1-temu-shaggy-rug",
     "zimmer1",
@@ -444,12 +453,12 @@ const placements: PlannerPlacement[] = [
     180,
     "fabric-ecru",
     {
-      source: "Nutzerlink zu AliExpress · Art. 1005012445521181 · Produktname verfügbar, Galerie und Maßblatt nicht verifiziert",
+      source: "AliExpress · XUEGW Art. 1005012445521181 · drei Produktgaleriebilder geprüft, Außenmaße nicht verifiziert",
       confidence: "estimated",
       notes: [
-        "Geplant als kompakter gepolsterter Drehstuhl mit Rückenlehne, höhenverstellbarer Säule und fünf leisen Rollen; Design- und Mechanikdetails sind Näherungen.",
-        "Nur Stellplatzschätzung: Breite 62 cm, Tiefe 53 cm, Höhe 92 cm. Diese Zahlen sind keine bestätigten Produktdaten.",
-        "Ecru/Creme als Planungsfarbe passend zur bisherigen Schminkecke; tatsächliche AliExpress-Farbvariante vor Bestellung prüfen.",
+        "Originalgalerie: geschwungene dreiteilige Blütenrückenlehne, dicke durchgehende Polsterarmlehnen, separates Schmetterlings-Lendenkissen und weicher cremefarbener Sitz.",
+        "Originalgalerie: weißes Fünfstern-Rollkreuz mit schwarzen Rollen, Gasdrucksäule und Bedienhebel; 360° drehbar und laut Bild 10 cm Hub. Breite 62 cm, Tiefe 53 cm, Höhe 92 cm sind weiterhin unbestätigte Planungsmaße.",
+        "Ecru/Creme entspricht der gezeigten hellen Variante; Materialien und Weißton bleiben bis zu einem Muster nur näherungsweise rekonstruiert.",
         "Die bisherige Platzierung bei X 2,96 m / Z 0,92 m und die Blickrichtung zum Schminktisch bleiben erhalten.",
       ],
     },

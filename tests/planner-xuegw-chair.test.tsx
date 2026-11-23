@@ -23,6 +23,8 @@ describe("Zimmer-1 AliExpress XUEGW replacement", () => {
     expect(item.renderMode).toBe("parametric");
     expect(item.realism?.confidence).toBe("estimated");
     expect(item.sourceUrl).toBe("https://de.aliexpress.com/item/1005012445521181.html");
+    expect(item.realism?.sourceLabel).toMatch(/Originalgalerie/);
+    expect(item.realism?.construction.join(" ")).toMatch(/Schmetterlings-Lendenkissen/);
     expect(item.defaultSize).toEqual({ width: 0.62, depth: 0.53, height: 0.92 });
     const placed = DEFAULT_APARTMENT_DOCUMENT.placements.find((p) => p.id === "zimmer1-chair")!;
     expect(placed.catalogId).toBe(ID);
@@ -97,6 +99,16 @@ describe("Zimmer-1 AliExpress XUEGW replacement", () => {
       expect(scene.getObjectByName("xuegw-adjustable-desk-chair")).toBeDefined();
       expect(scene.getObjectByName("xuegw-gas-lift")).toBeDefined();
       for (let i = 0; i < 5; i++) expect(scene.getObjectByName("xuegw-caster-" + i)).toBeDefined();
+      for (const detail of [
+        "xuegw-petal-back",
+        "xuegw-back-center-petal",
+        "xuegw-butterfly-lumbar",
+        "xuegw-pillow-cinch",
+        "xuegw-wraparound-arm-left",
+        "xuegw-wraparound-arm-right",
+        "xuegw-seat-piping",
+        "xuegw-height-lever",
+      ]) expect(scene.getObjectByName(detail), detail).toBeDefined();
       const ray = (y: number) => new THREE.Raycaster(new THREE.Vector3(0, y, 1), new THREE.Vector3(0, 0, -1))
         .intersectObjects(scene.children, true);
       expect(ray(0.49).length).toBeGreaterThan(0);
@@ -107,5 +119,21 @@ describe("Zimmer-1 AliExpress XUEGW replacement", () => {
       expect(bounds.y).toBeLessThan(0.94);
       expect(bounds.z).toBeLessThanOrEqual(0.54);
     } finally { await act(async () => { root.unmount(); }); }
+  });
+  test("updates obsolete gallery evidence for an already selected XUEGW without moving it", () => {
+    const legacy = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
+    const chair = legacy.placements.find((p) => p.id === "zimmer1-chair")!;
+    chair.metadata = {
+      ...chair.metadata!,
+      source: "Nutzerlink zu AliExpress · Art. 1005012445521181 · Produktname verfügbar, Galerie und Maßblatt nicht verifiziert",
+      notes: ["Geplant als kompakter gepolsterter Drehstuhl mit Rückenlehne", "Eigene Notiz bleibt erhalten"],
+    };
+    chair.position = { x: 3.04, z: 1.02 };
+    const upgraded = upgradeZimmer1Chair(legacy);
+    const actual = upgraded.placements.find((p) => p.id === chair.id)!;
+    expect(actual.position).toEqual({ x: 3.04, z: 1.02 });
+    expect(actual.metadata?.source).toContain("Produktgaleriebilder geprüft");
+    expect(actual.metadata?.notes).toContain("Eigene Notiz bleibt erhalten");
+    expect(upgradeZimmer1Chair(upgraded)).toBe(upgraded);
   });
 });

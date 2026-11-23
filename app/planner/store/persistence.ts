@@ -374,19 +374,22 @@ function readStoredValue(raw: string): MigrationResult {
       const withDining = upgradeDiningChairsToWoltu(withChair);
       const withWc = upgradeWcPhotoReference(withDining);
       const withWallboards = upgradeZimmer1VanityWallboards(withWc);
-      if (!normalized.identityChanged && isOlderBaselineModel(withWallboards)) {
+      const withFly = upgradeZimmer1WardrobeToFly(withWallboards);
+      if (!normalized.identityChanged && isOlderBaselineModel(withFly)) {
         return {
-          document: rebaseBaselineModel(withWallboards),
+          document: rebaseBaselineModel(withFly),
           warnings: ["Das gespeicherte Möbel-Layout und die Bad-/WC-Materialien wurden auf den aktuellen Stand aktualisiert."],
           legacyBackupJson: raw,
           unmapped: [],
         };
       }
-      if (normalized.changed || withWallboards !== parsed) {
+      if (normalized.changed || withFly !== parsed) {
         return {
-          document: withWallboards,
+          document: withFly,
           warnings: [normalized.changed
             ? "Das gespeicherte Dokument wurde auf die zusammengeführte Balkon-/Loggia-Struktur aktualisiert."
+            : withFly !== withWallboards
+              ? "Der Kleiderschrank in Zimmer 1 wurde an das MID.YOU-FLY-Maß angepasst; Kaschmirfronten und angepasste Möbelpositionen bleiben erhalten."
             : withWallboards !== withWc
               ? "Die drei Wandboards der Schminkecke wurden auf die ausgewählten Möbelix-Produkte aktualisiert; andere Möbelpositionen bleiben erhalten."
             : withWc !== withDining
@@ -516,14 +519,62 @@ export function upgradeDiningChairsToWoltu(document: PlannerDocumentV3): Planner
   return changed ? { ...document, placements } : document;
 }
 
+/**
+ * Upgrade the original 225 cm wardrobe to the sourced MID.YOU FLY footprint.
+ * Only the previous exact default-sized wardrobe changes. A moved/rotated
+ * cupboard keeps its coordinates; only the original back-wall centre is
+ * shifted 2 cm so the shallower case stays flush with the wall. The matching
+ * top decoration follows the new 210 cm top instead of floating above it.
+ */
+export function upgradeZimmer1WardrobeToFly(document: PlannerDocumentV3): PlannerDocumentV3 {
+  if (document.id !== DEFAULT_APARTMENT_DOCUMENT.id) return document;
+  const current = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "zimmer1-wardrobe");
+  const previous = document.placements.find((item) => item.id === "zimmer1-wardrobe");
+  if (!current || !previous || previous.catalogId !== "wardrobe-225"
+    || previous.size.width !== 2.25 || previous.size.depth !== 0.62 || previous.size.height !== 2.2) {
+    return document;
+  }
+  return parsePlannerDocument({
+    ...document,
+    placements: document.placements.map((item) => item.id === previous.id ? {
+      ...item,
+      size: { ...current.size },
+      position: { ...item.position, z: Math.abs(item.position.z - 2.96) < 0.001 ? 2.98 : item.position.z },
+      metadata: { ...item.metadata, ...current.metadata },
+    } : item),
+    builtIns: document.builtIns.map((item) => item.id === "builtin-z1-wardrobe-top-decor"
+      && Math.abs((item.elevation ?? 0) - 2.2) < 0.001
+      ? { ...item, elevation: 2.1 }
+      : item),
+  });
+}
+
 /** Switch only the previous default Zimmer-1 chair, preserving custom positions,
  * rotations, and any genuinely user-resized bounding box. Alternative product
- * selections remain untouched. */
+ * selections remain untouched; also refresh the superseded gallery evidence. */
 export function upgradeZimmer1Chair(document: PlannerDocumentV3): PlannerDocumentV3 {
   if (document.id !== DEFAULT_APARTMENT_DOCUMENT.id) return document;
   const current = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "zimmer1-chair");
   const previous = document.placements.find((item) => item.id === "zimmer1-chair");
-  if (!current || !previous || previous.catalogId !== "chair-temu-executive-ivory") return document;
+  if (!current || !previous) return document;
+  if (previous.catalogId === current.catalogId) {
+    // Only the obsolete built-in evidence is refreshed, not personal choices.
+    if (!previous.metadata?.source?.includes("Galerie und Maßblatt nicht verifiziert")) return document;
+    const priorNotes = (previous.metadata.notes ?? []).filter((note) => ![
+      "Geplant als kompakter", "Nur Stellplatzschätzung", "Ecru/Creme als Planungsfarbe",
+    ].some((prefix) => note.startsWith(prefix)));
+    return parsePlannerDocument({
+      ...document,
+      placements: document.placements.map((item) => item.id === previous.id
+        ? { ...item, metadata: {
+          ...item.metadata,
+          ...current.metadata,
+          notes: [...new Set([...(current.metadata?.notes ?? []), ...priorNotes])],
+        } }
+        : item),
+    });
+  }
+  if (previous.catalogId !== "chair-temu-executive-ivory") return document;
   const wasDefaultSize = previous.size.width === 0.64 && previous.size.depth === 0.51 && previous.size.height === 1.14;
   return parsePlannerDocument({
     ...document,
@@ -699,6 +750,9 @@ function isOlderBaselineModel(document: PlannerDocumentV3) {
   const hasMarkedFourChairGroup = diningTable?.metadata?.notes?.some((note) => /Vier (?:Kaleo-Armlehnstühle|WOLTU Chenille-Drehstühle)/i.test(note)) ?? false;
   return DEFAULT_APARTMENT_DOCUMENT.placements.some((item) => {
     if (!BASELINE_VISUAL_PLACEMENT_REFRESH_IDS.has(item.id)) return false;
+    // An older cabinet depth must not rebase the entire saved apartment.
+    // The targeted FLY migration above preserves user-modified positions.
+    if (item.id === "zimmer1-wardrobe") return false;
     const previous = storedPlacements.get(item.id);
     if (item.id === "living-bozan-table" && previous && isTableComparisonPlacement(previous)) return false;
     if (item.id === "living-kaleo-chair-north" && !previous && hasMarkedFourChairGroup) return false;

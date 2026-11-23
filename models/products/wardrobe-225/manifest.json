@@ -1,9 +1,11 @@
 {
   "id": "wardrobe-225",
-  "displayName": "Kleiderschrank 225",
+  "displayName": "MID.YOU FLY · 225 cm · Bestandsfinish Kaschmir/Weiß",
   "category": "storage",
   "status": "reference-only",
-  "sourceUrls": [],
+  "sourceUrls": [
+    "https://www.moebelix.at/p/mid-you-drehtuerenschrank-mit-spiegel-laden-225cm-fly-weiss-graphit-001787045908"
+  ],
   "materials": [],
   "variants": [
     "default"
