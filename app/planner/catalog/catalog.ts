@@ -231,6 +231,12 @@ const PRODUCT_REALISM: Record<string, ProductRealismSpec> = {
     confidence: "estimated",
     construction: ["weißer Korpus", "zwei Schubladen", "beleuchtetes offenes Ablagefach", "Steckdosen und USB-Ladeflächen"],
   },
+  "nightstand-aliexpress-woltu-1005012793801128": {
+    sourceLabel: "AliExpress Art. 1005012793801128 · WOLTU Produktgalerie",
+    dimensions: "ca. 39,6 × 30 × 60,4 cm · Planungsmaß aus bildgleicher Bauform",
+    confidence: "estimated",
+    construction: ["matt schwarzer Korpus", "zwei grifflos wirkende Schubladen", "offenes LED-Fach mit blauem Licht", "ausziehbare Ablage", "integrierte USB-/Ladefläche"],
+  },
   "wardrobe-225": {
     sourceLabel: "Zimmer-1-Fotoreferenz / vorhandener Kleiderschrank",
     dimensions: "ca. 225 × 62 × 220 cm",

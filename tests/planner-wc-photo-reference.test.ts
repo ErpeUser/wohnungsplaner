@@ -25,8 +25,8 @@ test("keeps the measured WC and reserves exactly nine centimetres beside the 80 
   assert.equal(shelf.materialVariants?.main, "oak-artisan");
   assert.equal(shelf.metadata?.confidence, "confirmed");
   assert.ok(Math.abs((0.98 - shelf.size.width) / 2 - 0.09) < 1e-9);
-  assert.equal(shelf.position.x - shelf.size.width / 2, -2.27);
-  assert.ok(Math.abs(shelf.position.x + shelf.size.width / 2 - (-1.47)) < 1e-9);
+  assert.ok(Math.abs(shelf.position.x - shelf.size.width / 2 + 2.27) < 1e-9);
+  assert.ok(Math.abs(shelf.position.x + shelf.size.width / 2 + 1.47) < 1e-9);
 });
 
 test("keeps WC utility shaft, dual-action flush, overhead ventilation and visible toilet aligned", () => {
