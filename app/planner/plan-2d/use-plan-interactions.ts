@@ -30,6 +30,7 @@ export function createCatalogPlacement(
     position: { ...position },
     rotation: 0,
     size: { ...item.defaultSize },
+    elevation: item.defaultElevation,
     materialVariants: { main: item.materials[0]?.id ?? "default" },
     metadata: { source: "Raumplaner-Katalog", confidence: "confirmed" },
   };

@@ -44,6 +44,13 @@ export function getPlannerAssetManifest() {
 }
 
 export async function loadPlannerAssetManifest(): Promise<PlannerAssetManifest> {
+  // The regular local visual server serves the checked-in manifest directly
+  // and intentionally has no Cloud Run live-asset endpoint. Avoid a noisy 404
+  // during browser smoke tests while retaining the endpoint for production
+  // hosts and the live-preview server.
+  if (typeof window !== "undefined" && window.location.hostname === "127.0.0.1" && window.location.port === "3100") {
+    return PLANNER_ASSET_MANIFEST;
+  }
   try {
     const response = await fetch("/__codex/live-assets/manifest", { cache: "no-store" });
     if (!response.ok) return PLANNER_ASSET_MANIFEST;

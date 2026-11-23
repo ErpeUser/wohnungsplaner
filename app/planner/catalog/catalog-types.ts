@@ -23,6 +23,8 @@ export type FurnitureCatalogItem = {
   category: FurnitureCategory;
   description: string;
   defaultSize: Size3;
+  /** Default floor elevation for newly placed catalogue items, in metres. */
+  defaultElevation?: number;
   resize: FurnitureResizeRule;
   symbol: "bed" | "storage" | "desk" | "chair" | "sofa" | "table" | "rug" | "light" | "plant";
   fallback3d: string;

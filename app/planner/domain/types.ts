@@ -122,6 +122,8 @@ export type PlannerPlacement = {
   rotation: number;
   size: Size3;
   wallId?: string;
+  /** Optional height above the finished floor for wall-mounted or raised decor. */
+  elevation?: number;
   /** Explicitly marks rugs and other low-profile floor finishes that may overlap furniture. */
   floorCovering?: boolean;
   materialVariants?: Record<string, string>;
