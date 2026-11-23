@@ -73,7 +73,7 @@ function refreshLegacyBathroomDetails(document: PlannerDocumentV3): PlannerDocum
 function restoreMissingVanityChair(document: PlannerDocumentV3): PlannerDocumentV3 {
   if (document.placements.some((item) => item.id === "zimmer1-chair")
     || !document.rooms.some((room) => room.id === "zimmer1")
-    || !document.placements.some((item) => item.id === "zimmer1-vanity")) return document;
+    || !document.placements.some((item) => item.id === "zimmer1-desk")) return document;
   const defaultChair = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "zimmer1-chair");
   return defaultChair
     ? { ...document, placements: [...document.placements, structuredClone(defaultChair)] }
