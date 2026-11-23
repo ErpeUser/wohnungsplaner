@@ -1,4 +1,4 @@
-import type {PlannerBuiltIn,PlannerMetadata} from './types.ts';
+import type {PlannerBuiltIn,PlannerMetadata,PlannerPlacement} from './types.ts';
 
 export const INTERIOR_REVISION='interior-refinement-2026-11-11';
 export const FINISHED_FLOOR_Y=.012;
@@ -14,6 +14,21 @@ export const HALL_REFERENCE=Object.freeze({
   betweenDoorsPrint:{width:.32,height:.45},planterDiameter:.25,clearDoorGap:.38,
 });
 export const REMOVED_INTERIOR_IDS=new Set(['builtin-hall-wall-decor','builtin-kitchen-backsplash-corner']);
+export function upgradeWoltuNightstandPlacement<T extends { id: string; placements: PlannerPlacement[] }>(document: T): T {
+  if (document.id !== 'wohnung-v3') return document;
+  let changed = false;
+  const placements = document.placements.map((placement) => {
+    if (placement.id !== 'zimmer1-led-nightstand' || placement.catalogId !== 'nightstand-led-2drawer-white') return placement;
+    changed = true;
+    return {
+      ...placement,
+      catalogId: 'nightstand-aliexpress-woltu-1005012793801128',
+      size: { width: 0.396, depth: 0.3, height: 0.604 },
+      materialVariants: { ...placement.materialVariants, main: 'metal-dark' },
+    };
+  });
+  return changed ? { ...document, placements } : document;
+}
 export function hookCenters(width:number):number[]{
   if(!Number.isFinite(width)||width<.48)throw new RangeError('Four hooks need at least 48 cm.');
   return Array.from({length:4},(_,i)=>-width/2+.06+i*(width-.12)/3);

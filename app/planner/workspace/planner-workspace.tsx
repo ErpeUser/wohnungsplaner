@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { PlannerWorkspace as Workspace } from './planner-workspace-base.tsx';
 import { DEFAULT_APARTMENT_DOCUMENT } from '../domain/apartment-v3.ts';
-import { INTERIOR_UPDATES, refineRoomLayout } from '../domain/room-refinement.ts';
+import { INTERIOR_UPDATES, refineRoomLayout, upgradeWoltuNightstandPlacement } from '../domain/room-refinement.ts';
 import { parsePlannerDocument } from '../domain/schema.ts';
 import type { PlannerDocumentV3 } from '../domain/types.ts';
 import { createPlannerStore, type PlannerStore } from '../store/planner-store.ts';
@@ -13,7 +13,7 @@ import { restoreWcMeasuredLayout } from '../domain/wc-layout.ts';
 
 function prepare(document: PlannerDocumentV3): PlannerDocumentV3 {
   if (document.id !== DEFAULT_APARTMENT_DOCUMENT.id) return document;
-  const updated = restoreWcMeasuredLayout(document);
+  const updated = upgradeWoltuNightstandPlacement(restoreWcMeasuredLayout(document));
   const existing = new Set(updated.builtIns.map(item => item.id));
   const missing = DEFAULT_APARTMENT_DOCUMENT.builtIns.filter(item => INTERIOR_UPDATES[item.id] && !existing.has(item.id));
   const refined = refineRoomLayout(missing.length ? { ...updated, builtIns: [...updated.builtIns, ...missing] } : updated);

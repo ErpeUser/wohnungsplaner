@@ -4,6 +4,7 @@ import test from "node:test";
 import { getFurnitureCatalogItem } from "../app/planner/catalog/catalog.ts";
 import { DEFAULT_APARTMENT_DOCUMENT } from "../app/planner/domain/apartment-v3.ts";
 import { inspectPlacement } from "../app/planner/domain/collisions.ts";
+import { upgradeWoltuNightstandPlacement } from "../app/planner/domain/room-refinement.ts";
 
 test("uses warm taupe only on the wall directly behind the Zimmer 1 bed", () => {
   const accent = DEFAULT_APARTMENT_DOCUMENT.builtIns.find((item) => item.id === "builtin-z1-bed-accent-wall");
@@ -49,4 +50,16 @@ test("keeps the former catalog model available alongside the selected WOLTU plac
   assert.equal(nightstand.materialVariants?.main, "metal-dark");
   assert.equal(nightstand.metadata?.confidence, "estimated");
   assert.ok(inspectPlacement(DEFAULT_APARTMENT_DOCUMENT, nightstand).hard.length === 0);
+});
+
+test("migrates an older saved nightstand placement to the selected AliExpress model", () => {
+  const legacy = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
+  legacy.placements = legacy.placements.map((item) => item.id === "zimmer1-led-nightstand"
+    ? { ...item, catalogId: "nightstand-led-2drawer-white", materialVariants: { main: "white-matte" } }
+    : item);
+  const migrated = upgradeWoltuNightstandPlacement(legacy);
+  const nightstand = migrated.placements.find((item) => item.id === "zimmer1-led-nightstand")!;
+  assert.equal(nightstand.catalogId, "nightstand-aliexpress-woltu-1005012793801128");
+  assert.equal(nightstand.materialVariants?.main, "metal-dark");
+  assert.equal(upgradeWoltuNightstandPlacement(migrated), migrated);
 });
