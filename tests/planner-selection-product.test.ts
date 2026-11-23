@@ -50,7 +50,7 @@ test("switches exactly the selected dining chair and retains its saved placement
       original.placements.filter((item) => item.id !== placementId),
       "the table, three other chairs, and unrelated furniture stay unchanged",
     );
-    assert.equal(selected.catalogId, "chair-kaleo-chenille-beige", "the original document stays immutable");
+    assert.equal(selected.catalogId, "chair-aliexpress-woltu-1005013095870024", "the original document stays immutable");
   }
 });
 
