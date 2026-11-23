@@ -94,7 +94,12 @@ test('CLI creates the generated report directory before writing its plan', () =>
       cwd: process.cwd(), encoding: 'utf8', windowsHide: true,
     });
     assert.equal(result.status, 0, result.stderr);
-    assert.ok(['full', 'runtime', 'asset-live'].includes(JSON.parse(readFileSync(output, 'utf8')).mode));
+    const outputPlan = JSON.parse(readFileSync(output, 'utf8'));
+    // Test-only HEAD commits are correctly classified as skip; this check
+    // verifies report generation, not the type of the current Git commit.
+    assert.ok(['skip', 'full', 'runtime', 'asset-live'].includes(outputPlan.mode));
+    assert.equal(outputPlan.commit, 'HEAD');
+    assert.equal(outputPlan.parent, 'HEAD^');
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }
