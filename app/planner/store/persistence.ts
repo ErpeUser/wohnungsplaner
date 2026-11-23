@@ -374,24 +374,27 @@ function readStoredValue(raw: string): MigrationResult {
       const withRug = upgradeLivingRugMaterial(parsed);
       const withHall = upgradeHallPhotoReference(withRug);
       const withChair = upgradeZimmer1Chair(withHall);
-      if (!normalized.identityChanged && isOlderBaselineModel(withChair)) {
+      const withWc = upgradeWcPhotoReference(withChair);
+      if (!normalized.identityChanged && isOlderBaselineModel(withWc)) {
         return {
-          document: rebaseBaselineModel(withChair),
+          document: rebaseBaselineModel(withWc),
           warnings: ["Das gespeicherte Möbel-Layout und die Bad-/WC-Materialien wurden auf den aktuellen Stand aktualisiert."],
           legacyBackupJson: raw,
           unmapped: [],
         };
       }
-      if (normalized.changed || withChair !== parsed) {
+      if (normalized.changed || withWc !== parsed) {
         return {
-          document: withChair,
+          document: withWc,
           warnings: [normalized.changed
             ? "Das gespeicherte Dokument wurde auf die zusammengeführte Balkon-/Loggia-Struktur aktualisiert."
-            : withChair !== withHall
-              ? "Der Stuhl in Zimmer 1 wurde auf das neue AliExpress-Modell aktualisiert; Position und Drehung bleiben erhalten."
-              : withHall !== withRug
-                ? "Die Vorraumgarderobe wurde anhand der braunen Fotoreferenz aktualisiert; Position und Maße bleiben erhalten."
-                : "Der vorhandene Wohnzimmerteppich wurde auf das neue Temu-Design aktualisiert; Position und Drehung bleiben erhalten."],
+            : withWc !== withChair
+              ? "Die WC-Fotoreferenz mit Eiche-Artisan-Regal, Schacht und Lüftung wurde übernommen; sonstige Möbelpositionen bleiben erhalten."
+              : withChair !== withHall
+                ? "Der Stuhl in Zimmer 1 wurde auf das neue AliExpress-Modell aktualisiert; Position und Drehung bleiben erhalten."
+                : withHall !== withRug
+                  ? "Die Vorraumgarderobe wurde anhand der braunen Fotoreferenz aktualisiert; Position und Maße bleiben erhalten."
+                  : "Der vorhandene Wohnzimmerteppich wurde auf das neue Temu-Design aktualisiert; Position und Drehung bleiben erhalten."],
           legacyBackupJson: raw,
           unmapped: [],
         };
@@ -513,6 +516,35 @@ export function upgradeHallPhotoReference(document: PlannerDocumentV3): PlannerD
       materialVariants: { ...item.materialVariants, main: "hallway-walnut-brown" },
       metadata: target.metadata,
     } : item),
+  });
+}
+
+/**
+ * One-time adoption of the user's WC photo in older saved apartment plans.
+ * Only new locked wall details and the recognized former revision-panel
+ * height change; custom furniture, room finishes and doors remain untouched.
+ */
+export function upgradeWcPhotoReference(document: PlannerDocumentV3): PlannerDocumentV3 {
+  if (document.id !== DEFAULT_APARTMENT_DOCUMENT.id) return document;
+  const ids = new Set(["builtin-wc-wallboard-artisan-80", "builtin-wc-shelf-styling", "builtin-wc-ventilation"]);
+  const already = new Set(document.builtIns.map((item) => item.id));
+  const missing = DEFAULT_APARTMENT_DOCUMENT.builtIns.filter((item) => ids.has(item.id) && !already.has(item.id));
+  const previous = document.builtIns.find((item) => item.id === "builtin-wc-revision");
+  const target = DEFAULT_APARTMENT_DOCUMENT.builtIns.find((item) => item.id === "builtin-wc-revision");
+  const oldRevision = Boolean(previous && target
+    && previous.catalogId === "wc-revision-panel"
+    && previous.position.x === -1.87 && previous.position.z === 4.15
+    && previous.size.width === 0.42 && previous.size.height === 0.3
+    && previous.elevation === 1.68);
+  if (!missing.length && !oldRevision) return document;
+  return parsePlannerDocument({
+    ...document,
+    builtIns: [
+      ...document.builtIns.map((item) => oldRevision && item.id === "builtin-wc-revision"
+        ? { ...item, elevation: target!.elevation, label: target!.label, metadata: target!.metadata }
+        : item),
+      ...missing,
+    ],
   });
 }
 

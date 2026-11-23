@@ -3,6 +3,7 @@
 import { BalconyArchitecture, isBalconyExteriorWall } from "./balcony";
 import { MarbleTileSurface, bathMarbleWallBounds, wcMarbleWallBounds } from "./marble-tiles";
 import { BathMat, BathRoundMirror, BathShowerCurtain, BathShowerRod, BathShowerSet, BathTiledFinish, BathTowelHookRail, ScoutBasinCabinet, ScoutWasherCabinet, Washbasin, WcBrush, WcFlushPlate, WcPaperHolder, WcRevisionPanel } from "./bathroom";
+import { WcArtisanWallboard, WcWallVent, WcShelfStyling, WcWallHungPan } from "./wc-reference";
 import { DeskLedMirror, WallpaperFinish, WindowCurtain, Zimmer1DeskAccessories, Zimmer1DeskShelf, Zimmer1EntryNiche, Zimmer1EntrySlimArt, Zimmer1HeadboardLed, Zimmer1HeadboardSconces, Zimmer1LayeredCurtain, Zimmer1NightstandDecor, Zimmer1WallArtPair, Zimmer1WardrobeTopDecor, ZimmerWallPanel } from "./bedroom";
 import { DoorAssembly, DoorFrame } from "./doors";
 import { FixtureMarker } from "./fixtures";
@@ -204,25 +205,7 @@ function ParametricBuiltIn({ item }: { item: SceneObject<PlannerBuiltIn> }) {
       </group>
     );
   }
-  if (item.renderProfile === "wall-wc") {
-    const [width, height, depth] = item.size;
-    return (
-      <group>
-        <mesh position={[0, -height * 0.04, depth * 0.07]} scale={[width, height * 0.72, depth]} geometry={SHARED_SPHERE} castShadow receiveShadow>
-          <primitive object={getPlannerMaterial("white-matte")} attach="material" />
-        </mesh>
-        <mesh position={[0, height * 0.27, depth * 0.09]} scale={[width * 0.72, 0.035, depth * 0.56]} geometry={SHARED_CYLINDER}>
-          <primitive object={getPlannerMaterial("glass-frosted")} attach="material" />
-        </mesh>
-        <mesh position={[0, height * 0.34, depth * 0.07]} rotation={[Math.PI / 2, 0, 0]} scale={[width * 0.72, depth * 0.56, 0.055]} geometry={SHARED_TORUS} castShadow>
-          <primitive object={getPlannerMaterial("white-matte")} attach="material" />
-        </mesh>
-        <mesh position={[0, height * 0.12, -depth * 0.39]} scale={[width * 0.88, height * 0.62, depth * 0.18]} geometry={SHARED_BOX} castShadow receiveShadow>
-          <primitive object={getPlannerMaterial("white-matte")} attach="material" />
-        </mesh>
-      </group>
-    );
-  }
+  if (item.renderProfile === "wall-wc") return <WcWallHungPan item={item} />;
   if (item.catalogId === "living-slat-wall") {
     const slatCount = Math.max(18, Math.round(item.size[0] / 0.055));
     return (
@@ -239,6 +222,9 @@ function ParametricBuiltIn({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   if (item.catalogId === "bath-tub-apron" || item.catalogId === "bath-tub-end-ledge" || item.catalogId === "bath-tub-side-apron") return <BathTiledFinish item={item} />;
   if (item.catalogId === "wc-flush-plate") return <WcFlushPlate item={item} />;
   if (item.catalogId === "wc-revision-panel") return <WcRevisionPanel item={item} />;
+  if (item.catalogId === "wc-artisan-wallboard-80") return <WcArtisanWallboard item={item} />;
+  if (item.catalogId === "wc-wall-ventilation") return <WcWallVent item={item} />;
+  if (item.catalogId === "wc-shelf-styling") return <WcShelfStyling item={item} />;
   if (item.catalogId === "wall-finish-vintage-fabric-wallpaper") return <WallpaperFinish item={item} />;
   if (item.catalogId === "floor-zone-kitchen") return <KitchenFloorZone item={item} />;
   if (item.catalogId === "kitchen-worktop") return <KitchenWorktop item={item} />;

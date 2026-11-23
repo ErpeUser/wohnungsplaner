@@ -160,7 +160,37 @@ const builtIns: PlannerBuiltIn[] = [
   }),
   builtIn("wc-pan", "Wand-WC", "wc", "sanitary", "sanitary-wall-wc", -1.87, 4.44, 0.38, 0.58, 0.42, 0, "#f5f4f0", 0.18),
   builtIn("wc-flush", "WC-Betätigungsplatte", "wc", "sanitary", "wc-flush-plate", -1.87, 4.155, 0.24, 0.035, 0.16, 0, "metal-satin", 1.02),
-  builtIn("wc-revision", "WC-Revisionsfeld", "wc", "sanitary", "wc-revision-panel", -1.87, 4.15, 0.42, 0.03, 0.3, 0, "tile-white-rect", 1.68),
+  builtIn("wc-revision", "Gefliester Installationsschacht mit Revisionsklappe", "wc", "sanitary", "wc-revision-panel", -1.87, 4.15, 0.42, 0.03, 0.3, 0, "tile-white-rect", 1.48, {
+    source: "Nutzerreferenzbild WC · Revisionsöffnung an der Rückwand",
+    confidence: "estimated",
+    notes: ["42 × 30 cm als bisheriges Planungsmaß; Unterkante ca. 148 cm und Oberkante ca. 178 cm.", "Revisionsklappe wandbündig, unter dem neuen Wandboard. Echtes Schacht- und Leitungsmaß nicht bekannt."],
+  }),
+  {
+    ...builtIn("wc-wallboard-artisan-80", "Wandboard Simple · 80 cm Eiche Artisan", "wc", "other", "wc-artisan-wallboard-80", -1.87, 4.3245, 0.8, 0.235, 0.038, 0, "oak-artisan", 2.015, {
+      source: "Möbelix Art. 007326000408 · vom Nutzer gewählte Variante · Händlermaße",
+      confidence: "confirmed",
+      notes: ["80 × 3,8 × 23,5 cm B/H/T · foliertes MDF · Eiche Artisan Dekor · bis ca. 10 kg Traglast · inkl. Befestigungsmaterial.",
+        "Mittig an der 98-cm-Rückwand montiert, beidseitig je 9 cm frei. Unterkante ca. 201,5 cm als Einbauannahme.",
+        "Rückkante liegt ca. 7 mm vor der Wandoberfläche. Die 23,5 cm Tiefe ragt waagerecht in den Raum."],
+    }),
+    collision: "decorative" as const,
+  },
+  {
+    ...builtIn("wc-shelf-styling", "Foto-Deko auf dem Wandboard (Visualisierung)", "wc", "other", "wc-shelf-styling", -1.87, 4.3245, 0.77, 0.2, 0.27, 0, "ceramic-beige", 2.053, {
+      source: "Nutzerreferenzbild WC · dekorative 3D-Annäherung",
+      confidence: "estimated",
+      notes: ["Links Efeutute, mittig Duftstäbchen, rechts Keramikvase und Korb als Beispielgestaltung.", "Deko ist nicht Bestandteil des Möbelix-Angebots und nicht automatisch Teil der Einkaufsliste."],
+    }),
+    collision: "decorative" as const,
+  },
+  {
+    ...builtIn("wc-ventilation", "Wandbündige WC-Lüftungsabdeckung · warmweiß", "wc", "other", "wc-wall-ventilation", -1.87, 4.207, 0.23, 0.024, 0.15, 0, "tile-white-rect", 2.35, {
+      source: "Nutzerreferenzbild WC · Lüftungsabdeckung nahe Decke",
+      confidence: "estimated",
+      notes: ["23 × 15 cm Sichtfläche als Schätzung; Montage nahe Decke über dem Regal, bündig zur Rückwand.", "Nur Lüftungsabdeckung visualisiert, keine bestätigte Lufttechnik oder Durchbruch-Maße."],
+    }),
+    collision: "decorative" as const,
+  },
   builtIn("wc-mat", "WC-Teppich · beige Baumwoll-Waffelstruktur · 77 × 46 cm", "wc", "other", "wc-mat", -1.87, 5.25, 0.77, 0.46, 0.018, 0, "temu-bath-rug-woven", 0.012, {
     source: "Vom Nutzer bereitgestelltes Temu-Produktbild · Art. 606121368598635",
     confidence: "confirmed",

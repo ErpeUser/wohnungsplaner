@@ -6,7 +6,7 @@ const item=(id:string)=>{const found=SHOPPING_ITEMS.find(i=>i.id===id);assert.ok
 test('preserves every existing shopping article without duplicate identities',()=>{
  for(const id of existingIds)assert.equal(SHOPPING_ITEMS.filter(i=>i.id===id).length,1,id);
  assert.equal(new Set(SHOPPING_ITEMS.map(i=>i.id)).size,SHOPPING_ITEMS.length);
- assert.equal(SHOPPING_ITEMS.length,existingIds.length+6);
+ assert.equal(SHOPPING_ITEMS.length,existingIds.length+7);
  assert.equal(SHOPPING_ITEMS.some(i=>i.id==='606296522765554'),false,'retired Temu chair must not be listed');
  assert.equal(item('1005012445521181').url,'https://de.aliexpress.com/item/1005012445521181.html');
 });
@@ -50,8 +50,8 @@ test('includes the exact selected Temu A8447 180 x 250 cm vintage rug',()=>{
 });
 test('adds the purchased living room rug to the known-priced subtotal',()=>{
  const total=SHOPPING_ITEMS.reduce((sum,i)=>sum+(i.price??0)*(i.quantity??1),0);
- assert.equal(Math.round(total*100),213180);
- assert.equal(SHOPPING_ITEMS.filter(i=>i.url).length,22);
+ assert.equal(Math.round(total*100),214679);
+ assert.equal(SHOPPING_ITEMS.filter(i=>i.url).length,23);
 });
 test('adds the 30-piece white-gold marble wall tile set for the bathroom',()=>{
  const tile=item('601100207687761');
@@ -69,4 +69,16 @@ test('adds the 20-piece Temu onyx wall tile set for the WC rear wall',()=>{
  assert.match(tile.dimensions,/30 × 60 cm/);
  assert.match(tile.amountLabel??'',/20 Stück.*mittlere WC-Rückwand/);
  assert.match(tile.url??'',/601099584128261/);
+});
+
+test('lists the selected 80 cm Artisan oak wallboard exactly once in the WC',()=>{
+  const shelf=item('007326000408');
+  assert.equal(shelf.room,'WC');
+  assert.equal(shelf.retailer,'Möbelix');
+  assert.equal(shelf.quantity,1);
+  assert.equal(shelf.price,14.99);
+  assert.match(shelf.dimensions,/80.*3,8.*23,5/);
+  assert.match(shelf.dimensions,/Artisan/);
+  assert.equal(shelf.url,'https://www.moebelix.at/p/wandboard-simple-b-80-cm-eiche-artisan-dekor-007326000408');
+  assert.equal(SHOPPING_ITEMS.filter(i=>i.id===shelf.id).length,1);
 });

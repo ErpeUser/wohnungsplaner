@@ -13,10 +13,12 @@ const FINISHES = {
     jointColor: "#d0c8bc",
   },
   wc: {
-    atlas: "/planner-assets/textures/stone/temu-celadon-onyx-601099584128261.webp",
-    name: "wc-celadon-onyx-marble",
-    joint: 0.00075,
-    jointColor: "#c2c4b3",
+    // The supplied WC photograph shows ivory/cream ceramic on every wall.
+    // Do not reuse the previously chosen celadon marble artwork here.
+    atlas: null,
+    name: "wc-ivory-ceramic-tiles",
+    joint: 0.0015,
+    jointColor: "#d6c9b9",
   },
 };
 type MarbleFinish = keyof typeof FINISHES;
@@ -48,17 +50,23 @@ export function bathMarbleWallBounds(
 }
 
 export function wcMarbleWallBounds(wall: SceneWall, segment: SceneWallSegment) {
-  if (wall.id !== "wall-wc-1-1") return null;
+  if (!wall.roomIds.includes("wc")) return null;
   const [x, y, z] = segment.position;
   const [width, height, depth] = segment.size;
-  const { rotationY } = segment;
-  const faceOffset = depth / 2 + 0.0005;
+  if (width <= 0.001 || height <= 0.001) return null;
+  // The actual measured WC sits around X -1.875, Z 4.91. Every shared wall
+  // gets the ceramic face ONLY on the WC side, never in the adjacent store
+  // room or hall. Opening-specific segments keep the 80-cm door unobstructed.
+  const normalX = Math.sin(segment.rotationY);
+  const normalZ = Math.cos(segment.rotationY);
+  const towardRoom = (-1.875 - x) * normalX + (4.91 - z) * normalZ;
+  const faceSign = towardRoom >= 0 ? 1 : -1;
+  const faceOffset = depth / 2 + 0.0008;
   return {
     width,
     height,
-    // The WC fittings are recessed. Keep the graphic below their exposed faces.
-    position: [x + Math.sin(rotationY) * faceOffset, y, z + Math.cos(rotationY) * faceOffset] as const,
-    rotationY,
+    position: [x + normalX * faceSign * faceOffset, y, z + normalZ * faceSign * faceOffset] as const,
+    rotationY: segment.rotationY + (faceSign === 1 ? 0 : Math.PI),
   };
 }
 
@@ -104,13 +112,28 @@ export function MarbleTileSurface({ width, height, patternOffset = 0, finish = "
   finish?: MarbleFinish;
 }) {
   const { atlas, name, jointColor } = FINISHES[finish];
-  const { positions, uvs, normals } = useMemo(() => {
+  const { positions, uvs, normals, colors } = useMemo(() => {
     const tiles = marbleTileBuffers(width, height, patternOffset, finish);
     const normals = new Float32Array(tiles.positions.length);
     for (let i = 2; i < normals.length; i += 3) normals[i] = 1;
-    return { ...tiles, normals };
+    // Slightly varied warm-ivory fired-ceramic panels, without any uploaded
+    // photograph being stored in this public application.
+    const tones = [
+      [0.942, 0.882, 0.826], [0.950, 0.895, 0.845],
+      [0.925, 0.870, 0.812], [0.944, 0.888, 0.834],
+    ];
+    const colors = finish === "wc" ? new Float32Array(tiles.positions.length) : null;
+    if (colors) {
+      for (let vertex = 0; vertex < tiles.positions.length / 3; vertex++) {
+        const tone = tones[(Math.floor(vertex / 6) + patternOffset) % tones.length];
+        colors[vertex * 3] = tone[0];
+        colors[vertex * 3 + 1] = tone[1];
+        colors[vertex * 3 + 2] = tone[2];
+      }
+    }
+    return { ...tiles, normals, colors };
   }, [width, height, patternOffset, finish]);
-  const texture = typeof document === "undefined" ? null : loadPlannerTexture(atlas);
+  const texture = atlas !== null && typeof document !== "undefined" ? loadPlannerTexture(atlas) : null;
   return (
     <group>
       <mesh position={[0, 0, finish === "wc" ? -0.0002 : -0.0008]} receiveShadow>
@@ -122,9 +145,11 @@ export function MarbleTileSurface({ width, height, patternOffset = 0, finish = "
           <bufferAttribute attach="attributes-position" args={[positions, 3]} />
           <bufferAttribute attach="attributes-normal" args={[normals, 3]} />
           <bufferAttribute attach="attributes-uv" args={[uvs, 2]} />
+          {colors ? <bufferAttribute attach="attributes-color" args={[colors, 3]} /> : null}
         </bufferGeometry>
-        <meshPhysicalMaterial color="#ffffff" map={texture} roughness={0.34}
-          clearcoat={0.22} clearcoatRoughness={0.31} metalness={0} />
+        <meshPhysicalMaterial color="#ffffff" map={texture} vertexColors={Boolean(colors)}
+          roughness={finish === "wc" ? 0.41 : 0.34}
+          clearcoat={finish === "wc" ? 0.16 : 0.22} clearcoatRoughness={0.31} metalness={0} />
       </mesh>
     </group>
   );

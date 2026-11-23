@@ -80,14 +80,25 @@ export function WcFlushPlate({ item }: { item: SceneObject<PlannerBuiltIn> }) {
 export function WcRevisionPanel({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   const [width, height, depth] = item.size;
   const tile = getPlannerMaterial(item.materialId);
-  const frame = getPlannerMaterial("tile-grout");
+  const frame = getPlannerMaterial("#c9bdb0");
+  const hinge = getPlannerMaterial("metal-satin");
   return (
     <group name={`wc-revision-panel-${item.source.id}`}>
+      {/* Tiled wall-integrated service shaft: keep the original recess envelope. */}
       <mesh scale={[width, height, depth]} geometry={SHARED_BOX} castShadow receiveShadow>
         <primitive object={tile} attach="material" />
       </mesh>
-      <mesh position={[0, 0, depth / 2 + 0.006]} scale={[Math.max(0.04, width - 0.028), Math.max(0.04, height - 0.028), 0.008]} geometry={SHARED_BOX}>
+      <mesh name="wc-service-hatch-frame" position={[0, 0, depth / 2 + 0.006]}
+        scale={[width - 0.028, height - 0.028, 0.008]} geometry={SHARED_BOX} castShadow>
         <primitive object={frame} attach="material" />
+      </mesh>
+      <mesh name="wc-service-hatch-door" position={[0, 0, depth / 2 + 0.011]}
+        scale={[width - 0.046, height - 0.046, 0.004]} geometry={SHARED_BOX} castShadow receiveShadow>
+        <primitive object={tile} attach="material" />
+      </mesh>
+      <mesh name="wc-service-hatch-latch" position={[-width * 0.37, -height * 0.01, depth / 2 + 0.017]}
+        scale={[0.013, 0.013, 0.005]} geometry={SHARED_CYLINDER} rotation={[Math.PI / 2, 0, 0]}>
+        <primitive object={hinge} attach="material" />
       </mesh>
     </group>
   );

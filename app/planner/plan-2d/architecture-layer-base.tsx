@@ -310,6 +310,19 @@ function BuiltInDetail({ item }: { item: PlanObjectDescriptor }) {
       })}
     </Group>;
   }
+  if (id === "wc-artisan-wallboard-80") {
+    // Source-specific 80 x 23.5 cm top view: thin oak foil with visible banding.
+    return <Group listening={false}>
+      <Line points={[box.minX, box.minZ, box.maxX, box.minZ, box.maxX, box.maxZ, box.minX, box.maxZ]}
+        closed fill="#c9a06f" stroke="#98704b" strokeWidth={0.009} />
+      <Line points={[box.minX + width * 0.08, box.minZ + depth * 0.22,
+        box.maxX - width * 0.08, box.minZ + depth * 0.22]}
+        stroke="#ae8155" strokeWidth={0.006} opacity={0.62} />
+      <Line points={[box.minX + width * 0.14, box.maxZ - depth * 0.16,
+        box.maxX - width * 0.1, box.maxZ - depth * 0.16]}
+        stroke="#e1bd8d" strokeWidth={0.005} opacity={0.62} />
+    </Group>;
+  }
   if (id === "wc-paper-holder") {
     // Two displaced oak ledges and the exposed iron roll arm in the WC plan.
     return <Group listening={false}>
@@ -383,6 +396,9 @@ function planObjectColor(catalogId: string | undefined, kind: string) {
   if (catalogId === "bath-basin-cabinet-scout" || catalogId === "bath-washer-cabinet-scout") return "#cfc3b2";
   if (catalogId === "zimmer1-desk-mirror") return "#cbdadd";
   if (catalogId === "wc-paper-holder") return "#d7b68b";
+  if (catalogId === "wc-artisan-wallboard-80") return "#c9a06f";
+  if (catalogId === "wc-wall-ventilation" || catalogId === "wc-revision-panel") return "#efe5d8";
+  if (catalogId === "wc-shelf-styling") return "#9fa988";
   if (catalogId === "zimmer1-wall-art-pair") return "#c99d68";
   if (catalogId === "zimmer1-entry-slim-art") return "#c99d68";
   if (catalogId === "zimmer1-headboard-led") return "#f2bd78";
