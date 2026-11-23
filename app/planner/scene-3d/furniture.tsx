@@ -3,6 +3,7 @@
 import { BlissBed, DetailedBed } from "./furniture/beds.tsx";
 import { ComparisonChair, KaleoArmchair, PhotoOfficeChair, TemuIvoryExecutiveChair } from "./furniture/chairs.tsx";
 import { DetailedCabinet, DetailedDresser, DetailedFloorLamp, DetailedLowboard, DetailedShelf, LedChargingNightstand, PhotoDesk, PhotoWardrobe, StandardPlant, StandardWardrobe, TejoHallway, Zimmer1OlivePlant } from "./furniture/decor.tsx";
+import { BrownHallwayMirrorBench } from "./furniture/hallway-brown.tsx";
 import { DetailStrip, SHARED_BOX, SHARED_CYLINDER, SHARED_SPHERE } from "./furniture/primitives.tsx";
 import { GalaShaggyRug, LivingIvoryGreigeRug, StandardWovenRug, TemuEasyLineRug, TemuIvoryRabbitRug, TemuWhiteShaggyRug } from "./furniture/rugs.tsx";
 import { ChicagoSofa, IvoryPulloutSofa, PhotoSectionalSofa, StandardSofa } from "./furniture/sofas.tsx";
@@ -177,6 +178,7 @@ function ParametricFurniture({ fallback, materialId, catalogId, size }: { fallba
   if (catalogId === "sofa-aliexpress-142" || catalogId === "sofa-aliexpress-142-open") return <IvoryPulloutSofa extended={catalogId === "sofa-aliexpress-142-open"} depth={size?.[2]} />;
   if (catalogId === "sofa-chicago-206") return <ChicagoSofa />;
   if (catalogId === "hallway-tejo-115") return <TejoHallway />;
+  if (catalogId === "hallway-brown-mirror-bench-115") return <BrownHallwayMirrorBench />;
   if (catalogId === "dining-table-bozan-110") return <BozanDiningTable />;
   if (catalogId.startsWith("dining-table-")) return <ComparisonDiningTable materialId={materialId} catalogId={catalogId} size={size} />;
   if (catalogId === "chair-kaleo-chenille-beige") return <KaleoArmchair />;

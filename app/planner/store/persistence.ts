@@ -371,20 +371,23 @@ function readStoredValue(raw: string): MigrationResult {
       const normalized = normalizeLegacyV3Aliases(value);
       const parsed = parsePlannerDocument(normalized.document);
       const withRug = upgradeLivingRugMaterial(parsed);
-      if (!normalized.identityChanged && isOlderBaselineModel(withRug)) {
+      const withHall = upgradeHallPhotoReference(withRug);
+      if (!normalized.identityChanged && isOlderBaselineModel(withHall)) {
         return {
-          document: rebaseBaselineModel(withRug),
+          document: rebaseBaselineModel(withHall),
           warnings: ["Das gespeicherte Möbel-Layout und die Bad-/WC-Materialien wurden auf den aktuellen Stand aktualisiert."],
           legacyBackupJson: raw,
           unmapped: [],
         };
       }
-      if (normalized.changed || withRug !== parsed) {
+      if (normalized.changed || withHall !== parsed) {
         return {
-          document: withRug,
+          document: withHall,
           warnings: [normalized.changed
             ? "Das gespeicherte Dokument wurde auf die zusammengeführte Balkon-/Loggia-Struktur aktualisiert."
-            : "Der vorhandene Wohnzimmerteppich wurde auf das neue Temu-Design aktualisiert; Position und Drehung bleiben erhalten."],
+            : withHall !== withRug
+              ? "Die Vorraumgarderobe wurde anhand der braunen Fotoreferenz aktualisiert; Position und Maße bleiben erhalten."
+              : "Der vorhandene Wohnzimmerteppich wurde auf das neue Temu-Design aktualisiert; Position und Drehung bleiben erhalten."],
           legacyBackupJson: raw,
           unmapped: [],
         };
@@ -466,6 +469,26 @@ function normalizeLegacyV3Aliases(value: object): { document: object; changed: b
     viewPreferences: preferences ? { ...preferences, activeRoomId: activeRoomId ? "balkon" : preferences.activeRoomId } : record.viewPreferences,
   };
   return { document: normalized, changed: true };
+}
+
+/** Adopt the brown hall photo without moving a locally adjusted wardrobe.
+ * Explicitly chosen alternative furniture must not be overwritten. */
+export function upgradeHallPhotoReference(document: PlannerDocumentV3): PlannerDocumentV3 {
+  if (document.id !== DEFAULT_APARTMENT_DOCUMENT.id) return document;
+  const target = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "hall-tejo-wardrobe");
+  if (!target) return document;
+  const previous = document.placements.find((item) => item.id === target.id);
+  if (!previous || previous.catalogId !== "hallway-tejo-115"
+    || (previous.materialVariants?.main && previous.materialVariants.main !== "tejo-cashmere")) return document;
+  return parsePlannerDocument({
+    ...document,
+    placements: document.placements.map((item) => item.id === previous.id ? {
+      ...item,
+      catalogId: target.catalogId,
+      materialVariants: { ...item.materialVariants, main: "hallway-walnut-brown" },
+      metadata: target.metadata,
+    } : item),
+  });
 }
 
 /** Migrate the retired concept fabric without resetting the user's rug placement. */

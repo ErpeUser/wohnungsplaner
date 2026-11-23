@@ -23,6 +23,9 @@ const CHICAGO_BEIGE = [
 const TEJO_CASHMERE = [
   { id: "tejo-cashmere", label: "Kaschmir Beige", color: "#cbc2b6" },
 ];
+const HALL_BROWN = [
+  { id: "hallway-walnut-brown", label: "Holzbraun · Fotoreferenz", color: "#806750" },
+];
 const BOZAN_ARTISAN = [
   { id: "oak-artisan", label: "Artisan Eiche hell", color: "#d0a66b" },
 ];
@@ -131,6 +134,12 @@ const PRODUCT_REALISM: Record<string, ProductRealismSpec> = {
     dimensions: "ca. 115 × 37,5 × 231,9 cm · Spiegel ca. 35 × 140 cm",
     confidence: "verified",
     construction: ["Kaschmir-/Eiche-Nachbildung", "raumhoher Korpus", "Spiegel, Sitzbank, Hakenleiste", "fünf Einlegeböden und seitenverkehrt montierbar"],
+  },
+  "hallway-brown-mirror-bench-115": {
+    sourceLabel: "Vom Nutzer bereitgestellte Vorraum-Fotoreferenz",
+    dimensions: "ca. 115 × 37,5 × 231,9 cm · an vorhandenen Stellplatz angepasst (Schätzung)",
+    confidence: "estimated",
+    construction: ["mittelbraune vertikal strukturierte Holzfronten oben und unten", "hoher Spiegel am seitlichen Hochschrank", "schwarze Griffleisten und Garderobenhaken", "offene Garderobennische mit heller Polstersitzbank"],
   },
   "dining-table-bozan-110": {
     sourceLabel: "Möbelix / Bozan AZ Art. 2858001801",
@@ -255,7 +264,7 @@ export const PHOTO_FIRST_IDS: ReadonlySet<string> = new Set([
   "bed-bliss-120", "wardrobe-225", "vanity-vicco-sherry-120",
   "chair-temu-executive-ivory", "chair-kaleo-chenille-beige", "chair-temu-swivel-upholstered", "chair-temu-faux-leather-metal", "chair-temu-velvet-swivel-arm", "chair-amber-chenille-beige", "sofa-sectional-photo",
   "sofa-chicago-206", "sofa-aliexpress-142", "sofa-aliexpress-142-open", "dining-table-bozan-110", "nightstand-led-2drawer-white",
-  "hallway-tejo-115", "dining-table-aliexpress-100-140", "dining-table-temu-606997-120-160", "dining-table-temu-609726-110-150", "dining-table-kaufland-567080013-120-160", "rug-gala-shaggy-2505-100x200", "rug-temu-shaggy-white-120x200",
+  "hallway-tejo-115", "hallway-brown-mirror-bench-115", "dining-table-aliexpress-100-140", "dining-table-temu-606997-120-160", "dining-table-temu-609726-110-150", "dining-table-kaufland-567080013-120-160", "rug-gala-shaggy-2505-100x200", "rug-temu-shaggy-white-120x200",
   "rug-temu-easy-line-120x180", "rug-temu-easy-line-140x200", "rug-temu-rabbit-ivory-100x180",
   "rug-living-concept-240x240", "plant-zimmer1-olive",
 ]);
@@ -284,6 +293,7 @@ export const FURNITURE_CATALOG: FurnitureCatalogItem[] = [
   item("wardrobe-200", "Kleiderschrank", "Aufbewahren", "Vier Türen, 60 cm tief", [2, 0.6, 2.2], "free", "storage", "wardrobe", WOOD),
   item("wardrobe-225", "Kleiderschrank 225", "Aufbewahren", "Fotobelegter Schrank, 225 cm breit", [2.25, 0.62, 2.2], "free", "storage", "wardrobe", WOOD),
   item("hallway-tejo-115", "Garderobe Tejo Beige/Kaschmir", "Aufbewahren", "Raumhohe Garderobenkombination mit Spiegel, Sitzbank, Hakenleiste und fünf Einlegeböden", [1.15, 0.375, 2.319], "fixed", "storage", "wardrobe", TEJO_CASHMERE),
+  item("hallway-brown-mirror-bench-115", "Vorraumgarderobe Braun mit Spiegel und Sitzbank", "Aufbewahren", "Fotoreferenz: braune Holzfronten, hohe Spiegeltür, schwarze Griffe und Haken, helle gepolsterte Sitzbank", [1.15, 0.375, 2.319], "fixed", "storage", "wardrobe", HALL_BROWN),
   item("dresser", "Kommode", "Aufbewahren", "Breite Kommode mit Schubladen", [1.2, 0.45, 0.82], "free", "storage", "cabinet", WOOD),
   item("shelf", "Regal", "Aufbewahren", "Offenes Bücherregal", [0.9, 0.35, 1.9], "free", "storage", "shelf", WOOD),
   item("lowboard", "Lowboard", "Aufbewahren", "Niedriges Medienmöbel", [1.8, 0.42, 0.5], "free", "storage", "cabinet", WOOD),

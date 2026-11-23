@@ -67,6 +67,14 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
     // Generated RGB already carries the finish; tinting it again darkens it.
     material.color.set("#ffffff");
     material.needsUpdate = true;
+  } else if (materialId === "hallway-walnut-brown") {
+    // Generated wood grain keeps the user-provided private photo out of public assets.
+    const grain = loadProductGrainTexture(materialId, [128, 103, 80], 0.78, 0.018);
+    material.map = grain;
+    material.bumpMap = asBumpMap(grain);
+    material.bumpScale = 0.012;
+    material.color.set("#ffffff");
+    material.needsUpdate = true;
   } else if (materialId === "tejo-cashmere-grain") {
     const grain = loadProductGrainTexture(materialId, [203, 194, 182], 0.76, 0.018);
     material.map = grain;
