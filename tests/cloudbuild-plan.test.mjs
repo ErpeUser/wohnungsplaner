@@ -99,7 +99,8 @@ test('CLI creates the generated report directory before writing its plan', () =>
     // verifies report generation, not the type of the current Git commit.
     assert.ok(['skip', 'full', 'runtime', 'asset-live'].includes(outputPlan.mode));
     assert.equal(outputPlan.commit, 'HEAD');
-    assert.equal(outputPlan.parent, 'HEAD^');
+    // On shallow CI checkouts the CLI resolves the GitHub parent to its SHA.
+    assert.match(outputPlan.parent, /^(?:HEAD\^|[a-f0-9]{40})$/i);
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }
