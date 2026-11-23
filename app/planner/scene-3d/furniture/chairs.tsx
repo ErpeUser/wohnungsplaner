@@ -77,7 +77,7 @@ export function TemuIvoryExecutiveChair() {
 
 
 
-export type ComparisonChairVariant = "kaleo" | "temu-swivel" | "faux-leather" | "velvet-swivel" | "amber";
+export type ComparisonChairVariant = "woltu-chenille" | "kaleo" | "temu-swivel" | "faux-leather" | "velvet-swivel" | "amber";
 
 
 
@@ -221,18 +221,43 @@ function KaleoDiscBase({ seatHeight }: { seatHeight: number }) {
 
 
 
+function WoltuSwivelBase({ width, depth, seatHeight }: { width: number; depth: number; seatHeight: number }) {
+  const black = getPlannerMaterial("metal-black");
+  return <group name="woltu-swivel-base">
+    {/* Swivel mounting is below the upholstered bowl; four legs touch the floor. */}
+    <mesh name="woltu-swivel-housing" position={[0, seatHeight - 0.077, 0]} scale={[0.105, 0.07, 0.105]} geometry={SHARED_CYLINDER} castShadow>
+      <primitive object={black} attach="material" />
+    </mesh>
+    <mesh name="woltu-seat-mounting-plate" position={[0, seatHeight - 0.048, 0]} scale={[0.21, 0.018, 0.18]} geometry={SHARED_CYLINDER} castShadow>
+      <primitive object={black} attach="material" />
+    </mesh>
+    {[-1, 1].flatMap((x) => [-1, 1].map((z) => {
+      const legX = x * width * 0.445;
+      const legZ = z * depth * 0.425;
+      return <group key={x + ":" + z} name={"woltu-leg-" + x + "-" + z}>
+        <FurnitureBeam start={[x * 0.072, seatHeight - 0.087, z * 0.073]} end={[legX, 0.018, legZ]} width={0.022} depth={0.024} round />
+        <FurnitureBeam start={[x * 0.059, seatHeight - 0.104, z * 0.05]} end={[x * width * 0.31, 0.20, z * depth * 0.29]} width={0.008} depth={0.010} round />
+        <RoundedBox args={[0.038, 0.013, 0.038]} radius={0.006} smoothness={3} position={[legX, 0.012, legZ]} castShadow receiveShadow>
+          <primitive object={black} attach="material" />
+        </RoundedBox>
+      </group>;
+    }))}
+  </group>;
+}
+
 export function ComparisonChair({ variant, materialId }: { variant: ComparisonChairVariant; materialId: string }) {
-  const id = variant === "kaleo" ? "chair-kaleo-chenille-beige" : variant === "amber" ? "chair-amber-chenille-beige" : variant === "temu-swivel" ? "chair-temu-swivel-upholstered" : variant === "velvet-swivel" ? "chair-temu-velvet-swivel-arm" : "chair-temu-faux-leather-metal";
+  const id = variant === "woltu-chenille" ? "chair-aliexpress-woltu-1005013095870024" : variant === "kaleo" ? "chair-kaleo-chenille-beige" : variant === "amber" ? "chair-amber-chenille-beige" : variant === "temu-swivel" ? "chair-temu-swivel-upholstered" : variant === "velvet-swivel" ? "chair-temu-velvet-swivel-arm" : "chair-temu-faux-leather-metal";
   const model = getChairModelForCatalogId(id)!;
   const width = model.sizeCm.width / 100;
   const depth = model.sizeCm.depth / 100;
   const height = model.sizeCm.height / 100;
   const seatHeight = model.seatCm.height / 100;
   const armless = variant === "faux-leather";
+  const woltu = variant === "woltu-chenille";
   const armHeight = armless ? seatHeight + 0.035 : (model.armHeightCm ? model.armHeightCm / 100 : seatHeight + 0.18);
-  return <group scale={[1 / width, 1 / height, 1 / depth]}>
-    <ChairUpholstery width={width} depth={depth} height={height} seatHeight={seatHeight} seatWidth={model.seatCm.width / 100} seatDepth={model.seatCm.depth / 100} armHeight={armHeight} materialId={materialId} channels={variant !== "amber" && !armless} softSeat={variant === "kaleo" || variant === "amber"} metricFabric={variant === "kaleo" || variant === "amber"} />
-    {variant === "kaleo" ? <KaleoDiscBase seatHeight={seatHeight} /> : variant === "amber" ? <group>
+  return <group name={woltu ? "woltu-chenille-dining-chair" : undefined} scale={[1 / width, 1 / height, 1 / depth]}>
+    <ChairUpholstery width={width} depth={depth} height={height} seatHeight={seatHeight} seatWidth={model.seatCm.width / 100} seatDepth={model.seatCm.depth / 100} armHeight={armHeight} materialId={materialId} channels={variant !== "amber" && !armless} softSeat={woltu || variant === "kaleo" || variant === "amber"} metricFabric={woltu || variant === "kaleo" || variant === "amber"} />
+    {woltu ? <WoltuSwivelBase width={width} depth={depth} seatHeight={seatHeight} /> : variant === "kaleo" ? <KaleoDiscBase seatHeight={seatHeight} /> : variant === "amber" ? <group>
       <FurnitureBeam start={[0, 0.035, 0]} end={[0, seatHeight - 0.055, 0]} width={0.046} round />
       {[0, Math.PI / 2, Math.PI, Math.PI * 1.5].map((angle) => <FurnitureBeam key={angle} start={[0, 0.04, 0]} end={[Math.cos(angle) * width * 0.49, 0.018, Math.sin(angle) * depth * 0.49]} width={0.026} depth={0.034} />)}
     </group> : <group>

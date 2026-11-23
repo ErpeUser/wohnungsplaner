@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { SHOPPING_ITEMS } from '../app/planner/workspace/shopping-items.ts';
+import { SHOPPING_ITEMS, shoppingSubtotal } from '../app/planner/workspace/shopping-items.ts';
 const existingIds = ['kitchen-fridge-60cm','kitchen-oven-60cm','kitchen-induction-hob-60cm','kitchen-hood-60cm','kitchen-sink-60cm','184900692R','184900692G','1005012515662602','601104051124011','601100062257123','607039887632432','800001233737','601099532250952','607246280935328','601100249492431','606121368598635','1005012445521181','1005013379584796','607199740937372','2778003504','2858001801','1634004202','601099691023748','601104781298502','601099526356869','z1-deko-bilder','z1-deko-vorhang','z1-deko-licht','z1-deko-wandregal-set-schminkecke','z1-deko-nische','z1-deko-wandleuchten','z1-deko-schrankboxen','z1-deko-pflanze','z1-deko-textilien','z1-deko-kleinteile','z1-deko-pendelleuchte'];
 const item=(id:string)=>{const found=SHOPPING_ITEMS.find(i=>i.id===id);assert.ok(found,id);return found;};
 test('preserves every existing shopping article without duplicate identities',()=>{
  for(const id of existingIds)assert.equal(SHOPPING_ITEMS.filter(i=>i.id===id).length,1,id);
  assert.equal(new Set(SHOPPING_ITEMS.map(i=>i.id)).size,SHOPPING_ITEMS.length);
- assert.equal(SHOPPING_ITEMS.length,existingIds.length+8);
+ assert.equal(SHOPPING_ITEMS.length,existingIds.length+9);
  assert.equal(SHOPPING_ITEMS.some(i=>i.id==='606296522765554'),false,'retired Temu chair must not be listed');
  assert.equal(item('1005012445521181').url,'https://de.aliexpress.com/item/1005012445521181.html');
 });
@@ -49,9 +49,9 @@ test('includes the exact selected Temu A8447 180 x 250 cm vintage rug',()=>{
  assert.match(rug.imageUrl??'',/temu-vintage-rug-607199740937372/);
 });
 test('adds the purchased living room rug to the known-priced subtotal',()=>{
- const total=SHOPPING_ITEMS.reduce((sum,i)=>sum+(i.price??0)*(i.quantity??1),0);
- assert.equal(Math.round(total*100),220710);
- assert.equal(SHOPPING_ITEMS.filter(i=>i.url).length,24);
+ const total=shoppingSubtotal;
+ assert.equal(Math.round(total*100),198342);
+ assert.equal(SHOPPING_ITEMS.filter(i=>i.url).length,25);
 });
 test('adds the 30-piece white-gold marble wall tile set for the bathroom',()=>{
  const tile=item('601100207687761');
@@ -89,4 +89,20 @@ test('lists the selected 80 cm Artisan oak wallboard exactly once in the WC',()=
   assert.match(shelf.dimensions,/Artisan/);
   assert.equal(shelf.url,'https://www.moebelix.at/p/wandboard-simple-b-80-cm-eiche-artisan-dekor-007326000408');
   assert.equal(SHOPPING_ITEMS.filter(i=>i.id===shelf.id).length,1);
+});
+
+test('lists WOLTU Chenille as four primary chairs in two unpriced two-packs, with Kaleo as budget-excluded backup',()=>{
+ const woltu=item('1005013095870024');
+ assert.equal(woltu.room,'Wohnküche');
+ assert.equal(woltu.quantity,2);
+ assert.equal(woltu.price,null);
+ assert.equal(woltu.alternative,undefined);
+ assert.equal(woltu.url,'https://de.aliexpress.com/item/1005013095870024.html');
+ assert.match(woltu.amountLabel??'',/2er-Set = 4/);
+ assert.match(woltu.dimensions,/Planungsmaß/);
+ const backup=item('1634004202');
+ assert.equal(backup.alternative,true);
+ assert.equal(backup.quantity,4);
+ assert.equal(backup.price,55.92);
+ assert.equal(shoppingSubtotal,1983.42);
 });

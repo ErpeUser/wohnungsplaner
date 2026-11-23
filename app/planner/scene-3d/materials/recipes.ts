@@ -105,6 +105,7 @@ export const RECIPES: Record<string, MaterialRecipe> = {
   "fabric-ali-shade": { color: "#dcd2c4", roughness: 0.99 },
   "fabric-chicago-beige": { color: "#d8d5cc", roughness: 0.98 },
   "fabric-chicago-chenille": { color: "#d8d5cc", roughness: 0.99 },
+  "fabric-woltu-chenille-cream": { color: "#ded4c5", roughness: 0.99 },
   "fabric-kaleo-beige": { color: "#ddd2c2", roughness: 0.98 },
   "fabric-kaleo-chenille": { color: "#ddd2c2", roughness: 0.99 },
   "fabric-temu-sand": { color: "#d5c7b6", roughness: 0.98 },

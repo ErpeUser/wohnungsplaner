@@ -39,6 +39,9 @@ const TABLE_TEMU_OAK = [
 const TABLE_ALI_OAK = [
   { id: "oak-artisan", label: "Artisan Eiche hell", color: "#d0a66b" },
 ];
+const WOLTU_CHENILLE_CREAM = [
+  { id: "fabric-woltu-chenille-cream", label: "Cremebeige Chenille · Planungsfarbe (unbestätigt)", color: "#ded4c5" },
+];
 const KALEO_BEIGE = [
   { id: "fabric-kaleo-beige", label: "Chenille Beige in Leinenoptik", color: "#ddd2c2" },
 ];
@@ -177,6 +180,12 @@ const PRODUCT_REALISM: Record<string, ProductRealismSpec> = {
     confidence: "verified",
     construction: ["geriffelter zylindrischer Mittelsockel", "versteckte Auszugsplatten", "warme Holzdekoroberfläche", "50 kg Belastbarkeit laut Produktgrafik"],
   },
+  "chair-aliexpress-woltu-1005013095870024": {
+    sourceLabel: "AliExpress / WOLTU Art. 1005013095870024 · 2er-Set, Titel bestätigt; Bilder und Maße nicht zugänglich",
+    dimensions: "Planungsmaß ca. 58 × 60 × 85 cm · Sitz ca. 44 × 44 × 48 cm · Armhöhe ca. 65 cm; geschätzt",
+    confidence: "estimated",
+    construction: ["Chenille-Polsterbezug laut Titel", "360°-Drehfunktion laut Titel", "Metallbeine laut Titel", "geschwungene gepolsterte Sitzschale mit Armlehnen als Modellannahme", "vier ausgestellte Beine und Mitteldrehteller als Modellannahme"],
+  },
   "chair-kaleo-chenille-beige": {
     sourceLabel: "Möbelix / Kaleo Art. 1634004202",
     dimensions: "ca. 63 × 64 × 87 cm · Sitzhöhe 50 cm · Armlehne 66 cm",
@@ -280,7 +289,7 @@ const PRODUCT_REALISM: Record<string, ProductRealismSpec> = {
 // Generic catalog items stay on the local GLB path automatically.
 export const PHOTO_FIRST_IDS: ReadonlySet<string> = new Set([
   "bed-bliss-120", "wardrobe-225", "vanity-vicco-sherry-120",
-  "chair-temu-executive-ivory", "chair-aliexpress-xuegw-1005012445521181", "chair-kaleo-chenille-beige", "chair-temu-swivel-upholstered", "chair-temu-faux-leather-metal", "chair-temu-velvet-swivel-arm", "chair-amber-chenille-beige", "sofa-sectional-photo",
+  "chair-temu-executive-ivory", "chair-aliexpress-xuegw-1005012445521181", "chair-aliexpress-woltu-1005013095870024", "chair-kaleo-chenille-beige", "chair-temu-swivel-upholstered", "chair-temu-faux-leather-metal", "chair-temu-velvet-swivel-arm", "chair-amber-chenille-beige", "sofa-sectional-photo",
   "sofa-chicago-206", "sofa-aliexpress-142", "sofa-aliexpress-142-open", "dining-table-bozan-110", "nightstand-led-2drawer-white", "nightstand-aliexpress-woltu-1005012793801128",
   "hallway-tejo-115", "hallway-brown-mirror-bench-115", "dining-table-aliexpress-100-140", "dining-table-temu-606997-120-160", "dining-table-temu-609726-110-150", "dining-table-kaufland-567080013-120-160", "rug-gala-shaggy-2505-100x200", "rug-temu-shaggy-white-120x200",
   "rug-temu-easy-line-120x180", "rug-temu-easy-line-140x200", "rug-temu-rabbit-ivory-100x180",
@@ -300,6 +309,7 @@ export const FURNITURE_CATALOG: FurnitureCatalogItem[] = [
   item("sofa-chicago-206", "Sofa Chicago 206", "Sitzen", "Beiger Chenille-Zweisitzer mit zwei elektrischen Relaxplätzen, Taschenfederkern und schwarzen Metallfüßen", [2.06, 1.07, 0.78], "fixed", "sofa", "sofa", CHICAGO_BEIGE),
   item("sofa-sectional-photo", "Ecksofa Grau", "Sitzen", "Fotobelegtes graues Ecksofa der Wohnküche", [2.35, 1.42, 0.84], "free", "sofa", "sofa", FABRIC),
   item("chair-dining", "Stuhl", "Sitzen", "Esszimmerstuhl", [0.5, 0.55, 0.84], "fixed", "chair", "chair", [...WOOD, ...FABRIC]),
+  { ...item("chair-aliexpress-woltu-1005013095870024", "WOLTU Chenille Drehstuhl · AliExpress", "Sitzen", "Zwei Chenille-Polsterstühle je Packung, drehbar mit Metallbeinen; Form und Abmessungen im Plan geschätzt", [0.58, 0.60, 0.85], "fixed", "chair", "chair", WOLTU_CHENILLE_CREAM), sourceUrl: "https://de.aliexpress.com/item/1005013095870024.html" },
   item("chair-kaleo-chenille-beige", "Armlehnstuhl Kaleo", "Sitzen", "Drehbarer Chenille-Armlehnstuhl in Beige mit schwarzem 50-cm-Rundfuß", [0.63, 0.64, 0.87], "fixed", "chair", "chair", KALEO_BEIGE),
   item("chair-temu-swivel-upholstered", "Temu Drehstuhl gepolstert", "Sitzen", "Gepolsterter 360°-Drehstuhl mit kompakter Sitzschale", [0.56, 0.55, 0.815], "fixed", "chair", "chair", TEMU_SWIVEL_SAND),
   item("chair-temu-faux-leather-metal", "Temu Kunstlederstuhl", "Sitzen", "Kunstlederstuhl mit Rückenlehne und Metallbeinen", [0.58, 0.5098, 0.7999], "fixed", "chair", "chair", TEMU_LEATHER_CREAM),

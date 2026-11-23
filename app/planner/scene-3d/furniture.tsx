@@ -182,6 +182,7 @@ function ParametricFurniture({ fallback, materialId, catalogId, size }: { fallba
   if (catalogId === "hallway-brown-mirror-bench-115") return <BrownHallwayMirrorBench />;
   if (catalogId === "dining-table-bozan-110") return <BozanDiningTable />;
   if (catalogId.startsWith("dining-table-")) return <ComparisonDiningTable materialId={materialId} catalogId={catalogId} size={size} />;
+  if (catalogId === "chair-aliexpress-woltu-1005013095870024") return <ComparisonChair variant="woltu-chenille" materialId={materialId} />;
   if (catalogId === "chair-kaleo-chenille-beige") return <KaleoArmchair />;
   if (catalogId === "chair-temu-swivel-upholstered") return <ComparisonChair variant="temu-swivel" materialId={materialId} />;
   if (catalogId === "chair-temu-faux-leather-metal") return <ComparisonChair variant="faux-leather" materialId={materialId} />;

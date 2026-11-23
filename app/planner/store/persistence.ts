@@ -188,7 +188,7 @@ export function upgradeRetiredDiningGroup(document: PlannerDocumentV3): PlannerD
   }
   const table = upgraded.placements.find((item) => item.id === "living-bozan-table");
   const defaultNorth = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "living-kaleo-chair-north");
-  const hasMigrationMarker = table?.metadata?.notes?.some((note) => /Vier Kaleo-Armlehnstühle/i.test(note));
+  const hasMigrationMarker = table?.metadata?.notes?.some((note) => /Vier (?:Kaleo-Armlehnstühle|WOLTU Chenille-Drehstühle)/i.test(note));
   if (!table || !defaultNorth || hasMigrationMarker || upgraded.placements.some((item) => item.id === defaultNorth.id)) {
     return upgraded;
   }
@@ -198,7 +198,7 @@ export function upgradeRetiredDiningGroup(document: PlannerDocumentV3): PlannerD
       ...upgraded.placements,
       defaultNorth,
     ].map((item) => item.id === table.id
-      ? { ...item, metadata: { ...item.metadata, notes: [...(item.metadata?.notes ?? []), "Vier Kaleo-Armlehnstühle sind als aktuelle Essgruppe markiert."] } }
+      ? { ...item, metadata: { ...item.metadata, notes: [...(item.metadata?.notes ?? []), "Vier WOLTU Chenille-Drehstühle sind als aktuelle Essgruppe markiert."] } }
       : item),
   });
 }
@@ -374,7 +374,8 @@ function readStoredValue(raw: string): MigrationResult {
       const withRug = upgradeLivingRugMaterial(parsed);
       const withHall = upgradeHallPhotoReference(withRug);
       const withChair = upgradeZimmer1Chair(withHall);
-      const withWc = upgradeWcPhotoReference(withChair);
+      const withDining = upgradeDiningChairsToWoltu(withChair);
+      const withWc = upgradeWcPhotoReference(withDining);
       if (!normalized.identityChanged && isOlderBaselineModel(withWc)) {
         return {
           document: rebaseBaselineModel(withWc),
@@ -388,8 +389,10 @@ function readStoredValue(raw: string): MigrationResult {
           document: withWc,
           warnings: [normalized.changed
             ? "Das gespeicherte Dokument wurde auf die zusammengeführte Balkon-/Loggia-Struktur aktualisiert."
-            : withWc !== withChair
+            : withWc !== withDining
               ? "Die WC-Fotoreferenz mit Eiche-Artisan-Regal, Schacht und Lüftung wurde übernommen; sonstige Möbelpositionen bleiben erhalten."
+              : withDining !== withChair
+                ? "Die vier bisherigen Kaleo-Hauptstühle wurden auf WOLTU Chenille umgestellt; ihre Positionen bleiben erhalten."
               : withChair !== withHall
                 ? "Der Stuhl in Zimmer 1 wurde auf das neue AliExpress-Modell aktualisiert; Position und Drehung bleiben erhalten."
                 : withHall !== withRug
@@ -476,6 +479,41 @@ function normalizeLegacyV3Aliases(value: object): { document: object; changed: b
     viewPreferences: preferences ? { ...preferences, activeRoomId: activeRoomId ? "balkon" : preferences.activeRoomId } : record.viewPreferences,
   };
   return { document: normalized, changed: true };
+}
+
+/** Change untouched default Kaleo seats to the newly selected WOLTU model.
+ * Preserve moved/rotated seats, personal notes and explicit comparison choices. */
+export function upgradeDiningChairsToWoltu(document: PlannerDocumentV3): PlannerDocumentV3 {
+  if (document.id !== DEFAULT_APARTMENT_DOCUMENT.id) return document;
+  const defaults = new Map(DEFAULT_APARTMENT_DOCUMENT.placements
+    .filter((item) => item.id.startsWith("living-kaleo-chair-"))
+    .map((item) => [item.id, item]));
+  let changed = false;
+  const placements = document.placements.map((item) => {
+    const next = defaults.get(item.id);
+    if (!next || item.catalogId !== "chair-kaleo-chenille-beige"
+      || item.size.width !== 0.63 || item.size.depth !== 0.64 || item.size.height !== 0.87
+      || item.metadata?.notes?.some((note) => /Stuhlvergleich chair-kaleo-chenille-beige/.test(note))) return item;
+    const extraNotes = (item.metadata?.notes ?? []).filter((note) => ![
+      "Produktmaß 63", "Armlehnenoberkante", "Schwarzer pulverbeschichteter",
+      "Beiger Chenillebezug", "Oberer/Nord-Stuhl", "Rechter/Ost-Stuhl",
+      "Linker/West-Stuhl", "Südlicher vierter Sitzplatz", "Die Position hält",
+    ].some((phrase) => note.includes(phrase)));
+    changed = true;
+    return {
+      ...item,
+      catalogId: next.catalogId,
+      size: { ...next.size },
+      materialVariants: { ...item.materialVariants, main: next.materialVariants?.main ?? "fabric-woltu-chenille-cream" },
+      metadata: {
+        ...item.metadata,
+        source: next.metadata?.source,
+        confidence: "estimated" as const,
+        notes: [...new Set([...(next.metadata?.notes ?? []), ...extraNotes])],
+      },
+    };
+  });
+  return changed ? { ...document, placements } : document;
 }
 
 /** Switch only the previous default Zimmer-1 chair, preserving custom positions,
@@ -621,7 +659,7 @@ function isOlderBaselineModel(document: PlannerDocumentV3) {
   if (fixturesNeedRefresh) return true;
   const storedPlacements = new Map(document.placements.map((item) => [item.id, item]));
   const diningTable = storedPlacements.get("living-bozan-table");
-  const hasMarkedFourChairGroup = diningTable?.metadata?.notes?.some((note) => /Vier Kaleo-Armlehnstühle/i.test(note)) ?? false;
+  const hasMarkedFourChairGroup = diningTable?.metadata?.notes?.some((note) => /Vier (?:Kaleo-Armlehnstühle|WOLTU Chenille-Drehstühle)/i.test(note)) ?? false;
   return DEFAULT_APARTMENT_DOCUMENT.placements.some((item) => {
     if (!BASELINE_VISUAL_PLACEMENT_REFRESH_IDS.has(item.id)) return false;
     const previous = storedPlacements.get(item.id);

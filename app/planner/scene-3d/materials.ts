@@ -58,8 +58,8 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
     material.bumpMap = asBumpMap(worktopTexture);
     material.bumpScale = 0.008;
     material.needsUpdate = true;
-  } else if (["fabric-bliss-weave", "fabric-chicago-chenille", "fabric-kaleo-chenille", "fabric-temu-sand", "velvet-temu-beige", "fabric-amber-beige"].includes(materialId)) {
-    const weave = materialId === "fabric-kaleo-chenille" || materialId === "fabric-amber-beige"
+  } else if (["fabric-bliss-weave", "fabric-chicago-chenille", "fabric-kaleo-chenille", "fabric-woltu-chenille-cream", "fabric-temu-sand", "velvet-temu-beige", "fabric-amber-beige"].includes(materialId)) {
+    const weave = materialId === "fabric-kaleo-chenille" || materialId === "fabric-woltu-chenille-cream" || materialId === "fabric-amber-beige"
       ? loadChairChenilleTexture(materialId) : loadProductWeaveTexture(materialId);
     material.map = weave;
     material.bumpMap = asBumpMap(weave);

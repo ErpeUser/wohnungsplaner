@@ -5,7 +5,8 @@ export type ChairModelId =
   | "temu-faux-leather-metal"
   | "temu-velvet-swivel-arm"
   | "moebelix-amber-chenille"
-  | "chair-kaleo-chenille-beige";
+  | "chair-kaleo-chenille-beige"
+  | "aliexpress-woltu-chenille-1005013095870024";
 
 export type ChairSourceStatus = "confirmed" | "estimated";
 export type ChairBaseStyle = "swivel-disc" | "metal-legs" | "swivel-metal-legs" | "star-base";
@@ -31,6 +32,30 @@ export type ChairModel = {
 };
 
 export const CHAIR_MODELS: readonly ChairModel[] = [
+  {
+    id: "aliexpress-woltu-chenille-1005013095870024",
+    name: "WOLTU Chenille 360°-Drehstuhl · 2er-Set · AliExpress",
+    shortName: "WOLTU Chenille · Hauptstuhl",
+    catalogId: "chair-aliexpress-woltu-1005013095870024",
+    sourceUrl: "https://de.aliexpress.com/item/1005013095870024.html",
+    sourceLabel: "WOLTU / AliExpress Art. 1005013095870024 · Titel aus Nutzer-Tab, Händlergalerie nicht auslesbar",
+    sourceStatus: "estimated",
+    confidence: "estimated",
+    imageUrls: [],
+    // Planning envelope, not an independently verified manufacturer drawing.
+    sizeCm: { width: 58, depth: 60, height: 85 },
+    seatCm: { width: 44, depth: 44, height: 48 },
+    armHeightCm: 65,
+    baseStyle: "swivel-metal-legs",
+    swivel: true,
+    materialId: "fabric-woltu-chenille-cream",
+    sourceNotes: [
+      "Titel im Nutzer-Tab: WOLTU 2-teiliges Set, Chenille-Esszimmerstühle, 360° drehbar, Metallbeine. Produktgalerie und Maßzeichnung nicht zugänglich.",
+      "3D-Planungsmaß geschätzt: ca. 58 × 60 × 85 cm, Sitzhöhe 48 cm, Armhöhe 65 cm; keine bestätigten Herstellermaße.",
+      "Cremebeiger Chenillebezug als Planungsfarbe, gerundete Armlehnen und vier ausgestellte Metallbeine mit mittigem Drehteller als Modellannahmen.",
+      "Vier Essplätze erfordern zwei 2er-Sets; Variante und Endpreis vor Kauf bestätigen.",
+    ],
+  },
   {
     id: "temu-swivel-upholstered",
     name: "Temu · gepolsterter 360°-Drehstuhl",

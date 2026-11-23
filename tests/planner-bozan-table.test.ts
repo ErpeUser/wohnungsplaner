@@ -35,15 +35,15 @@ test("balances the Bozan table between fridge and sofa while keeping the kitchen
   assert.deepEqual(inspectPlacement(DEFAULT_APARTMENT_DOCUMENT, table, { ignorePlacementIds: diningGroupIds }).hard, []);
 });
 
-test("places four Kaleo armchairs while keeping the refrigerator side clear", () => {
-  const catalogItem = getFurnitureCatalogItem("chair-kaleo-chenille-beige");
+test("places four WOLTU main dining chairs while keeping the refrigerator side clear", () => {
+  const catalogItem = getFurnitureCatalogItem("chair-aliexpress-woltu-1005013095870024");
   const table = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "living-bozan-table");
   const chairs = DEFAULT_APARTMENT_DOCUMENT.placements
-    .filter((item) => item.catalogId === "chair-kaleo-chenille-beige")
+    .filter((item) => item.catalogId === "chair-aliexpress-woltu-1005013095870024")
     .toSorted((left, right) => left.id.localeCompare(right.id));
 
   assert.ok(catalogItem);
-  assert.deepEqual(catalogItem.defaultSize, { width: 0.63, depth: 0.64, height: 0.87 });
+  assert.deepEqual(catalogItem.defaultSize, { width: 0.58, depth: 0.6, height: 0.85 });
   assert.equal(catalogItem.resize, "fixed");
   assert.ok(table);
   assert.equal(table.groupId, "living-dining-group");
@@ -59,28 +59,28 @@ test("places four Kaleo armchairs while keeping the refrigerator side clear", ()
       id: "living-kaleo-chair-east",
       position: { x: 2.9, z: 5.7 },
       rotation: 90,
-      size: { width: 0.63, depth: 0.64, height: 0.87 },
+      size: { width: 0.58, depth: 0.6, height: 0.85 },
       groupId: "living-dining-group",
     },
     {
       id: "living-kaleo-chair-north",
       position: { x: 2.2, z: 6.4 },
       rotation: 180,
-      size: { width: 0.63, depth: 0.64, height: 0.87 },
+      size: { width: 0.58, depth: 0.6, height: 0.85 },
       groupId: "living-dining-group",
     },
     {
       id: "living-kaleo-chair-south",
       position: { x: 1.5, z: 5.7 },
       rotation: 270,
-      size: { width: 0.63, depth: 0.64, height: 0.87 },
+      size: { width: 0.58, depth: 0.6, height: 0.85 },
       groupId: "living-dining-group",
     },
     {
       id: "living-kaleo-chair-west",
       position: { x: 2.2, z: 5 },
       rotation: 0,
-      size: { width: 0.63, depth: 0.64, height: 0.87 },
+      size: { width: 0.58, depth: 0.6, height: 0.85 },
       groupId: "living-dining-group",
     },
   ]);
@@ -88,9 +88,9 @@ test("places four Kaleo armchairs while keeping the refrigerator side clear", ()
   const groupIds = new Set([table.id, ...chairs.map((chair) => chair.id)]);
   for (const chair of chairs) {
     assert.deepEqual(inspectPlacement(DEFAULT_APARTMENT_DOCUMENT, chair, { ignorePlacementIds: groupIds }).hard, []);
-    assert.equal(chair.materialVariants?.main, "fabric-kaleo-beige");
-    assert.ok(chair.metadata?.notes?.some((note) => /armlehne.*66 cm/i.test(note)));
-    assert.ok(chair.metadata?.notes?.some((note) => /50-cm.*rundfu/i.test(note)));
+    assert.equal(chair.materialVariants?.main, "fabric-woltu-chenille-cream");
+    assert.ok(chair.metadata?.notes?.some((note) => /armlehnenhöhe 65 cm/i.test(note)));
+    assert.ok(chair.metadata?.notes?.some((note) => /Metallbeine/i.test(note)));
   }
   const fridgeFrontZ = 4.14;
   const tableNorthEdge = table.position.z - table.size.depth / 2;

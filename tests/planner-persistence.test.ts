@@ -81,9 +81,9 @@ test("bewahrt eine ausgewählte Tischvariante über Save und Reload", () => {
   assert.equal(table.materialVariants?.main, "walnut");
 });
 
-test("replaces the two retired Amber placeholders in a live document with four Kaleo chairs", () => {
+test("replaces the two retired Amber placeholders in a live document with four WOLTU chairs", () => {
   const stale = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
-  stale.placements = stale.placements.filter((item) => item.catalogId !== "chair-kaleo-chenille-beige");
+  stale.placements = stale.placements.filter((item) => item.catalogId !== "chair-aliexpress-woltu-1005013095870024");
   stale.placements.push(
     {
       id: "living-amber-chair-west",
@@ -106,7 +106,7 @@ test("replaces the two retired Amber placeholders in a live document with four K
   );
 
   const upgraded = upgradeRetiredDiningGroup(stale);
-  const chairs = upgraded.placements.filter((item) => item.catalogId === "chair-kaleo-chenille-beige");
+  const chairs = upgraded.placements.filter((item) => item.catalogId === "chair-aliexpress-woltu-1005013095870024");
 
   assert.notEqual(upgraded, stale);
   assert.equal(upgraded.placements.some((item) => item.catalogId === "chair-amber-chenille-beige"), false);
@@ -146,12 +146,12 @@ test("ergänzt einen fehlenden vierten Stuhl in einem alten Drei-Stuhl-Save einm
   const stale = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
   stale.placements = stale.placements.filter((item) => item.id !== "living-kaleo-chair-north");
   const table = stale.placements.find((item) => item.id === "living-bozan-table")!;
-  table.metadata = { ...table.metadata, notes: table.metadata?.notes?.filter((note) => !/Vier Kaleo/i.test(note)) };
+  table.metadata = { ...table.metadata, notes: table.metadata?.notes?.filter((note) => !/Vier (?:Kaleo|WOLTU)/i.test(note)) };
 
   const upgraded = upgradeRetiredDiningGroup(stale);
 
   assert.notEqual(upgraded, stale);
-  assert.equal(upgraded.placements.filter((item) => item.catalogId === "chair-kaleo-chenille-beige").length, 4);
+  assert.equal(upgraded.placements.filter((item) => item.catalogId === "chair-aliexpress-woltu-1005013095870024").length, 4);
   assert.ok(upgraded.placements.some((item) => item.id === "living-kaleo-chair-north"));
   assert.equal(upgradeRetiredDiningGroup(upgraded), upgraded);
 });

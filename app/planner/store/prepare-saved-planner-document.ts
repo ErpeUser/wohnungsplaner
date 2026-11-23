@@ -7,6 +7,7 @@ import {
   upgradeLivingRugMaterial,
   upgradeHallPhotoReference,
   upgradeZimmer1Chair,
+  upgradeDiningChairsToWoltu,
   upgradeWcPhotoReference,
 } from "./persistence.ts";
 
@@ -24,7 +25,8 @@ export function prepareSavedPlannerDocument(document: PlannerDocumentV3): Planne
   const withRug = upgradeLivingRugMaterial(withBathroom);
   const withHall = upgradeHallPhotoReference(withRug);
   const withChair = restoreMissingVanityChair(upgradeZimmer1Chair(withHall));
-  const withWc = upgradeWcPhotoReference(withChair);
+  const withDining = upgradeDiningChairsToWoltu(withChair);
+  const withWc = upgradeWcPhotoReference(withDining);
   const updated = upgradeWoltuNightstandPlacement(withWc);
 
   const existing = new Set(updated.builtIns.map((item) => item.id));
