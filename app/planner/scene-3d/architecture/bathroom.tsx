@@ -9,16 +9,20 @@ import { MarbleTileSurface } from "./marble-tiles";
 
 
 
-export function BathTiledFinish({ item }: { item: SceneObject<PlannerBuiltIn> }) {
+export function BathTiledFinish({ item, frontWallEndZ }: { item: SceneObject<PlannerBuiltIn>; frontWallEndZ?: number }) {
   const [width, height, depth] = item.size;
   const tile = getPlannerMaterial(item.materialId);
   if (item.roomId === "bad" && item.catalogId === "bath-tub-apron") {
+    // The side cap reaches the bathroom wall before the 160-cm tub starts.
+    // Cover that remaining distance with the SAME marble face, not grey tiles.
+    const tubFrontEndZ = item.position[2] - width / 2;
+    const extension = Math.max(0, tubFrontEndZ - (frontWallEndZ ?? tubFrontEndZ));
     return (
       <group name={`bath-tiled-finish-${item.source.id}`}>
         <mesh scale={item.size} geometry={SHARED_BOX} material={tile} castShadow receiveShadow />
         {/* Local −Z faces into the room at the installed 90° rotation. */}
-        <group position={[0, 0, -depth / 2 - 0.002]} rotation={[0, Math.PI, 0]}>
-          <MarbleTileSurface width={width} height={height} patternOffset={3} />
+        <group position={[-extension / 2, 0, -depth / 2 - 0.002]} rotation={[0, Math.PI, 0]}>
+          <MarbleTileSurface width={width + extension} height={height} patternOffset={3} />
         </group>
       </group>
     );

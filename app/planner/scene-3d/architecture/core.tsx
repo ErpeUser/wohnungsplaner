@@ -53,6 +53,8 @@ export function PlannerArchitecture({
   const hiddenObjects = useMemo(() => new Set(hiddenObjectIds), [hiddenObjectIds]);
   const hiddenFixtures = useMemo(() => new Set(hiddenFixtureIds), [hiddenFixtureIds]);
   const bathtub = scene.builtIns.find((item) => item.roomId === "bad" && item.catalogId === "sanitary-bathtub");
+  const bathSideCap = scene.builtIns.find((item) => item.roomId === "bad" && item.catalogId === "bath-tub-side-apron");
+  const bathFrontEndZ = bathSideCap ? bathSideCap.position[2] - bathSideCap.size[2] / 2 : undefined;
   return (
     <group onPointerMissed={() => onSelect(null)}>
       {scene.floors.map((floor) => <Floor key={floor.id} floor={floor} />)}
@@ -81,7 +83,8 @@ export function PlannerArchitecture({
         );
       })}
       {scene.builtIns.filter((item) => !hiddenObjects.has(item.id)).map((item) => (
-        <ObjectBox key={item.id} item={item} walls={scene.walls} selected={selectionId === item.id} onSelect={onSelect} />
+        <ObjectBox key={item.id} item={item} walls={scene.walls} bathFrontEndZ={bathFrontEndZ}
+          selected={selectionId === item.id} onSelect={onSelect} />
       ))}
       {scene.fixtures
         .filter((fixture) => !hiddenFixtures.has(fixture.id))
@@ -114,8 +117,7 @@ function WallSegmentMesh({ wall, segment, bathtub }: {
       />
       {bathMarble && (
         <group position={bathMarble.position} rotation={[0, Math.PI / 2, 0]}>
-          {/* Let the finish tuck 1 cm behind both adjoining corners so no bare wall seam peeks through. */}
-          <MarbleTileSurface width={bathMarble.width + 0.02} height={bathMarble.height} />
+          <MarbleTileSurface width={bathMarble.width} height={bathMarble.height} />
         </group>
       )}
       {wcMarble && (
@@ -157,11 +159,13 @@ function recessedPanelPosition(item: SceneObject<PlannerBuiltIn>, walls: readonl
 function ObjectBox({
   item,
   walls,
+  bathFrontEndZ,
   selected,
   onSelect,
 }: {
   item: SceneObject<PlannerBuiltIn>;
   walls: readonly SceneWall[];
+  bathFrontEndZ?: number;
   selected: boolean;
   onSelect(id: string | null): void;
 }) {
@@ -174,7 +178,7 @@ function ObjectBox({
         onSelect(item.id);
       }}
     >
-      <ParametricBuiltIn item={item} />
+      <ParametricBuiltIn item={item} bathFrontEndZ={bathFrontEndZ} />
       {selected ? (
         <mesh scale={item.size.map((value) => value * 1.015) as [number, number, number]} geometry={SHARED_BOX}>
           <meshBasicMaterial color="#d46f3a" wireframe transparent opacity={0.9} />
@@ -184,7 +188,7 @@ function ObjectBox({
   );
 }
 
-function ParametricBuiltIn({ item }: { item: SceneObject<PlannerBuiltIn> }) {
+function ParametricBuiltIn({ item, bathFrontEndZ }: { item: SceneObject<PlannerBuiltIn>; bathFrontEndZ?: number }) {
   if (item.renderProfile === "bathtub") {
     const [width, height, depth] = item.size;
     return (
@@ -221,7 +225,7 @@ function ParametricBuiltIn({ item }: { item: SceneObject<PlannerBuiltIn> }) {
       </group>
     );
   }
-  if (item.catalogId === "bath-tub-apron" || item.catalogId === "bath-tub-end-ledge" || item.catalogId === "bath-tub-side-apron") return <BathTiledFinish item={item} />;
+  if (item.catalogId === "bath-tub-apron" || item.catalogId === "bath-tub-end-ledge" || item.catalogId === "bath-tub-side-apron") return <BathTiledFinish item={item} frontWallEndZ={bathFrontEndZ} />;
   if (item.catalogId === "wc-flush-plate") return <WcFlushPlate item={item} />;
   if (item.catalogId === "wc-revision-panel") return <WcRevisionPanel item={item} />;
   if (isWcWallboardCatalogId(item.catalogId)) return <WcArtisanWallboard item={item} />;
