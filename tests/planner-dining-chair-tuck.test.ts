@@ -57,7 +57,7 @@ test("respects moved seats, deliberately selected backup, custom dining table an
   const stored = previousWoltuLayout();
   const west = stored.placements.find((p) => p.id === "living-kaleo-chair-west")!;
   west.position = { x: 2.2, z: 4.91 }; // personal movement
-  west.metadata!.notes.push("Persönliche Position beibehalten");
+  west.metadata!.notes = [...(west.metadata?.notes ?? []), "Persönliche Position beibehalten"];
   const east = stored.placements.find((p) => p.id === "living-kaleo-chair-east")!;
   east.catalogId = "chair-kaleo-chenille-beige";
   east.size = { width: 0.63, depth: 0.64, height: 0.87 };
