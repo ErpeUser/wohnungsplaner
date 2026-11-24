@@ -28,9 +28,9 @@ test("renders the user-selected oak board, pale-tiled shaft, ventilation, foliag
     });
     state!.scene.updateMatrixWorld(true);
     const rootObject = state!.scene;
-    const wood = rootObject.getObjectByName("wc-artisan-simple-wallboard");
+    const wood = rootObject.getObjectByName("wc-wallboard-simple-80");
     expect(wood).toBeDefined();
-    expect(rootObject.getObjectByName("wc-artisan-top-veneer")).toBeDefined();
+    expect(rootObject.getObjectByName("wc-wallboard-mdf-top")).toBeDefined();
     const bounds = new Box3().setFromObject(wood!).getSize(new Vector3());
     expect(bounds.x).toBeCloseTo(0.8, 2);
     expect(bounds.y).toBeCloseTo(0.038, 2);
