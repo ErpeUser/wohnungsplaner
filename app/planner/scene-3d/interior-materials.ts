@@ -6,12 +6,12 @@ function pixels(data:Uint8Array,width:number,height:number,color:boolean,name:st
   texture.name=name;texture.colorSpace=color?SRGBColorSpace:NoColorSpace;texture.wrapS=texture.wrapT=RepeatWrapping;
   texture.magFilter=LinearFilter;texture.minFilter=LinearMipmapLinearFilter;texture.generateMipmaps=true;texture.anisotropy=8;texture.needsUpdate=true;return texture;
 }
-function woodTexture(){
+function woodTexture(base:readonly [number,number,number]=[213,180,132],name='interior-natural-wood'){
   const size=256,data=new Uint8Array(size*size*4);
   for(let y=0;y<size;y++)for(let x=0;x<size;x++){
     const grain=Math.sin(x*.11+Math.sin(y*.023)*2.8)*10+Math.sin(x*.72+Math.sin(y*.037))*2.6,pore=((x*13+y*31+x*y)%19-9)*.3;
-    data.set([213+grain+pore,180+grain*.86+pore,132+grain*.7+pore,255],(y*size+x)*4);
-  }return pixels(data,size,size,true,'interior-natural-wood');
+    data.set([base[0]+grain+pore,base[1]+grain*.86+pore,base[2]+grain*.7+pore,255],(y*size+x)*4);
+  }return pixels(data,size,size,true,name);
 }
 /** RoundedBox UVs are metres: horizontal, periodic detail at one tile per metre.
  * Grain density is a rendering estimate; the shared wood finish stays unchanged. */
@@ -29,6 +29,11 @@ export function getInteriorMaterial(kind:string):MeshStandardMaterial{
     case 'cotton':{const generated=createWafflePixels(512);material=new MeshPhysicalMaterial({color:'#ffffff',roughness:.97,metalness:0,sheen:.6,sheenColor:'#e2d4bd',sheenRoughness:.9,map:pixels(generated.color,generated.size,generated.size,true,'interior-waffle-albedo'),bumpMap:pixels(generated.height,generated.size,generated.size,false,'interior-cotton-linear-microheight'),bumpScale:.00055});break;}
     case 'cotton-edge':material=new MeshStandardMaterial({color:'#c9b18d',roughness:1});break;
     case 'wood':material=new MeshPhysicalMaterial({color:'#ffffff',roughness:.72,clearcoat:.06,map:woodTexture()});break;
+    // Darker warm oak only for the requested paper-holder model.
+    case 'wc-paper-holder-wood':material=new MeshPhysicalMaterial({
+      color:'#ffffff',roughness:.80,clearcoat:.035,
+      map:woodTexture([187,147,105],'interior-wc-paper-holder-dark-oak'),
+    });break;
     case 'backsplash-wood':material=getInteriorMaterial('wood').clone();material.map=backsplashWoodTexture();break;
     case 'white-front':material=new MeshPhysicalMaterial({color:'#f5f4ef',roughness:.28,clearcoat:.3,clearcoatRoughness:.35});break;
     case 'carcass':material=new MeshStandardMaterial({color:'#e8e5df',roughness:.72});break;

@@ -196,10 +196,10 @@ const builtIns: PlannerBuiltIn[] = [
     confidence: "confirmed",
     notes: ["WC-Teppich exakt 77 × 46 cm mit 1-cm-Waffelrelief; um 90° gedreht, sodass die 77-cm-Seite quer vor dem Wand-WC liegt."],
   }),
-  builtIn("wc-paper-holder", "Eiche-Eisen-Ablage mit Toilettenpapierhalter · Temu", "wc", "other", "wc-paper-holder", -1.455, 4.8, 0.33, 0.15, 0.25, 90, "wc-holder-solid-oak", 0.68, {
-    source: "Nutzerfotos, Temu Art. 601100249492431 · SKU 17595354506975",
+  builtIn("wc-paper-holder", "Dunklere Massivholz-Doppelablage mit Toilettenpapierhalter · AliExpress", "wc", "other", "wc-paper-holder", -1.455, 4.8, 0.33, 0.15, 0.25, 90, "wc-holder-solid-oak", 0.68, {
+    source: "Nutzerfotos, AliExpress Art. 1005013624521211",
     confidence: "estimated",
-    notes: ["Foto-Maße: unteres Holzbrett 17 × 14 cm; Eisenhalter 15 cm; Verbindungssteg 9 cm. Oberes Holzbrett baugleich als Visualisierungsannahme.", "Bestehende rechte WC-Seitenwand, oberes Ablageniveau ca. 92 cm. 33 × 15 × 25 cm Gesamt-Bounding-Box und Montagehöhe geschätzt, vor Bestellung und Montage an Wand und WC-Abständen prüfen.", "Kein zweiter Papierhalter und keine zusätzlichen Dekoartikel aus dem Werbefoto."],
+    notes: ["Produktbild-Maße: zwei versetzte Holzablagen je 16,99 × 13,97 cm; schwarzer Papierarm 14,98 cm; senkrechter Eisensteg 9,39 cm. Dunklerer Holzton als bisher.", "Bestehende rechte WC-Seitenwand, oberes Ablageniveau ca. 92 cm. 33 × 15 × 25 cm Gesamt-Bounding-Box und Montagehöhe geschätzt, vor Bestellung und Montage an Wand und WC-Abständen prüfen.", "Kein zweiter Papierhalter und keine zusätzlichen Dekoartikel aus dem Werbefoto."],
   }),
   builtIn("living-slats", "Holzlamellen auf dunklem Träger", "wohnkueche", "other", "living-slat-wall", 4.3636, 6.5579, 1.052, 0.035, 2.54, 72.23, "slat-oak-dark", 0),
   builtIn("living-moss", "Moosfeld an Lamellenwand", "wohnkueche", "other", "living-moss-panel", 4.3208, 6.5716, 1.01, 0.055, 0.78, 72.23, "moss-green", 0.99),

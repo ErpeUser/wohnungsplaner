@@ -340,10 +340,10 @@ function BuiltInDetail({ item }: { item: PlanObjectDescriptor }) {
     return <Group listening={false}>
       <Line points={[box.minX + width * 0.02, box.minZ + depth * 0.08, box.minX + width * 0.52, box.minZ + depth * 0.08,
         box.minX + width * 0.52, box.maxZ - depth * 0.12, box.minX + width * 0.02, box.maxZ - depth * 0.12]}
-        closed fill="#dcb889" stroke="#a8784e" strokeWidth={0.016} />
+        closed fill="#bd9268" stroke="#89603e" strokeWidth={0.016} />
       <Line points={[box.minX + width * 0.48, box.minZ + depth * 0.12, box.maxX - width * 0.02, box.minZ + depth * 0.12,
         box.maxX - width * 0.02, box.maxZ - depth * 0.08, box.minX + width * 0.48, box.maxZ - depth * 0.08]}
-        closed fill="#dcb889" stroke="#a8784e" strokeWidth={0.016} />
+        closed fill="#bd9268" stroke="#89603e" strokeWidth={0.016} />
       <Line points={[box.minX + width * 0.45, box.minZ + depth * 0.5, box.maxX - width * 0.09, box.minZ + depth * 0.5]}
         stroke="#222220" strokeWidth={0.02} lineCap="round" />
       <Circle x={box.maxX - width * 0.17} y={box.minZ + depth * 0.51}
@@ -407,7 +407,7 @@ function planObjectColor(catalogId: string | undefined, kind: string) {
   if (catalogId === "living-moss-panel") return "#405539";
   if (catalogId === "bath-basin-cabinet-scout" || catalogId === "bath-washer-cabinet-scout") return "#cfc3b2";
   if (catalogId === "zimmer1-desk-mirror") return "#cbdadd";
-  if (catalogId === "wc-paper-holder") return "#d7b68b";
+  if (catalogId === "wc-paper-holder") return "#bd9268";
   if (catalogId === "wc-artisan-wallboard-80") return "#aa956f";
   if (catalogId === "wc-boxxx-wallboard-90") return "#d8c0a4";
   if (catalogId === "wc-livetastic-wallboard-90") return "#bc6f3e";

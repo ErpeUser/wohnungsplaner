@@ -194,7 +194,6 @@ test.each(panels)("$id shows fine horizontal wood at the existing metre scale th
 
 test.each([
   ["bath-towel-hooks-wood-black", 4],
-  ["wc-paper-holder", 2],
   ["hall-tejo-art-plates", 5],
   ["hall-between-door-decor", 5],
 ] as const)("%s retains its existing %i shared wooden surfaces", async (catalogId, count) => {
@@ -212,6 +211,29 @@ test.each([
       expect(material.map).toBe(sharedMap);
       expect(pixelHash(dataTexture(material))).toBe(SHARED_WOOD_HASH);
     });
+  } finally { await model.dispose(); }
+});
+
+test("WC holder renders two darker staggered shelves without recolouring shared wood", async () => {
+  const item = source.builtIns.find((candidate) => candidate.catalogId === "wc-paper-holder")!;
+  expect(item).toBeDefined();
+  expect(hasRefinedInteriorModel(item)).toBe(true);
+  const model = await renderObjects([item]);
+  const darkWood = getInteriorMaterial("wc-paper-holder-wood");
+  const darkTexture = dataTexture(darkWood);
+  try {
+    const shelves: Mesh[] = [];
+    model.scene.traverse((object) => {
+      if (object instanceof Mesh && object.material === darkWood) shelves.push(object);
+    });
+    expect(shelves).toHaveLength(2);
+    expect(shelves.map((object) => Number(object.position.x.toFixed(3))).sort((a,b)=>a-b)).toEqual([-.075,.075]);
+    expect(shelves.map((object) => Number(object.position.y.toFixed(3))).sort((a,b)=>a-b)).toEqual([-.058,.058]);
+    expect(pixelMetrics(darkTexture).mean[0]).toBeLessThan(pixelMetrics(dataTexture(shared)).mean[0]-15);
+    expect(pixelHash(darkTexture)).not.toBe(SHARED_WOOD_HASH);
+    expect(darkWood.map).not.toBe(sharedMap);
+    expect(getInteriorMaterial("wood")).toBe(shared);
+    expect(pixelHash(dataTexture(shared))).toBe(SHARED_WOOD_HASH);
   } finally { await model.dispose(); }
 });
 

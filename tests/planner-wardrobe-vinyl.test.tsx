@@ -70,18 +70,16 @@ describe("Zimmer 1 wardrobe vinyl", () => {
     assert.match(curtain.querySelector("a")?.getAttribute("href") ?? "", /goods_id=601100062257123&sku_id=17594540656721/);
   });
 
-  test("lists the supplied Temu WC oak-and-iron shelf with correct source and single price", () => {
+  test("lists the darker AliExpress double-shelf holder with the requested price and correct image", () => {
     render(<ShoppingListDrawer onClose={() => undefined} />);
-    const product = screen.getByRole("heading", { name: /Wandablage aus Naturholz und schwarzem Eisen mit Toilettenpapierhalter/ }).closest("article");
+    const product = screen.getByRole("heading", { name: /Dunklere Holz-Doppelablage mit schwarzem Toilettenpapierhalter/ }).closest("article");
     assert.ok(product);
-    assert.match(product.textContent ?? "", /17 × 14 cm/);
-    assert.match(product.textContent ?? "", /15-cm-Papierhalter/);
-    assert.match(product.textContent ?? "", /9-cm-Verbindungssteg/);
-    assert.match(product.textContent ?? "", /9,75\s*€/);
-    assert.match(product.textContent ?? "", /SKU 17595354506975/);
-    assert.match(product.querySelector("img")?.getAttribute("src") ?? "", /temu-wc-paper-holder-601100249492431\.svg$/);
-    assert.match(product.querySelector("a")?.getAttribute("href") ?? "", /goods_id=601100249492431&sku_id=17595354506975/);
-    assert.match(product.querySelector("a")?.getAttribute("href") ?? "", /0aac879c-84e0-4e9a-9220-87e2e075ce21\.jpg/);
+    assert.match(product.textContent ?? "", /16,99 × 13,97 cm/);
+    assert.match(product.textContent ?? "", /14,98 cm/);
+    assert.match(product.textContent ?? "", /9,39 cm/);
+    assert.match(product.textContent ?? "", /12,21\s*€/);
+    assert.match(product.querySelector("img")?.getAttribute("src") ?? "", /aliexpress-wc-paper-holder-1005013624521211\.svg$/);
+    assert.equal(product.querySelector("a")?.getAttribute("href"), "https://de.aliexpress.com/item/1005013624521211.html");
   });
 
 });

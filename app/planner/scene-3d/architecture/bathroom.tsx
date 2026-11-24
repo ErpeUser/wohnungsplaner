@@ -365,9 +365,8 @@ export function BathShowerSet({ item }: { item: SceneObject<PlannerBuiltIn> }) {
 
 export function WcPaperHolder({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   const [width, height, depth] = item.size;
-  // User photo: two offset solid-wood ledges (photo annotates the lower one
-  // as 17 × 14 cm), an approximately 15-cm horizontal iron roll arm and a
-  // 9-cm vertical connector. Overall envelope / mounting remain estimates.
+  // User AliExpress reference: two darker wooden ledges (16.99 × 13.97 cm),
+  // a 14.98-cm arm and a 9.39-cm iron brace. Mounting is still estimated.
   const wood = getPlannerMaterial("wc-holder-solid-oak");
   const woodEdge = getPlannerMaterial("wc-holder-oak-edge");
   const iron = getPlannerMaterial("wc-holder-black-iron");
@@ -381,9 +380,9 @@ export function WcPaperHolder({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   const topY = height / 2 - 0.023;
   const bottomY = -height / 2 + 0.023;
   const bracketX = 0;
-  const frontZ = depth / 2 - 0.009;
+  const frontZ = Math.min(ledgeDepth / 2 - 0.012, depth / 2 - 0.009);
   return (
-    <group name="temu-wc-oak-iron-paper-shelf">
+    <group name="aliexpress-dark-oak-iron-paper-shelf">
       {[{ x: topX, y: topY }, { x: bottomX, y: bottomY }].map(({ x, y }, index) => (
         <group key={`wood-ledge-${index}`} position={[x, y, 0]}>
           <RoundedBox args={[ledgeWidth, ledgeThickness, ledgeDepth]} radius={0.006} smoothness={4} castShadow receiveShadow>
@@ -402,7 +401,7 @@ export function WcPaperHolder({ item }: { item: SceneObject<PlannerBuiltIn> }) {
         </group>
       ))}
       {/* Continuous bracket between the two offset wooden shelves. */}
-      <RoundedBox args={[0.022, height * 0.75, 0.024]} radius={0.004} smoothness={3}
+      <RoundedBox args={[0.022, 0.0939, 0.024]} radius={0.004} smoothness={3}
         position={[bracketX, 0, frontZ - 0.025]} castShadow>
         <primitive object={iron} attach="material" />
       </RoundedBox>
@@ -432,12 +431,12 @@ export function WcPaperHolder({ item }: { item: SceneObject<PlannerBuiltIn> }) {
           </mesh>
         </group>
       ))}
-      <mesh position={[0.078, -0.085, frontZ + 0.046]} scale={[0.086, 0.118, 0.002]} geometry={SHARED_BOX} castShadow>
+      <mesh position={[0.078, -0.050, frontZ + 0.046]} scale={[0.086, 0.040, 0.002]} geometry={SHARED_BOX} castShadow>
         <primitive object={paper} attach="material" />
       </mesh>
       {/* Wall mounting tabs under the shelves. */}
       {[topY - 0.035, bottomY + 0.032].map((y, index) => (
-        <mesh key={`wall-mount-${index}`} position={[bracketX, y, -depth / 2 + 0.005]}
+        <mesh key={`wall-mount-${index}`} position={[bracketX, y, -ledgeDepth / 2 - 0.004]}
           scale={[0.038, 0.038, 0.008]} geometry={SHARED_BOX} castShadow>
           <primitive object={iron} attach="material" />
         </mesh>

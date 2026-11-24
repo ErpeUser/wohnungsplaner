@@ -214,11 +214,11 @@ export function loadWcWallboardProductTexture(materialId: string) {
 
 export function loadWcShelfOakTexture(edge: boolean) {
   return createProductDataTexture(`generated:wc-shelf-oak-${edge ? "edge" : "face"}`, 256, (x, y) => {
-    // Directional honey-oak grain, narrow pores and warm latewood lines.
+    // The new reference has warmer, slightly darker wood with fine latewood grain.
     const wave = Math.sin(x * 0.09 + Math.sin(y * 0.17) * 2.1) * 8;
     const knots = Math.sin(x * 0.023 + y * 0.068) * 4.8;
     const pores = ((x * 41 + y * 17 + x * y) % 23 - 11) * 0.45;
-    const base = edge ? [180, 127, 77] : [224, 186, 139];
+    const base = edge ? [147, 102, 67] : [190, 151, 107];
     return [base[0] + wave + knots + pores, base[1] + wave * 0.84 + knots + pores, base[2] + wave * 0.68 + knots + pores];
   });
 }

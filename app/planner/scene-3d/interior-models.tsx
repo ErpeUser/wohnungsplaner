@@ -51,16 +51,36 @@ function OakHooks({item}:{item:Item}){
   </group>)}</group>;
 }
 function WoodPaperHolder(){
-  const tail=useMemo(()=>{const g=new BufferGeometry(),positions:number[]=[],uv:number[]=[],indices:number[]=[];for(let j=0;j<=16;j++)for(let i=0;i<2;i++){const t=j/16;positions.push(.078+(i-.5)*.102,.018-t*.13,.055+Math.sin(t*Math.PI)*.008);uv.push(i,1-t);}for(let j=0;j<16;j++){const a=j*2;indices.push(a,a+2,a+1,a+1,a+2,a+3);}g.setAttribute('position',new Float32BufferAttribute(positions,3));g.setAttribute('uv',new Float32BufferAttribute(uv,2));g.setIndex(indices);g.computeVertexNormals();return g;},[]);
+  // The supplied AliExpress reference shows two staggered 16.99 x 13.97 cm
+  // shelves, a 14.98 cm arm and a 9.39 cm matte-black connecting bracket.
+  // Whole-object depth, envelope and mounting height are still estimates.
+  const tail=useMemo(()=>{const g=new BufferGeometry(),positions:number[]=[],uv:number[]=[],indices:number[]=[];
+    for(let j=0;j<=16;j++)for(let i=0;i<2;i++){const t=j/16;positions.push(.078+(i-.5)*.102,-.019-t*.048,.055+Math.sin(t*Math.PI)*.006);uv.push(i,1-t);}
+    for(let j=0;j<16;j++){const a=j*2;indices.push(a,a+2,a+1,a+1,a+2,a+3);}
+    g.setAttribute('position',new Float32BufferAttribute(positions,3));g.setAttribute('uv',new Float32BufferAttribute(uv,2));g.setIndex(indices);g.computeVertexNormals();return g;},[]);
   useEffect(()=>()=>tail.dispose(),[tail]);
-  return <group name="oak-iron-photo-paper-holder">
-    <Block size={[.17,.02,.14]} position={[.075,.085,0]} finish="wood" radius={.004}/><Block size={[.17,.02,.14]} position={[-.075,-.025,0]} finish="wood" radius={.004}/>
-    <Block size={[.018,.09,.018]} position={[.005,.03,-.005]} finish="black-iron"/><Block size={[.15,.012,.012]} position={[.081,.024,.008]} finish="black-iron"/><Block size={[.007,.023,.009]} position={[.153,.033,.008]} finish="black-iron"/>
-    <mesh position={[.078,.024,.008]} rotation={[0,0,Math.PI/2]} castShadow receiveShadow><cylinderGeometry args={[.049,.049,.105,40,1,true]}/><primitive object={material('paper')} attach="material"/></mesh>
-    <mesh position={[.078,.024,.008]} rotation={[0,0,Math.PI/2]}><cylinderGeometry args={[.016,.016,.106,24,1,true]}/><primitive object={material('core')} attach="material"/></mesh>
-    {[-1,1].map(side=><mesh key={side} position={[.078+side*.0525,.024,.008]} rotation={[0,side*Math.PI/2,0]} castShadow><ringGeometry args={[.016,.049,40]}/><primitive object={material('paper')} attach="material"/></mesh>)}
+  return <group name="aliexpress-dark-oak-two-tier-paper-holder">
+    {/* The two rounded shelves remain within the 15-cm planned height. */}
+    <Block size={[.1699,.021,.1397]} position={[.075,.058,0]} finish="wc-paper-holder-wood" radius={.004}/>
+    <Block size={[.1699,.021,.1397]} position={[-.075,-.058,0]} finish="wc-paper-holder-wood" radius={.004}/>
+    {/* Steel support reaches the underside of the upper board. */}
+    <Block size={[.020,.0939,.022]} position={[.002,-.001,-.017]} finish="black-iron" radius={.003}/>
+    <Block size={[.1498,.011,.012]} position={[.078,-.006,.008]} finish="black-iron" radius={.003}/>
+    <Block size={[.008,.022,.011]} position={[.151,-.002,.008]} finish="black-iron" radius={.002}/>
+    {/* The white paper roll hangs below the shelf without cutting through it. */}
+    <mesh position={[.078,-.006,.008]} rotation={[0,0,Math.PI/2]} castShadow receiveShadow>
+      <cylinderGeometry args={[.049,.049,.105,40,1,true]}/>
+      <primitive object={material('paper')} attach="material"/>
+    </mesh>
+    <mesh position={[.078,-.006,.008]} rotation={[0,0,Math.PI/2]}>
+      <cylinderGeometry args={[.016,.016,.106,24,1,true]}/>
+      <primitive object={material('core')} attach="material"/>
+    </mesh>
+    {[-1,1].map(side=><mesh key={side} position={[.078+side*.0525,-.006,.008]} rotation={[0,side*Math.PI/2,0]} castShadow>
+      <ringGeometry args={[.016,.049,40]}/><primitive object={material('paper')} attach="material"/>
+    </mesh>)}
     <mesh geometry={tail} material={material('paper')} castShadow receiveShadow dispose={null}/>
-    {[.054,-.005].map(y=><Block key={y} position={[0,y,-.068]} size={[.03,.027,.007]} finish="black-iron"/>)}
+    {[.041,-.040].map(y=><Block key={y} position={[0,y,-.068]} size={[.03,.027,.007]} finish="black-iron"/>)}
   </group>;
 }
 function FramedPrint({width,height,kind='arches'}:{width:number;height:number;kind?:'pampas'|'arches'}){

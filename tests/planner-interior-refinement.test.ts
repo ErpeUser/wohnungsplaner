@@ -13,8 +13,15 @@ test('bath runner moves toward the basin, keeping the supplied 122 x 61 x 1 cm',
 test('WC mat extends from the toilet rather than across the room',()=>{
   const item=get('builtin-wc-mat');assert.equal(item.rotation,90);assert.deepEqual(item.position,{x:-1.87,z:5.15});assert.equal(item.size.width,.77);assert.equal(item.size.depth,.46);
 });
-test('paper holder is on the opposite WC wall and faces inward',()=>{
-  const item=get('builtin-wc-paper-holder');assert.equal(item.position.x,-2.285);assert.equal(item.rotation,270);
+test('paper holder remains on opposite WC wall but uses the darker two-ledge AliExpress source',()=>{
+  const item=get('builtin-wc-paper-holder');
+  assert.deepEqual(item.position,{x:-2.285,z:4.88});
+  assert.equal(item.elevation,.68);
+  assert.equal(item.rotation,270);
+  assert.equal(item.catalogId,'wc-paper-holder');
+  assert.match(item.metadata?.source??'',/1005013624521211/);
+  assert.match(item.label,/Dunklere Massivholz-Doppelablage/);
+  assert.ok(item.metadata?.notes?.some(note=>/16,99 × 13,97 cm.*14,98 cm.*9,39 cm/.test(note)));
 });
 test('four hooks form a horizontal row with 20-cm centres',()=>{
   assert.deepEqual(hookCenters(.72).map(x=>Number(x.toFixed(3))),[-.3,-.1,.1,.3]);

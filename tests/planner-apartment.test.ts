@@ -228,7 +228,7 @@ test("places four individual oak and black hooks in a 2-by-2 group on the existi
   assert.ok(hooks.metadata?.notes?.some((note) => /Vier einzelne.*2×2/.test(note)));
 });
 
-test("places the original Temu oak-and-iron shelf on the WC side wall with photo dimensions", () => {
+test("places the user-selected AliExpress darker oak-and-iron shelves without moving the WC fixture", () => {
   const holders = DEFAULT_APARTMENT_DOCUMENT.builtIns.filter((item) => item.catalogId === "wc-paper-holder");
   assert.equal(holders.length, 1, "exactly one WC paper holder, no duplicate furniture");
   const holder = holders[0];
@@ -241,8 +241,8 @@ test("places the original Temu oak-and-iron shelf on the WC side wall with photo
   assert.equal(holder.materialVariants?.main, "wc-holder-solid-oak");
   assert.equal(holder.collision, "decorative");
   assert.equal(holder.metadata?.confidence, "estimated", "overall dimensions are not documented on the photo");
-  assert.match(holder.metadata?.source ?? "", /601100249492431.*17595354506975/);
-  assert.ok(holder.metadata?.notes?.some((note) => /17 × 14 cm.*15 cm.*9 cm/.test(note)));
+  assert.match(holder.metadata?.source ?? "", /1005013624521211/);
+  assert.ok(holder.metadata?.notes?.some((note) => /16,99 × 13,97 cm.*14,98 cm.*9,39 cm/.test(note)));
   assert.ok(DEFAULT_APARTMENT_DOCUMENT.builtIns.some((item) => item.catalogId === "wc-mat"), "existing WC rug must remain");
   assert.ok(DEFAULT_APARTMENT_DOCUMENT.builtIns.some((item) => item.catalogId === "sanitary-wall-wc"), "existing WC must remain");
 });
