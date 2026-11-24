@@ -108,15 +108,16 @@ test("stored former wardrobe size upgrades without moving a user-positioned ward
   const legacy = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
   const old = legacy.placements.find((p) => p.id === "zimmer1-wardrobe")!;
   old.size = { width: 2.25, depth: 0.62, height: 2.2 };
-  old.position = { x: 1.31, z: 2.86 };
-  old.rotation = 172;
+  // 2 cm away from the original back-wall position, still inside the room.
+  old.position = { x: 1.19, z: 2.94 };
+  old.rotation = 180;
   const decor = legacy.builtIns.find((p) => p.id === "builtin-z1-wardrobe-top-decor")!;
   decor.elevation = 2.2;
   const changed = upgradeZimmer1WardrobeToFly(legacy);
   const current = changed.placements.find((p) => p.id === old.id)!;
   expect(current.size).toEqual({ width: 2.25, depth: 0.58, height: 2.1 });
-  expect(current.position).toEqual({ x: 1.31, z: 2.86 });
-  expect(current.rotation).toBe(172);
+  expect(current.position).toEqual({ x: 1.19, z: 2.94 });
+  expect(current.rotation).toBe(180);
   expect(changed.builtIns.find((p) => p.id === decor.id)?.elevation).toBe(2.1);
   expect(changed.placements.find((p) => p.id === "zimmer1-chair")).toEqual(legacy.placements.find((p) => p.id === "zimmer1-chair"));
   expect(upgradeZimmer1WardrobeToFly(changed)).toBe(changed);
@@ -128,7 +129,7 @@ test("stored former wardrobe size upgrades without moving a user-positioned ward
     removeItem: (key: string) => { backing.delete(key); },
   };
   const loaded = createLocalStoragePlannerRepository(storage).load().document;
-  expect(loaded.placements.find((p) => p.id === old.id)?.position).toEqual({ x: 1.31, z: 2.86 });
+  expect(loaded.placements.find((p) => p.id === old.id)?.position).toEqual({ x: 1.19, z: 2.94 });
   expect(loaded.placements.find((p) => p.id === old.id)?.size.depth).toBe(0.58);
   const alternative = structuredClone(legacy);
   alternative.placements.find((p) => p.id === old.id)!.catalogId = "wardrobe-200";

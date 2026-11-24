@@ -2444,3 +2444,23 @@
 @media (prefers-reduced-motion: reduce) {
   .planner-wallboard-choice__select { scroll-behavior: auto; }
 }
+
+
+/* Merchant-photo calibrated WC swatches: Artisan is muted, BOXXX is pale
+   laminate, and Livetastic has reddish acacia grain with a natural bevel. */
+.planner-wallboard-choice[data-option="simple-80"] .planner-wallboard-choice__sample-board {
+  background: repeating-linear-gradient(96deg, #a99773 0 3px, #b3a07d 5px 8px, #8e7d5d 12px 13px, #aa956f 17px 23px);
+}
+.planner-wallboard-choice[data-option="boxxx-90"] .planner-wallboard-choice__sample-board {
+  background: repeating-linear-gradient(96deg, #dcc8af 0 5px, #e5d3bd 7px 11px, #c3a98b 14px 15px, #d8c0a4 18px 25px);
+}
+.planner-wallboard-choice[data-option="livetastic-90"] .planner-wallboard-choice__sample-board {
+  border-radius: 1px;
+  clip-path: polygon(0 0, 100% 0, 100% 68%, 96% 87%, 72% 91%, 46% 82%, 23% 94%, 4% 87%, 0 73%);
+  background: repeating-linear-gradient(96deg, #d2915e 0 4px, #a96035 8px 10px, #bf7543 14px 20px, #985531 22px 24px, #d2915e 27px 32px);
+  box-shadow: 0 4px 0 #834827, 0 7px 9px rgba(48, 37, 26, 0.22);
+}
+.planner-wallboard-choice[data-option="livetastic-90"] .planner-wallboard-choice__sample-board::after {
+  opacity: .35;
+  background: repeating-radial-gradient(ellipse at 58% 24%, transparent 0 6px, #7a3b20 7px 8px, transparent 9px 15px);
+}

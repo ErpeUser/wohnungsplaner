@@ -175,6 +175,43 @@ export function loadProductGrainTexture(materialId: string, base: [number, numbe
 
 
 
+
+/** Product-specific procedural veneer and acacia grain reconstructed from the
+ * exact Möbelix Simple / XXXLutz BOXXX / XXXLutz Livetastic product photos.
+ * Keeps supplier imagery out of public assets. Uses distinct face, long-edge
+ * and cross-grain colours, never a shared generic oak tone.
+ */
+export function loadWcWallboardProductTexture(materialId: string) {
+  const palettes: Record<string, [number, number, number]> = {
+    "wc-board-simple-face": [170, 149, 111],
+    "wc-board-simple-edge": [187, 160, 121],
+    "wc-board-boxxx-face": [216, 192, 164],
+    "wc-board-boxxx-edge": [203, 178, 148],
+    "wc-board-livetastic-face": [204, 133, 78],
+    "wc-board-livetastic-edge": [172, 90, 50],
+    "wc-board-livetastic-end": [146, 85, 53],
+  };
+  const base = palettes[materialId];
+  if (!base) throw new Error("Unknown WC board finish: " + materialId);
+  const acacia = materialId.includes("livetastic");
+  const crossGrain = materialId.endsWith("-end");
+  return createProductDataTexture("generated:wc-wallboard-product:" + materialId, 256, (x, y) => {
+    // The wood fibres run along the long side. Organic acacia waves and dark
+    // heartwood patches are stronger than the fine, repeatable MDF prints.
+    const wave = Math.sin(y * (acacia ? 0.089 : 0.124) + Math.sin(x * 0.025) * (acacia ? 2.6 : 1.3));
+    const micro = Math.sin(y * (acacia ? 0.51 : 0.38) + Math.sin(x * 0.12) * 1.4);
+    const knotDistance = Math.hypot(x - 155, (y - 92) * 0.92);
+    const knot = Math.sin(knotDistance * (acacia ? 0.135 : 0.105) + y * 0.022)
+      * Math.exp(-knotDistance / 63);
+    const fine = Math.sin(y * 0.87 + x * 0.032);
+    const grain = wave * (acacia ? 15 : 6.3) + micro * (acacia ? 5 : 2.3)
+      + knot * (acacia ? 13 : 5) + fine * (acacia ? 1.2 : 1.7);
+    const endRings = crossGrain ? Math.sin(Math.hypot((x - 127) * 0.85, y - 125) * 0.14) * 10 : 0;
+    return [base[0] + grain + endRings, base[1] + grain * 0.78 + endRings * 0.82,
+      base[2] + grain * 0.54 + endRings * 0.7];
+  });
+}
+
 export function loadWcShelfOakTexture(edge: boolean) {
   return createProductDataTexture(`generated:wc-shelf-oak-${edge ? "edge" : "face"}`, 256, (x, y) => {
     // Directional honey-oak grain, narrow pores and warm latewood lines.

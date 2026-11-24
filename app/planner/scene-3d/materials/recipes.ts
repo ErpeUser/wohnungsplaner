@@ -65,6 +65,16 @@ export const RECIPES: Record<string, MaterialRecipe> = {
   "cabinet-black": { color: "#171919", roughness: 0.3, clearcoat: 0.35, clearcoatRoughness: 0.28 },
   "door-oak": { color: "#a66f43", roughness: 0.58, clearcoat: 0.08, clearcoatRoughness: 0.75 },
   "oak-natural": { color: "#b98a5e", roughness: 0.64 },
+  // WC-specific wood finishes; independent from generic oak and from the
+  // unrelated WC toilet-roll holder. Each has matching top and edge colours.
+  "wc-board-simple-face": { color: "#aa956f", roughness: 0.75 },
+  "wc-board-simple-edge": { color: "#bba17b", roughness: 0.77 },
+  "wc-board-boxxx-face": { color: "#d8c0a4", roughness: 0.73 },
+  "wc-board-boxxx-edge": { color: "#cbb294", roughness: 0.76 },
+  "wc-board-livetastic-face": { color: "#cb8652", roughness: 0.79 },
+  "wc-board-livetastic-edge": { color: "#a96035", roughness: 0.84 },
+  "wc-board-livetastic-end": { color: "#8b5438", roughness: 0.89 },
+
   "wc-holder-solid-oak": { color: "#e6c497", roughness: 0.72 },
   "wc-holder-oak-edge": { color: "#bb8857", roughness: 0.8 },
   "wc-holder-black-iron": { color: "#20211f", roughness: 0.46, metalness: 0.78 },

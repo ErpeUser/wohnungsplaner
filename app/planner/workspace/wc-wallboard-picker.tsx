@@ -32,7 +32,7 @@ export function WcWallboardPicker({ document, dispatch, compact = false }: {
         {WC_WALLBOARD_OPTIONS.map((option) => {
           const active = selected.id === option.id;
           return (
-            <article className="planner-wallboard-choice" data-selected={active} key={option.id}>
+            <article className="planner-wallboard-choice" data-selected={active} data-option={option.id} key={option.id}>
               <button
                 type="button"
                 className="planner-wallboard-choice__select"

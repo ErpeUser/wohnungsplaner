@@ -16,6 +16,8 @@ describe("WC wallboard selector", () => {
     const options = within(group).getAllByRole("button");
     expect(options).toHaveLength(3);
     expect(options[0].getAttribute("aria-pressed")).toBe("true");
+    expect(options.map((button) => button.closest("article")?.getAttribute("data-option")))
+      .toEqual(["simple-80", "boxxx-90", "livetastic-90"]);
     fireEvent.click(options[2]);
     expect(dispatch).toHaveBeenCalledWith({ type: "setWcWallboard", optionId: "livetastic-90" });
     expect(within(group).getByRole("button", { name: /BOXXX/ })).toBeTruthy();

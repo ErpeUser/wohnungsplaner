@@ -1,37 +1,129 @@
 import { RoundedBox } from "@react-three/drei";
-import { useMemo } from "react";
-import { CatmullRomCurve3, TubeGeometry, Vector3 } from "three";
+import { useEffect, useMemo } from "react";
+import { BufferGeometry, CatmullRomCurve3, Float32BufferAttribute, TubeGeometry, Vector3 } from "three";
 import type { PlannerBuiltIn } from "../../domain/types.ts";
+import { WC_WALLBOARD_OPTIONS } from "../../domain/wc-wallboards.ts";
 import { getPlannerMaterial } from "../materials.ts";
 import type { SceneObject } from "../scene-model.ts";
 import { SHARED_BOX, SHARED_CYLINDER, SHARED_PLANE, SHARED_SPHERE, SHARED_TORUS } from "../shared/architecture-primitives.ts";
 
-/** Furniture dimensions are sourced from Möbelix item 007326000408.
- * Width 80 cm, height 3.8 cm, depth 23.5 cm; photographed finish is
- * artisan-oak foil on MDF, not solid oak. All geometry stays in that envelope.
+/**
+ * Source-based WC shelves:
+ * Simple (Artisan oak MDF, 80 × 3.8 × 23.5 cm) and BOXXX (pale oak MDF,
+ * 90 × 3.8 × 23.5 cm) have straight, laminated faces.
+ * Livetastic is solid, reddish natural acacia (90 × 3.5 × 20 cm) with a
+ * chamfered and uneven front edge, visible end grain and a dark wall lip.
  */
 export function WcArtisanWallboard({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   const [width, height, depth] = item.size;
-  const edge = getPlannerMaterial(item.catalogId === "wc-livetastic-wallboard-90"
-    ? "wc-holder-oak-edge"
-    : item.catalogId === "wc-boxxx-wallboard-90" ? "oak-bozan-edge" : "oak-artisan-edge");
-  const veneer = getPlannerMaterial(item.materialId || "oak-artisan");
+  const option = WC_WALLBOARD_OPTIONS.find((candidate) => candidate.catalogId === item.catalogId) ?? WC_WALLBOARD_OPTIONS[0];
+  const front = getPlannerMaterial(option.edgeMaterialId);
+  const face = getPlannerMaterial(option.materialId);
+  const isAcacia = option.id === "livetastic-90";
+
+  if (isAcacia) return <WcLivetasticAcaciaWallboard width={width} height={height} depth={depth}
+    faceMaterialId={option.materialId} edgeMaterialId={option.edgeMaterialId} />;
+
   return (
-    <group name="wc-artisan-simple-wallboard">
-      <RoundedBox args={[width, height, depth]} radius={0.004} smoothness={4} castShadow receiveShadow>
-        <primitive object={edge} attach="material" />
+    <group name={"wc-wallboard-" + option.id}>
+      <RoundedBox name="wc-wallboard-mdf-core" args={[width, height, depth]}
+        radius={0.002} smoothness={4} castShadow receiveShadow>
+        <primitive object={front} attach="material" />
       </RoundedBox>
-      {/* Actual veneer plane preserves directionality and a fine PBR wood grain. */}
-      <mesh name="wc-artisan-top-veneer" position={[0, height / 2 + 0.0006, 0]} rotation={[-Math.PI / 2, 0, 0]}
-        scale={[width - 0.004, depth - 0.003, 1]} geometry={SHARED_PLANE} receiveShadow>
-        <primitive object={veneer} attach="material" />
+      <mesh name="wc-wallboard-mdf-top" position={[0, height / 2 + 0.00035, 0]}
+        rotation={[-Math.PI / 2, 0, 0]} scale={[width - 0.003, depth - 0.002, 1]}
+        geometry={SHARED_PLANE} receiveShadow>
+        <primitive object={face} attach="material" />
       </mesh>
-      <mesh name="wc-artisan-front-banding" position={[0, 0, depth / 2 + 0.0006]}
-        scale={[width - 0.006, height - 0.003, 0.0008]} geometry={SHARED_BOX} castShadow>
-        <primitive object={veneer} attach="material" />
+      <mesh name="wc-wallboard-mdf-front" position={[0, 0, depth / 2 + 0.0003]}
+        scale={[width - 0.003, height - 0.003, 0.0005]} geometry={SHARED_BOX} castShadow>
+        <primitive object={front} attach="material" />
       </mesh>
+      {/* No irregular bark/chamfer geometry on the MDF versions. */}
     </group>
   );
+}
+
+/** Separate mesh faces let the natural chamfer show under real lighting instead
+ * of being erased by a flat veneer plane. Irregularities are a *visual*
+ * approximation: everything stays within the source 90 × 3.5 × 20 cm box. */
+export function createWcAcaciaBoardGeometry(width: number, height: number, depth: number) {
+  const halfW = width / 2, halfH = height / 2, halfD = depth / 2;
+  const xs = [-halfW, -halfW * 0.55, 0, halfW * 0.51, halfW];
+  const bevelInset = [0.018, 0.014, 0.020, 0.013, 0.017];
+  const bevelDrop = [0.010, 0.007, 0.012, 0.009, 0.010];
+  const topFront = xs.map((x, i) => [x, halfH, halfD - bevelInset[i]] as const);
+  const slopeFront = xs.map((x, i) => [x, halfH - bevelDrop[i], halfD] as const);
+  const lowerFront = xs.map((x) => [x, -halfH, halfD] as const);
+  const backTop = xs.map((x) => [x, halfH, -halfD] as const);
+  const backBottom = xs.map((x) => [x, -halfH, -halfD] as const);
+
+  const make = (quads: readonly (readonly (readonly number[])[])[]) => {
+    const positions: number[] = [], uvs: number[] = [], indices: number[] = [];
+    for (const quad of quads) {
+      const offset = positions.length / 3;
+      quad.forEach((p) => { positions.push(p[0], p[1], p[2]); uvs.push(p[0] / width + 0.5, p[2] / depth + 0.5); });
+      indices.push(offset, offset + 1, offset + 2, offset, offset + 2, offset + 3);
+    }
+    const geometry = new BufferGeometry();
+    geometry.setAttribute("position", new Float32BufferAttribute(positions, 3));
+    geometry.setAttribute("uv", new Float32BufferAttribute(uvs, 2));
+    geometry.setIndex(indices);
+    geometry.computeVertexNormals();
+    return geometry;
+  };
+  const faces: (readonly (readonly number[])[])[] = [];
+  const slopes: (readonly (readonly number[])[])[] = [];
+  const edges: (readonly (readonly number[])[])[] = [];
+  for (let i = 0; i < xs.length - 1; i++) {
+    // Triangle winding faces the visible outside of the board.
+    faces.push([backTop[i], topFront[i], topFront[i + 1], backTop[i + 1]]);
+    slopes.push([topFront[i], slopeFront[i], slopeFront[i + 1], topFront[i + 1]]);
+    edges.push([slopeFront[i], lowerFront[i], lowerFront[i + 1], slopeFront[i + 1]]);
+    faces.push([backBottom[i + 1], lowerFront[i + 1], lowerFront[i], backBottom[i]]);
+    edges.push([backTop[i + 1], backBottom[i + 1], backBottom[i], backTop[i]]);
+  }
+  const ends: (readonly (readonly number[])[])[] = [
+    [backTop[0], backBottom[0], lowerFront[0], topFront[0]],
+    [topFront[0], lowerFront[0], slopeFront[0], topFront[0]],
+    [backTop[4], topFront[4], lowerFront[4], backBottom[4]],
+    [topFront[4], slopeFront[4], lowerFront[4], topFront[4]],
+  ];
+  return {
+    top: make(faces),
+    bevel: make(slopes),
+    front: make(edges),
+    ends: make(ends),
+    topFront,
+    slopeFront,
+  };
+}
+
+function WcLivetasticAcaciaWallboard({ width, height, depth, faceMaterialId, edgeMaterialId }: {
+  width: number; height: number; depth: number; faceMaterialId: string; edgeMaterialId: string;
+}) {
+  const geometry = useMemo(() => createWcAcaciaBoardGeometry(width, height, depth), [width, height, depth]);
+  useEffect(() => () => {
+    geometry.top.dispose(); geometry.bevel.dispose(); geometry.front.dispose(); geometry.ends.dispose();
+  }, [geometry]);
+  return <group name="wc-wallboard-livetastic-natural-acacia">
+    <mesh name="wc-acacia-top-natural-grain" geometry={geometry.top} castShadow receiveShadow>
+      <primitive object={getPlannerMaterial(faceMaterialId)} attach="material" />
+    </mesh>
+    <mesh name="wc-acacia-sloped-live-edge" geometry={geometry.bevel} castShadow receiveShadow>
+      <primitive object={getPlannerMaterial(edgeMaterialId)} attach="material" />
+    </mesh>
+    <mesh name="wc-acacia-front-woodgrain" geometry={geometry.front} castShadow receiveShadow>
+      <primitive object={getPlannerMaterial(edgeMaterialId)} attach="material" />
+    </mesh>
+    <mesh name="wc-acacia-exposed-endgrain" geometry={geometry.ends} castShadow receiveShadow>
+      <primitive object={getPlannerMaterial("wc-board-livetastic-end")} attach="material" />
+    </mesh>
+    <mesh name="wc-acacia-wall-bracket-lip" position={[0, height / 2 - 0.002, -depth / 2 + 0.002]}
+      scale={[width - 0.006, 0.002, 0.002]} geometry={SHARED_BOX} castShadow>
+      <primitive object={getPlannerMaterial("metal-black")} attach="material" />
+    </mesh>
+  </group>;
 }
 
 /** The ventilation cover is flush against the WC's tiled rear wall.

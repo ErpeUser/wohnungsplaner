@@ -311,16 +311,28 @@ function BuiltInDetail({ item }: { item: PlanObjectDescriptor }) {
     </Group>;
   }
   if (id === "wc-artisan-wallboard-80" || id === "wc-boxxx-wallboard-90" || id === "wc-livetastic-wallboard-90") {
-    // Source-specific plan footprint: 80 or 90 cm wide, 20 or 23.5 cm deep.
+    const acacia = id === "wc-livetastic-wallboard-90";
+    const boxxx = id === "wc-boxxx-wallboard-90";
+    // Matches the source gallery: muted Artisan oak, pale BOXXX oak veneer,
+    // or reddish acacia with a visibly bevelled, natural front edge.
+    const fill = acacia ? "#bc6f3e" : boxxx ? "#d8c0a4" : "#aa956f";
+    const grain = acacia ? "#91532f" : boxxx ? "#b99b78" : "#827055";
     return <Group listening={false}>
       <Line points={[box.minX, box.minZ, box.maxX, box.minZ, box.maxX, box.maxZ, box.minX, box.maxZ]}
-        closed fill={id === "wc-livetastic-wallboard-90" ? "#b8875d" : id === "wc-boxxx-wallboard-90" ? "#cda977" : "#c9a06f"} stroke="#98704b" strokeWidth={0.009} />
+        closed fill={fill} stroke={grain} strokeWidth={0.009} />
+      {acacia ? <Line points={[
+        box.minX, box.maxZ - 0.018,
+        box.minX + width * 0.24, box.maxZ - 0.014,
+        box.minX + width * 0.50, box.maxZ - 0.020,
+        box.minX + width * 0.76, box.maxZ - 0.013,
+        box.maxX, box.maxZ - 0.017,
+      ]} stroke="#834527" strokeWidth={0.009} opacity={0.95} /> : null}
       <Line points={[box.minX + width * 0.08, box.minZ + depth * 0.22,
         box.maxX - width * 0.08, box.minZ + depth * 0.22]}
-        stroke="#ae8155" strokeWidth={0.006} opacity={0.62} />
+        stroke={grain} strokeWidth={0.006} opacity={0.62} />
       <Line points={[box.minX + width * 0.14, box.maxZ - depth * 0.16,
-        box.maxX - width * 0.1, box.maxZ - depth * 0.16]}
-        stroke="#e1bd8d" strokeWidth={0.005} opacity={0.62} />
+        box.maxX - width * 0.10, box.maxZ - depth * 0.16]}
+        stroke={acacia ? "#dba36c" : "#e1c5a1"} strokeWidth={0.005} opacity={0.68} />
     </Group>;
   }
   if (id === "wc-paper-holder") {
@@ -396,9 +408,9 @@ function planObjectColor(catalogId: string | undefined, kind: string) {
   if (catalogId === "bath-basin-cabinet-scout" || catalogId === "bath-washer-cabinet-scout") return "#cfc3b2";
   if (catalogId === "zimmer1-desk-mirror") return "#cbdadd";
   if (catalogId === "wc-paper-holder") return "#d7b68b";
-  if (catalogId === "wc-artisan-wallboard-80") return "#c9a06f";
-  if (catalogId === "wc-boxxx-wallboard-90") return "#cda977";
-  if (catalogId === "wc-livetastic-wallboard-90") return "#b8875d";
+  if (catalogId === "wc-artisan-wallboard-80") return "#aa956f";
+  if (catalogId === "wc-boxxx-wallboard-90") return "#d8c0a4";
+  if (catalogId === "wc-livetastic-wallboard-90") return "#bc6f3e";
   if (catalogId === "wc-wall-ventilation" || catalogId === "wc-revision-panel") return "#efe5d8";
   if (catalogId === "wc-shelf-styling") return "#9fa988";
   if (catalogId === "zimmer1-wall-art-pair") return "#c99d68";

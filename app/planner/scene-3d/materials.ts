@@ -4,7 +4,7 @@ import {
     MeshStandardMaterial
 } from "three";
 import { RECIPES, TEXTURES, TILE_TEXTURES, fallbackRecipe } from "./materials/recipes.ts";
-import { asBumpMap, createBathroomWaffleTexture, createShowerCurtainTextileTexture, loadBalconyFloorTexture, loadCashmereVinylTexture, loadChairChenilleTexture, loadComparisonTabletopTexture, loadComparisonWoodTexture, loadConcreteTexture, loadEpoxyFloorTexture, loadKitchenWalnutBacksplashTexture, loadKitchenWorktopTexture, loadMacaronMilkCoffeeWallpaperTexture, loadPlannerTexture, loadPlannerTileTexture, loadProductCeramicTexture, loadProductGrainTexture, loadProductLacquerTexture, loadProductLeafTexture, loadProductPebbleTexture, loadProductPileTexture, loadProductWeaveTexture, loadProductWoodTexture, loadVintageBeigeFabricWallpaperTexture, loadVintageBrownFabricWallpaperTexture, loadWcShelfOakTexture } from "./materials/texture-factory.ts";
+import { asBumpMap, createBathroomWaffleTexture, createShowerCurtainTextileTexture, loadBalconyFloorTexture, loadCashmereVinylTexture, loadChairChenilleTexture, loadComparisonTabletopTexture, loadComparisonWoodTexture, loadConcreteTexture, loadEpoxyFloorTexture, loadKitchenWalnutBacksplashTexture, loadKitchenWorktopTexture, loadMacaronMilkCoffeeWallpaperTexture, loadPlannerTexture, loadPlannerTileTexture, loadProductCeramicTexture, loadProductGrainTexture, loadProductLacquerTexture, loadProductLeafTexture, loadProductPebbleTexture, loadProductPileTexture, loadProductWeaveTexture, loadProductWoodTexture, loadVintageBeigeFabricWallpaperTexture, loadVintageBrownFabricWallpaperTexture, loadWcShelfOakTexture, loadWcWallboardProductTexture } from "./materials/texture-factory.ts";
 export { PLANNER_TEXTURE_READY_EVENT } from "./materials/texture-factory.ts";
 
 
@@ -80,6 +80,14 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
     material.map = grain;
     material.bumpMap = asBumpMap(grain);
     material.bumpScale = 0.012;
+    material.needsUpdate = true;
+  } else if (materialId.startsWith("wc-board-")) {
+    const grain = loadWcWallboardProductTexture(materialId);
+    material.map = grain;
+    material.bumpMap = asBumpMap(grain);
+    material.bumpScale = materialId.includes("livetastic") ? 0.0045 : 0.0028;
+    // The generated map is already pigment-coloured.
+    material.color.set("#ffffff");
     material.needsUpdate = true;
   } else if (materialId === "wc-holder-solid-oak" || materialId === "wc-holder-oak-edge") {
     const oak = loadWcShelfOakTexture(materialId === "wc-holder-oak-edge");

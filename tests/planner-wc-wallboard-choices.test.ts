@@ -8,6 +8,7 @@ import {
 } from "../app/planner/domain/wc-wallboards.ts";
 import { shoppingItemsForDocument, shoppingSubtotalForDocument, shoppingSubtotal } from "../app/planner/workspace/shopping-items.ts";
 import { createSceneModel } from "../app/planner/scene-3d/scene-model.ts";
+import { RECIPES } from "../app/planner/scene-3d/materials/recipes.ts";
 
 test("WC wallboard options preserve exact measured width, height and depth", () => {
   assert.deepEqual(WC_WALLBOARD_OPTIONS.map(({ articleId, widthCm, heightCm, depthCm }) => ({
@@ -68,4 +69,28 @@ test("invalid selections do not mutate the plan", () => {
   const result = applyPlannerCommand(DEFAULT_APARTMENT_DOCUMENT, { type: "setWcWallboard", optionId: "unknown" as never });
   assert.equal(result.error?.code, "invalid");
   assert.equal(result.document, DEFAULT_APARTMENT_DOCUMENT);
+});
+
+test("each WC variant has its own source-matched finish with a distinct top and edge", () => {
+  const [simple, boxxx, acacia] = WC_WALLBOARD_OPTIONS;
+  assert.equal(simple.materialId, "wc-board-simple-face");
+  assert.equal(simple.edgeMaterialId, "wc-board-simple-edge");
+  assert.equal(boxxx.materialId, "wc-board-boxxx-face");
+  assert.equal(boxxx.edgeMaterialId, "wc-board-boxxx-edge");
+  assert.equal(acacia.materialId, "wc-board-livetastic-face");
+  assert.equal(acacia.edgeMaterialId, "wc-board-livetastic-edge");
+  for (const option of WC_WALLBOARD_OPTIONS) {
+    assert.ok(RECIPES[option.materialId], option.materialId);
+    assert.ok(RECIPES[option.edgeMaterialId], option.edgeMaterialId);
+    assert.notEqual(option.materialId, option.edgeMaterialId);
+  }
+  // BOXXX is a noticeably paler beige, acacia is a warmer red-brown.
+  const rgb = (hex: string) => [
+    Number.parseInt(hex.slice(1, 3), 16),
+    Number.parseInt(hex.slice(3, 5), 16),
+    Number.parseInt(hex.slice(5, 7), 16),
+  ];
+  const s = rgb(simple.swatch), b = rgb(boxxx.swatch), a = rgb(acacia.swatch);
+  assert.ok(b[0] > s[0] && b[1] > s[1] && b[2] > s[2]);
+  assert.ok(a[0] > a[1] * 1.35 && a[1] > a[2]);
 });

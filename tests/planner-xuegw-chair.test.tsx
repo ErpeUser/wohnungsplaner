@@ -11,7 +11,7 @@ import { Furniture3D } from "../app/planner/scene-3d/furniture.tsx";
 import { upgradeZimmer1Chair, createLocalStoragePlannerRepository, PLANNER_STORAGE_KEY } from "../app/planner/store/persistence.ts";
 import { SHOPPING_ITEMS } from "../app/planner/workspace/shopping-items.ts";
 
-extend({ Group: THREE.Group, Mesh: THREE.Mesh, ExtrudeGeometry: THREE.ExtrudeGeometry, MeshBasicMaterial: THREE.MeshBasicMaterial });
+extend({ Group: THREE.Group, Mesh: THREE.Mesh, ExtrudeGeometry: THREE.ExtrudeGeometry, TorusGeometry: THREE.TorusGeometry, MeshBasicMaterial: THREE.MeshBasicMaterial });
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 const ID = "chair-aliexpress-xuegw-1005012445521181";

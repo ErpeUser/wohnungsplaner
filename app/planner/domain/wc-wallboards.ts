@@ -1,6 +1,10 @@
 import type { PlannerDocumentV3 } from "./types.ts";
 
-/** Mutually exclusive physical products at the same WC wall position. */
+/** Mutually exclusive physical products at the same WC wall position.
+ * Product finishes are based on the retailers' own 2026 image galleries:
+ * Simple is muted Artisan oak, BOXXX very light beige oak; Livetastic is
+ * reddish acacia with an irregular bevelled front edge (not oak).
+ */
 export const WC_WALLBOARD_BUILTIN_ID = "builtin-wc-wallboard-artisan-80";
 export const WC_WALLBOARD_STYLING_ID = "builtin-wc-shelf-styling";
 export const WC_REAR_WALL_WIDTH_CM = 98;
@@ -12,7 +16,7 @@ export const WC_WALLBOARD_OPTIONS = [
     retailer: "Möbelix",
     sourceUrl: "https://www.moebelix.at/p/wandboard-simple-b-80-cm-eiche-artisan-dekor-007326000408",
     widthCm: 80, heightCm: 3.8, depthCm: 23.5,
-    finish: "Foliertes MDF · Eiche Artisan", materialId: "oak-artisan", swatch: "#c99c62",
+    finish: "Foliertes MDF · Eiche Artisan (gedecktes Eichenbraun)", materialId: "wc-board-simple-face", edgeMaterialId: "wc-board-simple-edge", swatch: "#aa956f",
     price: 14.99, loadKg: 10,
   },
   {
@@ -21,7 +25,7 @@ export const WC_WALLBOARD_OPTIONS = [
     retailer: "XXXLutz",
     sourceUrl: "https://www.xxxlutz.at/p/boxxx-wandboard-in-90-3-8-23-5-cm-eichefarben-004201012302",
     widthCm: 90, heightCm: 3.8, depthCm: 23.5,
-    finish: "MDF · Eiche-Dekor", materialId: "oak-light", swatch: "#cda977",
+    finish: "MDF · helles Eiche-Dekor", materialId: "wc-board-boxxx-face", edgeMaterialId: "wc-board-boxxx-edge", swatch: "#d8c0a4",
     price: 9.90, loadKg: 5,
   },
   {
@@ -30,7 +34,7 @@ export const WC_WALLBOARD_OPTIONS = [
     retailer: "XXXLutz",
     sourceUrl: "https://www.xxxlutz.at/p/livetastic-wandboard-in-90-3-5-20-cm-naturfarben-000377013101",
     widthCm: 90, heightCm: 3.5, depthCm: 20,
-    finish: "Massive Akazie · naturfarben", materialId: "oak-natural", swatch: "#b8875d",
+    finish: "Massive Akazie · rotbraune Naturmaserung, schräge Baumkante", materialId: "wc-board-livetastic-face", edgeMaterialId: "wc-board-livetastic-edge", swatch: "#bc6f3e",
     price: 44.91, loadKg: 5,
   },
 ] as const;
