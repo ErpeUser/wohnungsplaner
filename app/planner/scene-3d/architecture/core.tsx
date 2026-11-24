@@ -114,7 +114,8 @@ function WallSegmentMesh({ wall, segment, bathtub }: {
       />
       {bathMarble && (
         <group position={bathMarble.position} rotation={[0, Math.PI / 2, 0]}>
-          <MarbleTileSurface width={bathMarble.width} height={bathMarble.height} />
+          {/* Let the finish tuck 1 cm behind both adjoining corners so no bare wall seam peeks through. */}
+          <MarbleTileSurface width={bathMarble.width + 0.02} height={bathMarble.height} />
         </group>
       )}
       {wcMarble && (
