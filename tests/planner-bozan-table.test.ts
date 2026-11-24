@@ -4,6 +4,7 @@ import test from "node:test";
 import { getFurnitureCatalogItem } from "../app/planner/catalog/catalog.ts";
 import { DEFAULT_APARTMENT_DOCUMENT } from "../app/planner/domain/apartment-v3.ts";
 import { inspectPlacement } from "../app/planner/domain/collisions.ts";
+import { getChairModelForCatalogId, BOZAN_WOLTU_TUCK_DISTANCE_M, chairSeatLayout } from "../app/planner/chairs/chair-models.ts";
 
 test("balances the Bozan table between fridge and sofa while keeping the kitchen-side aisle usable", () => {
   const catalogItem = getFurnitureCatalogItem("dining-table-bozan-110");
@@ -57,28 +58,28 @@ test("places four WOLTU main dining chairs while keeping the refrigerator side c
   })), [
     {
       id: "living-kaleo-chair-east",
-      position: { x: 2.9, z: 5.7 },
+      position: { x: 2.82, z: 5.7 },
       rotation: 90,
       size: { width: 0.58, depth: 0.6, height: 0.85 },
       groupId: "living-dining-group",
     },
     {
       id: "living-kaleo-chair-north",
-      position: { x: 2.2, z: 6.4 },
+      position: { x: 2.2, z: 6.32 },
       rotation: 180,
       size: { width: 0.58, depth: 0.6, height: 0.85 },
       groupId: "living-dining-group",
     },
     {
       id: "living-kaleo-chair-south",
-      position: { x: 1.5, z: 5.7 },
+      position: { x: 1.58, z: 5.7 },
       rotation: 270,
       size: { width: 0.58, depth: 0.6, height: 0.85 },
       groupId: "living-dining-group",
     },
     {
       id: "living-kaleo-chair-west",
-      position: { x: 2.2, z: 5 },
+      position: { x: 2.2, z: 5.08 },
       rotation: 0,
       size: { width: 0.58, depth: 0.6, height: 0.85 },
       groupId: "living-dining-group",
@@ -105,3 +106,39 @@ test("places four WOLTU main dining chairs while keeping the refrigerator side c
   assert.ok(westAisle >= 0.75, "the main passage beside the sofa must stay comfortably open");
   assert.ok(eastAisle >= 0.67, "the secondary aisle at the angled wall must remain usable");
 });
+
+test("Bozan + WOLTU allow a partial under-table tuck without hiding the back or cutting into the apron", () => {
+  const table = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "living-bozan-table")!;
+  const model = getChairModelForCatalogId("chair-aliexpress-woltu-1005013095870024")!;
+  const chairs = DEFAULT_APARTMENT_DOCUMENT.placements.filter((item) => item.groupId === table.groupId && item.id !== table.id);
+  assert.equal(chairs.length, 4);
+  assert.equal(BOZAN_WOLTU_TUCK_DISTANCE_M, 0.62);
+  const tabletopUnder = table.size.height - 0.025;
+  assert.ok(model.armHeightCm !== undefined);
+  assert.ok(topUnderArmClearance(tabletopUnder, model.armHeightCm / 100) >= 0.08);
+  const tabletopRadius = table.size.width / 2;
+  // Measured 25 mm top; the under-slab frame spans 72% of the Bozan model.
+  const apronHalfWidth = table.size.width * 0.72 / 2;
+  for (const chair of chairs) {
+    const distance = Math.hypot(chair.position.x - table.position.x, chair.position.z - table.position.z);
+    assert.ok(Math.abs(distance - BOZAN_WOLTU_TUCK_DISTANCE_M) < 0.00001, chair.id);
+    const frontSeat = distance - model.sizeCm.depth / 200;
+    assert.ok(topFrontSeatInset(tabletopRadius, frontSeat) >= 0.2, chair.id);
+    // The shell arm tips end at 31% of depth from the centre; leave 3 cm
+    // to the lower apron, not an unrealistic complete chair insertion.
+    const frontArm = distance - model.sizeCm.depth / 100 * 0.31;
+    assert.ok(frontArm > apronHalfWidth + 0.03, chair.id);
+    const back = distance + model.sizeCm.depth / 100 * 0.46;
+    assert.ok(back > tabletopRadius + 0.2, "high back remains outside table: " + chair.id);
+  }
+  // Each pair's nearest rectangular corners remains at least 3 cm apart.
+  const axisGap = BOZAN_WOLTU_TUCK_DISTANCE_M - model.sizeCm.width / 200 - model.sizeCm.depth / 200;
+  assert.ok(axisGap >= 0.03 - 1e-10);
+  // Re-applying the chosen WOLTU group preserves the compact arrangement.
+  const layout = chairSeatLayout(table, model);
+  for (const seat of layout) {
+    assert.ok(Math.abs(Math.hypot(seat.position.x - table.position.x, seat.position.z - table.position.z) - 0.62) < 1e-8);
+  }
+});
+function topUnderArmClearance(underside: number, armTop: number) { return underside - armTop; }
+function topFrontSeatInset(radius: number, seatFrontDistance: number) { return radius - seatFrontDistance; }

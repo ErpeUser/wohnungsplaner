@@ -372,7 +372,8 @@ function readStoredValue(raw: string): MigrationResult {
       const withHall = upgradeHallPhotoReference(withRug);
       const withChair = upgradeZimmer1Chair(withHall);
       const withDining = upgradeDiningChairsToWoltu(withChair);
-      const withWc = upgradeWcPhotoReference(withDining);
+      const withTuckedDining = upgradeDefaultWoltuDiningChairTuck(withDining);
+      const withWc = upgradeWcPhotoReference(withTuckedDining);
       const withWallboards = upgradeZimmer1VanityWallboards(withWc);
       const withFly = upgradeZimmer1WardrobeToFly(withWallboards);
       if (!normalized.identityChanged && isOlderBaselineModel(withFly)) {
@@ -392,8 +393,10 @@ function readStoredValue(raw: string): MigrationResult {
               ? "Der Kleiderschrank in Zimmer 1 wurde an das MID.YOU-FLY-Maß angepasst; Kaschmirfronten und angepasste Möbelpositionen bleiben erhalten."
             : withWallboards !== withWc
               ? "Die drei Wandboards der Schminkecke wurden auf die ausgewählten Möbelix-Produkte aktualisiert; andere Möbelpositionen bleiben erhalten."
-            : withWc !== withDining
+            : withWc !== withTuckedDining
               ? "Die WC-Fotoreferenz mit Eiche-Artisan-Regal, Schacht und Lüftung wurde übernommen; sonstige Möbelpositionen bleiben erhalten."
+              : withTuckedDining !== withDining
+                ? "Die vier unveränderten WOLTU-Hauptstühle wurden teilweise unter den Bozan-Tisch geschoben; manuell verschobene Möbel bleiben unberührt."
               : withDining !== withChair
                 ? "Die vier bisherigen Kaleo-Hauptstühle wurden auf WOLTU Chenille umgestellt; ihre Positionen bleiben erhalten."
               : withChair !== withHall
@@ -547,6 +550,55 @@ export function upgradeZimmer1WardrobeToFly(document: PlannerDocumentV3): Planne
       ? { ...item, elevation: 2.1 }
       : item),
   });
+}
+
+/**
+ * One-time compact partial-tuck upgrade for the original WOLTU dining group.
+ * Keep the Bozan table fixed and never overwrite a custom/moved/rotated chair.
+ * WOLTU dimensions are estimated, so this is a planning pose, not an assertion
+ * that its 85-cm backrest fits under the 73.5-cm tabletop underside.
+ */
+export function upgradeDefaultWoltuDiningChairTuck(document: PlannerDocumentV3): PlannerDocumentV3 {
+  if (document.id !== DEFAULT_APARTMENT_DOCUMENT.id) return document;
+  const table = document.placements.find((item) => item.id === "living-bozan-table");
+  if (!table || table.catalogId !== "dining-table-bozan-110"
+    || table.position.x !== 2.2 || table.position.z !== 5.7
+    || table.rotation !== 180 || table.size.width !== 1.1
+    || table.size.depth !== 1.1 || table.size.height !== 0.76) return document;
+
+  const oldPositions = new Map([
+    ["living-kaleo-chair-west", { x: 2.2, z: 5.0 }],
+    ["living-kaleo-chair-east", { x: 2.9, z: 5.7 }],
+    ["living-kaleo-chair-south", { x: 1.5, z: 5.7 }],
+    ["living-kaleo-chair-north", { x: 2.2, z: 6.4 }],
+  ]);
+  const reference = new Map(DEFAULT_APARTMENT_DOCUMENT.placements
+    .filter((item) => oldPositions.has(item.id))
+    .map((item) => [item.id, item]));
+  let changed = false;
+  const placements = document.placements.map((item) => {
+    const old = oldPositions.get(item.id);
+    const target = reference.get(item.id);
+    if (!old || !target || item.catalogId !== "chair-aliexpress-woltu-1005013095870024"
+      || item.groupId !== "living-dining-group" || item.roomId !== "wohnkueche"
+      || item.rotation !== target.rotation
+      || item.size.width !== 0.58 || item.size.depth !== 0.6 || item.size.height !== 0.85
+      || item.position.x !== old.x || item.position.z !== old.z) return item;
+    changed = true;
+    const originalNotes = (item.metadata?.notes ?? [])
+      .filter((note) => !(note.startsWith("Stuhlplatz ")
+        && note.endsWith("Tisch und übrige Möbel bleiben unverändert.")));
+    const updatedNote = target.metadata?.notes?.find((note) => note.startsWith("Stuhlplatz "));
+    return {
+      ...item,
+      position: { ...target.position },
+      metadata: {
+        ...item.metadata,
+        notes: [...new Set([...originalNotes, ...(updatedNote ? [updatedNote] : [])])],
+      },
+    };
+  });
+  return changed ? { ...document, placements } : document;
 }
 
 /** Switch only the previous default Zimmer-1 chair, preserving custom positions,
@@ -754,8 +806,12 @@ function isOlderBaselineModel(document: PlannerDocumentV3) {
     // The targeted FLY migration above preserves user-modified positions.
     if (item.id === "zimmer1-wardrobe") return false;
     const previous = storedPlacements.get(item.id);
-    if (item.id === "living-bozan-table" && previous && isTableComparisonPlacement(previous)) return false;
+    if (item.id === "living-bozan-table" && previous
+      && (isTableComparisonPlacement(previous) || previous.catalogId === "dining-table-bozan-110")) return false;
     if (item.id === "living-kaleo-chair-north" && !previous && hasMarkedFourChairGroup) return false;
+    // Seat coordinates have their own non-destructive one-time migration.
+    // A deliberately chosen alternate seat or custom placement stays untouched.
+    if (item.id.startsWith("living-kaleo-chair-") && previous) return false;
     return !previous
       || previous.rotation !== item.rotation
       || previous.position.x !== item.position.x
@@ -804,9 +860,13 @@ function rebaseBaselineModel(stored: PlannerDocumentV3): PlannerDocumentV3 {
     placements: [
       ...DEFAULT_APARTMENT_DOCUMENT.placements.map((item) => (
         BASELINE_VISUAL_PLACEMENT_REFRESH_IDS.has(item.id)
-          ? item.id === "living-bozan-table" && storedPlacements.get(item.id) && isTableComparisonPlacement(storedPlacements.get(item.id)!)
+          ? item.id === "living-bozan-table" && storedPlacements.get(item.id)
+            && (isTableComparisonPlacement(storedPlacements.get(item.id)!)
+              || storedPlacements.get(item.id)!.catalogId === "dining-table-bozan-110")
             ? storedPlacements.get(item.id)!
-            : item
+            : item.id.startsWith("living-kaleo-chair-") && storedPlacements.has(item.id)
+              ? storedPlacements.get(item.id)!
+              : item
           : storedPlacements.get(item.id) ?? item
       )),
       ...stored.placements.filter((item) => !baselinePlacementIds.has(item.id) && !RETIRED_BASELINE_PLACEMENT_IDS.has(item.id)),

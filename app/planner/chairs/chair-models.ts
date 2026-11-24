@@ -218,10 +218,18 @@ export type ChairSeatLayout = {
  * perpendicular offset uses the largest real footprint (chair depth or a
  * star/swivel base), so changing models never hides a foot under the table.
  */
+/** Partial tuck of WOLTU Chenille beneath the selected 110-cm Bozan table. */
+export const BOZAN_WOLTU_TUCK_DISTANCE_M = 0.62;
+
 export function chairSeatLayout(table: PlannerPlacement, model: ChairModel): ChairSeatLayout[] {
   const baseDepth = model.baseStyle === "star-base" ? Math.max(model.sizeCm.depth / 100, 0.65) : model.sizeCm.depth / 100;
-  const sideOffset = table.size.width / 2 + baseDepth / 2 + 0.04;
-  const endOffset = table.size.depth / 2 + model.sizeCm.depth / 200 + 0.04;
+  // Only the measured Bozan + estimated WOLTU pair uses the compact
+  // partial-tuck layout. All other combinations retain their conservative gap.
+  const tuckedWoltu = table.catalogId === "dining-table-bozan-110"
+    && table.size.width === 1.1 && table.size.depth === 1.1
+    && model.catalogId === "chair-aliexpress-woltu-1005013095870024";
+  const sideOffset = tuckedWoltu ? BOZAN_WOLTU_TUCK_DISTANCE_M : table.size.width / 2 + baseDepth / 2 + 0.04;
+  const endOffset = tuckedWoltu ? BOZAN_WOLTU_TUCK_DISTANCE_M : table.size.depth / 2 + model.sizeCm.depth / 200 + 0.04;
   const radians = (table.rotation * Math.PI) / 180;
   const rotateOffset = (dx: number, dz: number): Point2 => ({
     x: table.position.x + dx * Math.cos(radians) - dz * Math.sin(radians),

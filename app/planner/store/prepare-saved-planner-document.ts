@@ -8,6 +8,7 @@ import {
   upgradeHallPhotoReference,
   upgradeZimmer1Chair,
   upgradeDiningChairsToWoltu,
+  upgradeDefaultWoltuDiningChairTuck,
   upgradeWcPhotoReference,
   upgradeZimmer1VanityWallboards,
   upgradeZimmer1WardrobeToFly,
@@ -28,7 +29,8 @@ export function prepareSavedPlannerDocument(document: PlannerDocumentV3): Planne
   const withHall = upgradeHallPhotoReference(withRug);
   const withChair = restoreMissingVanityChair(upgradeZimmer1Chair(withHall));
   const withDining = upgradeDiningChairsToWoltu(withChair);
-  const withWc = upgradeWcPhotoReference(withDining);
+  const withTuckedDining = upgradeDefaultWoltuDiningChairTuck(withDining);
+  const withWc = upgradeWcPhotoReference(withTuckedDining);
   const withWallboards = upgradeZimmer1VanityWallboards(withWc);
   const withWardrobe = upgradeZimmer1WardrobeToFly(withWallboards);
   const updated = upgradeWoltuNightstandPlacement(withWardrobe);
