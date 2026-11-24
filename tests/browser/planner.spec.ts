@@ -118,18 +118,16 @@ test('bathroom renders the white-gold marble finish', async ({ page }, info) => 
   await screenshot(page, info, 'bath-white-gold-marble');
 });
 
-test('WC renders the celadon onyx rear wall and lists 20 panels', async ({ page }, info) => {
+test('WC renders the current ivory ceramic design and keeps Onyx as an alternative', async ({ page }, info) => {
   await startPlanner(page);
   await page.getByRole('combobox', { name: 'Raum', exact: true }).selectOption('wc');
-  const texture = page.waitForResponse((response) => response.url().includes('temu-celadon-onyx-601099584128261.webp'));
   await page.getByRole('button', { name: '3D-Ansicht', exact: true }).click();
-  expect((await texture).ok()).toBe(true);
   const canvas = page.locator('canvas[aria-label="3D-Planungsfläche"]');
   await expect(canvas).toHaveAttribute('data-render-ready', 'true', { timeout: 60_000 });
   await assertRendered(page, canvas);
-  await screenshot(page, info, 'wc-celadon-onyx-marble');
+  await screenshot(page, info, 'wc-ivory-ceramic-tiles');
   await page.getByRole('button', { name: 'Einkaufsliste öffnen' }).click();
-  await expect(page.getByText('20 Stück · für die mittlere WC-Rückwand', { exact: true })).toBeVisible();
+  await expect(page.getByText(/20 Stück · bisherige Onyx-Alternative für die mittlere WC-Rückwand/)).toBeVisible();
 });
 
 test('Zimmer 1 renders the AliExpress WOLTU nightstand in 3D', async ({ page }, info) => {
