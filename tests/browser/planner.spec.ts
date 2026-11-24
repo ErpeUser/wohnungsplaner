@@ -193,9 +193,10 @@ test('every room renders in 2D and in the real 3D canvas', async ({ page }, info
   const selector = page.getByRole('combobox', { name: 'Raum', exact: true });
   const rooms = await selector.locator('option[value]').evaluateAll((items) =>
     items.map((item) => (item as HTMLOptionElement).value).filter(Boolean));
-  // Zimmer 1 is a 3D verification room and is intentionally omitted from
-  // the public starter scene; its products remain available in the catalogue.
-  expect(rooms.length).toBe(7);
+  // The public plan includes seven interior rooms and the balcony/loggia.
+  // Zimmer 1 must remain available in both 2D and 3D.
+  expect(rooms).toHaveLength(8);
+  expect(rooms).toContain('zimmer1');
   for (const roomId of rooms) {
     await page.getByRole('button', { name: '2D-Ansicht', exact: true }).click();
     await selector.selectOption(roomId);
