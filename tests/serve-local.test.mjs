@@ -162,7 +162,14 @@ test("PIN-Gate schützt die Website mit einem signierten __session-Cookie", asyn
 });
 
 test("serve-local akzeptiert HOST für Container-Netzwerkschnittstellen", async (t) => {
-  const port = 37000 + (process.pid % 1000);
+  // Let the OS select a free wildcard port: Windows reserves some high ports.
+  const portProbe = http.createServer();
+  await new Promise((resolve, reject) => {
+    portProbe.once("error", reject);
+    portProbe.listen(0, "0.0.0.0", resolve);
+  });
+  const port = portProbe.address().port;
+  await new Promise((resolve) => portProbe.close(resolve));
   const child = spawn(process.execPath, ["serve-local.mjs"], {
     env: { ...process.env, HOST: "0.0.0.0", PORT: String(port), PLANNER_WRITE_PID: "0" },
     stdio: ["ignore", "pipe", "pipe"],
