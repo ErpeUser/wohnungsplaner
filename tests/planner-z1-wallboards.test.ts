@@ -106,7 +106,7 @@ test("browser saved-plan loader upgrades legacy Zimmer 1 shelves, backs up raw d
     prepareSavedPlannerDocument, DEFAULT_APARTMENT_DOCUMENT.id);
   assert.ok(result, "the browser's valid V3 loading route is active");
   for (const id of ids) {
-    const upgraded = result.document.builtIns.find((item) => item.id === id)!;
+    const upgraded: (typeof legacy.builtIns)[number] = result.document.builtIns.find((item) => item.id === id)!;
     assert.deepEqual(upgraded.size, shelf(id).size);
     assert.equal(upgraded.materialVariants?.main, shelf(id).materialVariants?.main);
   }
