@@ -3,6 +3,9 @@ import test from "node:test";
 import { DEFAULT_APARTMENT_DOCUMENT } from "../app/planner/domain/apartment-v3.ts";
 import { PLANNER_STORAGE_KEY, createLocalStoragePlannerRepository, upgradeZimmer1VanityWallboards } from "../app/planner/store/persistence.ts";
 import { getPlannerMaterial } from "../app/planner/scene-3d/materials.ts";
+import { prepareSavedPlannerDocument } from "../app/planner/store/prepare-saved-planner-document.ts";
+import { readRefinedInterior, INTERIOR_BACKUP_KEY } from "../app/planner/store/interior-upgrade.ts";
+import { parsePlannerDocument } from "../app/planner/domain/schema.ts";
 
 const ids = ["builtin-z1-vanity-shelf-main", "builtin-z1-vanity-shelf-side-upper", "builtin-z1-vanity-shelf-side-lower"];
 const shelf = (id: string) => DEFAULT_APARTMENT_DOCUMENT.builtIns.find((item) => item.id === id)!;
@@ -72,4 +75,42 @@ test("custom finish and position on an individual wallboard are not silently ove
   upper.size = { width: 0.36, depth: 0.16, height: 0.04 };
   upper.position.z = 0.56;
   assert.equal(upgradeZimmer1VanityWallboards(document), document);
+});
+
+
+test("browser saved-plan loader upgrades legacy Zimmer 1 shelves, backs up raw data and preserves moved furniture", () => {
+  const legacy = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
+  const oldSizes = new Map<string, [number, number, number]>([
+    [ids[0], [1.12, 0.19, 0.045]],
+    [ids[1], [0.36, 0.16, 0.04]],
+    [ids[2], [0.32, 0.16, 0.04]],
+  ]);
+  legacy.builtIns = legacy.builtIns.map((item) => {
+    const original = oldSizes.get(item.id);
+    return original ? {
+      ...item,
+      size: { width: original[0], depth: original[1], height: original[2] },
+      materialVariants: { ...item.materialVariants, main: "oak-light" },
+      label: item.id === ids[0] ? "Haupt-Wandregal Natur-Eiche" : "Eck-Wandregal Natur-Eiche",
+    } : item;
+  });
+  const chair = legacy.placements.find((item) => item.id === "zimmer1-chair")!;
+  chair.position.z = 1.06;
+  const raw = JSON.stringify(legacy);
+  const data = new Map<string, string>();
+  const storage = {
+    getItem: (key: string) => data.get(key) ?? null,
+    setItem: (key: string, value: string) => { data.set(key, value); },
+  };
+  const result = readRefinedInterior(raw, storage, parsePlannerDocument,
+    prepareSavedPlannerDocument, DEFAULT_APARTMENT_DOCUMENT.id);
+  assert.ok(result, "the browser's valid V3 loading route is active");
+  for (const id of ids) {
+    const upgraded = result.document.builtIns.find((item) => item.id === id)!;
+    assert.deepEqual(upgraded.size, shelf(id).size);
+    assert.equal(upgraded.materialVariants?.main, shelf(id).materialVariants?.main);
+  }
+  assert.equal(result.document.placements.find((item) => item.id === chair.id)?.position.z, 1.06);
+  assert.equal(data.get(INTERIOR_BACKUP_KEY), raw, "original plan remains recoverable");
+  assert.equal(prepareSavedPlannerDocument(result.document), result.document, "browser migration is idempotent");
 });
