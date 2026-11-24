@@ -51,8 +51,9 @@ describe("WC shelf merchant-reference render", () => {
         const document = applyPlannerCommand(DEFAULT_APARTMENT_DOCUMENT, { type: "setWcWallboard", optionId: option.id }).document;
         const item = createSceneModel(document, "wc").builtIns.find((entry) => entry.id === WC_WALLBOARD_BUILTIN_ID)!;
         expect(item.size).toEqual([option.widthCm / 100, option.heightCm / 100, option.depthCm / 100]);
-        await act(async () => { root.render(<WcArtisanWallboard item={item} />); });
-        const scene = root.getState().scene;
+        let renderedState: RootState | undefined;
+        await act(async () => { renderedState = root.render(<WcArtisanWallboard item={item} />).getState(); });
+        const scene = renderedState!.scene;
         scene.updateMatrixWorld(true);
         if (option.id === "livetastic-90") {
           expect(scene.getObjectByName("wc-acacia-sloped-live-edge")).toBeDefined();
