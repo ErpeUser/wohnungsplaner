@@ -36,6 +36,58 @@ import { PlannerWorkspace } from "../app/planner/workspace/planner-workspace.tsx
 import { ShoppingListDrawer } from "../app/planner/workspace/shopping-list-drawer.tsx";
 
 describe("PlannerWorkspace", () => {
+
+  test("shopping defaults to the active room, switches to total and follows the active room", async () => {
+    const user = userEvent.setup();
+    const store = createPlannerStore({ initialDocument: structuredClone(DEFAULT_APARTMENT_DOCUMENT) });
+    store.getState().setActiveRoom("bad");
+    render(<PlannerWorkspace store={store} />);
+    await user.click(screen.getByRole("button", { name: "Einkaufsliste öffnen" }));
+    const dialog = within(screen.getByRole("dialog", { name: "Einkaufsliste" }));
+    const roomTab = dialog.getByRole("tab", { name: "Dieser Raum" });
+    const allTab = dialog.getByRole("tab", { name: "Gesamt" });
+    expect(roomTab.getAttribute("aria-selected")).toBe("true");
+    expect(dialog.getByRole("heading", { name: "Badteppich · Beige mit Fransen" })).toBeTruthy();
+    expect(dialog.queryByRole("heading", { name: "WC-Teppich · Beige mit Fransen" })).toBeNull();
+    expect(dialog.queryByRole("heading", { name: "Wandboard für das WC" })).toBeNull();
+    expect(dialog.queryByRole("heading", { name: "Polsterbett Bliss" })).toBeNull();
+    expect(dialog.getByText(/262,65/)).toBeTruthy();
+    await user.click(allTab);
+    expect(allTab.getAttribute("aria-selected")).toBe("true");
+    expect(dialog.getByRole("heading", { name: "WC-Teppich · Beige mit Fransen" })).toBeTruthy();
+    expect(dialog.getByRole("heading", { name: "Polsterbett Bliss" })).toBeTruthy();
+    expect(dialog.getByText(/2[.\s]058,89/)).toBeTruthy();
+    await user.click(roomTab);
+    act(() => { store.getState().setActiveRoom("wc"); });
+    expect(dialog.getByRole("heading", { name: "WC-Teppich · Beige mit Fransen" })).toBeTruthy();
+    expect(dialog.queryByRole("heading", { name: "Badteppich · Beige mit Fransen" })).toBeNull();
+    expect(dialog.getByRole("heading", { name: "Wandboard für das WC" })).toBeTruthy();
+    expect(dialog.getByText(/49,04/)).toBeTruthy();
+  });
+
+  test("shows a useful empty room instead of falling back to other rooms", async () => {
+    const user = userEvent.setup();
+    const store = createPlannerStore({ initialDocument: structuredClone(DEFAULT_APARTMENT_DOCUMENT) });
+    store.getState().setActiveRoom("balkon");
+    render(<PlannerWorkspace store={store} />);
+    await user.click(screen.getByRole("button", { name: "Einkaufsliste öffnen" }));
+    const dialog = within(screen.getByRole("dialog", { name: "Einkaufsliste" }));
+    expect(dialog.getByText(/Keine Produkte für diesen Raum/)).toBeTruthy();
+    expect(dialog.queryByRole("heading", { name: "Polsterbett Bliss" })).toBeNull();
+    expect(dialog.getByRole("tab", { name: "Gesamt" })).toBeTruthy();
+  });
+
+  test("overall apartment view starts with the total shopping tab", async () => {
+    const user = userEvent.setup();
+    const store = createPlannerStore({ initialDocument: structuredClone(DEFAULT_APARTMENT_DOCUMENT) });
+    store.getState().setActiveRoom(null);
+    render(<PlannerWorkspace store={store} />);
+    await user.click(screen.getByRole("button", { name: "Einkaufsliste öffnen" }));
+    const dialog = within(screen.getByRole("dialog", { name: "Einkaufsliste" }));
+    expect(dialog.getByRole("tab", { name: "Gesamt" }).getAttribute("aria-selected")).toBe("true");
+    expect((dialog.getByRole("tab", { name: "Dieser Raum" }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
   test.each(["close button", "Escape", "backdrop"])("returns shopping focus to its trigger after %s", async (method) => {
     const user = userEvent.setup();
     const store = createPlannerStore({ initialDocument: structuredClone(DEFAULT_APARTMENT_DOCUMENT) });

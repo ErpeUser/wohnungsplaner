@@ -4,7 +4,7 @@ import { useId, useRef, useState, type KeyboardEvent } from "react";
 
 import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
 import type { CommandResult, PlannerCommand } from "../domain/commands.ts";
-import type { PlannerDocumentV3, PlannerPlacement } from "../domain/types.ts";
+import type { PlannerBuiltIn, PlannerDocumentV3, PlannerPlacement } from "../domain/types.ts";
 import { ChairComparisonPanel } from "./chair-comparison-panel.tsx";
 import { getChairModelForCatalogId } from "../chairs/chair-models.ts";
 import { getTableModelForCatalogId, metresFromCentimetres } from "../tables/table-models.ts";
@@ -13,6 +13,7 @@ import { ModelImage, referenceKind } from "./model-evidence.tsx";
 import { WC_WALLBOARD_BUILTIN_ID } from "../domain/wc-wallboards.ts";
 import { WcWallboardPicker } from "./wc-wallboard-picker.tsx";
 import { DINING_CHAIR_IDS, placementLabel } from "./placement-label.ts";
+import { formatShoppingPrice, shoppingItemsForSelection, shoppingPriceLabel } from "./shopping-items.ts";
 import "./model-switcher.css";
 
 type InspectorPanelProps = {
@@ -39,6 +40,7 @@ export function InspectorPanel({ document, selectionId, dispatch, select }: Insp
             <span aria-hidden="true">◆</span>
             <div><strong>{builtIn.label}</strong><p>Fest positioniert · gegen Verschieben und Entfernen geschützt</p></div>
           </div>
+          <PurchaseDetails document={document} selection={builtIn} />
           {builtIn.id === WC_WALLBOARD_BUILTIN_ID ? <WcWallboardPicker document={document} dispatch={dispatch} compact /> : null}
         </div>
       ) : (
@@ -49,6 +51,41 @@ export function InspectorPanel({ document, selectionId, dispatch, select }: Insp
         </div>
       )}
     </aside>
+  );
+}
+
+function PurchaseDetails({ document, selection }: {
+  document: PlannerDocumentV3;
+  selection: PlannerBuiltIn | PlannerPlacement;
+}) {
+  const items = shoppingItemsForSelection(document, selection);
+  const catalogId = selection.catalogId;
+  const sourceUrl = catalogId ? getFurnitureCatalogItem(catalogId)?.sourceUrl
+    ?? getChairModelForCatalogId(catalogId)?.sourceUrl
+    ?? getTableModelForCatalogId(catalogId)?.sourceUrl : undefined;
+  return (
+    <section className="planner-purchase" aria-label="Kaufdaten">
+      <span className="planner-kicker">Einkaufsliste</span>
+      {items.length ? items.map((item) => (
+        <div className="planner-purchase__item" key={item.id}>
+          <strong className="planner-purchase__name">{item.name}</strong>
+          <div className="planner-purchase__price">
+            <span>{(item.quantity ?? 1) > 1 ? "Listenbetrag" : "Preis"}</span>
+            <strong>{shoppingPriceLabel(item)}</strong>
+          </div>
+          {item.price !== null && (item.quantity ?? 1) > 1
+            ? <small>{item.quantity} × {formatShoppingPrice(item.price)} je Einkaufseinheit</small> : null}
+          {item.amountLabel ? <small>{item.amountLabel}</small> : null}
+          {item.alternative ? <small>Backup · nicht zur Zwischensumme addiert</small> : null}
+          {item.url ? <a href={item.url} target="_blank" rel="noreferrer">Produkt bei {item.retailer} öffnen ↗</a> : <small>Produktlink noch offen</small>}
+        </div>
+      )) : (
+        <div className="planner-purchase__item">
+          <small>Kein Einkaufsartikel hinterlegt · Preis offen</small>
+          {sourceUrl ? <a href={sourceUrl} target="_blank" rel="noreferrer">Produktquelle öffnen ↗</a> : <small>Produktlink noch offen</small>}
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -72,6 +109,7 @@ function PlacementFields({
         <span className="planner-selection-summary__swatch" aria-hidden="true" />
         <span><strong>{placementLabel(placement)}</strong><small>{placement.roomId}</small></span>
       </div>
+      <PurchaseDetails document={document} selection={placement} />
       <ModelSwitcher document={document} placement={placement} dispatch={dispatch} select={select} />
       <fieldset>
         <legend>Position</legend>

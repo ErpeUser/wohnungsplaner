@@ -1,5 +1,5 @@
-import type { PlannerDocumentV3 } from "../domain/types.ts";
-import { getSelectedWcWallboardOption, wallboardDimensionLabel } from "../domain/wc-wallboards.ts";
+import type { PlannerBuiltIn, PlannerDocumentV3 } from "../domain/types.ts";
+import { getSelectedWcWallboardOption, wallboardDimensionLabel, WC_WALLBOARD_BUILTIN_ID } from "../domain/wc-wallboards.ts";
 
 /** Supplied articles retained; unpriced hall entries are planning placeholders. */
 export type ShoppingItem = {
@@ -76,7 +76,7 @@ export const shoppingSubtotal = SHOPPING_ITEMS.reduce((sum, item) => sum + (item
 /** One selected WC board; non-selected alternatives are excluded from the list and subtotal. */
 export function shoppingItemsForDocument(document: Pick<PlannerDocumentV3, "builtIns">): ShoppingItem[] {
   const option = getSelectedWcWallboardOption(document);
-  if (option.id === "simple-80") return SHOPPING_ITEMS;
+  if (option.id === "simple-80") return SHOPPING_ITEMS.map((item) => item.id === option.articleId ? { ...item, price: option.price, url: option.sourceUrl, retailer: option.retailer } : item);
   return SHOPPING_ITEMS.map((item) => item.id === "007326000408" ? {
     ...item,
     id: option.articleId,
@@ -91,8 +91,92 @@ export function shoppingItemsForDocument(document: Pick<PlannerDocumentV3, "buil
   } : item);
 }
 
-export function shoppingSubtotalForDocument(document: Pick<PlannerDocumentV3, "builtIns">): number {
-  return Math.round(shoppingItemsForDocument(document).reduce(
+export function shoppingSubtotalForItems(items: readonly ShoppingItem[]): number {
+  return Math.round(items.reduce(
     (sum, item) => sum + (item.alternative ? 0 : (item.price ?? 0) * (item.quantity ?? 1)), 0,
   ) * 100) / 100;
+}
+
+export function shoppingSubtotalForDocument(document: Pick<PlannerDocumentV3, "builtIns">): number {
+  return shoppingSubtotalForItems(shoppingItemsForDocument(document));
+}
+
+/** Use exact room labels, including a shared article explicitly assigned to multiple rooms. */
+export function shoppingItemsForRoom(items: readonly ShoppingItem[], roomName: string): ShoppingItem[] {
+  return items.filter((item) => item.room === roomName || item.room.split(/\s+\/\s+/).includes(roomName));
+}
+
+export function formatShoppingPrice(amount: number, minimumFractionDigits = 2): string {
+  return amount.toLocaleString("de-AT", { style: "currency", currency: "EUR", minimumFractionDigits, maximumFractionDigits: 2 });
+}
+
+/** Both the drawer and the selected object's properties use the same line total. */
+export function shoppingPriceLabel(item: ShoppingItem): string {
+  if (item.generic) return "Budget offen";
+  if (item.price === null) return "Preis bei " + item.retailer + " prüfen";
+  return formatShoppingPrice(item.price * (item.quantity ?? 1), Number.isInteger(item.price) ? 0 : 2);
+}
+
+/** Link stable model identities, not display labels or shared merchant URLs.
+ * Fixed composite decorations may correspond to several purchasing rows.
+ * Prices and URLs deliberately live only in the purchase data above.
+ */
+const builtInShoppingIds: Readonly<Record<string, readonly string[]>> = {
+  "builtin-kitchen-fridge": ["kitchen-fridge-60cm"],
+  "builtin-kitchen-oven": ["kitchen-oven-60cm"],
+  "builtin-kitchen-hob": ["kitchen-induction-hob-60cm"],
+  "builtin-kitchen-hood": ["kitchen-hood-60cm"],
+  "builtin-kitchen-sink": ["kitchen-sink-60cm"],
+  "builtin-bath-washer-cabinet-scout": ["184900692R"],
+  "builtin-bath-basin-cabinet-scout": ["184900692G"],
+  "builtin-bath-round-mirror": ["1005012515662602"],
+  "builtin-bath-shower-rod": ["601104051124011"],
+  "builtin-bath-shower-curtain": ["601100062257123"],
+  "builtin-bath-towel-hook-rail": ["607039887632432"],
+  "builtin-wc-paper-holder": ["1005013624521211"],
+  "builtin-wc-mat": ["1005013137520536-wc"],
+  "builtin-bath-mat": ["1005013137520536-bad"],
+  "builtin-z1-bed-accent-wall": ["601099526356869"],
+  "builtin-z1-entry-wallpaper-return": ["601099526356869"],
+  "builtin-z1-entry-wallpaper-door-strip": ["601099526356869"],
+  "builtin-z1-wall-art-pair": ["z1-deko-bilder"],
+  "builtin-z1-headboard-led": ["z1-deko-licht"],
+  "builtin-z1-headboard-sconces": ["z1-deko-wandleuchten"],
+  "builtin-z1-layered-curtain": ["z1-deko-vorhang"],
+  "builtin-z1-vanity-shelf-main": ["001555006211"],
+  "builtin-z1-vanity-shelf-side-upper": ["007326000308"],
+  "builtin-z1-vanity-shelf-side-lower": ["007326000308"],
+  "builtin-z1-entry-niche": ["z1-deko-nische"],
+  "builtin-z1-wardrobe-top-decor": ["z1-deko-schrankboxen"],
+  "builtin-z1-nightstand-decor": ["z1-deko-kleinteile"],
+  "builtin-hall-tejo-art-plates": ["hall-decor-tejo-print", "hall-decor-three-plates"],
+  "builtin-hall-between-door-decor": ["hall-decor-between-doors-print", "hall-decor-planter"],
+};
+
+const catalogShoppingIds: Readonly<Record<string, readonly string[]>> = {
+  "bed-bliss-120": ["800001233737"],
+  "rug-temu-rabbit-ivory-100x180": ["601099532250952"],
+  "rug-temu-easy-line-120x180": ["607246280935328"],
+  "nightstand-aliexpress-woltu-1005012793801128": ["1005012793801128"],
+  "chair-aliexpress-xuegw-1005012445521181": ["1005012445521181"],
+  "rug-living-concept-240x240": ["607199740937372"],
+  "sofa-aliexpress-142": ["1005013379584796"],
+  "sofa-aliexpress-142-open": ["1005013379584796"],
+  "hallway-tejo-115": ["2778003504"],
+  // The user selected the Tejo shopping article while retaining the brown photo-based model.
+  "hallway-brown-mirror-bench-115": ["2778003504"],
+  "dining-table-bozan-110": ["2858001801"],
+  "chair-aliexpress-woltu-1005013095870024": ["1005013095870024"],
+  "chair-kaleo-chenille-beige": ["1634004202"],
+  "plant-zimmer1-olive": ["z1-deko-pflanze"],
+};
+
+export function shoppingItemsForSelection(
+  document: Pick<PlannerDocumentV3, "builtIns">,
+  selection: Pick<PlannerBuiltIn, "id" | "catalogId">,
+): ShoppingItem[] {
+  const ids = selection.id === WC_WALLBOARD_BUILTIN_ID
+    ? [getSelectedWcWallboardOption(document).articleId]
+    : builtInShoppingIds[selection.id] ?? (selection.catalogId ? catalogShoppingIds[selection.catalogId] : undefined) ?? [];
+  return shoppingItemsForDocument(document).filter((item) => ids.includes(item.id));
 }

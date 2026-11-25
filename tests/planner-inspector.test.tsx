@@ -20,6 +20,41 @@ function setup(id = "living-kaleo-chair-west") {
 }
 
 describe("inspector editing", () => {
+
+  test.each([
+    ["builtin-bath-mat", "27,20", "https://de.aliexpress.com/item/1005013137520536.html"],
+    ["builtin-wc-mat", "21,84", "https://de.aliexpress.com/item/1005013137520536.html"],
+    ["living-chicago-sofa", "437,49", "https://de.aliexpress.com/item/1005013379584796.html"],
+  ])("shows the selected product's shopping price and link for %s", (id, price, url) => {
+    setup(id);
+    const data = screen.getByRole("region", { name: "Kaufdaten" });
+    expect(data.textContent).toContain(price);
+    expect(within(data).getByRole("link", { name: /Produkt bei AliExpress öffnen/ }).getAttribute("href")).toBe(url);
+  });
+
+  test("updates the purchase card when the WC wallboard variant changes", () => {
+    const store = setup("builtin-wc-wallboard-artisan-80");
+    const card = () => screen.getByRole("region", { name: "Kaufdaten" });
+    expect(card().textContent).toContain("14,99");
+    act(() => { store.getState().dispatch({ type: "setWcWallboard", optionId: "livetastic-90" }); });
+    expect(card().textContent).toContain("44,91");
+    expect(within(card()).getByRole("link", { name: /Produkt bei XXXLutz öffnen/ }).getAttribute("href")).toBe("https://www.xxxlutz.at/p/livetastic-wandboard-in-90-3-5-20-cm-naturfarben-000377013101");
+  });
+
+  test("shows an existing product link without inventing a missing price", () => {
+    setup("builtin-bath-round-mirror");
+    const data = screen.getByRole("region", { name: "Kaufdaten" });
+    expect(data.textContent).toContain("Preis bei AliExpress prüfen");
+    expect(within(data).getByRole("link", { name: /Produkt bei AliExpress öffnen/ }).getAttribute("href")).toContain("1005012515662602");
+  });
+
+  test("does not attach an unrelated purchase price or link to a fixed object", () => {
+    setup("builtin-bath-tub");
+    const data = screen.getByRole("region", { name: "Kaufdaten" });
+    expect(data.textContent).toContain("Kein Einkaufsartikel hinterlegt");
+    expect(within(data).queryByRole("link")).toBeNull();
+  });
+
   test("focusing and leaving an unchanged numeric field does not create history", async () => {
     const user = userEvent.setup();
     const store = setup();

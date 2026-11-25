@@ -1360,6 +1360,83 @@
   width: min(430px, calc(100vw - 28px));
 }
 
+.planner-shopping__tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin: 12px 0 10px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #f1efe9;
+}
+
+.planner-shopping__tabs button {
+  min-height: 36px;
+  padding: 7px 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 680;
+  cursor: pointer;
+}
+
+.planner-shopping__tabs button[aria-selected="true"] {
+  color: #fff;
+  background: var(--planner-chrome-soft);
+}
+
+.planner-shopping__tabs button:disabled {
+  opacity: .45;
+  cursor: default;
+}
+
+.planner-shopping__tabs button:focus-visible,
+.planner-purchase a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.planner-shopping__scope {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 0 5px;
+  font-size: 13px;
+}
+
+.planner-shopping__scope small { color: var(--muted); font-size: 11px; }
+
+.planner-shopping__empty {
+  padding: 18px 12px;
+  margin: 14px 0;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  background: #f5f3ed;
+}
+
+.planner-purchase {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfaf6;
+}
+
+.planner-purchase__item { display: grid; gap: 6px; min-width: 0; }
+.planner-purchase__item + .planner-purchase__item { padding-top: 10px; border-top: 1px solid var(--line); }
+.planner-purchase__name { font-size: 12px; line-height: 1.4; overflow-wrap: anywhere; }
+.planner-purchase__price { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--muted); }
+.planner-purchase__price strong { color: var(--planner-ink, #192c34); font-size: 15px; text-align: right; }
+.planner-purchase small { color: var(--muted); font-size: 10px; line-height: 1.45; }
+.planner-purchase a { color: var(--accent); font-size: 12px; font-weight: 650; text-underline-offset: 2px; overflow-wrap: anywhere; }
+
 .planner-shopping__intro {
   margin-top: 4px !important;
   padding-bottom: 14px;

@@ -277,7 +277,7 @@ export function PlannerWorkspace({ store: providedStore }: { store?: PlannerStor
       </div>
 
       {state.panels.details ? <DetailsDrawer document={state.document} onClose={closeDetails} /> : null}
-      {shoppingOpen ? <ShoppingListDrawer document={state.document} dispatch={state.dispatch} onClose={() => { setShoppingOpen(false); shoppingButtonRef.current?.focus(); }} /> : null}
+      {shoppingOpen ? <ShoppingListDrawer document={state.document} activeRoomId={state.activeRoomId} dispatch={state.dispatch} onClose={() => { setShoppingOpen(false); shoppingButtonRef.current?.focus(); }} /> : null}
       {repository ? (
         <ExportDialog
           open={exportOpen}
