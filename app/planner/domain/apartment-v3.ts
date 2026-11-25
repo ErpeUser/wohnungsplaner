@@ -154,9 +154,9 @@ const builtIns: PlannerBuiltIn[] = [
     notes: ["Temu Art. 601100062257123 · SKU 17594540656721 · 12 Metallhaken · waschbarer, blickdichter beiger Stoff 180 × 200 cm ohne Quasten; im 3D halb geöffnet (ca. 90 cm Vorhangpaket links, ca. 90 cm Einstieg frei); glatte Saumabschlüsse und weiche Falten, Unterkante ca. 16 cm über dem Boden."],
   }),
   builtIn("bath-towel-hook-rail", "4 einzelne Rundhaken · Eiche natur / Schwarz · 2 × 2", "bad", "other", "bath-towel-hooks-wood-black", -0.16, 8.72, 0.36, 0.09, 0.34, 90, "bath-hook-oak-natural", 1.3, {
-    source: "Nutzerbild und Temu Art. 607039887632432 · SKU 118446205486445 · 4er-Pack",
+    source: "Nutzerwahl und AliExpress Produktfoto · Art. 1005013057225398 · Style2 · 4er-Pack (4PCS)",
     confidence: "estimated",
-    notes: ["Vier einzelne runde Naturholz-Wandplatten mit mattschwarzen gebogenen Haken in einer 2×2-Anordnung auf der bestehenden freien Badezimmerwand. Anordnung ca. 36 × 34 cm; reale Hakendurchmesser und die Eignung der Klebemontage auf den Fliesen vor Montage prüfen."],
+    notes: ["Vier einzelne runde Naturholz-Wandplatten mit senkrechter Holzmaserung und mattschwarzen ovalen Haken (Style2) in einer 2×2-Anordnung auf der bestehenden freien Badezimmerwand. Anordnung ca. 36 × 34 cm; reale Hakendurchmesser und die Eignung der Klebemontage auf den Fliesen vor Montage prüfen."],
   }),
   builtIn("wc-pan", "Wand-WC", "wc", "sanitary", "sanitary-wall-wc", -1.87, 4.44, 0.38, 0.58, 0.42, 0, "#f5f4f0", 0.18),
   builtIn("wc-flush", "WC-Betätigungsplatte", "wc", "sanitary", "wc-flush-plate", -1.87, 4.155, 0.24, 0.035, 0.16, 0, "metal-satin", 1.02),

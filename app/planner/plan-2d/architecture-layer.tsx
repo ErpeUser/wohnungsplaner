@@ -36,7 +36,7 @@ export function ArchitectureLayer(props: Props) {
           onTap={e => { e.cancelBubble = true; onSelect?.(item.id); }}>
           <Rect x={-width / 2} y={-depth / 2} width={width} height={depth} fill='rgba(214,190,153,0.2)' stroke='#a98a62' strokeWidth={.008} hitStrokeWidth={.09} />
           {item.catalogId === 'bath-towel-hooks-wood-black' ? hookCenters(width).map((x, i) => <Group key={i} x={x}>
-            <Line points={[-.06, -.035, .06, -.035]} stroke='#d1ae7a' strokeWidth={.014} />
+            <Line points={[-.06, -.035, .06, -.035]} stroke='#c2976a' strokeWidth={.014} />
             <Line points={[0, -.025, 0, .03]} stroke='#202221' strokeWidth={.012} />
             <Circle x={0} y={.032} radius={.012} fill='#202221' />
           </Group>) : <>

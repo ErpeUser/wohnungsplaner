@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { DEFAULT_APARTMENT_DOCUMENT } from '../app/planner/domain/apartment-v3.ts';
 import { SHOPPING_ITEMS, shoppingSubtotal, shoppingItemsForDocument, shoppingItemsForSelection, shoppingSubtotalForDocument } from '../app/planner/workspace/shopping-items.ts';
-const existingIds = ['kitchen-fridge-60cm','kitchen-oven-60cm','kitchen-induction-hob-60cm','kitchen-hood-60cm','kitchen-sink-60cm','184900692R','184900692G','1005012515662602','601104051124011','601100062257123','607039887632432','800001233737','601099532250952','607246280935328','1005013624521211','1005013137520536-wc','1005013137520536-bad','1005012445521181','1005013379584796','607199740937372','2778003504','2858001801','1634004202','601099691023748','601104781298502','601099526356869','z1-deko-bilder','z1-deko-vorhang','z1-deko-licht','001555006211','007326000308','z1-deko-nische','z1-deko-wandleuchten','z1-deko-schrankboxen','z1-deko-pflanze','z1-deko-textilien','z1-deko-kleinteile','z1-deko-pendelleuchte','001787045908','800000829847'];
+const existingIds = ['kitchen-fridge-60cm','kitchen-oven-60cm','kitchen-induction-hob-60cm','kitchen-hood-60cm','kitchen-sink-60cm','184900692R','184900692G','1005012515662602','601104051124011','601100062257123','1005013057225398','800001233737','601099532250952','607246280935328','1005013624521211','1005013137520536-wc','1005013137520536-bad','1005012445521181','1005013379584796','607199740937372','2778003504','2858001801','1634004202','601099691023748','601104781298502','601099526356869','z1-deko-bilder','z1-deko-vorhang','z1-deko-licht','001555006211','007326000308','z1-deko-nische','z1-deko-wandleuchten','z1-deko-schrankboxen','z1-deko-pflanze','z1-deko-textilien','z1-deko-kleinteile','z1-deko-pendelleuchte','001787045908','800000829847'];
 const item=(id:string)=>{const found=SHOPPING_ITEMS.find(i=>i.id===id);assert.ok(found,id);return found;};
 test('preserves every existing shopping article without duplicate identities',()=>{
  for(const id of existingIds)assert.equal(SHOPPING_ITEMS.filter(i=>i.id===id).length,1,id);
@@ -12,9 +12,14 @@ test('preserves every existing shopping article without duplicate identities',()
  assert.equal(item('1005012445521181').url,'https://de.aliexpress.com/item/1005012445521181.html');
 });
 test('four hooks cost one supplied pack and describe a single horizontal row',()=>{
- const hooks=item('607039887632432');assert.equal(hooks.price,6.36);assert.equal(hooks.quantity,1);
+ const hooks=item('1005013057225398');assert.equal(hooks.price,5.34);assert.equal(hooks.quantity,1);assert.equal(hooks.retailer,'AliExpress');assert.equal(hooks.room,'Bad');
  assert.match(hooks.dimensions,/nebeneinander/);assert.doesNotMatch(hooks.dimensions,/2.*2 im Plan/);
- assert.match(hooks.url??'',/goods_id=607039887632432&sku_id=118446205486445/);
+ assert.equal(hooks.url,'https://de.aliexpress.com/item/1005013057225398.html');
+ assert.match(hooks.amountLabel??'',/4PCS.*Style2.*5,34/);
+ assert.match(hooks.imageUrl??'',/aliexpress-bath-hooks-1005013057225398-style2\.jpg$/);
+ assert.equal(SHOPPING_ITEMS.some(i=>i.id==='607039887632432'),false);
+ const hook=DEFAULT_APARTMENT_DOCUMENT.builtIns.find(i=>i.id==='builtin-bath-towel-hook-rail')!;
+ assert.equal(shoppingItemsForSelection(DEFAULT_APARTMENT_DOCUMENT,hook)[0].id,'1005013057225398');
 });
 test('selected darker two-shelf WC holder has the supplied AliExpress link, dimensions and price',()=>{
  const holder=item('1005013624521211');assert.equal(holder.price,12.21);assert.equal(holder.quantity,1);
@@ -55,7 +60,7 @@ test('includes the exact selected Temu A8447 180 x 250 cm vintage rug',()=>{
 });
 test('adds the purchased living room rug to the known-priced subtotal',()=>{
  const total=shoppingSubtotal;
- assert.equal(Math.round(total*100),205889);
+ assert.equal(Math.round(total*100),205787);
  assert.equal(SHOPPING_ITEMS.filter(i=>i.url).length,30);
 });
 test('adds the 30-piece white-gold marble wall tile set for the bathroom',()=>{
@@ -109,7 +114,7 @@ test('lists WOLTU Chenille as four primary chairs in two unpriced two-packs, wit
  assert.equal(backup.alternative,true);
  assert.equal(backup.quantity,4);
  assert.equal(backup.price,55.92);
- assert.equal(Math.round(shoppingSubtotal * 100),205889);
+ assert.equal(Math.round(shoppingSubtotal * 100),205787);
 });
 
 test('uses the requested Universal TEJO link without changing the existing furniture or its historical budget value',()=>{
@@ -160,7 +165,7 @@ test('includes the two source-linked existing bedroom products without adding re
    assert.equal(entries[0].existing,true);assert.equal(entries[0].price,null);
    assert.equal(shoppingItemsForDocument(document).filter(i=>i.id===id).length,1);
  }
- assert.equal(shoppingSubtotalForDocument(document),2058.89);
+ assert.equal(shoppingSubtotalForDocument(document),2057.87);
 });
 
 test('a selected catalogue alternative with a product link is visible once in its room and in the properties',()=>{
@@ -175,6 +180,6 @@ test('a selected catalogue alternative with a product link is visible once in it
  assert.equal(entry.quantity,2);
  assert.equal(shoppingItemsForDocument(document).filter(i=>i.id===entry.id).length,1);
  assert.equal(shoppingItemsForSelection(document,chairs[1])[0].id,entry.id);
- assert.equal(shoppingSubtotalForDocument(document),2058.89);
+ assert.equal(shoppingSubtotalForDocument(document),2057.87);
  assert.ok(!shoppingItemsForDocument(DEFAULT_APARTMENT_DOCUMENT).some(i=>i.id===entry.id));
 });

@@ -25,7 +25,11 @@ test('paper holder remains on opposite WC wall but uses the darker two-ledge Ali
 });
 test('four hooks form a horizontal row with 20-cm centres',()=>{
   assert.deepEqual(hookCenters(.72).map(x=>Number(x.toFixed(3))),[-.3,-.1,.1,.3]);
-  assert.equal(get('builtin-bath-towel-hook-rail').size.height,.12);
+  const hooks=get('builtin-bath-towel-hook-rail');
+  assert.equal(hooks.size.height,.12);
+  assert.match(hooks.metadata?.source??'',/1005013057225398.*Style2.*4PCS/);
+  assert.deepEqual(hooks.position,{x:-.20,z:8.82});
+  assert.equal(hooks.elevation,1.49);assert.equal(hooks.rotation,90);
 });
 test('supplier west chain equals 2562 mm',()=>{
   assert.deepEqual(kitchenModuleWidths(),[.45,.15,.6,.6,.112,.65]);assert.ok(Math.abs(kitchenModuleWidths().reduce((a,b)=>a+b,0)-2.562)<1e-9);

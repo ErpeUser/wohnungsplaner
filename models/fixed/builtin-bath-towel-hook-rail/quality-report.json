@@ -3,21 +3,25 @@
   "assetType": "fixed",
   "status": "reference-only",
   "identity": {
-    "displayName": "4 einzelne Rundhaken · Eiche natur / Schwarz · 2 × 2",
+    "displayName": "4 einzelne Rundhaken · Naturholz / Schwarz · AliExpress Style2",
     "category": "fixed-interior",
-    "sourceConfidence": "catalog-or-folder-id"
+    "sourceConfidence": "user-supplied-product-link-and-style2-photo"
   },
   "referenceSources": {
-    "manifestSourceUrls": [],
-    "linkEntries": [
-      "# Wohnungselement ohne externe Produktquelle; Teil der festen Wohnung/Architektur."
+    "manifestSourceUrls": [
+      "https://de.aliexpress.com/item/1005013057225398.html"
     ],
-    "status": "no-external-source-documented"
+    "linkEntries": [
+      "https://de.aliexpress.com/item/1005013057225398.html"
+    ],
+    "status": "documented"
   },
   "dimensions": {
     "status": "not-verified-in-repository",
     "verified": [],
-    "estimated": []
+    "estimated": [
+      "72 cm row width, 20 cm centres, 12 cm disc diameter, 9 cm plan depth; supplier dimensions unconfirmed"
+    ]
   },
   "assetFiles": [],
   "reconstruction": {
@@ -26,7 +30,10 @@
     "meshFiles": []
   },
   "materials": {
-    "declared": [],
+    "declared": [
+      "bath-hook-oak-natural",
+      "bath-hook-black"
+    ],
     "pbrTexturesPresent": false,
     "textureFiles": []
   },
@@ -37,15 +44,14 @@
   },
   "checks": {
     "manifestJson": "passed",
-    "linkManifestConsistency": "no-url-to-synchronize",
+    "linkManifestConsistency": "synchronized",
     "geometry": "not-run-no-mesh",
     "materials": "not-run-no-pbr-textures",
     "viewerIntegration": "parametric-fallback-preserved"
   },
   "limitations": [
-    "No mesh asset is present in this model folder; existing runtime GLBs remain outside models/** and are not copied into this folder.",
-    "No repository PBR texture set is present; material fidelity remains runtime-defined.",
-    "Exact dimensions and product identity require source-specific verification before a photorealistic asset can be claimed."
+    "Original product photograph confirms Style2 light natural wood, vertical grain and black oval hooks, not the exact dimensions or adhesive load rating.",
+    "Parametric runtime model preserves the existing horizontal bathroom wall placement; wood-only sample is colour-adjusted, not a measured PBR material."
   ],
-  "auditedAt": "2026-11-12"
+  "auditedAt": "2026-11-25"
 }

@@ -1,6 +1,7 @@
 import {DataTexture,DoubleSide,MeshPhysicalMaterial,MeshStandardMaterial,NoColorSpace,RGBAFormat,RepeatWrapping,SRGBColorSpace,LinearFilter,LinearMipmapLinearFilter,UnsignedByteType} from 'three';
 import {createWafflePixels,createArtworkPixels} from './interior-geometry.ts';
 import {createWcPaperHolderWoodTexture} from './wc-paper-holder-photo.ts';
+import {createBathHookStyle2WoodTexture} from './bath-hook-style2-photo.ts';
 const cache=new Map<string,MeshStandardMaterial>();
 function pixels(data:Uint8Array,width:number,height:number,color:boolean,name:string){
   const texture=new DataTexture(data,width,height,RGBAFormat,UnsignedByteType);
@@ -31,6 +32,11 @@ export function getInteriorMaterial(kind:string):MeshStandardMaterial{
     case 'cotton-edge':material=new MeshStandardMaterial({color:'#d9c19d',roughness:1});break;
     case 'cotton-fringe':material=new MeshStandardMaterial({color:'#e5cfaa',roughness:1,side:DoubleSide,vertexColors:true});break;
     case 'wood':material=new MeshPhysicalMaterial({color:'#ffffff',roughness:.72,clearcoat:.06,map:woodTexture()});break;
+    case 'bath-hook-style2-wood':case 'bath-hook-style2-edge':material=new MeshPhysicalMaterial({
+      color:'#ffffff',roughness:.83,clearcoat:.025,
+      map:createBathHookStyle2WoodTexture(kind==='bath-hook-style2-edge'),
+    });break;
+    case 'bath-hook-style2-black':material=new MeshStandardMaterial({color:'#191918',roughness:.58,metalness:.14});break;
     // Dedicated, colour-corrected photo grains; shared oak and cabinetry stay unchanged.
     case 'wc-paper-holder-wood':case 'wc-paper-holder-edge':material=new MeshPhysicalMaterial({
       color:'#ffffff',roughness:.82,clearcoat:.025,

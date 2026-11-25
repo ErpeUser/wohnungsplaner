@@ -33,6 +33,7 @@ describe("inspector editing", () => {
 
 
   test.each([
+    ["builtin-bath-towel-hook-rail", "5,34", "https://de.aliexpress.com/item/1005013057225398.html"],
     ["builtin-bath-mat", "27,20", "https://de.aliexpress.com/item/1005013137520536.html"],
     ["builtin-wc-mat", "21,84", "https://de.aliexpress.com/item/1005013137520536.html"],
     ["living-chicago-sofa", "437,49", "https://de.aliexpress.com/item/1005013379584796.html"],

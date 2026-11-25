@@ -5,6 +5,7 @@ import {
 } from "three";
 import { RECIPES, TEXTURES, TILE_TEXTURES, fallbackRecipe } from "./materials/recipes.ts";
 import { createWcPaperHolderWoodTexture } from "./wc-paper-holder-photo.ts";
+import { createBathHookStyle2WoodTexture } from "./bath-hook-style2-photo.ts";
 import { asBumpMap, createBathroomWaffleTexture, createShowerCurtainTextileTexture, loadBalconyFloorTexture, loadCashmereVinylTexture, loadChairChenilleTexture, loadComparisonTabletopTexture, loadComparisonWoodTexture, loadConcreteTexture, loadEpoxyFloorTexture, loadKitchenWalnutBacksplashTexture, loadKitchenWorktopTexture, loadMacaronMilkCoffeeWallpaperTexture, loadPlannerTexture, loadPlannerTileTexture, loadProductCeramicTexture, loadProductGrainTexture, loadProductLacquerTexture, loadProductLeafTexture, loadProductPebbleTexture, loadProductPileTexture, loadProductWeaveTexture, loadProductWoodTexture, loadVintageBeigeFabricWallpaperTexture, loadVintageBrownFabricWallpaperTexture, loadWcShelfOakTexture, loadWcWallboardProductTexture } from "./materials/texture-factory.ts";
 export { PLANNER_TEXTURE_READY_EVENT } from "./materials/texture-factory.ts";
 
@@ -160,7 +161,7 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
     material.bumpScale = 0.003;
     material.needsUpdate = true;
   } else if (materialId === "bath-hook-oak-natural") {
-    const oak = loadProductWoodTexture("oak-bozan-directional");
+    const oak = createBathHookStyle2WoodTexture();
     material.color.set("#ffffff");
     material.map = oak;
     material.bumpMap = asBumpMap(oak);

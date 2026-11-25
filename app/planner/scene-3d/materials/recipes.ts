@@ -108,7 +108,7 @@ export const RECIPES: Record<string, MaterialRecipe> = {
   "shower-curtain-linen-beige": { color: "#d8cdbb", roughness: 0.96, clearcoat: 0.02, clearcoatRoughness: 0.9 },
   "temu-shower-curtain-beige": { color: "#f2eade", roughness: 0.98 },
   "shower-curtain-hem-beige": { color: "#e4dacb", roughness: 0.99 },
-  "bath-hook-oak-natural": { color: "#d6b486", roughness: 0.83 },
+  "bath-hook-oak-natural": { color: "#c2976a", roughness: 0.83 },
   "bath-hook-black": { color: "#191918", roughness: 0.56, metalness: 0.14 },
   "fabric-taupe": { color: "#aa9684", roughness: 0.98 },
   // Warm beige fabric; the previous near-white value made the sofa read as

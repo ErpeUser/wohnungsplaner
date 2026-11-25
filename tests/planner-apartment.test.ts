@@ -224,7 +224,7 @@ test("places four individual oak and black hooks in a 2-by-2 group on the existi
   assert.equal(hooks.rotation, 90);
   assert.equal(hooks.materialVariants?.main, "bath-hook-oak-natural");
   assert.equal(hooks.collision, "decorative");
-  assert.match(hooks.metadata?.source ?? "", /607039887632432.*118446205486445.*4er-Pack/);
+  assert.match(hooks.metadata?.source ?? "", /1005013057225398.*Style2.*4er-Pack/);
   assert.ok(hooks.metadata?.notes?.some((note) => /Vier einzelne.*2×2/.test(note)));
 });
 

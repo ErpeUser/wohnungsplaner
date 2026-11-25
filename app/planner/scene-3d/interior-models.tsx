@@ -25,7 +25,7 @@ function Handle({position,width=.128,vertical=false}:{position:Triple;width?:num
 export function RefinedInteriorModel({item}:{item:Item}){
   switch(item.catalogId){
     case 'bath-mat':case 'wc-mat':return <WaffleMat item={item}/>;
-    case 'bath-towel-hooks-wood-black':return <OakHooks item={item}/>;
+    case 'bath-towel-hooks-wood-black':return <Style2Hooks item={item}/>;
     case 'wc-paper-holder':return <WoodPaperHolder/>;
     case 'hall-tejo-art-plates':return <HallArtPlates/>;
     case 'hall-between-door-decor':return <HallBetweenDoors/>;
@@ -50,11 +50,16 @@ export function WaffleMat({item}:{item:Item}){
     <mesh name="woven-fringes" geometry={fringeGeometry} material={material("cotton-fringe")} castShadow receiveShadow dispose={null}/>
   </group>;
 }
-function OakHooks({item}:{item:Item}){
-  return <group name="four-hooks-horizontal-row">{hookCenters(item.size[0]).map((x,index)=><group key={index} position={[x,0,0]}>
-    <mesh position={[0,0,-.033]} rotation={[Math.PI/2,0,0]} castShadow receiveShadow><cylinderGeometry args={[.058,.06,.014,40]}/><primitive object={material('wood')} attach="material"/></mesh>
-    <mesh position={[0,-.006,.002]} rotation={[Math.PI/2,0,0]} castShadow><cylinderGeometry args={[.010,.010,.055,18]}/><primitive object={material('black-iron')} attach="material"/></mesh>
-    <mesh position={[0,.004,.032]} rotation={[-.22,0,-.08]} scale={[1,1,.22]} castShadow><capsuleGeometry args={[.015,.033,5,16]}/><primitive object={material('black-iron')} attach="material"/></mesh>
+function Style2Hooks({item}:{item:Item}){
+  // Style2's four individual round wooden discs have a vertical natural grain,
+  // darkened cut edges and short black stems with a gently tilted oval stop.
+  // The existing 20-cm spacing and assumed 12-cm diameter stay unchanged.
+  const plateMaterials=useMemo(()=>[material('bath-hook-style2-edge'),material('bath-hook-style2-wood'),material('bath-hook-style2-wood')],[]);
+  const black=material('bath-hook-style2-black');
+  return <group name="four-style2-hooks-horizontal-row">{hookCenters(item.size[0]).map((x,index)=><group key={index} name={'style2-hook-'+index} position={[x,0,0]}>
+    <mesh name="style2-round-natural-wood" position={[0,0,-.033]} rotation={[Math.PI/2,0,0]} material={plateMaterials} castShadow receiveShadow><cylinderGeometry args={[.058,.06,.014,48]}/></mesh>
+    <mesh name="style2-black-stem" position={[0,-.006,.002]} rotation={[Math.PI/2,0,0]} material={black} castShadow><cylinderGeometry args={[.010,.010,.055,24]}/></mesh>
+    <mesh name="style2-black-oval" position={[0,.004,.032]} rotation={[-.22,0,-.19]} scale={[1,1,.22]} material={black} castShadow receiveShadow><capsuleGeometry args={[.021,.027,8,24]}/></mesh>
   </group>)}</group>;
 }
 function WoodPaperHolder(){

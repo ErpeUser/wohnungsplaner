@@ -193,7 +193,6 @@ test.each(panels)("$id shows fine horizontal wood at the existing metre scale th
 });
 
 test.each([
-  ["bath-towel-hooks-wood-black", 4],
   ["hall-tejo-art-plates", 5],
   ["hall-between-door-decor", 5],
 ] as const)("%s retains its existing %i shared wooden surfaces", async (catalogId, count) => {
@@ -211,6 +210,28 @@ test.each([
       expect(material.map).toBe(sharedMap);
       expect(pixelHash(dataTexture(material))).toBe(SHARED_WOOD_HASH);
     });
+  } finally { await model.dispose(); }
+});
+
+test("Style2 bathroom hooks use their own vertical photo grain, four discs and oval black stops", async () => {
+  const item=source.builtIns.find(candidate=>candidate.catalogId==="bath-towel-hooks-wood-black")!;
+  const model=await renderObjects([item]);
+  const face=getInteriorMaterial("bath-hook-style2-wood"),edge=getInteriorMaterial("bath-hook-style2-edge"),black=getInteriorMaterial("bath-hook-style2-black");
+  try {
+    const discs: Mesh[]=[],stops: Mesh[]=[];
+    model.scene.traverse(object=>{
+      if(object instanceof Mesh && object.name==="style2-round-natural-wood")discs.push(object);
+      if(object instanceof Mesh && object.name==="style2-black-oval")stops.push(object);
+    });
+    expect(discs).toHaveLength(4);expect(stops).toHaveLength(4);
+    for(const disc of discs){expect(disc.material).toEqual([edge,face,face]);}
+    for(const stop of stops){expect(stop.material).toBe(black);}
+    expect(face.map?.name).toContain("1005013057225398-style2");
+    const metrics=pixelMetrics(dataTexture(face));
+    expect(metrics.mean[0]).toBeGreaterThan(180);
+    expect(metrics.directionRatio).toBeLessThan(1);
+    expect(pixelMetrics(dataTexture(edge)).mean[0]).toBeLessThan(metrics.mean[0]-20);
+    expect(pixelHash(dataTexture(shared))).toBe(SHARED_WOOD_HASH);
   } finally { await model.dispose(); }
 });
 
