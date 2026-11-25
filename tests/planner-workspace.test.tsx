@@ -61,9 +61,9 @@ describe("PlannerWorkspace", () => {
 
   test("lists both measured AliExpress rug variants with their prices and link", () => {
     render(<ShoppingListDrawer onClose={() => undefined} />);
-    for(const [name,size] of [["WC-Teppich · Beige mit Fransen","61 × 92 cm"],["Badteppich · Beige mit Fransen","61 × 122 cm"]]){
+    for(const [name,size,price] of [["WC-Teppich · Beige mit Fransen","61 × 92 cm","21,84"],["Badteppich · Beige mit Fransen","61 × 122 cm","27,20"]]){
       const product=screen.getByRole("heading",{name}).closest("article");
-      assert.ok(product);assert.ok(product.textContent?.includes(size));
+      assert.ok(product);assert.ok(product.textContent?.includes(size)); assert.ok(product.querySelector("strong")?.textContent?.includes(price)); assert.ok(product.querySelector("small")?.textContent?.includes(price));
       assert.equal(product.querySelector("a")?.getAttribute("href"),"https://de.aliexpress.com/item/1005013137520536.html");
     }
   });

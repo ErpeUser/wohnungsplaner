@@ -142,6 +142,6 @@ test('uses two Möbelix SIMPLE boards and one Wotan SKATE instead of an unpriced
 });
 
 test("replaces Temu set with both AliExpress variants and user prices",()=>{
-  for(const [id,room,size,price] of [["1005013137520536-wc","WC","61 × 92 cm",27.20],["1005013137520536-bad","Bad","61 × 122 cm",21.84]] as const){const rug=item(id);assert.equal(rug.room,room);assert.ok(rug.dimensions.includes(size));assert.equal(rug.price,price);assert.equal(rug.quantity,1);assert.equal(rug.url,"https://de.aliexpress.com/item/1005013137520536.html");}
+  for(const [id,room,size,price] of [["1005013137520536-wc","WC","61 × 92 cm",21.84],["1005013137520536-bad","Bad","61 × 122 cm",27.20]] as const){const rug=item(id);assert.equal(rug.room,room);assert.ok(rug.dimensions.includes(size));assert.equal(rug.price,price);assert.equal(rug.quantity,1);assert.equal(rug.url,"https://de.aliexpress.com/item/1005013137520536.html");}
   assert.equal(SHOPPING_ITEMS.some(i=>i.id==="606121368598635"),false);
 });
