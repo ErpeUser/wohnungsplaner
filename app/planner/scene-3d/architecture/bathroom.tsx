@@ -5,6 +5,7 @@ import { getPlannerMaterial } from "../materials.ts";
 import type { SceneObject } from "../scene-model.ts";
 import { SHARED_BOX, SHARED_CIRCLE, SHARED_CYLINDER, SHARED_MIRROR_LED, SHARED_PLANE, SHARED_TORUS } from "../shared/architecture-primitives.ts";
 import { MarbleTileSurface } from "./marble-tiles";
+import { WaffleMat } from "../interior-models.tsx";
 
 
 
@@ -143,35 +144,7 @@ export function BathRoundMirror({ item }: { item: SceneObject<PlannerBuiltIn> })
 
 
 export function BathMat({ item }: { item: SceneObject<PlannerBuiltIn> }) {
-  const [width, height, depth] = item.size;
-  const sand = getPlannerMaterial("temu-bath-rug-woven");
-  const fringe = getPlannerMaterial("bath-mat-fringe-sand");
-  const stitches = Math.max(22, Math.round(width / 0.018));
-  // True footprint comes from the Temu variants: 122×61 cm and 77×46 cm.
-  // The relief is a tiny 1-cm waffle lattice, not a large tile pattern.
-  return (
-    <group name={`waffle-rug-${item.catalogId}`}>
-      <RoundedBox args={[width * 0.985, height, depth * 0.95]} radius={0.009} smoothness={3} receiveShadow castShadow>
-        <primitive object={sand} attach="material" />
-      </RoundedBox>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, height / 2 + 0.002, 0]} scale={[width * 0.973, depth * 0.928, 1]} geometry={SHARED_PLANE} receiveShadow>
-        <primitive object={sand} attach="material" side={DoubleSide} />
-      </mesh>
-      {[-1, 1].flatMap((side) => Array.from({ length: stitches }, (_, index) => {
-        const x = -width / 2 + (index + 0.5) * width / stitches;
-        const length = 0.008 + (index % 4) * 0.0009;
-        return <mesh key={`fringe-${side}-${index}`} position={[x, 0.002, side * (depth / 2 + length * 0.24)]}
-          rotation={[(index % 3 - 1) * 0.16, 0, (index % 5 - 2) * 0.1]}
-          scale={[0.0022, 0.005, length]} geometry={SHARED_BOX} castShadow>
-          <primitive object={fringe} attach="material" />
-        </mesh>;
-      }))}
-      {[-1, 1].map((side) => <mesh key={`hem-${side}`} position={[0, height / 2 + 0.002, side * (depth / 2 - 0.014)]}
-        scale={[width * 0.96, 0.003, 0.012]} geometry={SHARED_BOX} receiveShadow>
-        <primitive object={fringe} attach="material" />
-      </mesh>)}
-    </group>
-  );
+  return <WaffleMat item={item} />;
 }
 
 

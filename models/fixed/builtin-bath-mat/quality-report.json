@@ -3,21 +3,27 @@
   "assetType": "fixed",
   "status": "reference-only",
   "identity": {
-    "displayName": "Badteppich · beige Baumwoll-Waffelstruktur · 122 × 61 cm",
+    "displayName": "Badteppich · beige Waffelstruktur mit Fransen · 122 × 61 cm",
     "category": "fixed-interior",
-    "sourceConfidence": "catalog-or-folder-id"
+    "sourceConfidence": "user-confirmed-product-and-photo"
   },
   "referenceSources": {
-    "manifestSourceUrls": [],
-    "linkEntries": [
-      "# Wohnungselement ohne externe Produktquelle; Teil der festen Wohnung/Architektur."
+    "manifestSourceUrls": [
+      "https://de.aliexpress.com/item/1005013137520536.html"
     ],
-    "status": "no-external-source-documented"
+    "linkEntries": [
+      "https://de.aliexpress.com/item/1005013137520536.html"
+    ],
+    "status": "user-supplied-product-link"
   },
   "dimensions": {
-    "status": "not-verified-in-repository",
-    "verified": [],
-    "estimated": []
+    "status": "user-confirmed-outer-dimensions",
+    "verified": [
+      "122 × 61 cm inklusive Fransen"
+    ],
+    "estimated": [
+      "Modellhöhe 1 cm; Webpitch und Fransenlänge bildbasiert"
+    ]
   },
   "assetFiles": [],
   "reconstruction": {
@@ -26,7 +32,9 @@
     "meshFiles": []
   },
   "materials": {
-    "declared": [],
+    "declared": [
+      "aliexpress-bath-rug-woven"
+    ],
     "pbrTexturesPresent": false,
     "textureFiles": []
   },
@@ -37,15 +45,14 @@
   },
   "checks": {
     "manifestJson": "passed",
-    "linkManifestConsistency": "no-url-to-synchronize",
+    "linkManifestConsistency": "synchronized",
     "geometry": "not-run-no-mesh",
     "materials": "not-run-no-pbr-textures",
     "viewerIntegration": "parametric-fallback-preserved"
   },
   "limitations": [
-    "No mesh asset is present in this model folder; existing runtime GLBs remain outside models/** and are not copied into this folder.",
-    "No repository PBR texture set is present; material fidelity remains runtime-defined.",
-    "Exact dimensions and product identity require source-specific verification before a photorealistic asset can be claimed."
+    "Parametric runtime geometry with albedo sampled from supplied product photo.",
+    "Outer dimensions confirmed; yarn thickness, exact height, pitch and fringe geometry are reconstructed from the photo."
   ],
-  "auditedAt": "2026-11-12"
+  "auditedAt": "2026-11-25"
 }

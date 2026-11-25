@@ -173,16 +173,16 @@ test("places the supplied woven rugs in the bathroom and WC at measured sizes", 
 
   assert.ok(bathMat);
   assert.ok(wcMat);
-  assert.deepEqual(bathMat.size, { width: 1.22, depth: 0.61, height: 0.018 });
-  assert.deepEqual(wcMat.size, { width: 0.77, depth: 0.46, height: 0.018 });
-  assert.deepEqual(wcMat.position, { x: -1.87, z: 5.25 });
-  assert.equal(wcMat.rotation, 0, "77-cm-Seite liegt quer im WC");
-  assert.equal(bathMat.materialVariants?.main, "temu-bath-rug-woven");
-  assert.equal(wcMat.materialVariants?.main, "temu-bath-rug-woven");
+  assert.deepEqual(bathMat.size, { width: 1.22, depth: 0.61, height: 0.01 });
+  assert.deepEqual(wcMat.size, { width: 0.92, depth: 0.61, height: 0.01 });
+  assert.deepEqual(wcMat.position, { x: -1.87, z: 5.15 });
+  assert.equal(wcMat.rotation, 90, "92-cm-Seite liegt längs im WC");
+  assert.equal(bathMat.materialVariants?.main, "aliexpress-bath-rug-woven");
+  assert.equal(wcMat.materialVariants?.main, "aliexpress-bath-rug-woven");
   assert.equal(bathMat.collision, "decorative");
   assert.equal(wcMat.collision, "decorative");
   assert.ok(bathMat.metadata?.notes?.some((note) => /122.*61 cm/i.test(note)));
-  assert.ok(wcMat.metadata?.notes?.some((note) => /77.*46 cm/i.test(note)));
+  assert.ok(wcMat.metadata?.notes?.some((note) => /92.*61 cm/i.test(note)));
 });
 
 test("keeps the chosen 180 x 250 cm Temu vintage rug at the 358 cm wall", () => {
@@ -206,7 +206,7 @@ test("keeps the bathroom rug aligned like the original plan graphic and records 
   assert.ok(curtain);
   assert.deepEqual(bathMat.position, { x: -1.25, z: 8.8 });
   assert.equal(bathMat.rotation, 90);
-  assert.equal(bathMat.materialVariants?.main, "temu-bath-rug-woven");
+  assert.equal(bathMat.materialVariants?.main, "aliexpress-bath-rug-woven");
   assert.deepEqual(curtain.size, { width: 1.8, depth: 0.018, height: 2 });
   assert.equal(curtain.materialVariants?.main, "temu-shower-curtain-beige");
   assert.equal(curtain.elevation, 0.16, "2-m-Vorhang hängt unter der 218-cm-Stange");

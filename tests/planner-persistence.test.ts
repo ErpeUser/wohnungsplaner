@@ -323,9 +323,9 @@ test("migrates saved WC rugs from marketing-image material to seamless waffle fi
   bathRug.materialVariants = { main: "bath-mat-shaggy-cream" };
   const stored = new MemoryStorage({ [PLANNER_STORAGE_KEY]: JSON.stringify(old) });
   const upgraded = createLocalStoragePlannerRepository(stored, fixedClock).load();
-  assert.equal(upgraded.document.builtIns.find((item) => item.id === "builtin-wc-mat")?.materialVariants?.main, "temu-bath-rug-woven");
-  assert.equal(upgraded.document.builtIns.find((item) => item.id === "builtin-bath-mat")?.materialVariants?.main, "temu-bath-rug-woven");
-  assert.equal(upgraded.document.builtIns.find((item) => item.id === "builtin-wc-mat")?.rotation, 0);
+  assert.equal(upgraded.document.builtIns.find((item) => item.id === "builtin-wc-mat")?.materialVariants?.main, "aliexpress-bath-rug-woven");
+  assert.equal(upgraded.document.builtIns.find((item) => item.id === "builtin-bath-mat")?.materialVariants?.main, "aliexpress-bath-rug-woven");
+  assert.equal(upgraded.document.builtIns.find((item) => item.id === "builtin-wc-mat")?.rotation, 90);
   assert.ok(upgraded.warnings.some((warning) => /aktualisiert/.test(warning)));
   assert.equal(upgraded.document.placements.length, old.placements.length, "no furniture is removed");
 });

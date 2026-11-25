@@ -5,7 +5,7 @@ import {BufferGeometry,Float32BufferAttribute,Uint32BufferAttribute,Shape,Vector
 import type {PlannerBuiltIn} from '../domain/types.ts';
 import type {SceneObject} from './scene-model.ts';
 import {HALL_REFERENCE,hookCenters,KITCHEN_REFERENCE,INTERIOR_REVISION} from '../domain/room-refinement.ts';
-import {createWaffleSurface,createKitchenTiles,worktopSlabs,sinkProfile,baseShellPanels,type InteriorMesh} from './interior-geometry.ts';
+import {createWaffleSurface,createWaffleFringe,WAFFLE_FRINGE,createKitchenTiles,worktopSlabs,sinkProfile,baseShellPanels,type InteriorMesh} from './interior-geometry.ts';
 import {getInteriorMaterial as material} from './interior-materials.ts';
 type Item=SceneObject<PlannerBuiltIn>;
 type Triple=[number,number,number];
@@ -39,9 +39,15 @@ export function RefinedInteriorModel({item}:{item:Item}){
     default:return null;
   }
 }
-function WaffleMat({item}:{item:Item}){
-  const [w,h,d]=item.size,data=useMemo(()=>createWaffleSurface(w,d,h),[w,d,h]),geometry=useBufferGeometry(data);
-  return <group name={`physical-waffle-${item.id}`}><Block size={[w,h*.24,d]} position={[0,-h*.38,0]} finish="cotton-edge" radius={.002}/><mesh geometry={geometry} material={material('cotton')} castShadow receiveShadow dispose={null}/></group>;
+export function WaffleMat({item}:{item:Item}){
+  const [w,h,d]=item.size,bodyW=w-2*WAFFLE_FRINGE,bodyD=d-2*WAFFLE_FRINGE;
+  const data=useMemo(()=>createWaffleSurface(bodyW,bodyD,h),[bodyW,bodyD,h]),geometry=useBufferGeometry(data);
+  const fringe=useMemo(()=>createWaffleFringe(w,d,h),[w,d,h]),fringeGeometry=useBufferGeometry(fringe);
+  return <group name={"physical-waffle-"+item.id}>
+    <Block size={[bodyW,h*.24,bodyD]} position={[0,-h*.38,0]} finish="cotton-edge" radius={.002}/>
+    <mesh geometry={geometry} material={material("cotton")} castShadow receiveShadow dispose={null}/>
+    <mesh name="woven-fringes" geometry={fringeGeometry} material={material("cotton-fringe")} castShadow receiveShadow dispose={null}/>
+  </group>;
 }
 function OakHooks({item}:{item:Item}){
   return <group name="four-hooks-horizontal-row">{hookCenters(item.size[0]).map((x,index)=><group key={index} position={[x,0,0]}>

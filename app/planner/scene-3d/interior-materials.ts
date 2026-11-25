@@ -26,8 +26,9 @@ function backsplashWoodTexture(){
 export function getInteriorMaterial(kind:string):MeshStandardMaterial{
   const cached=cache.get(kind);if(cached)return cached;let material:MeshStandardMaterial;
   switch(kind){
-    case 'cotton':{const generated=createWafflePixels(512);material=new MeshPhysicalMaterial({color:'#ffffff',roughness:.97,metalness:0,sheen:.6,sheenColor:'#e2d4bd',sheenRoughness:.9,map:pixels(generated.color,generated.size,generated.size,true,'interior-waffle-albedo'),bumpMap:pixels(generated.height,generated.size,generated.size,false,'interior-cotton-linear-microheight'),bumpScale:.00055});break;}
-    case 'cotton-edge':material=new MeshStandardMaterial({color:'#c9b18d',roughness:1});break;
+    case 'cotton':{const generated=createWafflePixels(512);material=new MeshPhysicalMaterial({color:'#ffffff',roughness:.97,metalness:0,sheen:.35,sheenColor:'#ead7b5',sheenRoughness:.9,map:pixels(generated.color,generated.size,generated.size,true,'photo-waffle-aliexpress-1005013137520536'),bumpMap:pixels(generated.height,generated.size,generated.size,false,'interior-cotton-linear-microheight'),bumpScale:.00055});break;}
+    case 'cotton-edge':material=new MeshStandardMaterial({color:'#d9c19d',roughness:1});break;
+    case 'cotton-fringe':material=new MeshStandardMaterial({color:'#e5cfaa',roughness:1,side:DoubleSide,vertexColors:true});break;
     case 'wood':material=new MeshPhysicalMaterial({color:'#ffffff',roughness:.72,clearcoat:.06,map:woodTexture()});break;
     // Darker warm oak only for the requested paper-holder model.
     case 'wc-paper-holder-wood':material=new MeshPhysicalMaterial({

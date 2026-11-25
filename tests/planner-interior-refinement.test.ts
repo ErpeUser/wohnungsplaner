@@ -11,7 +11,7 @@ test('bath runner moves toward the basin, keeping the supplied 122 x 61 x 1 cm',
   const item=get('builtin-bath-mat');assert.deepEqual(item.position,{x:-1.25,z:8.99});assert.equal(item.rotation,90);assert.deepEqual(item.size,{width:1.22,depth:.61,height:.01});
 });
 test('WC mat extends from the toilet rather than across the room',()=>{
-  const item=get('builtin-wc-mat');assert.equal(item.rotation,90);assert.deepEqual(item.position,{x:-1.87,z:5.15});assert.equal(item.size.width,.77);assert.equal(item.size.depth,.46);
+  const item=get('builtin-wc-mat');assert.equal(item.rotation,90);assert.deepEqual(item.position,{x:-1.87,z:5.15});assert.equal(item.size.width,.92);assert.equal(item.size.depth,.61);
 });
 test('paper holder remains on opposite WC wall but uses the darker two-ledge AliExpress source',()=>{
   const item=get('builtin-wc-paper-holder');
@@ -44,7 +44,7 @@ test('reapplication is idempotent',()=>{const once=refineRoomLayout(DEFAULT_APAR
 test('other apartments remain untouched',()=>{const other={...DEFAULT_APARTMENT_DOCUMENT,id:'another-flat'};assert.equal(refineRoomLayout(other),other);});
 test('refined plan passes the actual document schema',()=>assert.doesNotThrow(()=>parsePlannerDocument(refineRoomLayout(DEFAULT_APARTMENT_DOCUMENT))));
 test('rugs use physical millimetre relief with finite normalized normals',()=>{
-  for(const [width,depth] of [[1.22,.61],[.77,.46]]){
+  for(const [width,depth] of [[1.22,.61],[.92,.61]]){
     const mesh=createWaffleSurface(width,depth,.01);let lo=Infinity,hi=-Infinity;
     for(let i=0;i<mesh.positions.length;i+=3){lo=Math.min(lo,mesh.positions[i+1]);hi=Math.max(hi,mesh.positions[i+1]);assert.ok(Math.abs(Math.hypot(...mesh.normals.slice(i,i+3))-1)<1e-5);assert.ok(mesh.normals[i+1]>0);}
     assert.ok(hi-lo>.003);assert.ok(mesh.positions.every(Number.isFinite));assert.ok(mesh.indices.every(i=>i<mesh.positions.length/3));

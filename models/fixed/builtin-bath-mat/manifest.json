@@ -1,10 +1,14 @@
 {
   "id": "builtin-bath-mat",
-  "displayName": "Badteppich · beige Baumwoll-Waffelstruktur · 122 × 61 cm",
+  "displayName": "Badteppich · beige Waffelstruktur mit Fransen · 122 × 61 cm",
   "category": "fixed-interior",
   "status": "reference-only",
-  "sourceUrls": [],
-  "materials": [],
+  "sourceUrls": [
+    "https://de.aliexpress.com/item/1005013137520536.html"
+  ],
+  "materials": [
+    "aliexpress-bath-rug-woven"
+  ],
   "variants": [
     "default"
   ],

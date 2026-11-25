@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createWaffleSurface, createWafflePixels, createKitchenTiles, worktopSlabs, baseShellPanels, sinkProfile, FABRIC_TILE_METRES } from '../app/planner/scene-3d/interior-geometry.ts';
+import { createWaffleSurface, createWaffleFringe, createWafflePixels, createKitchenTiles, worktopSlabs, baseShellPanels, sinkProfile, FABRIC_TILE_METRES } from '../app/planner/scene-3d/interior-geometry.ts';
 
-for (const [name,w,d] of [['bath',1.22,.61],['wc',.77,.46]] as const) {
+for (const [name,w,d] of [['bath',1.22,.61],['wc',.92,.61]] as const) {
  test(`${name} rug has millimetre relief within the supplied footprint and 1-cm height`,()=>{
   const g=createWaffleSurface(w,d,.01);let min=Infinity,max=-Infinity;
   for(let i=0;i<g.positions.length;i+=3){const [x,y,z]=g.positions.slice(i,i+3);assert.ok(Number.isFinite(x+y+z));assert.ok(Math.abs(x)<=w/2+1e-6);assert.ok(Math.abs(z)<=d/2+1e-6);assert.ok(Math.abs(y)<=.005+1e-6);min=Math.min(min,y);max=Math.max(max,y);}
@@ -48,4 +48,11 @@ test('invalid cutouts and extreme rug dimensions do not allocate broken geometry
  assert.throws(()=>createWaffleSurface(NaN,.61),RangeError);
  assert.throws(()=>createWaffleSurface(100,.61),RangeError);
  assert.throws(()=>createKitchenTiles(2,1,0,0,.32,.4),RangeError);
+});
+
+test("Fringe geometry stays inside the confirmed overall dimensions",()=>{
+  for(const [w,d] of [[.92,.61],[1.22,.61]]){
+    const g=createWaffleFringe(w,d,.01);assert.ok(g.positions.length>1000);
+    for(let i=0;i<g.positions.length;i+=3){assert.ok(Math.abs(g.positions[i])<=w/2+1e-6);assert.ok(Math.abs(g.positions[i+2])<=d/2+1e-6);}
+  }
 });

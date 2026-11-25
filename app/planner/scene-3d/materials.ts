@@ -137,13 +137,13 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
     material.bumpMap = asBumpMap(pile);
     material.bumpScale = materialId === "rug-rabbit-pile" ? 0.024 : 0.014;
     material.needsUpdate = true;
-  } else if (materialId === "temu-bath-rug-woven") {
+  } else if (materialId === "aliexpress-bath-rug-woven" || materialId === "temu-bath-rug-woven") {
     const waffle = createBathroomWaffleTexture();
-    waffle.repeat.set(7.6, 3.8);
+    waffle.repeat.set(15.25, 7.625);
     material.color.set("#ffffff");
     material.map = waffle;
     material.bumpMap = asBumpMap(waffle);
-    material.bumpScale = 0.010;
+    material.bumpScale = 0.001;
     material.needsUpdate = true;
   } else if (materialId === "temu-shower-curtain-beige") {
     const linen = createShowerCurtainTextileTexture();

@@ -1,0 +1,48 @@
+/** Cropped, rectified and edge-blended pixels from the supplied product photo, AliExpress 1005013137520536.
+ * Four waffle cells per repeat, 48 x 48 pixels, 64 RGB samples. No marketing-photo plane. */
+const SIZE = 48;
+const palette = Uint8Array.from(atob("/+/O/uvK/erI/ufI+ufF/OTE+uTD++LB9uLA+d+/9t+/9N+99d289dq78N2779m38da37ta169W17dOy69Cx6NOx59Cv5c6t5sur4cup4cen4MOj3Mel28Oi28Gg1sGg2L6d1rqa0bqZ0LiX0LeWz7STyrOSybCPx6yMwquKwamIv6WEvqKBuqOBuKB+up58tp18tpl4sZp3r5d0rpRyrJFuqJFwp45upoxqoYlnoIVkm4NhmoBfln1bkndWiW5O"), c => c.charCodeAt(0));
+const indices = Uint8Array.from(atob(
+  "Ig4DCg4YIB4eGBMgIRAJERoiIBodJx0kHA8ECAQBCwgPBwwMChATDhcJEhYKBBIZJhkXIykkICAhGAkhFBAYGxskKCUqKBodCw4O" +
+  "CwsPDwsZHCQkHRMDCgMMDRAQFCgmDg8fIiYoIR44NCQmFA0TIxslJycwKSUcCBkfIikrKiouNDIpJyAeJBwdGh4oKCcfAAAZIys0" +
+  "Kyc4NxkKDQEJGBghHiUkISIVAQgOKTMyMjguNTUjFBcrJikrMiovJiEXBgYIFS44ODEhHgALEgcDEyQvJy8zKhwOBAAfKS42MjMu" +
+  "MiIMCg8YIyspJSQoLSIVDw4ACy01NDMjFgEOBhUGETE6MTo2JwQVEgEODjM+NDI2LgwHDAwRGSceMTY0JwwSHxwCDR4zMDAlFwMG" +
+  "Dh0GHTo+PD4wEgIZCwECIi0oJzMmDgEPBw8WHT0xOz4yDAMGLR8EKDA7MisdAgQSCAYKKDE8NTcjAwYcFgYIFicuODsjCBUcBhwZ" +
+  "Izw7PjcYBwYPFgwLKzM0MjMtBgoSAAEWLzA0MToqEhIrGQEBGT49PDsaACcfASMoIzc4NC4LCgMGDBYgODkzLTMtEQQZCworPTQn" +
+  "LDknDgEcCAAOPD87OTsmBB8RBysvNDspOTMKFhEGDBEpNi4hIC0lHAYVBAY2Pzo4NjQiGQEOBAEZNjM5OTsrFhcMDCgsMjMtOzYe" +
+  "DA8MBgcZEwkBFBQREgYGABIsJyYkHykSEgECCwEZOSoiIhwPCgcHByEmIyYwKjcnAw0HGgoHDQ4XFhIXFR0iGhcKAwEFBBUGFhUV" +
+  "GRchKQsAAQoHDxkTFBYPCwQVChIWCwwaDxgYISsnJCkmGSoyJg8DERUXFRYaJB8fHBoGAwYSFRkcICYhEwsODg4WFRIhIh4iCRki" +
+  "LjAtLi4tLjIfDhwdJCkmJyIiIh0jEhQPGyckHiEpJSMaCR0mIiAfKiYfIicmBA8aKCotMCQmLSYOHTYpJyYULSIiLioiARwqMTEv" +
+  "LzE0JB0OAhokJR0WJSIhLjQiDBYdHwoNFBouIwgXJisuNjQaNjA2PiMDBiovMS81LDU0JR0HAhkpMCYRLTMtOCoRER8wNCYrLjk3" +
+  "Bg4XBCA6PjspOzs2MgoFFCYvNTQ0JSwxGw8MDB0tODgrPzkyKg8HBhcrPjo8PT0mAxcMASQ6LTArNzQrIgMNGCAoLyckJTElDAQV" +
+  "BxEpKjk0NzQ3JgEGDhcmOjc+PjoWBCMOBjI6NDc5OS4gCwEHESAoLzU6OjEUBwgiFBQoKzctOTYrCwIMFREtPzw7NDYaCiYXFjQ+" +
+  "PTY+NyQAAAQIERYbNT49NS4MBAIWDREgKzk2OSsfAAYXAwoZOz88LjcZARIWAyk5Pjo+MB8EDhcIAg8nPjs6LzwPAgQSBiIuPj83" +
+  "NzAcABIXChcmPz4/OTcfAQMGDSs8PjEwJiMICwsHDBUoNDk9NDQRCgYHCicyNjc7PSkZAQsQFx03PDk7MjYWCQ0FDBocFhQWFxcB" +
+  "Ag4XBgQdKTIoHhYFCQUMAx40KSs4MyMXBwkUBREnKR8fEhEFEBYTGA0DCQkDDAkHBgUMDxELFRMJAwkYGhoeEB4rMCMWGg4GDwwM" +
+  "DxQKAwADAxIZGB0hIhQQBxQQGR0dIhYiIhcJBwwgHhoeJSglGBAQEQUDBwwQExMQHwoDEhgaISQhITEpGx0aISwpNywkKyouIBkd" +
+  "JiQoIRohJycgHhAQCRodGBcTGicmDRohIhgUIR4YJTAmFBQoND05OjM0OTAtFhYlLhgWIB4nJS0kDxMeGiYkIRMYJyoaEBgkJyAb" +
+  "IBsoMycUAxAiLywlLCoxNCYOBx4xMyAgJy04JyATBRkiIyYgJBgsNSgHCRMsOTMxPzo6MigRAxYpMSwgKCUsNRcABxoxPjQsNTk7" +
+  "LA4VIxkZKy4hLygsLBoHBQ0vPj4xOjUvLR8DAxkqPDgvPjg6KAwCDxkuPTk9PDQ4HQIIIxwcKi4lMywvJQ0DEBAsNDs0ODg1Kw0B" +
+  "CRQhOj8/Pj46JRMJCgstOzQ9Pj0jCxUAIiYYKywsMiweDAwTGhM0PTw4PjgjEQIPERMgNTU0Ki8pEAoIAgQrNy43OisEDhcXMy0c" +
+  "MzgyKy8YAyEeDR4xPTg7PDchGBATCQkTKCw9OT0qCgYHDw8tOzY+NjAICB8VEicrKzU9ND0jByEQExghPj81NDQhGg0MDBEnPz8/" +
+  "OjknDQUIEQQmPTw+OjYODwgEEiYtND8/Pj4aDRsHGBo5Pj88OzUlGBANDBE8Pzk7NjYwGAMMCAAfPjw9OzAXDgAODx0tPD49PzgU" +
+  "DRAQDSU9MjAyKBgYEAcJAxE1OSowLicaDQMDAw4nKyQfFQ4CAggPFSEsOjQrKhgJBQkYBxgjGhgKEREUHhsYExMaGRIPDw8KEhcV" +
+  "FxwZFw4IDxUVHycjHBsbIR0SEBAUGBQQEAUXGRQKGxoYHisoFhQUFBYSGRwdJyUmHhUVIBkXJCYiIi0pFxMZExggJSUiJCIaBhgn" +
+  "Ky0aJygiLjAaDR4hICAYJCYcICMZFR0jJxYZICQlKSsnDR8kIiYgIRgUJRwSARMmOj0wOT07PCMDFCEeKSAeGCEWHiEKCxYjNCAh" +
+  "Jyo1NikVAB8pJSggMSUmJw8EAxElOTs+PTwyIAcDFB4lMiAkGDMzJxgAAAEcOTY+ODk5NB8EASQoLTwsPDImGhIDBAMVNjw/NjMz" +
+  "GAMQGBoWKSs0Mz88IAAOAQEOMDk6ODowJwoLAR8wMD0zNC0iFwsDBA4cNi0wMS8oBwMNGA0dPDU9PDUkCA4mBAsZKTo1PTk3HAsS" +
+  "ABcuJzEqMCocBAEADxIdNjM7PDQlBwUNGxAsPjQ9PjMXABckBgEOJzk6OTcgAAscCxclJyAoOC4tDgAIAgQnOzY9OjAdBwcJFA0o" +
+  "NyszOSYLAA4VBAgdKzc7NDYfBAQkEhcsNzU5NzAoAAEKAhI2Pjo3KRgNBxMNDBQ0KA8UFAMNDgoGCxInMzI0Lh8ZDgQZESQ3ODM2" +
+  "OiQIAAEDDxIfKh0IAwwTBxYbGRQcCQMNFBoiHRMXDw4cJyooGQQaEQEDBR0uJS4uHwECBgQE"
+), c => c.charCodeAt(0));
+
+export function sampleWaffleReference(u: number, v: number): [number, number, number] {
+  const x = ((u % 1 + 1) % 1) * SIZE, y = ((v % 1 + 1) % 1) * SIZE;
+  const ix = Math.floor(x), iy = Math.floor(y), fx = x - ix, fy = y - iy;
+  const at = (i: number, j: number, k: number) => palette[indices[(j % SIZE) * SIZE + i % SIZE] * 3 + k];
+  const channel = (k: number) => Math.round(
+    (at(ix, iy, k) * (1 - fx) + at(ix + 1, iy, k) * fx) * (1 - fy)
+    + (at(ix, iy + 1, k) * (1 - fx) + at(ix + 1, iy + 1, k) * fx) * fy,
+  );
+  return [channel(0), channel(1), channel(2)];
+}

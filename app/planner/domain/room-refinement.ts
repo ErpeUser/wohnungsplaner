@@ -38,15 +38,15 @@ const kitchenEvidence:PlannerMetadata={source:'BD19929-2.PDF, S. 1-4; Nutzerauft
   'Bestaetigte Planmasse: 2425/2562 mm Zeilen; Sockel 120, Korpus 750, Arbeitsplatte 40, Rueckwand 560 mm; Oberschraenke UK 1470 / OK 2220 mm.',
   'Nordkette 1766 + 659 bzw. 1768 + 657 mm: 2 mm Plan-/Anschlusstoleranz. Keine erfundene dickere Abschlusswange.',
   'Vorhandene lichte Nordbreite 2380 mm weicht 45 mm vom Lieferplan ab. Module bleiben masshaltig; 600-mm-Kuehlschrank wird ohne Wanddurchdringung eingepasst. Verbindliches Raumaufmass bleibt offen.']};
-const bathEvidence:PlannerMetadata={source:'Nutzer-Massbild; Temu Art. 606121368598635',confidence:'confirmed',notes:[INTERIOR_REVISION,
-  '122 x 61 cm bzw. 77 x 46 cm; Hoehe 1 cm laut Massbild. Position und Ausrichtung nach Nutzerauftrag.']};
+const bathEvidence:PlannerMetadata={source:'Nutzerfoto und bestätigte Maße; AliExpress Art. 1005013137520536',confidence:'confirmed',notes:[INTERIOR_REVISION,
+  'Bad 122 × 61 cm, WC 92 × 61 cm inklusive Fransen; Webpitch und Modellhöhe 1 cm bildbasiert, Position und Ausrichtung nach Nutzerauftrag.']};
 type Update=Partial<PlannerBuiltIn>;
 const p=(x:number,z:number)=>({x,z});
 const s=(width:number,depth:number,height:number)=>({width,depth,height});
 const k=(update:Update):Update=>({...update,elevation:(update.elevation??0)+FINISHED_FLOOR_Y,metadata:kitchenEvidence});
 export const INTERIOR_UPDATES:Readonly<Record<string,Update>>={
-  'builtin-bath-mat':{position:p(-1.25,8.99),size:s(1.22,.61,.01),rotation:90,elevation:.0125,collision:'decorative',materialVariants:{main:'temu-bath-rug-woven'},metadata:bathEvidence,label:'Badteppich · beige Waffelstruktur · 122 × 61 cm · am Waschbecken'},
-  'builtin-wc-mat':{position:p(-1.87,5.15),size:s(.77,.46,.01),rotation:90,elevation:.0125,collision:'decorative',materialVariants:{main:'temu-bath-rug-woven'},metadata:bathEvidence,label:'WC-Teppich · beige Waffelstruktur · 77 × 46 cm · längs vor dem WC'},
+  'builtin-bath-mat':{position:p(-1.25,8.99),size:s(1.22,.61,.01),rotation:90,elevation:.0125,collision:'decorative',materialVariants:{main:'aliexpress-bath-rug-woven'},metadata:bathEvidence,label:'Badteppich · beige Waffelstruktur mit Fransen · 122 × 61 cm · am Waschbecken'},
+  'builtin-wc-mat':{position:p(-1.87,5.15),size:s(.92,.61,.01),rotation:90,elevation:.0125,collision:'decorative',materialVariants:{main:'aliexpress-bath-rug-woven'},metadata:bathEvidence,label:'WC-Teppich · beige Waffelstruktur mit Fransen · 92 × 61 cm · längs vor dem WC'},
   'builtin-bath-towel-hook-rail':{position:p(-.20,8.82),size:s(.72,.09,.12),rotation:90,elevation:1.49,catalogId:'bath-towel-hooks-wood-black',materialVariants:{main:'bath-hook-oak-natural'},collision:'decorative',label:'4 einzelne Rundhaken · Naturholz / Schwarz · nebeneinander',metadata:{source:'Temu Art. 607039887632432; SKU 118446205486445; 4er-Pack',confidence:'estimated',notes:[INTERIOR_REVISION,'Vier einzelne Haken auf einer Hoehe, Achsabstand 20 cm; Mittelpunkt 155 cm ueber Boden. Scheibendurchmesser 12 cm und Montagemasse sind Darstellungsannahmen.']}},
   'builtin-wc-paper-holder':{position:p(-2.285,4.88),rotation:270,size:s(.33,.15,.25),elevation:.68,catalogId:'wc-paper-holder',materialVariants:{main:'wc-holder-solid-oak'},collision:'decorative',label:'Dunklere Massivholz-Doppelablage mit Papierhalter · gegenüberliegende WC-Wand',metadata:{source:'Nutzerfotos; AliExpress Art. 1005013624521211',confidence:'estimated',notes:[INTERIOR_REVISION,'Zwei versetzte Holzablagen je 16,99 × 13,97 cm; Eisenarm 14,98 cm; Verbindungssteg 9,39 cm laut Produktbild. Dunklerer warmer Holzton, mattschwarzer Halter.', 'Gegenueberliegende WC-Seitenwand, nach innen orientiert; 33 × 15 × 25 cm Gesamtmass und Montagehoehe bleiben Schaetzwerte.']}},
   'builtin-kitchen-base-west':k({position:p(.3615,5.136),size:s(1.912,.603,.87),rotation:-90,label:'Gerätezeile · 450 + 150 + 600 + 600 + 112 mm bis zur Ecke'}),

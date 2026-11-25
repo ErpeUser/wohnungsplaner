@@ -59,17 +59,13 @@ describe("PlannerWorkspace", () => {
     assert.equal(product.querySelector("img")?.getAttribute("src"), path);
   });
 
-  test("lists the measured bathroom and WC rug set with the supplied Temu link", () => {
+  test("lists both measured AliExpress rug variants with their prices and link", () => {
     render(<ShoppingListDrawer onClose={() => undefined} />);
-
-    const heading = screen.getByRole("heading", { name: "Badematten-Set Waffelstruktur Beige" });
-    const product = heading.closest("article");
-    assert.ok(product);
-    assert.match(product.textContent ?? "", /Bad \/ WC.*122.*61 cm.*77.*46 cm/);
-    assert.equal(
-      product.querySelector("a")?.getAttribute("href"),
-      "https://www.temu.com/goods.html?goods_id=606121368598635&sku_id=102680185861178",
-    );
+    for(const [name,size] of [["WC-Teppich · Beige mit Fransen","61 × 92 cm"],["Badteppich · Beige mit Fransen","61 × 122 cm"]]){
+      const product=screen.getByRole("heading",{name}).closest("article");
+      assert.ok(product);assert.ok(product.textContent?.includes(size));
+      assert.equal(product.querySelector("a")?.getAttribute("href"),"https://de.aliexpress.com/item/1005013137520536.html");
+    }
   });
 
   test("lists the selected beige 180 by 200 cm shower curtain", () => {

@@ -1,6 +1,7 @@
 import { Color, DataTexture, LinearFilter, LinearMipmapLinearFilter, NoColorSpace, RepeatWrapping, RGBAFormat, SRGBColorSpace, Texture, TextureLoader, UnsignedByteType } from "three";
 import { plannerAssetUrl } from "../asset-url.ts";
 import { RECIPES } from "./recipes.ts";
+import { sampleWaffleReference } from "../waffle-photo-reference.ts";
 
 
 const textureCache = new Map<string, Texture>();
@@ -22,21 +23,9 @@ export function asBumpMap(texture: Texture | null) {
 
 
 
-/** 1-cm waffles sampled from the user photo: raised sand yarn borders and
- * a slightly darker recessed square center.  A single local procedural texture
- * works in the 2D/3D pipeline without downloading third-party image assets. */
+/** Four-cell repeat sampled directly from the supplied product photo. */
 export function createBathroomWaffleTexture() {
-  return createProductDataTexture("generated:temu-bath-rug-waffle-1cm", 256, (x, y) => {
-    const cell = 16; // 16 cells across the texture, sized as a real small waffle weave
-    const u = x % cell;
-    const v = y % cell;
-    const edge = Math.min(u, cell - 1 - u, v, cell - 1 - v);
-    const raised = edge < 3;
-    const yarn = Math.sin(x * 1.36) * 3.8 + Math.cos(y * 1.45) * 3.6;
-    const grain = ((x * 19 + y * 29 + x * y * 3) % 11 - 5) * 0.66;
-    const relief = raised ? 8 : -15;
-    return [198 + relief + yarn + grain, 167 + relief + yarn * 0.93 + grain, 131 + relief + yarn * 0.72 + grain];
-  });
+  return createProductDataTexture("photo:aliexpress-waffle-1005013137520536", 256, (x,y) => sampleWaffleReference(x/256,y/256));
 }
 
 

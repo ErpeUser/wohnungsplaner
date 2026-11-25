@@ -4,14 +4,14 @@ import { DataTexture, NoColorSpace } from "three";
 
 import { getPlannerMaterial } from "../app/planner/scene-3d/materials.ts";
 
-test("WC and bathroom rugs use a generated waffle fabric, never the advertising graphic", () => {
-  const material = getPlannerMaterial("temu-bath-rug-woven");
-  assert.ok(material.map instanceof DataTexture, "rug must use a procedural pixel texture");
-  assert.match(material.map.name, /generated:temu-bath-rug-waffle-1cm/);
+test("WC and bathroom rugs use rectified reference-photo weave, not the full advertising graphic", () => {
+  const material = getPlannerMaterial("aliexpress-bath-rug-woven");
+  assert.ok(material.map instanceof DataTexture, "rug must use a sampled pixel texture");
+  assert.match(material.map.name, /photo:aliexpress-waffle-1005013137520536/);
   assert.notEqual(material.bumpMap, material.map, "height sampling must not mutate the sRGB color map");
   assert.equal(material.bumpMap?.colorSpace, NoColorSpace);
-  assert.equal(material.map.repeat.x, 7.6);
-  assert.equal(material.map.repeat.y, 3.8);
+  assert.equal(material.map.repeat.x, 15.25);
+  assert.equal(material.map.repeat.y, 7.625);
   assert.equal(material.color.getHexString(), "ffffff", "no double tinting of beige pixel data");
   assert.doesNotMatch(material.map.name, /\.png|Extra Water Absorbent/i);
 });

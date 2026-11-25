@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { SHOPPING_ITEMS, shoppingSubtotal } from '../app/planner/workspace/shopping-items.ts';
-const existingIds = ['kitchen-fridge-60cm','kitchen-oven-60cm','kitchen-induction-hob-60cm','kitchen-hood-60cm','kitchen-sink-60cm','184900692R','184900692G','1005012515662602','601104051124011','601100062257123','607039887632432','800001233737','601099532250952','607246280935328','1005013624521211','606121368598635','1005012445521181','1005013379584796','607199740937372','2778003504','2858001801','1634004202','601099691023748','601104781298502','601099526356869','z1-deko-bilder','z1-deko-vorhang','z1-deko-licht','001555006211','007326000308','z1-deko-nische','z1-deko-wandleuchten','z1-deko-schrankboxen','z1-deko-pflanze','z1-deko-textilien','z1-deko-kleinteile','z1-deko-pendelleuchte'];
+const existingIds = ['kitchen-fridge-60cm','kitchen-oven-60cm','kitchen-induction-hob-60cm','kitchen-hood-60cm','kitchen-sink-60cm','184900692R','184900692G','1005012515662602','601104051124011','601100062257123','607039887632432','800001233737','601099532250952','607246280935328','1005013624521211','1005013137520536-wc','1005013137520536-bad','1005012445521181','1005013379584796','607199740937372','2778003504','2858001801','1634004202','601099691023748','601104781298502','601099526356869','z1-deko-bilder','z1-deko-vorhang','z1-deko-licht','001555006211','007326000308','z1-deko-nische','z1-deko-wandleuchten','z1-deko-schrankboxen','z1-deko-pflanze','z1-deko-textilien','z1-deko-kleinteile','z1-deko-pendelleuchte'];
 const item=(id:string)=>{const found=SHOPPING_ITEMS.find(i=>i.id===id);assert.ok(found,id);return found;};
 test('preserves every existing shopping article without duplicate identities',()=>{
  for(const id of existingIds)assert.equal(SHOPPING_ITEMS.filter(i=>i.id===id).length,1,id);
@@ -54,8 +54,8 @@ test('includes the exact selected Temu A8447 180 x 250 cm vintage rug',()=>{
 });
 test('adds the purchased living room rug to the known-priced subtotal',()=>{
  const total=shoppingSubtotal;
- assert.equal(Math.round(total*100),200985);
- assert.equal(SHOPPING_ITEMS.filter(i=>i.url).length,27);
+ assert.equal(Math.round(total*100),205889);
+ assert.equal(SHOPPING_ITEMS.filter(i=>i.url).length,28);
 });
 test('adds the 30-piece white-gold marble wall tile set for the bathroom',()=>{
  const tile=item('601100207687761');
@@ -108,7 +108,7 @@ test('lists WOLTU Chenille as four primary chairs in two unpriced two-packs, wit
  assert.equal(backup.alternative,true);
  assert.equal(backup.quantity,4);
  assert.equal(backup.price,55.92);
- assert.equal(Math.round(shoppingSubtotal * 100),200985);
+ assert.equal(Math.round(shoppingSubtotal * 100),205889);
 });
 
 test('uses the requested Universal TEJO link without changing the existing furniture or its historical budget value',()=>{
@@ -139,4 +139,9 @@ test('uses two Möbelix SIMPLE boards and one Wotan SKATE instead of an unpriced
   assert.equal(simple.url,'https://www.moebelix.at/p/wandboard-simple-007326000308');
   assert.equal(SHOPPING_ITEMS.some(i=>i.id==='z1-deko-wandregal-set-schminkecke'),false);
   assert.equal(item('007326000408').room,'WC','the distinct 80 cm WC wallboard remains');
+});
+
+test("replaces Temu set with both AliExpress variants and user prices",()=>{
+  for(const [id,room,size,price] of [["1005013137520536-wc","WC","61 × 92 cm",27.20],["1005013137520536-bad","Bad","61 × 122 cm",21.84]] as const){const rug=item(id);assert.equal(rug.room,room);assert.ok(rug.dimensions.includes(size));assert.equal(rug.price,price);assert.equal(rug.quantity,1);assert.equal(rug.url,"https://de.aliexpress.com/item/1005013137520536.html");}
+  assert.equal(SHOPPING_ITEMS.some(i=>i.id==="606121368598635"),false);
 });

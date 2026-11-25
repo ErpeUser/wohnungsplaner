@@ -1,10 +1,14 @@
 {
   "id": "builtin-wc-mat",
-  "displayName": "WC-Teppich · beige Baumwoll-Waffelstruktur · 77 × 46 cm",
+  "displayName": "WC-Teppich · beige Waffelstruktur mit Fransen · 92 × 61 cm",
   "category": "fixed-interior",
   "status": "reference-only",
-  "sourceUrls": [],
-  "materials": [],
+  "sourceUrls": [
+    "https://de.aliexpress.com/item/1005013137520536.html"
+  ],
+  "materials": [
+    "aliexpress-bath-rug-woven"
+  ],
   "variants": [
     "default"
   ],

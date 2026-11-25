@@ -1,7 +1,9 @@
-/** Original, dependency-free geometry and texture pixels. No merchant image planes. */
+/** Metric geometry and a repeatable photo-derived textile surface. No merchant image planes. */
+import { sampleWaffleReference } from "./waffle-photo-reference.ts";
 export type InteriorMesh={positions:Float32Array;normals:Float32Array;uvs:Float32Array;indices:Uint32Array;colors?:Float32Array};
 export const WAFFLE_PITCH=.02;
-export const FABRIC_TILE_METRES=.16;
+export const FABRIC_TILE_METRES=.08;
+export const WAFFLE_FRINGE=.025;
 const TAU=Math.PI*2;
 const clamp=(v:number,lo:number,hi:number)=>Math.max(lo,Math.min(hi,v));
 function positive(v:number,name:string){if(!Number.isFinite(v)||v<=0)throw new RangeError(`${name} must be positive.`);}
@@ -33,11 +35,33 @@ export function createWafflePixels(size=256){
   if(!Number.isInteger(size)||size<32||size>1024)throw new RangeError('Texture size must be 32..1024.');
   const color=new Uint8Array(size*size*4),height=new Uint8Array(size*size*4);
   for(let y=0;y<size;y++)for(let x=0;x<size;x++){
-    const u=x/size,v=y/size,crossed=Math.max(rib(u*FABRIC_TILE_METRES),rib(v*FABRIC_TILE_METRES));
-    const warp=Math.sin(TAU*u*112)*Math.cos(TAU*v*8),weft=Math.sin(TAU*v*120)*Math.cos(TAU*u*8),fuzz=((x*31+y*47+x*y*3)%17-8)*.36,fibre=warp*2.2+weft*2+fuzz,offset=(y*size+x)*4;
-    color.set([clamp(201+crossed*23+fibre,0,255),clamp(179+crossed*24+fibre,0,255),clamp(146+crossed*27+fibre,0,255),255],offset);
+    const u=x/size,v=y/size;
+    const warp=Math.sin(TAU*u*112)*Math.cos(TAU*v*8),weft=Math.sin(TAU*v*120)*Math.cos(TAU*u*8),fuzz=((x*31+y*47+x*y*3)%17-8)*.36,offset=(y*size+x)*4;
+    color.set([...sampleWaffleReference(u,v),255],offset);
     const bump=clamp(127+warp*33+weft*30+fuzz*2,0,255);height.set([bump,bump,bump,255],offset);
   }return {size,color,height};
+}
+/** Dense, curved yarn ribbons bounded by the confirmed outside dimensions. */
+export function createWaffleFringe(width:number,depth:number,height=.01):InteriorMesh {
+  const pos:number[]=[],normal:number[]=[],uv:number[]=[],indices:number[]=[],colors:number[]=[];
+  const fringe=WAFFLE_FRINGE;
+  for(const alongX of [true,false])for(const side of [-1,1]){
+    const span=(alongX?width:depth)-2*fringe,outer=(alongX?depth:width)/2;
+    const count=Math.ceil(span/.0021);
+    for(let i=0;i<count;i++){
+      const t=(i+.5)*span/count-span/2,half=.00065+(i%4)*.00007;
+      const length=fringe-(i%7)*.00055,bend=Math.sin(i*2.71)*.0014;
+      const start=outer-fringe-.002,base=pos.length/3,shade=.85+(i%9)*.018;
+      for(let j=0;j<3;j++)for(const q of [-1,1]){
+        const f=j/2,a=t+bend*f+q*half*(1-.45*f),b=side*Math.min(outer,start+(length+.002)*f);
+        const y=-height*.4+Math.sin(f*Math.PI)*height*.16;
+        pos.push(alongX?a:b,y,alongX?b:a);normal.push(0,1,0);uv.push(q===-1?0:1,f);
+        colors.push(shade,shade,shade);
+      }
+      for(let j=0;j<2;j++){const k=base+j*2;indices.push(k,k+2,k+1,k+1,k+2,k+3);}
+    }
+  }
+  return {positions:new Float32Array(pos),normals:new Float32Array(normal),uvs:new Float32Array(uv),indices:new Uint32Array(indices),colors:new Float32Array(colors)};
 }
 export type Slab={x:number;z:number;width:number;depth:number};
 export function worktopSlabs(width:number,depth:number,hole?:Slab):Slab[]{

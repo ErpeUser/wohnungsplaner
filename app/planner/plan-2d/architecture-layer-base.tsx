@@ -248,25 +248,15 @@ function BuiltInDetail({ item }: { item: PlanObjectDescriptor }) {
     </Group>;
   }
   if (id === "bath-mat" || id === "wc-mat") {
-    const countX = Math.max(9, Math.round(width / 0.065));
-    const countZ = Math.max(7, Math.round(depth / 0.065));
+    const fringe = .025, x0 = box.minX + fringe, z0 = box.minZ + fringe, x1 = box.maxX - fringe, z1 = box.maxZ - fringe;
+    const countX = Math.max(1, Math.round((x1-x0)/.02)), countZ = Math.max(1, Math.round((z1-z0)/.02));
     return <Group listening={false}>
-      <Line points={[box.minX, box.minZ, box.maxX, box.minZ, box.maxX, box.maxZ, box.minX, box.maxZ]}
-        closed fill="#c9ae88" stroke="#aa8c64" strokeWidth={0.016} />
-      {Array.from({ length: countX - 1 }, (_, i) => {
-        const x = box.minX + (i + 1) * width / countX;
-        return <Line key={`waffle-x-${i}`} points={[x, box.minZ + 0.018, x, box.maxZ - 0.018]}
-          stroke="#eddbba" strokeWidth={0.007} opacity={0.85} />;
-      })}
-      {Array.from({ length: countZ - 1 }, (_, i) => {
-        const z = box.minZ + (i + 1) * depth / countZ;
-        return <Line key={`waffle-z-${i}`} points={[box.minX + 0.018, z, box.maxX - 0.018, z]}
-          stroke="#eddbba" strokeWidth={0.007} opacity={0.85} />;
-      })}
-      <Line points={[box.minX + 0.015, box.minZ + 0.018, box.maxX - 0.015, box.minZ + 0.018]}
-        stroke="#e7d4b6" strokeWidth={0.013} dash={[0.009, 0.006]} />
-      <Line points={[box.minX + 0.015, box.maxZ - 0.018, box.maxX - 0.015, box.maxZ - 0.018]}
-        stroke="#e7d4b6" strokeWidth={0.013} dash={[0.009, 0.006]} />
+      <Line points={[box.minX,box.minZ,box.maxX,box.minZ,box.maxX,box.maxZ,box.minX,box.maxZ]} closed fill="#e5cfaa" stroke="#c5ac86" strokeWidth={.003}/>
+      <Line points={[x0,z0,x1,z0,x1,z1,x0,z1]} closed fill="#cbb18d" stroke="#dcc39e" strokeWidth={.005}/>
+      {Array.from({length:countX-1},(_,i)=>{const x=x0+(i+1)*(x1-x0)/countX;return <Line key={"waffle-x-"+i} points={[x,z0,x,z1]} stroke="#ead4b1" strokeWidth={.004}/>;})}
+      {Array.from({length:countZ-1},(_,i)=>{const z=z0+(i+1)*(z1-z0)/countZ;return <Line key={"waffle-z-"+i} points={[x0,z,x1,z]} stroke="#ead4b1" strokeWidth={.004}/>;})}
+      {[box.minZ+.012,box.maxZ-.012].map((z,i)=><Line key={"fringe-z-"+i} points={[box.minX,z,box.maxX,z]} stroke="#f4e1bf" strokeWidth={.018} dash={[.002,.002]}/>)}
+      {[box.minX+.012,box.maxX-.012].map((x,i)=><Line key={"fringe-x-"+i} points={[x,box.minZ,x,box.maxZ]} stroke="#f4e1bf" strokeWidth={.018} dash={[.002,.002]}/>)}
     </Group>;
   }
   if (id === "bath-towel-hooks-wood-black") {

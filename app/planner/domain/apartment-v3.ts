@@ -138,10 +138,10 @@ const builtIns: PlannerBuiltIn[] = [
     confidence: "estimated",
     notes: ["Festgelegt: Ø 60 cm, mittig über dem 60-cm-Waschtisch; rundum ausreichend Wandabstand für Beleuchtung und Reinigung."],
   }),
-  builtIn("bath-mat", "Badteppich · beige Baumwoll-Waffelstruktur · 122 × 61 cm", "bad", "other", "bath-mat", -1.25, 8.8, 1.22, 0.61, 0.018, 90, "temu-bath-rug-woven", 0.012, {
-    source: "Vom Nutzer bereitgestelltes Temu-Produktbild · Art. 606121368598635",
+  builtIn("bath-mat", "Badteppich · beige Waffelstruktur mit Fransen · 122 × 61 cm", "bad", "other", "bath-mat", -1.25, 8.8, 1.22, 0.61, 0.01, 90, "aliexpress-bath-rug-woven", 0.0125, {
+    source: "Nutzerfoto und bestätigte Außenmaße · AliExpress Art. 1005013137520536",
     confidence: "confirmed",
-    notes: ["Badteppich exakt 122 × 61 cm, Höhe ca. 1 cm; dichtes gewebtes Waffelrelief in Sandbeige mit gesäumten, leicht fransigen Kanten; vor Wanne und Waschtisch mit freiem Türschwenk platziert."],
+    notes: ["122 × 61 cm inklusive Fransen; Beige und Webstruktur aus dem Nutzerfoto. Modellhöhe 1 cm und Webpitch sind bildbasierte Darstellungsmaße."],
   }),
   builtIn("bath-shower-rod", "Duschvorhangstange · Brilliant Silber · 171–210 cm", "bad", "other", "bath-shower-rod", -1.64, 9.19, 2.05, 0.03, 0.03, -90, "chrome-polished", 2.18, {
     source: "Badewannenmaß und Inspirationsbild",
@@ -191,10 +191,10 @@ const builtIns: PlannerBuiltIn[] = [
     }),
     collision: "decorative" as const,
   },
-  builtIn("wc-mat", "WC-Teppich · beige Baumwoll-Waffelstruktur · 77 × 46 cm", "wc", "other", "wc-mat", -1.87, 5.25, 0.77, 0.46, 0.018, 0, "temu-bath-rug-woven", 0.012, {
-    source: "Vom Nutzer bereitgestelltes Temu-Produktbild · Art. 606121368598635",
+  builtIn("wc-mat", "WC-Teppich · beige Waffelstruktur mit Fransen · 92 × 61 cm", "wc", "other", "wc-mat", -1.87, 5.15, 0.92, 0.61, 0.01, 90, "aliexpress-bath-rug-woven", 0.0125, {
+    source: "Nutzerfoto und bestätigte Außenmaße · AliExpress Art. 1005013137520536",
     confidence: "confirmed",
-    notes: ["WC-Teppich exakt 77 × 46 cm mit 1-cm-Waffelrelief; um 90° gedreht, sodass die 77-cm-Seite quer vor dem Wand-WC liegt."],
+    notes: ["92 × 61 cm inklusive Fransen, längs vor dem Wand-WC; Beige und Webstruktur aus dem Nutzerfoto. Modellhöhe 1 cm, nicht vom Händler bestätigt."],
   }),
   builtIn("wc-paper-holder", "Dunklere Massivholz-Doppelablage mit Toilettenpapierhalter · AliExpress", "wc", "other", "wc-paper-holder", -1.455, 4.8, 0.33, 0.15, 0.25, 90, "wc-holder-solid-oak", 0.68, {
     source: "Nutzerfotos, AliExpress Art. 1005013624521211",
@@ -312,9 +312,9 @@ const DECORATIVE_BUILT_IN_IDS = new Set([
 ]);
 
 const finalBuiltIns = builtIns.map((item) => item.id === "builtin-bath-mat"
-  ? { ...item, position: { x: -1.25, z: 8.8 }, rotation: 90, materialVariants: { ...item.materialVariants, main: "temu-bath-rug-woven" }, collision: "decorative" as const }
+  ? { ...item, position: { x: -1.25, z: 8.8 }, rotation: 90, materialVariants: { ...item.materialVariants, main: "aliexpress-bath-rug-woven" }, collision: "decorative" as const }
   : item.id === "builtin-wc-mat"
-    ? { ...item, position: { x: -1.87, z: 5.25 }, rotation: 0, materialVariants: { ...item.materialVariants, main: "temu-bath-rug-woven" }, collision: "decorative" as const }
+    ? { ...item, position: { x: -1.87, z: 5.15 }, rotation: 90, materialVariants: { ...item.materialVariants, main: "aliexpress-bath-rug-woven" }, collision: "decorative" as const }
   : item.id === "builtin-bath-basin-cabinet-scout"
     ? { ...item, position: { ...item.position, z: 9.8 } }
     : item.id === "builtin-bath-washer-cabinet-scout"
