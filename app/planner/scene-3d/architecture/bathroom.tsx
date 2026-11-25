@@ -341,7 +341,7 @@ export function WcPaperHolder({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   // User AliExpress reference: two darker wooden ledges (16.99 × 13.97 cm),
   // a 14.98-cm arm and a 9.39-cm iron brace. Mounting is still estimated.
   const wood = getPlannerMaterial("wc-holder-solid-oak");
-  const woodEdge = getPlannerMaterial("wc-holder-oak-edge");
+  const woodEdge = getPlannerMaterial("wc-holder-dark-wood-edge");
   const iron = getPlannerMaterial("wc-holder-black-iron");
   const paper = getPlannerMaterial("wc-paper-white");
   const core = getPlannerMaterial("wc-paper-core");

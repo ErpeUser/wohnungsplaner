@@ -1,5 +1,8 @@
 import type { PlannerBuiltIn, PlannerDocumentV3 } from "../domain/types.ts";
 import { getSelectedWcWallboardOption, wallboardDimensionLabel, WC_WALLBOARD_BUILTIN_ID } from "../domain/wc-wallboards.ts";
+import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
+import { getChairModelForCatalogId } from "../chairs/chair-models.ts";
+import { getTableModelForCatalogId } from "../tables/table-models.ts";
 
 /** Supplied articles retained; unpriced hall entries are planning placeholders. */
 export type ShoppingItem = {
@@ -16,11 +19,16 @@ export type ShoppingItem = {
   generic?: boolean;
   /** Alternative catalogue choice: shown but excluded from the planned purchase subtotal. */
   alternative?: boolean;
+  /** Existing furniture and unconfirmed model references are listed without increasing the purchase budget. */
+  existing?: boolean;
+  reference?: boolean;
   type: "washer" | "basin" | "bed" | "rug" | "camel-rug" | "hallway-rug" | "sofa" | "hallway" | "table" | "chair" | "vinyl" | "mirror" | "appliance" | "decor" | "wallboard";
   retailer: string;
 };
 
 export const SHOPPING_ITEMS: ShoppingItem[] = [
+  {"id":"001787045908","name":"Kleiderschrank 225 · MID.YOU FLY","room":"Zimmer 1","dimensions":"225 × 210 × 58 cm (B/H/T) · vorhandene Kaschmir-/Creme-Ausführung; Händlerlink zeigt die Referenz Weiß/Graphit","price":null,"quantity":1,"amountLabel":"Vorhandenes Möbel · Anschaffungspreis nicht hinterlegt","existing":true,"url":"https://www.moebelix.at/p/mid-you-drehtuerenschrank-mit-spiegel-laden-225cm-fly-weiss-graphit-001787045908","type":"hallway","retailer":"Möbelix"},
+  {"id":"800000829847","name":"Schminktisch Vicco Sherry · Weiß/Gold","room":"Zimmer 1","dimensions":"120 × 145 × 55 cm (B/H/T) · fünf Schubladen · LED-Spiegel","price":null,"quantity":1,"amountLabel":"Vorhandenes Möbel · Anschaffungspreis nicht hinterlegt","existing":true,"url":"https://www.xxxlutz.at/p/vicco-schminktisch-sherry-weiss-gold-120-cm-mit-led-spiegel-800000829847","type":"table","retailer":"XXXLutz"},
   {"id": "kitchen-fridge-60cm", "name": "Einbaukühlschrank / Kühl-Gefrier-Kombination", "room": "Wohnküche", "dimensions": "Nische 60 × 65 × 204 cm · schwarzes Frontbild · genaue Gerätehöhe vor Bestellung prüfen", "price": null, "quantity": 1, "amountLabel": "1 Stück · Nischenmaß aus dem Wohnungsplan", "searchHint": "Einbaukühlschrank schwarz 60 cm Nische 204 cm energieeffizient", "generic": true, "type": "appliance", "retailer": "frei wählbar"},
   {"id": "kitchen-oven-60cm", "name": "Einbaubackofen 60 cm", "room": "Wohnküche", "dimensions": "Frontmaß ca. 60 × 59 cm · schwarzes Glas · unter dem Induktionsfeld", "price": null, "quantity": 1, "amountLabel": "1 Stück · vorhandene Planung: Gorenje 60 cm", "searchHint": "Gorenje Einbaubackofen 60 cm schwarz Glas Energieklasse", "generic": true, "type": "appliance", "retailer": "frei wählbar"},
   {"id": "kitchen-induction-hob-60cm", "name": "Induktionskochfeld 60 cm", "room": "Wohnküche", "dimensions": "ca. 58 × 52 cm · 4 Kochzonen · schwarze Glasfläche · über dem Backofen", "price": null, "quantity": 1, "amountLabel": "1 Stück · Ausschnitt und Anschluss vor Bestellung prüfen", "searchHint": "Induktionskochfeld 60 cm 4 Zonen schwarz flächenbündig", "generic": true, "type": "appliance", "retailer": "frei wählbar"},
@@ -71,13 +79,16 @@ export const SHOPPING_ITEMS: ShoppingItem[] = [
 ];
 
 /** Only selected products enter the planned subtotal; backup chairs remain browsable. */
-export const shoppingSubtotal = SHOPPING_ITEMS.reduce((sum, item) => sum + (item.alternative ? 0 : (item.price ?? 0) * (item.quantity ?? 1)), 0);
+export const shoppingSubtotal = shoppingSubtotalForItems(SHOPPING_ITEMS);
 
 /** One selected WC board; non-selected alternatives are excluded from the list and subtotal. */
-export function shoppingItemsForDocument(document: Pick<PlannerDocumentV3, "builtIns">): ShoppingItem[] {
+type ShoppingDocument = Pick<PlannerDocumentV3, "builtIns"> & Partial<Pick<PlannerDocumentV3, "placements" | "rooms">>;
+
+export function shoppingItemsForDocument(document: ShoppingDocument): ShoppingItem[] {
   const option = getSelectedWcWallboardOption(document);
-  if (option.id === "simple-80") return SHOPPING_ITEMS.map((item) => item.id === option.articleId ? { ...item, price: option.price, url: option.sourceUrl, retailer: option.retailer } : item);
-  return SHOPPING_ITEMS.map((item) => item.id === "007326000408" ? {
+  const base = option.id === "simple-80"
+    ? SHOPPING_ITEMS.map((item) => item.id === option.articleId ? { ...item, price: option.price, url: option.sourceUrl, retailer: option.retailer } : item)
+    : SHOPPING_ITEMS.map((item) => item.id === "007326000408" ? {
     ...item,
     id: option.articleId,
     name: option.name,
@@ -89,15 +100,16 @@ export function shoppingItemsForDocument(document: Pick<PlannerDocumentV3, "buil
     dimensions: `${wallboardDimensionLabel(option)} (B/H/T) · ${option.finish} · Belastbarkeit bis ${option.loadKg} kg`,
     amountLabel: `1 Stück · ${option.retailer} Art. ${option.articleId} · oberhalb der WC-Spülung · Preis vor Kauf prüfen`,
   } : item);
+  return [...base, ...additionalModelReferences(document, base)];
 }
 
 export function shoppingSubtotalForItems(items: readonly ShoppingItem[]): number {
   return Math.round(items.reduce(
-    (sum, item) => sum + (item.alternative ? 0 : (item.price ?? 0) * (item.quantity ?? 1)), 0,
+    (sum, item) => sum + (item.alternative || item.existing || item.reference ? 0 : (item.price ?? 0) * (item.quantity ?? 1)), 0,
   ) * 100) / 100;
 }
 
-export function shoppingSubtotalForDocument(document: Pick<PlannerDocumentV3, "builtIns">): number {
+export function shoppingSubtotalForDocument(document: ShoppingDocument): number {
   return shoppingSubtotalForItems(shoppingItemsForDocument(document));
 }
 
@@ -112,6 +124,8 @@ export function formatShoppingPrice(amount: number, minimumFractionDigits = 2): 
 
 /** Both the drawer and the selected object's properties use the same line total. */
 export function shoppingPriceLabel(item: ShoppingItem): string {
+  if (item.existing && item.price === null) return "Bestand · Preis nicht erfasst";
+  if (item.reference && item.price === null) return "Preis offen";
   if (item.generic) return "Budget offen";
   if (item.price === null) return "Preis bei " + item.retailer + " prüfen";
   return formatShoppingPrice(item.price * (item.quantity ?? 1), Number.isInteger(item.price) ? 0 : 2);
@@ -155,6 +169,8 @@ const builtInShoppingIds: Readonly<Record<string, readonly string[]>> = {
 
 const catalogShoppingIds: Readonly<Record<string, readonly string[]>> = {
   "bed-bliss-120": ["800001233737"],
+  "wardrobe-225": ["001787045908"],
+  "vanity-vicco-sherry-120": ["800000829847"],
   "rug-temu-rabbit-ivory-100x180": ["601099532250952"],
   "rug-temu-easy-line-120x180": ["607246280935328"],
   "nightstand-aliexpress-woltu-1005012793801128": ["1005012793801128"],
@@ -171,12 +187,64 @@ const catalogShoppingIds: Readonly<Record<string, readonly string[]>> = {
   "plant-zimmer1-olive": ["z1-deko-pflanze"],
 };
 
+const modelReferenceId = (roomId: string, catalogId: string) => "model:" + roomId + ":" + catalogId;
+
+function retailerForUrl(url: string): string {
+  const host = new URL(url).hostname.toLowerCase();
+  if (host.endsWith("aliexpress.com")) return "AliExpress";
+  if (host.endsWith("temu.com")) return "Temu";
+  if (host.endsWith("moebelix.at")) return "Möbelix";
+  if (host.endsWith("xxxlutz.at")) return "XXXLutz";
+  if (host.endsWith("kaufland.de") || host.endsWith("kaufland.at")) return "Kaufland";
+  return host.replace(/^www\./, "");
+}
+
+/** Explicitly linked placements not yet in the planned purchase list appear once per
+ * room and model. No price or purchase decision is inferred from a reference URL.
+ * The user's planned products and backups retain their existing budget semantics.
+ */
+function additionalModelReferences(document: ShoppingDocument, base: readonly ShoppingItem[]): ShoppingItem[] {
+  const references = new Map<string, ShoppingItem>();
+  for (const placement of document.placements ?? []) {
+    const room = document.rooms?.find((candidate) => candidate.id === placement.roomId);
+    if (!room) continue;
+    const mapped = base.filter((item) => (catalogShoppingIds[placement.catalogId] ?? []).includes(item.id));
+    if (shoppingItemsForRoom(mapped, room.name).length) continue;
+    const catalog = getFurnitureCatalogItem(placement.catalogId);
+    const chair = getChairModelForCatalogId(placement.catalogId);
+    const table = getTableModelForCatalogId(placement.catalogId);
+    const sourceUrl = mapped.find((item) => item.url)?.url ?? catalog?.sourceUrl ?? chair?.sourceUrl ?? table?.sourceUrl;
+    if (!sourceUrl || !/^https:\/\//i.test(sourceUrl)) continue;
+    const id = modelReferenceId(room.id, placement.catalogId);
+    const existing = references.get(id);
+    if (existing) { existing.quantity = (existing.quantity ?? 1) + 1; continue; }
+    const type: ShoppingItem["type"] = chair ? "chair" : table ? "table"
+      : catalog?.symbol === "storage" ? "hallway"
+      : catalog?.symbol === "desk" ? "table"
+      : catalog?.symbol === "chair" || catalog?.symbol === "bed" || catalog?.symbol === "sofa" || catalog?.symbol === "rug" || catalog?.symbol === "table" ? catalog.symbol : "decor";
+    const size = catalog?.defaultSize ?? placement.size;
+    const cm = (value: number) => Number((value * 100).toFixed(1)).toLocaleString("de-AT");
+    references.set(id, {
+      id, room: room.name, name: chair?.name ?? table?.name ?? catalog?.name ?? mapped[0]?.name ?? placement.catalogId,
+      dimensions: [size.width, size.depth, size.height].map(cm).join(" × ") + " cm (B/T/H, Modellmaß)",
+      price: null, quantity: 1, url: sourceUrl, retailer: mapped.find((item) => item.url)?.retailer ?? retailerForUrl(sourceUrl),
+      reference: true, type,
+      imageUrl: chair?.imageUrls[0] ?? table?.imageUrls[0],
+    });
+  }
+  return [...references.values()];
+}
+
 export function shoppingItemsForSelection(
-  document: Pick<PlannerDocumentV3, "builtIns">,
-  selection: Pick<PlannerBuiltIn, "id" | "catalogId">,
+  document: ShoppingDocument,
+  selection: Pick<PlannerBuiltIn, "id" | "catalogId" | "roomId">,
 ): ShoppingItem[] {
   const ids = selection.id === WC_WALLBOARD_BUILTIN_ID
     ? [getSelectedWcWallboardOption(document).articleId]
     : builtInShoppingIds[selection.id] ?? (selection.catalogId ? catalogShoppingIds[selection.catalogId] : undefined) ?? [];
-  return shoppingItemsForDocument(document).filter((item) => ids.includes(item.id));
+  const all = shoppingItemsForDocument(document);
+  const room = document.rooms?.find((candidate) => candidate.id === selection.roomId);
+  const mapped = all.filter((item) => ids.includes(item.id));
+  const references = selection.catalogId ? all.filter((item) => item.id === modelReferenceId(selection.roomId, selection.catalogId!)) : [];
+  return room ? [...shoppingItemsForRoom(mapped, room.name), ...references] : [...mapped, ...references];
 }

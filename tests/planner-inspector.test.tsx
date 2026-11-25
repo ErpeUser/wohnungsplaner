@@ -20,6 +20,17 @@ function setup(id = "living-kaleo-chair-west") {
 }
 
 describe("inspector editing", () => {
+  test.each([
+    ["zimmer1-wardrobe","Möbelix","001787045908"],
+    ["zimmer1-desk","XXXLutz","800000829847"],
+  ])("shows the existing furniture purchase reference for %s", (id, retailer, articleId) => {
+    setup(id);
+    const data=screen.getByRole("region",{name:"Kaufdaten"});
+    expect(data.textContent).toContain("Bestand");
+    expect(within(data).getByRole("link",{name:new RegExp("Produkt bei "+retailer+" öffnen")}).getAttribute("href")).toContain(articleId);
+    expect(data.textContent).not.toContain("Kein Einkaufsartikel hinterlegt");
+  });
+
 
   test.each([
     ["builtin-bath-mat", "27,20", "https://de.aliexpress.com/item/1005013137520536.html"],
@@ -37,7 +48,7 @@ describe("inspector editing", () => {
     const card = () => screen.getByRole("region", { name: "Kaufdaten" });
     expect(card().textContent).toContain("14,99");
     act(() => { store.getState().dispatch({ type: "setWcWallboard", optionId: "livetastic-90" }); });
-    expect(card().textContent).toContain("44,91");
+    expect(card().textContent).toContain("44,41");
     expect(within(card()).getByRole("link", { name: /Produkt bei XXXLutz öffnen/ }).getAttribute("href")).toBe("https://www.xxxlutz.at/p/livetastic-wandboard-in-90-3-5-20-cm-naturfarben-000377013101");
   });
 

@@ -5,14 +5,16 @@
   "identity": {
     "displayName": "Schminktisch Sherry mit LED-Spiegel",
     "category": "desk",
-    "sourceConfidence": "catalog-or-folder-id"
+    "sourceConfidence": "retailer-article-verified"
   },
   "referenceSources": {
-    "manifestSourceUrls": [],
-    "linkEntries": [
-      "# Keine externe Produktquelle im Datensatz hinterlegt."
+    "manifestSourceUrls": [
+      "https://www.xxxlutz.at/p/vicco-schminktisch-sherry-weiss-gold-120-cm-mit-led-spiegel-800000829847"
     ],
-    "status": "no-external-source-documented"
+    "linkEntries": [
+      "https://www.xxxlutz.at/p/vicco-schminktisch-sherry-weiss-gold-120-cm-mit-led-spiegel-800000829847"
+    ],
+    "status": "documented"
   },
   "dimensions": {
     "status": "not-verified-in-repository",
@@ -37,7 +39,7 @@
   },
   "checks": {
     "manifestJson": "passed",
-    "linkManifestConsistency": "no-url-to-synchronize",
+    "linkManifestConsistency": "synchronized",
     "geometry": "not-run-no-mesh",
     "materials": "not-run-no-pbr-textures",
     "viewerIntegration": "parametric-fallback-preserved"
@@ -47,5 +49,5 @@
     "No repository PBR texture set is present; material fidelity remains runtime-defined.",
     "Exact dimensions and product identity require source-specific verification before a photorealistic asset can be claimed."
   ],
-  "auditedAt": "2026-11-12"
+  "auditedAt": "2026-11-25"
 }

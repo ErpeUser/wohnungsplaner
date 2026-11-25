@@ -77,6 +77,8 @@ function PurchaseDetails({ document, selection }: {
             ? <small>{item.quantity} × {formatShoppingPrice(item.price)} je Einkaufseinheit</small> : null}
           {item.amountLabel ? <small>{item.amountLabel}</small> : null}
           {item.alternative ? <small>Backup · nicht zur Zwischensumme addiert</small> : null}
+          {item.existing ? <small>Bestand · nicht zur Zwischensumme addiert</small> : null}
+          {item.reference ? <small>Modellreferenz · Kaufentscheidung offen · nicht zur Zwischensumme addiert</small> : null}
           {item.url ? <a href={item.url} target="_blank" rel="noreferrer">Produkt bei {item.retailer} öffnen ↗</a> : <small>Produktlink noch offen</small>}
         </div>
       )) : (

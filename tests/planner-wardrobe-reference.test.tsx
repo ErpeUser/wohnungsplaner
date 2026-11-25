@@ -77,7 +77,7 @@ test("wardrobe retains four vertical seams between its five bays", async () => {
   } finally { await model.dispose(); }
 });
 
-test("MID.YOU FLY dimensions, source and cashmere customization do not add a wardrobe shopping row", () => {
+test("MID.YOU FLY dimensions and source remain linked as existing furniture, not a new purchase", () => {
   const item = getFurnitureCatalogItem("wardrobe-225")!;
   expect(item.defaultSize).toEqual({ width: 2.25, height: 2.1, depth: 0.58 });
   expect(item.realism?.confidence).toBe("verified");
@@ -88,7 +88,7 @@ test("MID.YOU FLY dimensions, source and cashmere customization do not add a war
   expect(placed.rotation).toBe(180);
   expect(placed.materialVariants?.main).toBe("white-matte");
   expect(placed.metadata?.notes?.join(" ")).toMatch(/vier.*Kaschmir|vier.*kaschmir/i);
-  expect(SHOPPING_ITEMS.some((p) => p.url?.includes("001787045908") || /MID.YOU FLY/i.test(p.name))).toBe(false);
+  expect(SHOPPING_ITEMS.find((p) => p.url?.includes("001787045908"))).toMatchObject({ existing: true, price: null, room: "Zimmer 1" });
   expect(DEFAULT_APARTMENT_DOCUMENT.builtIns.find((p) => p.id === "builtin-z1-wardrobe-top-decor")?.elevation).toBe(2.1);
 });
 

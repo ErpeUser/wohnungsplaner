@@ -4,6 +4,7 @@ import {
     MeshStandardMaterial
 } from "three";
 import { RECIPES, TEXTURES, TILE_TEXTURES, fallbackRecipe } from "./materials/recipes.ts";
+import { createWcPaperHolderWoodTexture } from "./wc-paper-holder-photo.ts";
 import { asBumpMap, createBathroomWaffleTexture, createShowerCurtainTextileTexture, loadBalconyFloorTexture, loadCashmereVinylTexture, loadChairChenilleTexture, loadComparisonTabletopTexture, loadComparisonWoodTexture, loadConcreteTexture, loadEpoxyFloorTexture, loadKitchenWalnutBacksplashTexture, loadKitchenWorktopTexture, loadMacaronMilkCoffeeWallpaperTexture, loadPlannerTexture, loadPlannerTileTexture, loadProductCeramicTexture, loadProductGrainTexture, loadProductLacquerTexture, loadProductLeafTexture, loadProductPebbleTexture, loadProductPileTexture, loadProductWeaveTexture, loadProductWoodTexture, loadVintageBeigeFabricWallpaperTexture, loadVintageBrownFabricWallpaperTexture, loadWcShelfOakTexture, loadWcWallboardProductTexture } from "./materials/texture-factory.ts";
 export { PLANNER_TEXTURE_READY_EVENT } from "./materials/texture-factory.ts";
 
@@ -89,8 +90,13 @@ export function getPlannerMaterial(materialId: string): MeshStandardMaterial {
     // The generated map is already pigment-coloured.
     material.color.set("#ffffff");
     material.needsUpdate = true;
-  } else if (materialId === "wc-holder-solid-oak" || materialId === "wc-holder-oak-edge") {
-    const oak = loadWcShelfOakTexture(materialId === "wc-holder-oak-edge");
+  } else if (materialId === "wc-holder-solid-oak" || materialId === "wc-holder-dark-wood-edge") {
+    const oak = createWcPaperHolderWoodTexture(materialId === "wc-holder-dark-wood-edge");
+    material.map = oak;
+    material.color.set("#ffffff");
+    material.needsUpdate = true;
+  } else if (materialId === "wc-holder-oak-edge") {
+    const oak = loadWcShelfOakTexture(true);
     material.map = oak;
     material.bumpMap = asBumpMap(oak);
     material.bumpScale = 0.009;

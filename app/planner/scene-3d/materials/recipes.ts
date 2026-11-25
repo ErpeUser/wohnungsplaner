@@ -75,7 +75,8 @@ export const RECIPES: Record<string, MaterialRecipe> = {
   "wc-board-livetastic-edge": { color: "#a96035", roughness: 0.84 },
   "wc-board-livetastic-end": { color: "#8b5438", roughness: 0.89 },
 
-  "wc-holder-solid-oak": { color: "#be976b", roughness: 0.78 },
+  "wc-holder-solid-oak": { color: "#a87d60", roughness: 0.82 },
+  "wc-holder-dark-wood-edge": { color: "#6f4c37", roughness: 0.85 },
   "wc-holder-oak-edge": { color: "#936643", roughness: 0.82 },
   "wc-holder-black-iron": { color: "#20211f", roughness: 0.46, metalness: 0.78 },
   "wc-paper-white": { color: "#f5f2e9", roughness: 0.98 },

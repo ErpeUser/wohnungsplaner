@@ -36,6 +36,16 @@ import { PlannerWorkspace } from "../app/planner/workspace/planner-workspace.tsx
 import { ShoppingListDrawer } from "../app/planner/workspace/shopping-list-drawer.tsx";
 
 describe("PlannerWorkspace", () => {
+  test("lists the linked existing furniture in Zimmer 1 without charging it again", () => {
+    render(<ShoppingListDrawer document={DEFAULT_APARTMENT_DOCUMENT} activeRoomId="zimmer1" onClose={()=>undefined}/>);
+    const dialog=within(screen.getByRole("dialog",{name:"Einkaufsliste"}));
+    for(const [name,article] of [["Kleiderschrank 225 · MID.YOU FLY","001787045908"],["Schminktisch Vicco Sherry · Weiß/Gold","800000829847"]]){
+      const product=dialog.getByRole("heading",{name}).closest("article");
+      assert.ok(product);assert.match(product.textContent??"",/Bestand/);assert.match(product.textContent??"",/nicht zur Zwischensumme/);
+      assert.ok(product.querySelector("a")?.getAttribute("href")?.includes(article));
+    }
+  });
+
 
   test("shopping defaults to the active room, switches to total and follows the active room", async () => {
     const user = userEvent.setup();

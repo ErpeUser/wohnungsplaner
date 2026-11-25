@@ -3,16 +3,16 @@
   "assetType": "fixed",
   "status": "reference-only",
   "identity": {
-    "displayName": "Eiche-Eisen-Ablage mit Toilettenpapierhalter · Temu",
+    "displayName": "Dunklere Massivholz-Doppelablage mit Papierhalter · AliExpress",
     "category": "fixed-interior",
-    "sourceConfidence": "source-linked"
+    "sourceConfidence": "user-supplied-product-link-and-photograph"
   },
   "referenceSources": {
     "manifestSourceUrls": [
-      "https://www.temu.com/goods.html?_bg_fs=1&goods_id=601100249492431&sku_id=17595354506975"
+      "https://de.aliexpress.com/item/1005013624521211.html"
     ],
     "linkEntries": [
-      "https://www.temu.com/goods.html?_bg_fs=1&goods_id=601100249492431&sku_id=17595354506975"
+      "https://de.aliexpress.com/item/1005013624521211.html"
     ],
     "status": "documented"
   },
@@ -28,7 +28,11 @@
     "meshFiles": []
   },
   "materials": {
-    "declared": [],
+    "declared": [
+      "wc-holder-solid-oak",
+      "wc-holder-dark-wood-edge",
+      "wc-holder-black-iron"
+    ],
     "pbrTexturesPresent": false,
     "textureFiles": []
   },
@@ -45,9 +49,8 @@
     "viewerIntegration": "parametric-fallback-preserved"
   },
   "limitations": [
-    "No mesh asset is present in this model folder; existing runtime GLBs remain outside models/** and are not copied into this folder.",
-    "No repository PBR texture set is present; material fidelity remains runtime-defined.",
-    "Exact dimensions and product identity require source-specific verification before a photorealistic asset can be claimed."
+    "Parametric runtime geometry with separate face/edge grains sampled from the supplied AliExpress product photo; calibrated reflectance and exact overall dimensions are not available.",
+    "Original Temu extraction in Auszug is historical and is not the selected product. The new AliExpress link is canonical."
   ],
-  "auditedAt": "2026-11-12"
+  "auditedAt": "2026-11-25"
 }

@@ -1,6 +1,7 @@
 'use client';
 import {useEffect,useMemo} from 'react';
 import {RoundedBox} from '@react-three/drei';
+import {RoundedBoxGeometry} from 'three-stdlib';
 import {BufferGeometry,Float32BufferAttribute,Uint32BufferAttribute,Shape,Vector2} from 'three';
 import type {PlannerBuiltIn} from '../domain/types.ts';
 import type {SceneObject} from './scene-model.ts';
@@ -57,6 +58,16 @@ function OakHooks({item}:{item:Item}){
   </group>)}</group>;
 }
 function WoodPaperHolder(){
+  // RoundedBoxGeometry has normalized face UVs; assign the real face grain only
+  // to the horizontal surfaces and the separate darker photo grain to edges.
+  const shelfGeometry=useMemo(()=>{
+    const geometry=new RoundedBoxGeometry(.1699,.021,.1397,3,.004);
+    if(geometry.groups.length!==6) throw new Error("Unexpected rounded shelf face groups");
+    geometry.groups.forEach((group,index)=>{group.materialIndex=index===2||index===3?0:1;});
+    return geometry;
+  },[]);
+  useEffect(()=>()=>shelfGeometry.dispose(),[shelfGeometry]);
+  const shelfMaterials=useMemo(()=>[material('wc-paper-holder-wood'),material('wc-paper-holder-edge')],[]);
   // The supplied AliExpress reference shows two staggered 16.99 x 13.97 cm
   // shelves, a 14.98 cm arm and a 9.39 cm matte-black connecting bracket.
   // Whole-object depth, envelope and mounting height are still estimates.
@@ -67,8 +78,8 @@ function WoodPaperHolder(){
   useEffect(()=>()=>tail.dispose(),[tail]);
   return <group name="aliexpress-dark-oak-two-tier-paper-holder">
     {/* The two rounded shelves remain within the 15-cm planned height. */}
-    <Block size={[.1699,.021,.1397]} position={[.075,.058,0]} finish="wc-paper-holder-wood" radius={.004}/>
-    <Block size={[.1699,.021,.1397]} position={[-.075,-.058,0]} finish="wc-paper-holder-wood" radius={.004}/>
+    <mesh name="photo-grain-upper-wood-shelf" geometry={shelfGeometry} material={shelfMaterials} position={[.075,.058,0]} castShadow receiveShadow dispose={null}/>
+    <mesh name="photo-grain-lower-wood-shelf" geometry={shelfGeometry} material={shelfMaterials} position={[-.075,-.058,0]} castShadow receiveShadow dispose={null}/>
     {/* Steel support reaches the underside of the upper board. */}
     <Block size={[.020,.0939,.022]} position={[.002,-.001,-.017]} finish="black-iron" radius={.003}/>
     <Block size={[.1498,.011,.012]} position={[.078,-.006,.008]} finish="black-iron" radius={.003}/>

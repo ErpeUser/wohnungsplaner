@@ -1,25 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="Zwei versetzte Ablagen aus etwas dunklerem Holz, mattschwarzer Eisenhalter und Toilettenpapierrolle">
 <defs>
   <linearGradient id="background" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f8f4ee"/><stop offset="1" stop-color="#e7e0d5"/></linearGradient>
-  <linearGradient id="wood" x1="0" y1="0" x2=".9" y2=".6"><stop stop-color="#dac09c"/><stop offset=".48" stop-color="#bd936b"/><stop offset="1" stop-color="#9c6d4b"/></linearGradient>
-  <linearGradient id="wood-edge" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ad784f"/><stop offset="1" stop-color="#65432e"/></linearGradient>
+  <linearGradient id="wood" x1="0" y1="0" x2=".9" y2=".6"><stop stop-color="#b88e6c"/><stop offset=".48" stop-color="#a87d60"/><stop offset="1" stop-color="#805638"/></linearGradient>
+  <linearGradient id="wood-edge" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#805a40"/><stop offset="1" stop-color="#513524"/></linearGradient>
   <linearGradient id="iron" x1="0" y1="0" x2="1" y2=".8"><stop stop-color="#42403a"/><stop offset=".45" stop-color="#111719"/><stop offset="1" stop-color="#2f3131"/></linearGradient>
   <linearGradient id="paper" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#d9d9d3"/><stop offset=".2" stop-color="#fcfcf9"/><stop offset=".85" stop-color="#f7f7f3"/><stop offset="1" stop-color="#d7d8d3"/></linearGradient>
   <filter id="shadow" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="9" dy="13" stdDeviation="13" flood-opacity=".19"/></filter>
-  <pattern id="grain" patternUnits="userSpaceOnUse" width="55" height="84"><path d="M3 0 Q25 16 7 40 T10 84 M29 0 Q9 31 31 50 T37 84 M48 0 Q60 22 48 41 T49 84" stroke="#6b4933" stroke-opacity=".24" stroke-width="1.6" fill="none"/></pattern>
+  <pattern id="grain" patternUnits="userSpaceOnUse" width="55" height="84"><path d="M3 0 Q25 16 7 40 T10 84 M29 0 Q9 31 31 50 T37 84 M48 0 Q60 22 48 41 T49 84" stroke="#593b29" stroke-opacity=".24" stroke-width="1.6" fill="none"/></pattern>
 </defs>
 <rect width="800" height="800" fill="url(#background)"/>
 <rect x="80" y="80" width="640" height="640" rx="18" fill="#f7f1e9" opacity=".5"/>
 <g filter="url(#shadow)">
   <!-- Lower warm medium-dark wood shelf, approx. 16.99 × 13.97 cm. -->
-  <path d="M115 524 L384 459 L520 517 L250 590 Z" fill="url(#wood)" stroke="#916949" stroke-width="4"/>
+  <path d="M115 524 L384 459 L520 517 L250 590 Z" fill="url(#wood)" stroke="#765238" stroke-width="4"/>
   <path d="M115 524 L250 590 L250 615 L115 548 Z" fill="url(#wood-edge)"/>
-  <path d="M250 590 L520 517 L520 542 L250 615 Z" fill="#8b5e3d"/>
+  <path d="M250 590 L520 517 L520 542 L250 615 Z" fill="#69462f"/>
   <path d="M115 524 L384 459 L520 517 L250 590 Z" fill="url(#grain)"/>
   <!-- Right upper oak shelf with rounded appearance and visible wooden edge. -->
-  <path d="M332 255 Q335 246 344 244 L600 190 Q610 188 621 194 L728 252 Q737 260 728 267 L456 339 Q448 341 439 337 L336 279 Q328 273 332 255 Z" fill="url(#wood)" stroke="#8c6344" stroke-width="3.5"/>
+  <path d="M332 255 Q335 246 344 244 L600 190 Q610 188 621 194 L728 252 Q737 260 728 267 L456 339 Q448 341 439 337 L336 279 Q328 273 332 255 Z" fill="url(#wood)" stroke="#785339" stroke-width="3.5"/>
   <path d="M334 278 L440 337 L440 359 L334 301 Z" fill="url(#wood-edge)"/>
-  <path d="M440 337 L730 264 L730 283 L440 359 Z" fill="#865432"/>
+  <path d="M440 337 L730 264 L730 283 L440 359 Z" fill="#67432d"/>
   <path d="M335 255 L600 190 L728 252 L456 339 Z" fill="url(#grain)"/>
   <!-- Connecting black wrought iron support, tucked below top and above lower wood. -->
   <path d="M380 328 L417 340 L417 514 L378 504 Z" fill="url(#iron)"/>

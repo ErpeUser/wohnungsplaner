@@ -224,11 +224,20 @@ test("WC holder renders two darker staggered shelves without recolouring shared 
   try {
     const shelves: Mesh[] = [];
     model.scene.traverse((object) => {
-      if (object instanceof Mesh && object.material === darkWood) shelves.push(object);
+      if (object instanceof Mesh && Array.isArray(object.material) && object.material[0] === darkWood) shelves.push(object);
     });
     expect(shelves).toHaveLength(2);
     expect(shelves.map((object) => Number(object.position.x.toFixed(3))).sort((a,b)=>a-b)).toEqual([-.075,.075]);
     expect(shelves.map((object) => Number(object.position.y.toFixed(3))).sort((a,b)=>a-b)).toEqual([-.058,.058]);
+    expect(pixelMetrics(darkTexture).mean[0]).toBeGreaterThan(150);
+    expect(pixelMetrics(darkTexture).mean[0]).toBeLessThan(180);
+    expect(darkTexture.name).toContain("1005013624521211");
+    expect(pixelMetrics(darkTexture).directionRatio).toBeGreaterThan(1.1);
+    const edge=getInteriorMaterial("wc-paper-holder-edge");
+    expect(pixelMetrics(dataTexture(edge)).mean[0]).toBeLessThan(125);
+    expect(edge.map?.name).toContain("1005013624521211");
+    expect(shelves.every(s=>Array.isArray(s.material)&&s.material[1]===edge)).toBe(true);
+    expect(shelves.every(s=>s.geometry.groups.filter(g=>g.materialIndex===0).length===2)).toBe(true);
     expect(pixelMetrics(darkTexture).mean[0]).toBeLessThan(pixelMetrics(dataTexture(shared)).mean[0]-15);
     expect(pixelHash(darkTexture)).not.toBe(SHARED_WOOD_HASH);
     expect(darkWood.map).not.toBe(sharedMap);

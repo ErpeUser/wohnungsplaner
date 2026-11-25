@@ -62,10 +62,10 @@ export function ShoppingListDrawer({ onClose, document, dispatch, activeRoomId =
               <i /><i /><i />
             </div>
             <div className="planner-shopping__copy">
-              <span>{item.room}{item.alternative ? ` · Backup-Alternative · Art. ${item.id}` : item.generic ? " · Deko-Vormerkung" : ` · Art. ${item.id}`}</span>
+              <span>{item.room}{item.existing ? ` · Bestand · Art. ${item.id}` : item.reference ? " · Modellreferenz" : item.alternative ? ` · Backup-Alternative · Art. ${item.id}` : item.generic ? " · Deko-Vormerkung" : ` · Art. ${item.id}`}</span>
               <h3>{item.name}</h3>
               <p>{item.dimensions}</p>
-              <div><strong>{shoppingPriceLabel(item)}</strong><small>{item.amountLabel ?? `${item.quantity ?? 1} Stück`}</small>{item.alternative ? <small>Backup · nicht zur Zwischensumme addiert</small> : null}</div>
+              <div><strong>{shoppingPriceLabel(item)}</strong><small>{item.amountLabel ?? `${item.quantity ?? 1} Stück`}</small>{item.alternative ? <small>Backup · nicht zur Zwischensumme addiert</small> : null}{item.existing ? <small>Bestand · nicht zur Zwischensumme addiert</small> : null}{item.reference ? <small>Kaufentscheidung offen · nicht zur Zwischensumme addiert</small> : null}</div>
               {item.url ? <a href={item.url} target="_blank" rel="noreferrer">Produkt bei {item.retailer} öffnen ↗</a> : <em className="planner-shopping__search">{item.searchHint ? "Suchbegriff: " + item.searchHint : "Produktlink noch offen"}</em>}
               {item.imageUrl?.startsWith("https://") && <a href={item.imageUrl} target="_blank" rel="noreferrer">Produktbild öffnen ↗</a>}
             </div>
@@ -75,7 +75,7 @@ export function ShoppingListDrawer({ onClose, document, dispatch, activeRoomId =
       <footer className="planner-shopping__total">
         <span>{activeScope === "room" ? "Zwischensumme · " + room?.name : "Zwischensumme · Gesamtwohnung"}</span>
         <strong>{formatShoppingPrice(total)}</strong>
-        <small>Produktpreise können sich ändern. Unbestätigte Produktpreise, Deko-Vormerkungen und Backup-Stühle sind nicht in der Summe enthalten.</small>
+        <small>Produktpreise können sich ändern. Unbestätigte Produktpreise, Deko-Vormerkungen, Bestandsmöbel, Modellreferenzen und Backup-Stühle sind nicht in der Summe enthalten.</small>
       </footer>
       </div>
     </aside>

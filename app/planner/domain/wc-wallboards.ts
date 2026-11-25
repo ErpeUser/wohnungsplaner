@@ -35,7 +35,7 @@ export const WC_WALLBOARD_OPTIONS = [
     sourceUrl: "https://www.xxxlutz.at/p/livetastic-wandboard-in-90-3-5-20-cm-naturfarben-000377013101",
     widthCm: 90, heightCm: 3.5, depthCm: 20,
     finish: "Massive Akazie · rotbraune Naturmaserung, schräge Baumkante", materialId: "wc-board-livetastic-face", edgeMaterialId: "wc-board-livetastic-edge", swatch: "#bc6f3e",
-    price: 44.91, loadKg: 5,
+    price: 44.41, loadKg: 5,
   },
 ] as const;
 
