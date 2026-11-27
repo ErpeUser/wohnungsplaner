@@ -5,7 +5,7 @@ import { restoreWcMeasuredLayout } from "../domain/wc-layout.ts";
 import type { PlannerDocumentV3 } from "../domain/types.ts";
 import {
   upgradeLivingRugMaterial,
-  upgradeHallPhotoReference,
+  restoreHallTejoCashmere,
   upgradeZimmer1Chair,
   upgradeDiningChairsToWoltu,
   upgradeDefaultWoltuDiningChairTuck,
@@ -26,7 +26,7 @@ export function prepareSavedPlannerDocument(document: PlannerDocumentV3): Planne
   const measured = restoreWcMeasuredLayout(document);
   const withBathroom = refreshLegacyBathroomDetails(measured);
   const withRug = upgradeLivingRugMaterial(withBathroom);
-  const withHall = upgradeHallPhotoReference(withRug);
+  const withHall = restoreHallTejoCashmere(withRug);
   const withChair = restoreMissingVanityChair(upgradeZimmer1Chair(withHall));
   const withDining = upgradeDiningChairsToWoltu(withChair);
   const withTuckedDining = upgradeDefaultWoltuDiningChairTuck(withDining);

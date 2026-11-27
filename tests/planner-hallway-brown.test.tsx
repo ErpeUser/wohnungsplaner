@@ -7,7 +7,7 @@ import { FURNITURE_CATALOG, getFurnitureCatalogItem } from "../app/planner/catal
 import { DEFAULT_APARTMENT_DOCUMENT } from "../app/planner/domain/apartment-v3.ts";
 import { createReviewScene } from "../app/planner/review/review-models.ts";
 import { Furniture3D } from "../app/planner/scene-3d/furniture.tsx";
-import { upgradeHallPhotoReference } from "../app/planner/store/persistence.ts";
+import { restoreHallTejoCashmere } from "../app/planner/store/persistence.ts";
 
 extend({ Group, Mesh, ExtrudeGeometry });
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -47,11 +47,11 @@ describe("brown entry wardrobe photo reference", () => {
     expect(getFurnitureCatalogItem("hallway-tejo-115")?.realism?.confidence).toBe("verified");
     expect(FURNITURE_CATALOG.filter((entry) => entry.id === ID)).toHaveLength(1);
     const placed = DEFAULT_APARTMENT_DOCUMENT.placements.find((entry) => entry.id === "hall-tejo-wardrobe")!;
-    expect(placed.catalogId).toBe(ID);
+    expect(placed.catalogId).toBe("hallway-tejo-115");
     expect(placed.roomId).toBe("vorraum");
     expect(placed.position).toEqual({ x: -1.78, z: 7.93 });
     expect(placed.rotation).toBe(180);
-    expect(placed.materialVariants?.main).toBe("hallway-walnut-brown");
+    expect(placed.materialVariants?.main).toBe("tejo-cashmere");
   });
 
   test("renders the uninterrupted tall mirror, brown surfaces and padded seat", async () => {
@@ -75,26 +75,34 @@ describe("brown entry wardrobe photo reference", () => {
     } finally { await model.dispose(); }
   });
 
-  test("upgrades saved Tejo layout without moving or resizing the hall wardrobe", () => {
+  test("restores the cashmere Tejo after the brown photo substitution without changing its layout", () => {
     const old = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
     const wardrobe = old.placements.find((entry) => entry.id === "hall-tejo-wardrobe")!;
-    wardrobe.catalogId = "hallway-tejo-115";
-    wardrobe.materialVariants = { main: "tejo-cashmere" };
+    wardrobe.catalogId = ID;
+    wardrobe.materialVariants = { main: "hallway-walnut-brown" };
+    wardrobe.metadata = { ...wardrobe.metadata, notes: ["Fotoreferenz: warmbraune Holzfronten", "My personal note"] };
     wardrobe.position = { x: -1.75, z: 7.88 };
     wardrobe.rotation = 175;
-    const updated = upgradeHallPhotoReference(old);
+    const updated = restoreHallTejoCashmere(old);
     const actual = updated.placements.find((entry) => entry.id === wardrobe.id)!;
-    expect(actual.catalogId).toBe(ID);
-    expect(actual.materialVariants?.main).toBe("hallway-walnut-brown");
+    expect(actual.catalogId).toBe("hallway-tejo-115");
+    expect(actual.materialVariants?.main).toBe("tejo-cashmere");
+    expect(actual.metadata?.notes).toContain("My personal note");
+    expect(actual.metadata?.notes).not.toContain("Fotoreferenz: warmbraune Holzfronten");
     expect(actual.position).toEqual({ x: -1.75, z: 7.88 });
     expect(actual.rotation).toBe(175);
     expect(actual.size).toEqual(wardrobe.size);
-    expect(upgradeHallPhotoReference(updated)).toBe(updated);
+    expect(restoreHallTejoCashmere(updated)).toBe(updated);
+  });
+
+  test("leaves a correctly selected cashmere Tejo unchanged", () => {
+    const current = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
+    expect(restoreHallTejoCashmere(current)).toBe(current);
   });
 
   test("does not replace a manually selected alternative wardrobe", () => {
     const custom = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
     custom.placements.find((entry) => entry.id === "hall-tejo-wardrobe")!.catalogId = "wardrobe-225";
-    expect(upgradeHallPhotoReference(custom)).toBe(custom);
+    expect(restoreHallTejoCashmere(custom)).toBe(custom);
   });
 });

@@ -369,7 +369,7 @@ function readStoredValue(raw: string): MigrationResult {
       const normalized = normalizeLegacyV3Aliases(value);
       const parsed = parsePlannerDocument(normalized.document);
       const withRug = upgradeLivingRugMaterial(parsed);
-      const withHall = upgradeHallPhotoReference(withRug);
+      const withHall = restoreHallTejoCashmere(withRug);
       const withChair = upgradeZimmer1Chair(withHall);
       const withDining = upgradeDiningChairsToWoltu(withChair);
       const withTuckedDining = upgradeDefaultWoltuDiningChairTuck(withDining);
@@ -640,22 +640,29 @@ export function upgradeZimmer1Chair(document: PlannerDocumentV3): PlannerDocumen
   });
 }
 
-/** Adopt the brown hall photo without moving a locally adjusted wardrobe.
- * Explicitly chosen alternative furniture must not be overwritten. */
-export function upgradeHallPhotoReference(document: PlannerDocumentV3): PlannerDocumentV3 {
+/** Restore the selected cashmere Tejo after the obsolete brown photo substitution.
+ * Preserve the saved placement, dimensions, personal notes and unrelated choices. */
+export function restoreHallTejoCashmere(document: PlannerDocumentV3): PlannerDocumentV3 {
   if (document.id !== DEFAULT_APARTMENT_DOCUMENT.id) return document;
   const target = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "hall-tejo-wardrobe");
   if (!target) return document;
   const previous = document.placements.find((item) => item.id === target.id);
-  if (!previous || previous.catalogId !== "hallway-tejo-115"
-    || (previous.materialVariants?.main && previous.materialVariants.main !== "tejo-cashmere")) return document;
+  if (!previous || previous.catalogId !== "hallway-brown-mirror-bench-115") return document;
+  const obsoleteNotes = [
+    "Fotoreferenz: warmbraune Holzfronten",
+    "Maße 115 × 37,5 × 231,9 cm entsprechen dem vorhandenen Stellplatz",
+    "Bestehende Vorraumposition und 180°-Ausrichtung bleiben unverändert.",
+  ];
+  const personalNotes = (previous.metadata?.notes ?? []).filter((note) =>
+    !obsoleteNotes.some((prefix) => note.startsWith(prefix)));
   return parsePlannerDocument({
     ...document,
     placements: document.placements.map((item) => item.id === previous.id ? {
       ...item,
       catalogId: target.catalogId,
-      materialVariants: { ...item.materialVariants, main: "hallway-walnut-brown" },
-      metadata: target.metadata,
+      materialVariants: { ...item.materialVariants, main: "tejo-cashmere" },
+      metadata: { ...item.metadata, ...target.metadata,
+        notes: [...new Set([...(target.metadata?.notes ?? []), ...personalNotes])] },
     } : item),
   });
 }

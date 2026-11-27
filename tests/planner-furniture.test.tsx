@@ -231,15 +231,12 @@ describe("furniture interactions", () => {
   });
 
   test("renders individual 2D graphics for every existing product family", () => {
-    const wardrobe = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "hall-tejo-wardrobe")!;
     const exampleDocument = {
       ...DEFAULT_APARTMENT_DOCUMENT,
       placements: [...DEFAULT_APARTMENT_DOCUMENT.placements, legacyChair, {
         ...DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "zimmer1-led-nightstand")!,
         id: "legacy-nightstand-example",
         catalogId: "nightstand-led-2drawer-white",
-      }, {
-        ...wardrobe, id: "tejo-catalog-example", catalogId: "hallway-tejo-115", materialVariants: { main: "tejo-cashmere" },
       }],
     };
     // Observe the real Image src setter: an unchanged path would reuse the old

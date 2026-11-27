@@ -21,8 +21,8 @@ function legacySavedPlan() {
   hatch.elevation = 1.68;
 
   const wardrobe = saved.placements.find((item) => item.id === "hall-tejo-wardrobe")!;
-  wardrobe.catalogId = "hallway-tejo-115";
-  wardrobe.materialVariants = { main: "tejo-cashmere" };
+  wardrobe.catalogId = "hallway-brown-mirror-bench-115";
+  wardrobe.materialVariants = { main: "hallway-walnut-brown" };
   wardrobe.position = { x: -1.77, z: 7.92 };
 
   const chair = saved.placements.find((item) => item.id === "zimmer1-chair")!;
@@ -63,7 +63,8 @@ test("actual browser preparation upgrades missing photo objects from an existing
   assert.equal(next.builtIns.find((item) => item.id === "builtin-wc-revision")?.elevation, 1.48);
 
   const wardrobe = next.placements.find((item) => item.id === "hall-tejo-wardrobe")!;
-  assert.equal(wardrobe.catalogId, "hallway-brown-mirror-bench-115");
+  assert.equal(wardrobe.catalogId, "hallway-tejo-115");
+  assert.equal(wardrobe.materialVariants?.main, "tejo-cashmere");
   assert.deepEqual(wardrobe.position, { x: -1.77, z: 7.92 });
   const chair = next.placements.find((item) => item.id === "zimmer1-chair")!;
   assert.equal(chair.catalogId, "chair-aliexpress-xuegw-1005012445521181");
@@ -81,11 +82,11 @@ test("actual browser preparation upgrades missing photo objects from an existing
 
 test("manually chosen furniture is preserved and previously completed WC details are not duplicated", () => {
   const custom = legacySavedPlan();
-  custom.placements.find((item) => item.id === "hall-tejo-wardrobe")!.catalogId = "hallway-brown-mirror-bench-115";
+  custom.placements.find((item) => item.id === "hall-tejo-wardrobe")!.catalogId = "wardrobe-225";
   custom.placements.find((item) => item.id === "zimmer1-chair")!.catalogId = "office-chair";
   const prepared = prepareSavedPlannerDocument(custom);
   assert.equal(prepared.placements.find((item) => item.id === "zimmer1-chair")?.catalogId, "office-chair");
-  assert.equal(prepared.placements.find((item) => item.id === "hall-tejo-wardrobe")?.catalogId, "hallway-brown-mirror-bench-115");
+  assert.equal(prepared.placements.find((item) => item.id === "hall-tejo-wardrobe")?.catalogId, "wardrobe-225");
   for (const id of newlyAddedWc) assert.equal(prepared.builtIns.filter((item) => item.id === id).length, 1);
   assert.equal(prepareSavedPlannerDocument(prepared), prepared);
 });
@@ -94,4 +95,10 @@ test("an unrecognized apartment is not changed", () => {
   const custom = structuredClone(DEFAULT_APARTMENT_DOCUMENT);
   custom.id = "other-layout";
   assert.equal(prepareSavedPlannerDocument(custom), custom);
+});
+
+test("the default hall wardrobe uses the original cashmere Tejo", () => {
+  const wardrobe = DEFAULT_APARTMENT_DOCUMENT.placements.find((item) => item.id === "hall-tejo-wardrobe")!;
+  assert.equal(wardrobe.catalogId, "hallway-tejo-115");
+  assert.equal(wardrobe.materialVariants?.main, "tejo-cashmere");
 });
