@@ -6,7 +6,7 @@ import { kitchenTileFaces, partitionInteriorPlan } from './interior-plan-geometr
 import type { PlanObjectDescriptor } from './plan-scene.ts';
 
 type Props = ComponentProps<typeof BaseLayer>;
-const DETAILS = new Set(['bath-towel-hooks-wood-black', 'hall-tejo-art-plates', 'hall-between-door-decor']);
+const DETAILS = new Set(['bath-towel-hooks-wood-black', 'hall-tejo-art-plates', 'hall-between-door-decor',"hall-wall-vase-light","hall-wall-vase-brown"]);
 const refined = (item: PlanObjectDescriptor) => (DETAILS.has(item.catalogId ?? '') || item.catalogId?.startsWith('hall-woven-basket-')) && Boolean(item.metadata?.notes?.includes(INTERIOR_REVISION));
 
 function KitchenFloorPatch({ item, onSelect }: { item: PlanObjectDescriptor; onSelect?: Props['onSelect'] }) {
@@ -39,7 +39,7 @@ export function ArchitectureLayer(props: Props) {
             <Line points={[-.06, -.035, .06, -.035]} stroke='#c2976a' strokeWidth={.014} />
             <Line points={[0, -.025, 0, .03]} stroke='#202221' strokeWidth={.012} />
             <Circle x={0} y={.032} radius={.012} fill='#202221' />
-          </Group>) : item.catalogId?.startsWith('hall-woven-basket-') ? <Line points={[-width/2,0,width/2,0]} stroke='#b69669' strokeWidth={Math.min(depth,.018)} listening={false} /> : <>
+          </Group>) : item.catalogId?.startsWith('hall-woven-basket-') ? <Line points={[-width/2,0,width/2,0]} stroke='#b69669' strokeWidth={Math.min(depth,.018)} listening={false} /> : item.catalogId?.startsWith('hall-wall-vase-') ? <Rect x={-width/2} y={-depth/2} width={width} height={depth} fill={item.catalogId==='hall-wall-vase-brown'?'#9d6739':'#d2ad6b'} stroke='#856342' strokeWidth={.002} listening={false} /> : <>
             <Line points={[-width / 2, -depth * .32, width / 2, -depth * .32]} stroke='#c49a68' strokeWidth={.022} />
             {item.catalogId === 'hall-between-door-decor' ? <Rect x={-.125} y={-.055} width={.25} height={.10} cornerRadius={.03} fill='#d9d0bd' stroke='#a89b80' strokeWidth={.008} /> : [-.1, 0, .1].map((x, i) => <Circle key={i} x={x} y={0} radius={.023} fill={['#cfb17f', '#e6ddc9', '#996b3e'][i]} />)}
           </>}

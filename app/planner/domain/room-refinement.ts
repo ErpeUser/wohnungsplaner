@@ -112,10 +112,29 @@ export function hallBasketDecor(): PlannerBuiltIn[]{
   });
 }
 
+/** User-selected AliExpress wall pockets. Only width and height are confirmed
+ * by the supplied dimension photograph; depth and mounting heights are estimates. */
+export const HALL_VASE_REFERENCE=Object.freeze({articleId:'1005009477769018',width:.07,height:.30,depth:.04,gap:.04,wallFaceZ:5.93,centerX:-1.30});
+export const HALL_VASE_SPECS=[
+  {id:'light',sku:'12000049222509307',label:'Helles Naturholz',fill:'Naturweizen',x:-1.355,elevation:1.06},
+  {id:'brown',sku:'12000049222509306',label:'Haselnussbraun',fill:'Cremefarbener Trockenhafer',x:-1.245,elevation:1.00},
+] as const;
+export function hallVaseDecor():PlannerBuiltIn[]{
+  const v=HALL_VASE_REFERENCE;
+  return HALL_VASE_SPECS.map(spec=>{
+    const target=hall('builtin-hall-wall-vase-'+spec.id,'Vorraum · Wandvase '+spec.label+' · 7 × 30 cm',spec.x,v.wallFaceZ+.001+v.depth/2,s(v.width,v.depth,v.height),0,spec.elevation,[
+      'Breite 7 cm und Höhe 30 cm laut Nutzer-Maßbild; Tiefe 4 cm ist eine Planungsannahme. Zwischen WC und Abstellraum, 4 cm horizontaler Abstand und 6 cm Höhenversatz.',
+      'Füllung: '+spec.fill+' als geplante Deko (nicht im Vasenpreis enthalten).',
+      'Farbzuordnung nach der vom Nutzer angegebenen Variantenreihenfolge; SKU vor Bestellung prüfen.',
+    ]);
+    return {...target,materialVariants:{main:'hall-vase-'+spec.id},metadata:{...target.metadata,source:'AliExpress Art. '+v.articleId+' · SKU '+spec.sku+' · Nutzer-Produktbild',confidence:'estimated' as const}};
+  });
+}
+
 /** Pure and idempotent: unrelated furniture, room boundaries and appliances remain. */
 export function refineRoomLayout<T extends {id:string;builtIns:PlannerBuiltIn[];placements?:PlannerPlacement[]}>(document:T):T{
   if(document.id!=='wohnung-v3')return document;
-  const activeHallDecor=hallBasketDecor();
+  const activeHallDecor=[...hallBasketDecor(),...hallVaseDecor()];
   const hallIds=new Set(activeHallDecor.map(item=>item.id));
   let changed=false;const builtIns:PlannerBuiltIn[]=[];
   for(const item of document.builtIns){

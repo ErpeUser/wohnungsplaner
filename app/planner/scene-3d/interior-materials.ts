@@ -32,6 +32,13 @@ export function getInteriorMaterial(kind:string):MeshStandardMaterial{
     case 'cotton-edge':material=new MeshStandardMaterial({color:'#d9c19d',roughness:1});break;
     case 'cotton-fringe':material=new MeshStandardMaterial({color:'#e5cfaa',roughness:1,side:DoubleSide,vertexColors:true});break;
     case 'wood':material=new MeshPhysicalMaterial({color:'#ffffff',roughness:.72,clearcoat:.06,map:woodTexture()});break;
+    case 'hall-vase-light':case 'hall-vase-brown':{
+      // Vertical grain and warm, matte finishes estimated from the two supplied product photos.
+      const dark=kind==='hall-vase-brown';
+      material=new MeshStandardMaterial({color:'#ffffff',roughness:.83,map:woodTexture(dark?[157,103,57]:[210,173,107],kind)});break;
+    }
+    case 'hall-vase-wheat':material=new MeshStandardMaterial({color:'#c6a465',roughness:.95});break;
+    case 'hall-vase-oat':material=new MeshStandardMaterial({color:'#e1d4b7',roughness:.97});break;
     case 'bath-hook-style2-wood':case 'bath-hook-style2-edge':material=new MeshPhysicalMaterial({
       color:'#ffffff',roughness:.83,clearcoat:.025,
       map:createBathHookStyle2WoodTexture(kind==='bath-hook-style2-edge'),

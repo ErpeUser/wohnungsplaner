@@ -8,7 +8,7 @@ const item=(id:string)=>{const found=SHOPPING_ITEMS.find(i=>i.id===id);assert.ok
 test('preserves every existing shopping article without duplicate identities',()=>{
  for(const id of existingIds)assert.equal(SHOPPING_ITEMS.filter(i=>i.id===id).length,1,id);
  assert.equal(new Set(SHOPPING_ITEMS.map(i=>i.id)).size,SHOPPING_ITEMS.length);
- assert.equal(SHOPPING_ITEMS.length,existingIds.length+10);
+ assert.equal(SHOPPING_ITEMS.length,existingIds.length+12);
  assert.equal(SHOPPING_ITEMS.some(i=>i.id==='606296522765554'),false,'retired Temu chair must not be listed');
  assert.equal(item('1005012445521181').url,'https://de.aliexpress.com/item/1005012445521181.html');
 });
@@ -61,8 +61,8 @@ test('includes the exact selected Temu A8447 180 x 250 cm vintage rug',()=>{
 });
 test('adds the purchased living room rug to the known-priced subtotal',()=>{
  const total=shoppingSubtotal;
- assert.equal(Math.round(total*100),213957);
- assert.equal(SHOPPING_ITEMS.filter(i=>i.url).length,31);
+ assert.equal(Math.round(total*100),215636);
+ assert.equal(SHOPPING_ITEMS.filter(i=>i.url).length,33);
 });
 test('adds the 30-piece white-gold marble wall tile set for the bathroom',()=>{
  const tile=item('601100207687761');
@@ -115,7 +115,7 @@ test('lists WOLTU Chenille as four primary chairs in two unpriced two-packs, wit
  assert.equal(backup.alternative,true);
  assert.equal(backup.quantity,4);
  assert.equal(backup.price,55.92);
- assert.equal(Math.round(shoppingSubtotal * 100),213957);
+ assert.equal(Math.round(shoppingSubtotal * 100),215636);
 });
 
 test('uses the requested Universal TEJO link without changing the existing furniture or its historical budget value',()=>{
@@ -166,7 +166,7 @@ test('includes the two source-linked existing bedroom products without adding re
    assert.equal(entries[0].existing,true);assert.equal(entries[0].price,null);
    assert.equal(shoppingItemsForDocument(document).filter(i=>i.id===id).length,1);
  }
- assert.equal(shoppingSubtotalForDocument(document),2139.57);
+ assert.equal(shoppingSubtotalForDocument(document),2156.36);
 });
 
 test('a selected catalogue alternative with a product link is visible once in its room and in the properties',()=>{
@@ -181,7 +181,7 @@ test('a selected catalogue alternative with a product link is visible once in it
  assert.equal(entry.quantity,2);
  assert.equal(shoppingItemsForDocument(document).filter(i=>i.id===entry.id).length,1);
  assert.equal(shoppingItemsForSelection(document,chairs[1])[0].id,entry.id);
- assert.equal(shoppingSubtotalForDocument(document),2139.57);
+ assert.equal(shoppingSubtotalForDocument(document),2156.36);
  assert.ok(!shoppingItemsForDocument(DEFAULT_APARTMENT_DOCUMENT).some(i=>i.id===entry.id));
 });
 
@@ -192,4 +192,22 @@ test('the woven hall decoration is one selected purchase, old entries remain arc
  for(const id of ['hall-decor-tejo-print','hall-decor-three-plates','hall-decor-between-doors-print','hall-decor-planter']){assert.ok(SHOPPING_ITEMS.some(i=>i.id===id));assert.ok(!active.some(i=>i.id===id));}
  const baskets=doc.builtIns.filter(i=>i.catalogId?.startsWith('hall-woven-basket-'));assert.equal(baskets.length,10);
  for(const basket of baskets)assert.deepEqual(shoppingItemsForSelection(doc,basket).map(i=>i.id),[product.id]);
+});
+
+test('both selected wooden hall vases have exact SKU, unit price, separate selection and user dimensions',()=>{
+ const doc=refineRoomLayout(DEFAULT_APARTMENT_DOCUMENT);
+ const active=shoppingItemsForDocument(doc);
+ const variants=[['light','12000049222509307',8.45],['brown','12000049222509306',8.34]] as const;
+ for(const [finish,sku,price] of variants){
+   const id='1005009477769018-'+sku;
+   const product=item(id);
+   assert.equal(product.price,price);assert.equal(product.quantity,1);assert.equal(product.room,'Vorraum');
+   assert.match(product.dimensions,/7 × 30 cm/);
+   assert.equal(product.url,'https://www.aliexpress.com/item/1005009477769018.html?sku_id='+sku);
+   assert.equal(active.filter(i=>i.id===id).length,1);
+   const placement=doc.builtIns.find(i=>i.id==='builtin-hall-wall-vase-'+finish)!;
+   assert.ok(placement);assert.deepEqual(shoppingItemsForSelection(doc,placement).map(i=>i.id),[id]);
+ }
+ assert.equal(Math.round(variants.reduce((sum,v)=>sum+v[2],0)*100),1679);
+ assert.equal(shoppingSubtotalForDocument(doc),2156.36);
 });

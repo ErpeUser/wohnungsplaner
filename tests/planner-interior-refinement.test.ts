@@ -98,3 +98,21 @@ test('sink aperture is absent from the stone geometry',()=>{
 test('invalid dimensions fail explicitly',()=>{
   assert.throws(()=>createWaffleSurface(0,.46));assert.throws(()=>createWaffleSurface(NaN,.46));assert.throws(()=>worktopSlabs(1,.5,{x:1,z:0,width:.5,depth:.2}));
 });
+
+test('two 7 × 30 cm wall pockets sit safely between WC and storage doors, while the existing baskets remain',()=>{
+ const doc=refineRoomLayout(DEFAULT_APARTMENT_DOCUMENT);
+ const vases=doc.builtIns.filter(i=>i.id.startsWith('builtin-hall-wall-vase-'));
+ assert.equal(vases.length,2);
+ assert.equal(doc.builtIns.filter(i=>i.id.startsWith('builtin-hall-woven-basket-')).length,10);
+ for(const vase of vases){
+   assert.deepEqual(vase.size,{width:.07,depth:.04,height:.30});
+   assert.equal(vase.roomId,'vorraum');assert.equal(vase.rotation,0);
+   assert.ok(vase.locked&&vase.collision==='decorative');
+   assert.ok(vase.position.x-vase.size.width/2>=-1.49&&vase.position.x+vase.size.width/2<=-1.11);
+   assert.ok(Math.abs(vase.position.z-vase.size.depth/2-5.931)<1e-8);
+   assert.match(vase.metadata?.notes?.join(' ')??'',/Tiefe 4 cm ist eine Planungsannahme/);
+ }
+ assert.ok(Math.abs(vases[1].position.x-vases[0].position.x-.07-.04)<1e-8);
+ assert.ok(Math.abs((vases[0].elevation??0)-(vases[1].elevation??0)-.06)<1e-8);
+ assert.equal(refineRoomLayout(doc),doc);
+});

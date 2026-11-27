@@ -9,9 +9,10 @@ import {HALL_REFERENCE,hookCenters,KITCHEN_REFERENCE,INTERIOR_REVISION} from '..
 import {createWaffleSurface,createWaffleFringe,WAFFLE_FRINGE,createKitchenTiles,worktopSlabs,sinkProfile,baseShellPanels,type InteriorMesh} from './interior-geometry.ts';
 import {getInteriorMaterial as material} from './interior-materials.ts';
 import {HallWovenBasket} from './hall-woven-basket-model.tsx';
+import {HallWallVase} from './hall-wall-vase-model.tsx';
 type Item=SceneObject<PlannerBuiltIn>;
 type Triple=[number,number,number];
-const MODEL_IDS=new Set(['bath-mat','wc-mat','bath-towel-hooks-wood-black','wc-paper-holder','hall-tejo-art-plates','hall-between-door-decor','kitchen-sink','kitchen-base','kitchen-corner-base','kitchen-worktop','kitchen-upper','kitchen-corner-upper','kitchen-backsplash-oak','floor-zone-kitchen']);
+const MODEL_IDS=new Set(['bath-mat','wc-mat','bath-towel-hooks-wood-black','wc-paper-holder','hall-tejo-art-plates','hall-between-door-decor','kitchen-sink','kitchen-base','kitchen-corner-base','kitchen-worktop','kitchen-upper','kitchen-corner-upper','kitchen-backsplash-oak','floor-zone-kitchen',"hall-wall-vase-light","hall-wall-vase-brown"]);
 export function hasRefinedInteriorModel(item:Item){return (MODEL_IDS.has(item.catalogId)||item.catalogId.startsWith('hall-woven-basket-'))&&Boolean(item.source.metadata?.notes?.includes(INTERIOR_REVISION));}
 function useBufferGeometry(data:InteriorMesh){
   const geometry=useMemo(()=>{const g=new BufferGeometry();g.setAttribute('position',new Float32BufferAttribute(data.positions,3));g.setAttribute('normal',new Float32BufferAttribute(data.normals,3));g.setAttribute('uv',new Float32BufferAttribute(data.uvs,2));if(data.colors)g.setAttribute('color',new Float32BufferAttribute(data.colors,3));g.setIndex(new Uint32BufferAttribute(data.indices,1));g.computeBoundingBox();g.computeBoundingSphere();return g;},[data]);
@@ -31,6 +32,7 @@ export function RefinedInteriorModel({item}:{item:Item}){
     case 'wc-paper-holder':return <WoodPaperHolder/>;
     case 'hall-tejo-art-plates':return <HallArtPlates/>;
     case 'hall-between-door-decor':return <HallBetweenDoors/>;
+    case 'hall-wall-vase-light':case 'hall-wall-vase-brown':return <HallWallVase catalogId={item.catalogId} size={item.size}/>;
     case 'kitchen-sink':return <KitchenSink item={item}/>;
     case 'kitchen-base':return <KitchenBase item={item}/>;
     case 'kitchen-corner-base':return <KitchenCornerBase item={item}/>;
