@@ -98,6 +98,12 @@ const openings: PlannerOpening[] = sourceOpenings.map((source) => {
 
 const defaultOpenDoorIds = new Set<string>(["hall-bath-door"]);
 
+/** Model reference retained for isolated preview; no active placement. */
+export const ZIMMER1_ENTRY_NICHE_MODEL: PlannerBuiltIn = {
+  ...builtIn("z1-entry-niche", "Schmale beleuchtete Eiche-Nische neben dem Schrank", "zimmer1", "storage", "zimmer1-entry-niche", 2.37, 3.255, 0.22, 0.13, 1.88, 180, "oak-light", 0.08, assumptionMetadata("Nur 22 cm breit und 13 cm tief, damit der Zugang frei bleibt; drei flache Ablagen und verdeckte warmweiße LED-Linie.")),
+  collision: "decorative",
+};
+
 const builtIns: PlannerBuiltIn[] = [
   builtIn("kitchen-tile-north", "L-förmige lichtgraue Fliesenzone vor Spüle und Kühlschrank", "wohnkueche", "other", "floor-zone-kitchen", 1.225, 4.185, 2.45, 1.43, 0.018, 0, "tile-kitchen-grey-square", 0.012),
   builtIn("kitchen-tile-west", "Fortsetzung der Fliesenzone vor der 256,2-cm-Gerätezeile", "wohnkueche", "other", "floor-zone-kitchen", 0.725, 5.466, 1.45, 1.132, 0.018, 0, "tile-kitchen-grey-square", 0.012),
@@ -247,7 +253,6 @@ const builtIns: PlannerBuiltIn[] = [
     confidence: "confirmed",
     notes: ["B/H/T 23,5 × 3,8 × 23,5 cm · foliertes MDF · Eiche Artisan Dekor · max. 10 kg.", "Unteres von zwei identischen quadratischen Wandboards an der seitlichen Wand; Position ist eine Planungsannahme.", "Befestigungsmaterial enthalten."],
   }),
-  builtIn("z1-entry-niche", "Schmale beleuchtete Eiche-Nische neben dem Schrank", "zimmer1", "storage", "zimmer1-entry-niche", 2.37, 3.255, 0.22, 0.13, 1.88, 180, "oak-light", 0.08, assumptionMetadata("Nur 22 cm breit und 13 cm tief, damit der Zugang frei bleibt; drei flache Ablagen und verdeckte warmweiße LED-Linie.")),
   builtIn("z1-wardrobe-top-decor", "Geflochtene Aufbewahrungsboxen auf dem Schrank", "zimmer1", "storage", "zimmer1-wardrobe-top-decor", 1.125, 3.02, 1.46, 0.42, 0.25, 180, "fabric-taupe", 2.1, assumptionMetadata("Drei niedrige, helle Flechtboxen stehen auf der nun 210 cm hohen Schrankoberseite und bleiben unter der 2,56-m-Decke.")),
   builtIn("z1-nightstand-decor", "Kompakte Deko auf dem Nachttisch", "zimmer1", "other", "zimmer1-nightstand-decor", 0.22, 1.69, 0.3, 0.18, 0.22, 270, "ceramic-beige", 0.61, assumptionMetadata("Schmales Tablett als einzige Deko; die integrierte Nachttischbeleuchtung bleibt frei und wird nicht durch eine zusätzliche Lampe ergänzt.")),
   builtIn(
@@ -305,7 +310,6 @@ const DECORATIVE_BUILT_IN_IDS = new Set([
   "builtin-z1-vanity-shelf-main",
   "builtin-z1-vanity-shelf-side-upper",
   "builtin-z1-vanity-shelf-side-lower",
-  "builtin-z1-entry-niche",
   "builtin-z1-wardrobe-top-decor",
   "builtin-z1-nightstand-decor",
   "builtin-hall-wall-decor",

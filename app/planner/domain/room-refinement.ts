@@ -14,7 +14,15 @@ export const HALL_REFERENCE=Object.freeze({
   tejoPrint:{width:.36,height:.50},plateDiameters:[.18,.14,.11] as readonly number[],
   betweenDoorsPrint:{width:.32,height:.45},planterDiameter:.25,clearDoorGap:.38,
 });
-export const REMOVED_INTERIOR_IDS=new Set(['builtin-hall-wall-decor','builtin-kitchen-backsplash-corner','builtin-hall-tejo-art-plates','builtin-hall-between-door-decor']);
+const ZIMMER1_ENTRY_NICHE_ID = 'builtin-z1-entry-niche';
+
+/** Retire only the former bedroom placement, not its model. */
+export function removeZimmer1EntryNiche<T extends { id: string; builtIns: PlannerBuiltIn[] }>(document: T): T {
+  if (document.id !== 'wohnung-v3' || !document.builtIns.some(item => item.id === ZIMMER1_ENTRY_NICHE_ID)) return document;
+  return { ...document, builtIns: document.builtIns.filter(item => item.id !== ZIMMER1_ENTRY_NICHE_ID) };
+}
+
+export const REMOVED_INTERIOR_IDS=new Set([ZIMMER1_ENTRY_NICHE_ID,'builtin-hall-wall-decor','builtin-kitchen-backsplash-corner','builtin-hall-tejo-art-plates','builtin-hall-between-door-decor']);
 export function upgradeWoltuNightstandPlacement<T extends { id: string; placements: PlannerPlacement[] }>(document: T): T {
   if (document.id !== 'wohnung-v3') return document;
   let changed = false;

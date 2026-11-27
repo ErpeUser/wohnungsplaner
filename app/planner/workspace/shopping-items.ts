@@ -85,8 +85,8 @@ export const SHOPPING_ITEMS: ShoppingItem[] = [
 ];
 
 /** Archived decor remains in the catalogue, but not in the active budget. */
-const ARCHIVED_HALL_SHOPPING_IDS=new Set(["hall-decor-tejo-print","hall-decor-three-plates","hall-decor-between-doors-print","hall-decor-planter"]);
-export const ACTIVE_SHOPPING_ITEMS=SHOPPING_ITEMS.filter(item=>!ARCHIVED_HALL_SHOPPING_IDS.has(item.id));
+const ARCHIVED_SHOPPING_IDS=new Set(["z1-deko-nische","hall-decor-tejo-print","hall-decor-three-plates","hall-decor-between-doors-print","hall-decor-planter"]);
+export const ACTIVE_SHOPPING_ITEMS=SHOPPING_ITEMS.filter(item=>!ARCHIVED_SHOPPING_IDS.has(item.id));
 
 /** Only selected products enter the planned subtotal; backup chairs remain browsable. */
 export const shoppingSubtotal = shoppingSubtotalForItems(ACTIVE_SHOPPING_ITEMS);

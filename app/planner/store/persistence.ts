@@ -4,6 +4,7 @@ import {
   type MigrationResult,
 } from "../domain/migration.ts";
 import { parsePlannerDocument } from "../domain/schema.ts";
+import { removeZimmer1EntryNiche } from "../domain/room-refinement.ts";
 import type { PlannerDocumentV3 } from "../domain/types.ts";
 
 export const PLANNER_STORAGE_KEY = "wohnung-planner-v3";
@@ -57,7 +58,6 @@ const BASELINE_VISUAL_REFRESH_IDS = new Set([
   "builtin-z1-headboard-led",
   "builtin-z1-headboard-sconces",
   "builtin-z1-layered-curtain",
-  "builtin-z1-entry-niche",
   "builtin-z1-wardrobe-top-decor",
   "builtin-z1-nightstand-decor",
   "builtin-hall-wall-decor",
@@ -336,6 +336,7 @@ export function createLocalStoragePlannerRepository(
       const migration = migrateStoredPlannerData(value, DEFAULT_APARTMENT_DOCUMENT);
       return {
         ...migration,
+        document: removeZimmer1EntryNiche(migration.document),
         canCommit: isValidV3(value) || isRecognizedLegacyDocument(value),
       };
     },
@@ -368,7 +369,8 @@ function readStoredValue(raw: string): MigrationResult {
     try {
       const normalized = normalizeLegacyV3Aliases(value);
       const parsed = parsePlannerDocument(normalized.document);
-      const withRug = upgradeLivingRugMaterial(parsed);
+      const withoutEntryNiche = removeZimmer1EntryNiche(parsed);
+      const withRug = upgradeLivingRugMaterial(withoutEntryNiche);
       const withHall = restoreHallTejoCashmere(withRug);
       const withChair = upgradeZimmer1Chair(withHall);
       const withDining = upgradeDiningChairsToWoltu(withChair);
@@ -403,7 +405,9 @@ function readStoredValue(raw: string): MigrationResult {
                 ? "Der Stuhl in Zimmer 1 wurde auf das neue AliExpress-Modell aktualisiert; Position und Drehung bleiben erhalten."
                 : withHall !== withRug
                   ? "Die Vorraumgarderobe wurde anhand der braunen Fotoreferenz aktualisiert; Position und Maße bleiben erhalten."
-                  : "Der vorhandene Wohnzimmerteppich wurde auf das neue Temu-Design aktualisiert; Position und Drehung bleiben erhalten."],
+                  : withRug !== withoutEntryNiche
+                    ? "Der vorhandene Wohnzimmerteppich wurde auf das neue Temu-Design aktualisiert; Position und Drehung bleiben erhalten."
+                    : "Die schmale Eiche-Nische in Zimmer 1 wurde entfernt; andere Möbelpositionen bleiben erhalten."],
           legacyBackupJson: raw,
           unmapped: [],
         };
