@@ -2,6 +2,7 @@ import { parsePlannerDocument } from "./schema.ts";
 import { ZIMMER1_ENTRY_GOLD_STRIPS } from "./zimmer1-entry-gold.ts";
 import { ZGV_WARDROBE_BOXES } from "./zimmer1-wardrobe-boxes.ts";
 import { ensureHallTejoPillow } from "./hall-tejo-pillow.ts";
+import { ZIMMER1_FICUS, ZIMMER1_FICUS_METADATA } from "./zimmer1-ficus.ts";
 import type {
   PlannerBuiltIn,
   PlannerFixture,
@@ -508,24 +509,17 @@ const placements: PlannerPlacement[] = [
     },
   ),
   placement(
-    "zimmer1-olive-plant",
+    ZIMMER1_FICUS.placementId,
     "zimmer1",
-    "plant-zimmer1-olive",
+    ZIMMER1_FICUS.catalogId,
     3.28,
     2.82,
-    0.42,
-    0.42,
-    1.1,
+    ZIMMER1_FICUS.width,
+    ZIMMER1_FICUS.depth,
+    ZIMMER1_FICUS.height,
     0,
-    "leaf-olive",
-    {
-      source: "Deko-Wunschplanung nach Nutzerreferenzen vom 30.10.2026",
-      confidence: "estimated",
-      notes: [
-        "Nur eine größere Pflanze in der Fensterecke, damit der Raum ruhig bleibt.",
-        "42-cm-Stellfläche und 110 cm Höhe; außerhalb von Türschwenkbereich und direktem Durchgang.",
-      ],
-    },
+    "ficus-green",
+    ZIMMER1_FICUS_METADATA,
   ),
   placement(
     "living-rug-concept",

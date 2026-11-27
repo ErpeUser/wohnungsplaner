@@ -248,6 +248,20 @@ function FurnitureSymbol({
   };
   const materialId = placement.materialVariants?.main;
 
+  if (placement.catalogId === "plant-zimmer1-ficus-90623179") {
+    const radius = Math.min(width, depth) * .265 / .42 / 2;
+    return <Group data-testid="plan-graphic-plant-zimmer1-ficus-90623179">
+      <Circle radius={radius} fill="#ded8ca" stroke="#a9a195" strokeWidth={.012} />
+      <Circle radius={radius * .235 / .265} fill="#b9b09f" stroke="#c6bdad" strokeWidth={.008} />
+      <Circle radius={radius * .19 / .265} fill="#63523d" stroke="#333b35" strokeWidth={.009} />
+      {Array.from({length: 17}, (_,i)=>{
+        const angle=i*2.399963, r=Math.min(width,depth)*(.13+.25*((i%5)/4));
+        return <Ellipse key={i} x={Math.cos(angle)*r} y={Math.sin(angle)*r} radiusX={width*.085} radiusY={depth*.046} rotation={angle*180/Math.PI} fill={["#294925","#365c2b","#466f35","#527b39"][i%4]} stroke="#2b4a2d" strokeWidth={.004} />;
+      })}
+      <Text x={-width/2} y={depth/2-.055} width={width} align="center" text="Ficus · 112 cm" fontSize={.048} fill="#39453b" listening={false} />
+    </Group>;
+  }
+
   if (placement.catalogId === "plant-zimmer1-olive") {
     return (
       <Group data-testid="plan-graphic-plant-zimmer1-olive">

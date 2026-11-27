@@ -1,4 +1,5 @@
 import { DEKO_CATALOG } from "./deko-catalog.ts";
+import { ZIMMER1_FICUS } from "../domain/zimmer1-ficus.ts";
 import type { FurnitureCatalogItem, FurnitureCategory, FurnitureMaterial, FurnitureResizeRule, ProductRealismSpec } from "./catalog-types.ts";
 export type { FurnitureCatalogItem, FurnitureCategory, FurnitureMaterial, FurnitureRenderMode, FurnitureResizeRule, ProductRealismSpec } from "./catalog-types.ts";
 
@@ -276,6 +277,12 @@ const PRODUCT_REALISM: Record<string, ProductRealismSpec> = {
     confidence: "verified",
     construction: ["cremefarbener Samt-Kurzflor", "verblasste florale Ranken in warmem Taupe", "umlaufende mehrfach gerahmte Ornamentbordüre", "Nutzerreferenz vom 11.11.2026; das 2D/3D-Muster ist eine fotoähnliche Rekonstruktion"],
   },
+  [ZIMMER1_FICUS.catalogId]: {
+    sourceLabel: "IKEA AT 906.231.79 und Temu 607016466675388 / SKU 107283317021641",
+    dimensions: "Pflanze 95 cm, Kulturtopf Ø 19 cm; Kelchtopf Ø 26,5 × H 35,5 cm, Öffnung Ø 23,5 cm, Fuß Ø 21 cm; Gesamt ca. 112 cm",
+    confidence: "estimated",
+    construction: ["aufrechter mehrtriebiger Ficus mit dunkelgrünen ovalen Blättern", "matter fein strukturierter beige-elfenbeinfarbener Harz-Kelchtopf", "gerundeter Gefäßbauch mit separatem konischem Fuß", "innenliegender Kulturtopf; Blattbreite und Einstecktiefe nach Foto geschätzt"],
+  },
   "plant-zimmer1-olive": {
     sourceLabel: "Zimmer-1-Fotoreferenz / vorhandene Deko",
     dimensions: "Stellfläche ca. 42 × 42 cm · Höhe ca. 110 cm",
@@ -293,7 +300,7 @@ export const PHOTO_FIRST_IDS: ReadonlySet<string> = new Set([
   "sofa-chicago-206", "sofa-aliexpress-142", "sofa-aliexpress-142-open", "dining-table-bozan-110", "nightstand-led-2drawer-white", "nightstand-aliexpress-woltu-1005012793801128",
   "hallway-tejo-115", "hallway-brown-mirror-bench-115", "dining-table-aliexpress-100-140", "dining-table-temu-606997-120-160", "dining-table-temu-609726-110-150", "dining-table-kaufland-567080013-120-160", "rug-gala-shaggy-2505-100x200", "rug-temu-shaggy-white-120x200",
   "rug-temu-easy-line-120x180", "rug-temu-easy-line-140x200", "rug-temu-rabbit-ivory-100x180",
-  "rug-living-concept-240x240", "plant-zimmer1-olive",
+  "rug-living-concept-240x240", "plant-zimmer1-olive", ZIMMER1_FICUS.catalogId,
 ]);
 
 export const FURNITURE_CATALOG: FurnitureCatalogItem[] = [
@@ -343,6 +350,7 @@ export const FURNITURE_CATALOG: FurnitureCatalogItem[] = [
   item("floor-lamp", "Stehleuchte", "Licht/Deko", "Schlanke Leselampe", [0.38, 0.38, 1.65], "fixed", "light", "lamp", WOOD),
   item("plant-medium", "Pflanze", "Licht/Deko", "Mittelgroße Zimmerpflanze", [0.55, 0.55, 1.15], "uniform", "plant", "plant", WOOD),
   item("plant-zimmer1-olive", "Olivpflanze Zimmer 1", "Licht/Deko", "Schlanke 110-cm-Pflanze im matten beigefarbenen Topf", [0.42, 0.42, 1.1], "fixed", "plant", "plant", ZIMMER1_PLANT),
+  item(ZIMMER1_FICUS.catalogId, "IKEA FICUS MICROCARPA · beiger Kelchtopf", "Licht/Deko", "95-cm-Chinesische Feige im 35,5 cm hohen Temu-Kelchgefäß", [ZIMMER1_FICUS.width, ZIMMER1_FICUS.depth, ZIMMER1_FICUS.height], "fixed", "plant", "plant", [{ id: "ficus-green", label: "Dunkelgrüne Ficusblätter / Beige-Elfenbein", color: "#31512b" }]),
   ...DEKO_CATALOG,
 ];
 

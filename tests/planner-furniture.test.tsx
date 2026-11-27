@@ -257,7 +257,7 @@ describe("furniture interactions", () => {
         />,
       );
       for (const id of [
-        "plant-zimmer1-olive",
+        "plant-zimmer1-ficus-90623179",
         "bed-bliss-120",
         "hallway-tejo-115",
         "vanity-vicco-sherry-120",

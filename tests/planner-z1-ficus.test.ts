@@ -1,0 +1,54 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { DEFAULT_APARTMENT_DOCUMENT } from "../app/planner/domain/apartment-v3.ts";
+import { ZIMMER1_FICUS as f, upgradeZimmer1Ficus } from "../app/planner/domain/zimmer1-ficus.ts";
+import { getFurnitureCatalogItem } from "../app/planner/catalog/catalog.ts";
+import { refineRoomLayout } from "../app/planner/domain/room-refinement.ts";
+import { FICUS_PLANTER_PROFILE, FICUS_PEDESTAL_PROFILE } from "../app/planner/scene-3d/furniture/zimmer1-ficus.tsx";
+import { SHOPPING_ITEMS, shoppingItemsForDocument, shoppingItemsForSelection, shoppingSubtotalForDocument } from "../app/planner/workspace/shopping-items.ts";
+
+const doc=DEFAULT_APARTMENT_DOCUMENT;
+const plant=doc.placements.find(p=>p.id===f.placementId)!;
+const close=(a:number,b:number)=>assert.ok(Math.abs(a-b)<1e-8, a+" != "+b);
+test("models the exact photographed planter dimensions and estimated inset plant height in Zimmer 1",()=>{
+  assert.equal(plant.roomId,"zimmer1");
+  assert.equal(plant.catalogId,f.catalogId);
+  assert.deepEqual(plant.position,{x:3.28,z:2.82});
+  assert.deepEqual(plant.size,{width:.42,depth:.42,height:1.12});
+  assert.deepEqual(getFurnitureCatalogItem(f.catalogId)?.defaultSize,plant.size);
+  close(f.nurseryRimHeight-f.nurseryHeight+f.plantHeight,f.height);
+  close(Math.max(...FICUS_PLANTER_PROFILE.map(p=>p[0]))*2,f.planterDiameter);
+  close(Math.max(...FICUS_PLANTER_PROFILE.map(p=>p[1])),f.planterHeight);
+  close(Math.max(...FICUS_PEDESTAL_PROFILE.map(p=>p[0]))*2,f.baseDiameter);
+  assert.ok(FICUS_PLANTER_PROFILE.some(p=>p[0]===f.openingDiameter/2));
+  assert.ok(f.openingDiameter>f.nurseryDiameter);
+  assert.equal(doc.placements.filter(p=>p.catalogId===f.catalogId).length,1);
+});
+test("updates an older saved olive placement once without moving it or adding an intentionally removed plant",()=>{
+  const legacy={...plant,catalogId:"plant-zimmer1-olive",position:{x:3.2,z:2.73},rotation:35,size:{width:.42,depth:.42,height:1.1}};
+  const old={...doc,placements:doc.placements.map(p=>p.id===plant.id?legacy:p)};
+  const migrated=upgradeZimmer1Ficus(old);
+  const updated=migrated.placements.find(p=>p.id===plant.id)!;
+  assert.equal(updated.catalogId,f.catalogId);
+  assert.deepEqual(updated.position,legacy.position);assert.equal(updated.rotation,35);
+  assert.deepEqual(updated.size,plant.size);
+  assert.equal(upgradeZimmer1Ficus(migrated),migrated);
+  for(const p of doc.placements.filter(p=>p.id!==plant.id))assert.equal(migrated.placements.find(q=>q.id===p.id),p);
+  const deleted={...doc,placements:doc.placements.filter(p=>p.id!==plant.id)};
+  assert.equal(upgradeZimmer1Ficus(deleted),deleted);
+  assert.equal(refineRoomLayout(old).placements.find(p=>p.id===plant.id)?.catalogId,f.catalogId);
+});
+test("lists the two requested purchases exactly once and removes the generic placeholder",()=>{
+  const rows=shoppingItemsForSelection(doc,plant);
+  assert.deepEqual(rows.map(r=>r.id).sort(),[f.plantArticle,f.planterArticle].sort());
+  assert.equal(rows.every(r=>r.room==="Zimmer 1"&&r.quantity===1),true);
+  assert.equal(rows.find(r=>r.id===f.plantArticle)?.price,9.99);
+  assert.equal(rows.find(r=>r.id===f.planterArticle)?.price,23.15);
+  assert.equal(rows.find(r=>r.id===f.plantArticle)?.url,f.plantUrl);
+  assert.equal(rows.find(r=>r.id===f.planterArticle)?.url,f.planterUrl);
+  close(rows.reduce((sum,r)=>sum+(r.price??0),0),33.14);
+  assert.ok(!SHOPPING_ITEMS.some(r=>r.id==="z1-deko-pflanze"));
+  const all=shoppingItemsForDocument(doc);
+  for(const row of rows)assert.equal(all.filter(r=>r.id===row.id).length,1);
+  close(shoppingSubtotalForDocument(doc),2304.78);
+});

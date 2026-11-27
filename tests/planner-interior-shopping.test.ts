@@ -3,7 +3,7 @@ import test from 'node:test';
 import { DEFAULT_APARTMENT_DOCUMENT } from '../app/planner/domain/apartment-v3.ts';
 import { refineRoomLayout } from '../app/planner/domain/room-refinement.ts';
 import { SHOPPING_ITEMS, shoppingSubtotal, shoppingItemsForDocument, shoppingItemsForSelection, shoppingSubtotalForDocument } from '../app/planner/workspace/shopping-items.ts';
-const existingIds = ['kitchen-fridge-60cm','kitchen-oven-60cm','kitchen-induction-hob-60cm','kitchen-hood-60cm','kitchen-sink-60cm','184900692R','184900692G','1005012515662602','601104051124011','601100062257123','1005013057225398','800001233737','601099532250952','607246280935328','1005013624521211','1005013137520536-wc','1005013137520536-bad','1005012445521181','1005013379584796','607199740937372','2778003504','2858001801','1634004202','601099691023748','601104781298502','601099526356869','z1-deko-bilder','605638990106029','607229268836803','z1-deko-vorhang','601105269560337','601099642729985','z1-deko-licht','001555006211','007326000308','z1-deko-nische','z1-deko-wandleuchten','z1-deko-schrankboxen','z1-deko-pflanze','z1-deko-textilien','z1-deko-kleinteile','z1-deko-pendelleuchte','001787045908','800000829847'];
+const existingIds = ['kitchen-fridge-60cm','kitchen-oven-60cm','kitchen-induction-hob-60cm','kitchen-hood-60cm','kitchen-sink-60cm','184900692R','184900692G','1005012515662602','601104051124011','601100062257123','1005013057225398','800001233737','601099532250952','607246280935328','1005013624521211','1005013137520536-wc','1005013137520536-bad','1005012445521181','1005013379584796','607199740937372','2778003504','2858001801','1634004202','601099691023748','601104781298502','601099526356869','z1-deko-bilder','605638990106029','607229268836803','z1-deko-vorhang','601105269560337','601099642729985','z1-deko-licht','001555006211','007326000308','z1-deko-nische','z1-deko-wandleuchten','z1-deko-schrankboxen','90623179','607016466675388','z1-deko-textilien','z1-deko-kleinteile','z1-deko-pendelleuchte','001787045908','800000829847'];
 const item=(id:string)=>{const found=SHOPPING_ITEMS.find(i=>i.id===id);assert.ok(found,id);return found;};
 test('preserves every existing shopping article without duplicate identities',()=>{
  for(const id of existingIds)assert.equal(SHOPPING_ITEMS.filter(i=>i.id===id).length,1,id);
@@ -61,8 +61,8 @@ test('includes the exact selected Temu A8447 180 x 250 cm vintage rug',()=>{
 });
 test('adds the purchased living room rug to the known-priced subtotal',()=>{
  const total=shoppingSubtotal;
- assert.equal(Math.round(total*100),227164);
- assert.equal(SHOPPING_ITEMS.filter(i=>i.url).length,41);
+ assert.equal(Math.round(total*100),230478);
+ assert.equal(SHOPPING_ITEMS.filter(i=>i.url).length,43);
 });
 test('adds the 30-piece white-gold marble wall tile set for the bathroom',()=>{
  const tile=item('601100207687761');
@@ -115,7 +115,7 @@ test('lists WOLTU Chenille as four primary chairs in two unpriced two-packs, wit
  assert.equal(backup.alternative,true);
  assert.equal(backup.quantity,4);
  assert.equal(backup.price,55.92);
- assert.equal(Math.round(shoppingSubtotal * 100),227164);
+ assert.equal(Math.round(shoppingSubtotal * 100),230478);
 });
 
 test('uses the requested Universal TEJO link without changing the existing furniture or its historical budget value',()=>{
@@ -166,7 +166,7 @@ test('includes the two source-linked existing bedroom products without adding re
    assert.equal(entries[0].existing,true);assert.equal(entries[0].price,null);
    assert.equal(shoppingItemsForDocument(document).filter(i=>i.id===id).length,1);
  }
- assert.equal(shoppingSubtotalForDocument(document),2271.64);
+ assert.equal(shoppingSubtotalForDocument(document),2304.78);
 });
 
 test('a selected catalogue alternative with a product link is visible once in its room and in the properties',()=>{
@@ -181,7 +181,7 @@ test('a selected catalogue alternative with a product link is visible once in it
  assert.equal(entry.quantity,2);
  assert.equal(shoppingItemsForDocument(document).filter(i=>i.id===entry.id).length,1);
  assert.equal(shoppingItemsForSelection(document,chairs[1])[0].id,entry.id);
- assert.equal(shoppingSubtotalForDocument(document),2271.64);
+ assert.equal(shoppingSubtotalForDocument(document),2304.78);
  assert.ok(!shoppingItemsForDocument(DEFAULT_APARTMENT_DOCUMENT).some(i=>i.id===entry.id));
 });
 
@@ -209,7 +209,7 @@ test('both selected wooden hall vases have exact SKU, unit price, separate selec
    assert.ok(placement);assert.deepEqual(shoppingItemsForSelection(doc,placement).map(i=>i.id).sort(),[id,finish==='light'?'606405775986248':'606886610979660'].sort());
  }
  assert.equal(Math.round(variants.reduce((sum,v)=>sum+v[2],0)*100),1679);
- assert.equal(shoppingSubtotalForDocument(doc),2271.64);
+ assert.equal(shoppingSubtotalForDocument(doc),2304.78);
 });
 
 test('preserves both wheat purchases and replaces the obsolete towel with the custom print',()=>{
@@ -228,7 +228,7 @@ test('preserves both wheat purchases and replaces the obsolete towel with the cu
  assert.match(custom.dimensions,/30 × 45 cm/);assert.match(custom.dimensions,/31 cm/);
  assert.equal(active.filter(i=>i.id===custom.id).length,1);
  assert.ok(!SHOPPING_ITEMS.some(i=>i.id==='606319608216104'));
- assert.equal(shoppingSubtotalForDocument(doc),2271.64);
+ assert.equal(shoppingSubtotalForDocument(doc),2304.78);
 });
 
 test('Zimmer 1 uses the selected Temu curtain pair and gold rod while Ecru is existing',()=>{

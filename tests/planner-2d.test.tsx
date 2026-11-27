@@ -15,6 +15,7 @@ vi.mock("react-konva", () => {
   return {
     Arc: node("Arc"),
     Circle: node("Circle"),
+    Ellipse: node("Ellipse"),
     Group: node("Group"),
     Layer: node("Layer"),
     Line: node("Line"),

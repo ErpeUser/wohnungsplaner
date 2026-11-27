@@ -2,6 +2,7 @@ import { DEFAULT_APARTMENT_DOCUMENT, upgradeZimmer1WallLights } from "../domain/
 import { upgradeZimmer1EntryGold, ZIMMER1_ENTRY_ART_ID } from "../domain/zimmer1-entry-gold.ts";
 import { upgradeZimmer1WardrobeBoxes } from "../domain/zimmer1-wardrobe-boxes.ts";
 import { ensureHallTejoPillow } from "../domain/hall-tejo-pillow.ts";
+import { upgradeZimmer1Ficus } from "../domain/zimmer1-ficus.ts";
 import {
   migrateStoredPlannerData,
   type MigrationResult,
@@ -133,7 +134,7 @@ const BASELINE_VISUAL_PLACEMENT_REFRESH_IDS = new Set([
   // The chair has its own one-time product migration so locally moved chairs
   // are not reset to default coordinates during a visual baseline rebase.
   "zimmer1-led-nightstand",
-  "zimmer1-olive-plant",
+  // The Ficus has its own targeted product migration; keep its saved position.
   "living-chicago-sofa",
   "living-bozan-table",
   "living-kaleo-chair-west",
@@ -338,7 +339,7 @@ export function createLocalStoragePlannerRepository(
       const migration = migrateStoredPlannerData(value, DEFAULT_APARTMENT_DOCUMENT);
       return {
         ...migration,
-        document: ensureHallTejoPillow(upgradeZimmer1WardrobeBoxes(upgradeZimmer1WardrobeToFly(upgradeZimmer1EntryGold(upgradeZimmer1WallLights(removeZimmer1EntryNiche(migration.document)))))),
+        document: upgradeZimmer1Ficus(ensureHallTejoPillow(upgradeZimmer1WardrobeBoxes(upgradeZimmer1WardrobeToFly(upgradeZimmer1EntryGold(upgradeZimmer1WallLights(removeZimmer1EntryNiche(migration.document))))))),
         canCommit: isValidV3(value) || isRecognizedLegacyDocument(value),
       };
     },
@@ -383,7 +384,8 @@ function readStoredValue(raw: string): MigrationResult {
       const withWallboards = upgradeZimmer1VanityWallboards(withWc);
       const withFly = upgradeZimmer1WardrobeToFly(withWallboards);
       const withBoxes = upgradeZimmer1WardrobeBoxes(withFly);
-      const withPillow = ensureHallTejoPillow(withBoxes);
+      const withFicus = upgradeZimmer1Ficus(withBoxes);
+      const withPillow = ensureHallTejoPillow(withFicus);
       if (!normalized.identityChanged && isOlderBaselineModel(withPillow)) {
         return {
           document: ensureHallTejoPillow(rebaseBaselineModel(withPillow)),
@@ -397,8 +399,10 @@ function readStoredValue(raw: string): MigrationResult {
           document: withPillow,
           warnings: [normalized.changed
             ? "Das gespeicherte Dokument wurde auf die zusammengeführte Balkon-/Loggia-Struktur aktualisiert."
-            : withPillow !== withBoxes
+            : withPillow !== withFicus
               ? "Das bronzefarbene Chenille-Kissen wurde auf der TEJO-Sitzbank ergänzt; andere Möbel bleiben erhalten."
+              : withFicus !== withBoxes
+              ? "Die bisherige Pflanze in Zimmer 1 wurde durch den ausgewählten Ficus im beigen Kelchtopf ersetzt; der Standort bleibt erhalten."
               : withBoxes !== withFly
               ? "Die drei Schrankboxen wurden auf das ausgewählte ZGV-XL-Set aktualisiert; andere Möbel bleiben erhalten."
               : withFly !== withWallboards

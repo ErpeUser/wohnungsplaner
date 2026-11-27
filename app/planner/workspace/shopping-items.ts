@@ -2,6 +2,7 @@ import type { PlannerBuiltIn, PlannerDocumentV3 } from "../domain/types.ts";
 import { ZIMMER1_ENTRY_GOLD_ARTICLE } from "../domain/zimmer1-entry-gold.ts";
 import { ZGV_WARDROBE_ARTICLE } from "../domain/zimmer1-wardrobe-boxes.ts";
 import { HALL_TEJO_PILLOW_ARTICLE, HALL_TEJO_PILLOW_ID } from "../domain/hall-tejo-pillow.ts";
+import { ZIMMER1_FICUS } from "../domain/zimmer1-ficus.ts";
 import { getSelectedWcWallboardOption, wallboardDimensionLabel, WC_WALLBOARD_BUILTIN_ID } from "../domain/wc-wallboards.ts";
 import { getFurnitureCatalogItem } from "../catalog/catalog.ts";
 import { getChairModelForCatalogId } from "../chairs/chair-models.ts";
@@ -74,7 +75,8 @@ export const SHOPPING_ITEMS: ShoppingItem[] = [
   {"id": "z1-deko-nische", "name": "Sehr schmale beleuchtete Eiche-Nische", "room": "Zimmer 1", "dimensions": "max. 22 cm breit · 13 cm tief · ca. 188 cm hoch · 3 Ablagen", "price": null, "quantity": 1, "searchHint": "schmales Wandregal Eiche 20 cm beleuchtet flache Ablagen", "generic": true, "type": "decor", "retailer": "frei wählbar / Maßanfertigung"},
   {"id":"z1-deko-wandleuchten","name":"GGbingo · wiederaufladbare LED-Kugelwandleuchte","room":"Zimmer 1","dimensions":"2 Leuchten · Kugel Ø ca. 12 cm (Planungsmaß, nicht bestätigt) · dimmbar, Fernbedienung laut Produkttitel","price":null,"quantity":2,"amountLabel":"2 Leuchten geplant · Art. 1005012428556452 · Preisindikator im Nutzerlink 33,68 €; Packungsinhalt, Variante und Endpreis vor Kauf prüfen","url":"https://de.aliexpress.com/item/1005012428556452.html","type":"decor","retailer":"AliExpress"},
   { id: "z1-deko-schrankboxen", name: "ZGV · XL-Kleider-Aufbewahrungsbeutel · 3er-Set", room: "Zimmer 1", dimensions: "Je 60 × 40 × 30 cm (B/T/H) · faltbar · Sichtfenster · Doppelreißverschluss · verstärkte Griffe", price: ZGV_WARDROBE_ARTICLE.price, quantity: 1, amountLabel: "1 Set = 3 Stück XL · SKU 118252395101764 · Nutzerpreis 12,74 € für das gesamte Set", url: ZGV_WARDROBE_ARTICLE.url, imageUrl: ZGV_WARDROBE_ARTICLE.imageUrl, type: "decor", retailer: "Temu" },
-  {"id": "z1-deko-pflanze", "name": "Eine schlanke Zimmerpflanze mit Beigetopf", "room": "Zimmer 1", "dimensions": "90–120 cm hoch · Topf Ø 24–28 cm · gesamte Stellfläche maximal 42 cm", "price": null, "quantity": 1, "searchHint": "schlanke Zimmerpflanze 110 cm Olivenbaum Zamioculcas Topf beige matt", "generic": true, "type": "decor", "retailer": "frei wählbar"},
+  { id: ZIMMER1_FICUS.plantArticle, name: "IKEA FICUS MICROCARPA · Chinesische Feige", room: "Zimmer 1", dimensions: "95 cm Pflanzenhöhe · Kulturtopf Ø 19 cm · Gesamtaufbau mit Kelchtopf ca. 112 cm", price: ZIMMER1_FICUS.plantPrice, quantity: 1, amountLabel: "1 Pflanze · IKEA Art. 906.231.79 · 9,99 € (IKEA AT, 27.11.2026) · tatsächliche Pflanzenhöhe variiert", url: ZIMMER1_FICUS.plantUrl, imageUrl: "https://www.ikea.com/ch/fr/images/products/ficus-microcarpa-plante-naturelle-ficus-microcarpa__1542101_pe1018312_s5.jpg", type: "decor", retailer: "IKEA" },
+  { id: ZIMMER1_FICUS.planterArticle, name: "Temu · großes beiges Kelchgefäß / Übertopf", room: "Zimmer 1", dimensions: "Ø 26,5 cm × H 35,5 cm · Öffnung Ø 23,5 cm · Fuß Ø 21 cm · mattes strukturiertes Harz", price: ZIMMER1_FICUS.planterPrice, quantity: 1, amountLabel: "1 Stück · Tuimung · Beiges Großes Becken · SKU 107283317021641 · 23,15 € laut Nutzerwarenkorb; mit Drainageöffnung, geeigneter Untersetzer separat", url: ZIMMER1_FICUS.planterUrl, imageUrl: "https://img.kwcdn.com/product/fancy/3fd962a5-6c50-472f-8c3b-47c910aaad55.jpg", type: "decor", retailer: "Temu" },
   {"id": "z1-deko-textilien", "name": "Ruhiges Betttextilien-Set in Creme/Taupe", "room": "Zimmer 1", "dimensions": "2 helle Kissen · Lendenkissen ca. 35 × 50 cm · strukturierte Decke ca. 130 × 170 cm", "price": null, "quantity": 1, "searchHint": "Bettdecke Tagesdecke Creme Taupe strukturiert Lendenkissen", "generic": true, "type": "decor", "retailer": "frei wählbar"},
   {"id": "z1-deko-kleinteile", "name": "Nachttisch- und Schreibtischdeko", "room": "Zimmer 1", "dimensions": "Kugelleuchte Ø 15–18 cm · Tablett 20–24 × 12–16 cm · Holz-Organizer 25–35 cm", "price": null, "quantity": 1, "searchHint": "kleine Kugellampe warmweiß Tablett beige Holz Schreibtisch Organizer", "generic": true, "type": "decor", "retailer": "frei wählbar"},
   {"id": "z1-deko-pendelleuchte", "name": "Leichte Pendelleuchte in Flecht-/Rattanoptik", "room": "Zimmer 1", "dimensions": "Schirm Ø ca. 35–40 cm · warmweißes Leuchtmittel · kurze Abhängung", "price": null, "quantity": 1, "searchHint": "Pendelleuchte Rattan hell 40 cm Schlafzimmer geprüft", "generic": true, "type": "decor", "retailer": "frei wählbar"},
@@ -206,7 +208,8 @@ const catalogShoppingIds: Readonly<Record<string, readonly string[]>> = {
   "dining-table-bozan-110": ["2858001801"],
   "chair-aliexpress-woltu-1005013095870024": ["1005013095870024"],
   "chair-kaleo-chenille-beige": ["1634004202"],
-  "plant-zimmer1-olive": ["z1-deko-pflanze"],
+  [ZIMMER1_FICUS.catalogId]: [ZIMMER1_FICUS.plantArticle, ZIMMER1_FICUS.planterArticle],
+  "plant-zimmer1-olive": [ZIMMER1_FICUS.plantArticle, ZIMMER1_FICUS.planterArticle],
 };
 
 const modelReferenceId = (roomId: string, catalogId: string) => "model:" + roomId + ":" + catalogId;

@@ -37,7 +37,7 @@ test("dokumentiert Konstruktion und Herkunft für jedes produktbezogene Möbel",
     "chair-kaleo-chenille-beige", "vanity-vicco-sherry-120", "chair-temu-executive-ivory",
     "nightstand-led-2drawer-white", "wardrobe-225", "rug-temu-rabbit-ivory-100x180",
     "rug-temu-shaggy-white-120x200", "rug-temu-easy-line-120x180", "rug-temu-easy-line-140x200",
-    "rug-gala-shaggy-2505-100x200", "rug-living-concept-240x240", "plant-zimmer1-olive",
+    "rug-gala-shaggy-2505-100x200", "rug-living-concept-240x240", "plant-zimmer1-olive", "plant-zimmer1-ficus-90623179",
   ];
 
   for (const id of productIds) {
@@ -62,7 +62,7 @@ test("hält produktbezogene Modelle parametrisch bis ein lizenziertes GLB vorlie
     "chair-kaleo-chenille-beige", "vanity-vicco-sherry-120", "chair-temu-executive-ivory",
     "nightstand-led-2drawer-white", "wardrobe-225", "rug-temu-rabbit-ivory-100x180",
     "rug-temu-shaggy-white-120x200", "rug-temu-easy-line-120x180", "rug-temu-easy-line-140x200",
-    "rug-gala-shaggy-2505-100x200", "rug-living-concept-240x240", "plant-zimmer1-olive",
+    "rug-gala-shaggy-2505-100x200", "rug-living-concept-240x240", "plant-zimmer1-olive", "plant-zimmer1-ficus-90623179",
   ];
 
   for (const id of productIds) {

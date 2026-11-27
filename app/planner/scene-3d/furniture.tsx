@@ -5,6 +5,8 @@ import { ComparisonChair, KaleoArmchair, PhotoOfficeChair, TemuIvoryExecutiveCha
 import { XuegwAdjustableDeskChair } from "./furniture/xuegw-chair.tsx";
 import { DetailedCabinet, DetailedDresser, DetailedFloorLamp, DetailedLowboard, DetailedShelf, LedChargingNightstand, PhotoDesk, PhotoWardrobe, StandardPlant, StandardWardrobe, TejoHallway, WoltuAliExpressNightstand, Zimmer1OlivePlant } from "./furniture/decor.tsx";
 import { BrownHallwayMirrorBench } from "./furniture/hallway-brown.tsx";
+import { Zimmer1FicusPlant } from "./furniture/zimmer1-ficus.tsx";
+import { ZIMMER1_FICUS } from "../domain/zimmer1-ficus.ts";
 import { DetailStrip, SHARED_BOX, SHARED_CYLINDER, SHARED_SPHERE } from "./furniture/primitives.tsx";
 import { GalaShaggyRug, LivingIvoryGreigeRug, StandardWovenRug, TemuEasyLineRug, TemuIvoryRabbitRug, TemuWhiteShaggyRug } from "./furniture/rugs.tsx";
 import { ChicagoSofa, IvoryPulloutSofa, PhotoSectionalSofa, StandardSofa } from "./furniture/sofas.tsx";
@@ -195,6 +197,7 @@ function ParametricFurniture({ fallback, materialId, catalogId, size }: { fallba
   if (catalogId === "rug-living-concept-240x240") return <LivingIvoryGreigeRug />;
   if (catalogId === "rug-temu-shaggy-white-120x200") return <TemuWhiteShaggyRug />;
   if (catalogId === "rug-gala-shaggy-2505-100x200") return <GalaShaggyRug />;
+  if (catalogId === ZIMMER1_FICUS.catalogId) return <Zimmer1FicusPlant />;
   if (catalogId === "plant-zimmer1-olive") return <Zimmer1OlivePlant />;
   if (catalogId === "vanity-vicco-sherry-120") return <ViccoSherryVanity />;
   if (catalogId === "chair-temu-executive-ivory") return <TemuIvoryExecutiveChair />;
