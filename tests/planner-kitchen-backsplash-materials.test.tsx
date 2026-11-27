@@ -11,7 +11,7 @@ import {
 import { expect, test, vi } from "vitest";
 
 import { DEFAULT_APARTMENT_DOCUMENT } from "../app/planner/domain/apartment-v3.ts";
-import { INTERIOR_REVISION, refineRoomLayout } from "../app/planner/domain/room-refinement.ts";
+import { HALL_DECOR, INTERIOR_REVISION, refineRoomLayout } from "../app/planner/domain/room-refinement.ts";
 import { PlannerArchitecture } from "../app/planner/scene-3d/architecture.tsx";
 import { getInteriorMaterial } from "../app/planner/scene-3d/interior-materials.ts";
 import { hasRefinedInteriorModel } from "../app/planner/scene-3d/interior-models.tsx";
@@ -196,7 +196,7 @@ test.each([
   ["hall-tejo-art-plates", 5],
   ["hall-between-door-decor", 5],
 ] as const)("%s retains its existing %i shared wooden surfaces", async (catalogId, count) => {
-  const item = source.builtIns.find((candidate) => candidate.catalogId === catalogId)!;
+  const item = createSceneModel({ ...DEFAULT_APARTMENT_DOCUMENT, builtIns: [...HALL_DECOR] }, null).builtIns.find((candidate) => candidate.catalogId === catalogId)!;
   expect(item).toBeDefined();
   const model = await renderObjects([item]);
   try {
@@ -309,4 +309,25 @@ test("the wrapper preserves the legacy backsplash material for unrefined documen
   const model = await renderObjects([legacy]);
   try { expect(panelSurface(model.scene, legacy).material).toBe(getPlannerMaterial("oak-backsplash")); }
   finally { await model.dispose(); }
+});
+
+test("the ten selected baskets are individually rendered with woven textures and their specified envelopes", async () => {
+  const baskets=source.builtIns.filter(item=>item.catalogId.startsWith("hall-woven-basket-"));
+  expect(baskets).toHaveLength(10);
+  const model=await renderObjects(baskets);
+  try {
+    const meshes: Mesh[]=[];
+    model.scene.traverse(obj=>{if(obj instanceof Mesh&&obj.name.startsWith("temu-hall-"))meshes.push(obj);});
+    expect(meshes).toHaveLength(10);
+    for(const item of baskets){
+      const mesh=meshes.find(obj=>obj.name==="temu-hall-"+item.catalogId.replace("hall-woven-basket-",""))!;
+      expect(mesh).toBeDefined();
+      const mat=mesh.material as MeshStandardMaterial;
+      expect(mat.map).toBeInstanceOf(DataTexture);
+      expect(mat.bumpMap).toBeInstanceOf(DataTexture);
+      mesh.geometry.computeBoundingBox();
+      const bounds=mesh.geometry.boundingBox!.getSize(new Vector3());
+      item.size.forEach((dimension,index)=>expect(Math.abs(bounds.getComponent(index)-dimension)).toBeLessThan(.004));
+    }
+  } finally { await model.dispose(); }
 });

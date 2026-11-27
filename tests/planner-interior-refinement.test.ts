@@ -40,9 +40,19 @@ test('appliances and user-movable furniture are retained',()=>{
   assert.deepEqual(original,snapshot);assert.equal(result.placements,original.placements);assert.equal(result.assets,original.assets);assert.equal(result.doorStates,original.doorStates);
   for(const name of ['fridge','oven','hob','sink','microwave','hood'])assert.equal(result.builtIns.filter(item=>item.id===`builtin-kitchen-${name}`).length,1);
 });
-test('both hall groups replace the retired combined object without duplicates',()=>{
-  const result=refineRoomLayout(DEFAULT_APARTMENT_DOCUMENT);assert.equal(result.builtIns.some(item=>item.id==='builtin-hall-wall-decor'),false);
-  for(const id of ['builtin-hall-tejo-art-plates','builtin-hall-between-door-decor'])assert.equal(result.builtIns.filter(item=>item.id===id).length,1);
+test('the ten selected woven baskets replace only active old hallway decor',()=>{
+  const result=refineRoomLayout(DEFAULT_APARTMENT_DOCUMENT);
+  for(const id of ['builtin-hall-wall-decor','builtin-hall-tejo-art-plates','builtin-hall-between-door-decor'])assert.equal(result.builtIns.some(item=>item.id===id),false);
+  const baskets=result.builtIns.filter(item=>item.catalogId?.startsWith('hall-woven-basket-'));
+  assert.equal(baskets.length,10);
+  assert.equal(new Set(baskets.map(item=>item.id)).size,10);
+  assert.deepEqual(baskets.map(item=>Math.round(item.size.width*100)).sort((a,b)=>a-b),[11,11,11,16,24,24,24,25,25,30]);
+  assert.deepEqual(baskets.map(item=>Math.round(((item.elevation??0)+item.size.height/2)*100)),[193,225,168,159,203,175,146,198,166,139]);
+  assert.equal(baskets.filter(item=>item.rotation===270).length,7);
+  assert.equal(baskets.filter(item=>item.rotation===0).length,3);
+  assert.ok(baskets.every(item=>item.roomId==='vorraum'&&item.collision==='decorative'&&item.locked));
+  assert.equal(result.placements,DEFAULT_APARTMENT_DOCUMENT.placements);
+  assert.equal(refineRoomLayout(result),result);
 });
 test('reapplication is idempotent',()=>{const once=refineRoomLayout(DEFAULT_APARTMENT_DOCUMENT);assert.equal(refineRoomLayout(once),once);});
 test('other apartments remain untouched',()=>{const other={...DEFAULT_APARTMENT_DOCUMENT,id:'another-flat'};assert.equal(refineRoomLayout(other),other);});

@@ -8,10 +8,11 @@ import type {SceneObject} from './scene-model.ts';
 import {HALL_REFERENCE,hookCenters,KITCHEN_REFERENCE,INTERIOR_REVISION} from '../domain/room-refinement.ts';
 import {createWaffleSurface,createWaffleFringe,WAFFLE_FRINGE,createKitchenTiles,worktopSlabs,sinkProfile,baseShellPanels,type InteriorMesh} from './interior-geometry.ts';
 import {getInteriorMaterial as material} from './interior-materials.ts';
+import {HallWovenBasket} from './hall-woven-basket-model.tsx';
 type Item=SceneObject<PlannerBuiltIn>;
 type Triple=[number,number,number];
 const MODEL_IDS=new Set(['bath-mat','wc-mat','bath-towel-hooks-wood-black','wc-paper-holder','hall-tejo-art-plates','hall-between-door-decor','kitchen-sink','kitchen-base','kitchen-corner-base','kitchen-worktop','kitchen-upper','kitchen-corner-upper','kitchen-backsplash-oak','floor-zone-kitchen']);
-export function hasRefinedInteriorModel(item:Item){return MODEL_IDS.has(item.catalogId)&&Boolean(item.source.metadata?.notes?.includes(INTERIOR_REVISION));}
+export function hasRefinedInteriorModel(item:Item){return (MODEL_IDS.has(item.catalogId)||item.catalogId.startsWith('hall-woven-basket-'))&&Boolean(item.source.metadata?.notes?.includes(INTERIOR_REVISION));}
 function useBufferGeometry(data:InteriorMesh){
   const geometry=useMemo(()=>{const g=new BufferGeometry();g.setAttribute('position',new Float32BufferAttribute(data.positions,3));g.setAttribute('normal',new Float32BufferAttribute(data.normals,3));g.setAttribute('uv',new Float32BufferAttribute(data.uvs,2));if(data.colors)g.setAttribute('color',new Float32BufferAttribute(data.colors,3));g.setIndex(new Uint32BufferAttribute(data.indices,1));g.computeBoundingBox();g.computeBoundingSphere();return g;},[data]);
   useEffect(()=>()=>geometry.dispose(),[geometry]);return geometry;
@@ -23,6 +24,7 @@ function Handle({position,width=.128,vertical=false}:{position:Triple;width?:num
   return <group position={position} rotation={[0,0,vertical?Math.PI/2:0]}><Block size={[width,.009,.012]} finish="steel" radius={.004}/>{[-1,1].map(side=><Block key={side} position={[side*(width/2-.01),0,-.009]} size={[.008,.008,.018]} finish="steel"/>)}</group>;
 }
 export function RefinedInteriorModel({item}:{item:Item}){
+  if(item.catalogId.startsWith('hall-woven-basket-'))return <HallWovenBasket catalogId={item.catalogId} size={item.size}/>;
   switch(item.catalogId){
     case 'bath-mat':case 'wc-mat':return <WaffleMat item={item}/>;
     case 'bath-towel-hooks-wood-black':return <Style2Hooks item={item}/>;

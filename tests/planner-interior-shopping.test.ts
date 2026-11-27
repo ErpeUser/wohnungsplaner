@@ -1,13 +1,14 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { DEFAULT_APARTMENT_DOCUMENT } from '../app/planner/domain/apartment-v3.ts';
+import { refineRoomLayout } from '../app/planner/domain/room-refinement.ts';
 import { SHOPPING_ITEMS, shoppingSubtotal, shoppingItemsForDocument, shoppingItemsForSelection, shoppingSubtotalForDocument } from '../app/planner/workspace/shopping-items.ts';
 const existingIds = ['kitchen-fridge-60cm','kitchen-oven-60cm','kitchen-induction-hob-60cm','kitchen-hood-60cm','kitchen-sink-60cm','184900692R','184900692G','1005012515662602','601104051124011','601100062257123','1005013057225398','800001233737','601099532250952','607246280935328','1005013624521211','1005013137520536-wc','1005013137520536-bad','1005012445521181','1005013379584796','607199740937372','2778003504','2858001801','1634004202','601099691023748','601104781298502','601099526356869','z1-deko-bilder','z1-deko-vorhang','z1-deko-licht','001555006211','007326000308','z1-deko-nische','z1-deko-wandleuchten','z1-deko-schrankboxen','z1-deko-pflanze','z1-deko-textilien','z1-deko-kleinteile','z1-deko-pendelleuchte','001787045908','800000829847'];
 const item=(id:string)=>{const found=SHOPPING_ITEMS.find(i=>i.id===id);assert.ok(found,id);return found;};
 test('preserves every existing shopping article without duplicate identities',()=>{
  for(const id of existingIds)assert.equal(SHOPPING_ITEMS.filter(i=>i.id===id).length,1,id);
  assert.equal(new Set(SHOPPING_ITEMS.map(i=>i.id)).size,SHOPPING_ITEMS.length);
- assert.equal(SHOPPING_ITEMS.length,existingIds.length+9);
+ assert.equal(SHOPPING_ITEMS.length,existingIds.length+10);
  assert.equal(SHOPPING_ITEMS.some(i=>i.id==='606296522765554'),false,'retired Temu chair must not be listed');
  assert.equal(item('1005012445521181').url,'https://de.aliexpress.com/item/1005012445521181.html');
 });
@@ -61,7 +62,7 @@ test('includes the exact selected Temu A8447 180 x 250 cm vintage rug',()=>{
 test('adds the purchased living room rug to the known-priced subtotal',()=>{
  const total=shoppingSubtotal;
  assert.equal(Math.round(total*100),211487);
- assert.equal(SHOPPING_ITEMS.filter(i=>i.url).length,30);
+ assert.equal(SHOPPING_ITEMS.filter(i=>i.url).length,31);
 });
 test('adds the 30-piece white-gold marble wall tile set for the bathroom',()=>{
  const tile=item('601100207687761');
@@ -182,4 +183,13 @@ test('a selected catalogue alternative with a product link is visible once in it
  assert.equal(shoppingItemsForSelection(document,chairs[1])[0].id,entry.id);
  assert.equal(shoppingSubtotalForDocument(document),2114.87);
  assert.ok(!shoppingItemsForDocument(DEFAULT_APARTMENT_DOCUMENT).some(i=>i.id===entry.id));
+});
+
+test('the woven hall decoration is one selected purchase, old entries remain archived',()=>{
+ const product=item('607596656326590');assert.equal(product.quantity,1);assert.equal(product.price,null);assert.equal(product.retailer,'Temu');assert.match(product.url??'',/goods_id=607596656326590&sku_id=107311636987647/);
+ const doc=refineRoomLayout(DEFAULT_APARTMENT_DOCUMENT),active=shoppingItemsForDocument(doc);
+ assert.equal(active.filter(i=>i.id===product.id).length,1);
+ for(const id of ['hall-decor-tejo-print','hall-decor-three-plates','hall-decor-between-doors-print','hall-decor-planter']){assert.ok(SHOPPING_ITEMS.some(i=>i.id===id));assert.ok(!active.some(i=>i.id===id));}
+ const baskets=doc.builtIns.filter(i=>i.catalogId?.startsWith('hall-woven-basket-'));assert.equal(baskets.length,10);
+ for(const basket of baskets)assert.deepEqual(shoppingItemsForSelection(doc,basket).map(i=>i.id),[product.id]);
 });

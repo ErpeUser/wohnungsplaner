@@ -57,3 +57,7 @@ test("review includes the two current hall decor groups and excludes the retired
   assert.ok(REVIEW_MODELS.some((model) => model.builtIn?.id === "builtin-hall-between-door-decor"));
   assert.equal(REVIEW_MODELS.some((model) => model.builtIn?.id === "builtin-hall-wall-decor"), false);
 });
+
+test("model review retains archived decor and contains all ten selected woven basket models",()=>{
+  assert.equal(REVIEW_MODELS.filter(model=>model.builtIn?.catalogId?.startsWith("hall-woven-basket-")).length,10);
+});

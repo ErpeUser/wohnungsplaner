@@ -75,11 +75,16 @@ export const SHOPPING_ITEMS: ShoppingItem[] = [
   {"id": "hall-decor-tejo-print", "name": "Gerahmtes Naturmotiv neben der Garderobe", "room": "Vorraum", "dimensions": "Planungsmaß 36 × 50 cm · heller Holzrahmen", "price": null, "quantity": 1, "searchHint": "Poster Pampas beige Holzrahmen 36x50", "generic": true, "type": "decor", "retailer": "frei wählbar"},
   {"id": "hall-decor-three-plates", "name": "Drei dekorative Wandteller", "room": "Vorraum", "dimensions": "Planungsmaße Ø 18 / 14 / 11 cm · Creme, Sand und Naturbraun", "price": null, "quantity": 1, "searchHint": "Wandteller Set Naturfaser beige braun 18 14 11 cm", "generic": true, "amountLabel": "1 Set = 3 Wandteller", "type": "decor", "retailer": "frei wählbar"},
   {"id": "hall-decor-between-doors-print", "name": "Gerahmtes Bogenmotiv zwischen den Türen", "room": "Vorraum", "dimensions": "Planungsmaß 32 × 45 cm · passt in das ca. 38-cm-Wandfeld", "price": null, "quantity": 1, "searchHint": "Poster Bogen beige Holzrahmen 32x45", "generic": true, "type": "decor", "retailer": "frei wählbar"},
-  {"id": "hall-decor-planter", "name": "Rundes Wandpflanzgefäß", "room": "Vorraum", "dimensions": "Ø 25 cm laut Nutzerangabe · Pflanzen und Steine als Deko-Platzhalter", "price": null, "quantity": 1, "searchHint": "Wandpflanzgefaess rund 25 cm beige", "generic": true, "type": "decor", "retailer": "frei wählbar"}
+  {"id": "hall-decor-planter", "name": "Rundes Wandpflanzgefäß", "room": "Vorraum", "dimensions": "Ø 25 cm laut Nutzerangabe · Pflanzen und Steine als Deko-Platzhalter", "price": null, "quantity": 1, "searchHint": "Wandpflanzgefaess rund 25 cm beige", "generic": true, "type": "decor", "retailer": "frei wählbar"} ,
+  {"id":"607596656326590","name":"Wandkorbdeko · Natur / Creme · 10er-Set","room":"Vorraum","dimensions":"Ø 30 / 25 / 25 / 24 / 24 / 11 / 11 / 11 cm · 2 Blattformen 24 / 16 cm breit · insgesamt 10 Teile","price":null,"quantity":1,"amountLabel":"1 Set = 10 Teile · SKU 107311636987647 · Preis bei Temu prüfen","imageUrl":"https://img.kwcdn.com/product/fancy/b6bb260d-a568-4b52-a4a8-46c5385345ea.jpg","url":"https://www.temu.com/goods.html?_bg_fs=1&goods_id=607596656326590&sku_id=107311636987647&_oak_page_source=501","type":"decor","retailer":"Temu"}
 ];
 
+/** Archived decor remains in the catalogue, but not in the active budget. */
+const ARCHIVED_HALL_SHOPPING_IDS=new Set(["hall-decor-tejo-print","hall-decor-three-plates","hall-decor-between-doors-print","hall-decor-planter"]);
+export const ACTIVE_SHOPPING_ITEMS=SHOPPING_ITEMS.filter(item=>!ARCHIVED_HALL_SHOPPING_IDS.has(item.id));
+
 /** Only selected products enter the planned subtotal; backup chairs remain browsable. */
-export const shoppingSubtotal = shoppingSubtotalForItems(SHOPPING_ITEMS);
+export const shoppingSubtotal = shoppingSubtotalForItems(ACTIVE_SHOPPING_ITEMS);
 
 /** One selected WC board; non-selected alternatives are excluded from the list and subtotal. */
 type ShoppingDocument = Pick<PlannerDocumentV3, "builtIns"> & Partial<Pick<PlannerDocumentV3, "placements" | "rooms">>;
@@ -87,8 +92,8 @@ type ShoppingDocument = Pick<PlannerDocumentV3, "builtIns"> & Partial<Pick<Plann
 export function shoppingItemsForDocument(document: ShoppingDocument): ShoppingItem[] {
   const option = getSelectedWcWallboardOption(document);
   const base = option.id === "simple-80"
-    ? SHOPPING_ITEMS.map((item) => item.id === option.articleId ? { ...item, price: option.price, url: option.sourceUrl, retailer: option.retailer } : item)
-    : SHOPPING_ITEMS.map((item) => item.id === "007326000408" ? {
+    ? ACTIVE_SHOPPING_ITEMS.map((item) => item.id === option.articleId ? { ...item, price: option.price, url: option.sourceUrl, retailer: option.retailer } : item)
+    : ACTIVE_SHOPPING_ITEMS.map((item) => item.id === "007326000408" ? {
     ...item,
     id: option.articleId,
     name: option.name,
@@ -241,6 +246,7 @@ export function shoppingItemsForSelection(
 ): ShoppingItem[] {
   const ids = selection.id === WC_WALLBOARD_BUILTIN_ID
     ? [getSelectedWcWallboardOption(document).articleId]
+    : selection.catalogId?.startsWith("hall-woven-basket-") ? ["607596656326590"]
     : builtInShoppingIds[selection.id] ?? (selection.catalogId ? catalogShoppingIds[selection.catalogId] : undefined) ?? [];
   const all = shoppingItemsForDocument(document);
   const room = document.rooms?.find((candidate) => candidate.id === selection.roomId);

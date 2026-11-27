@@ -14,7 +14,7 @@ export const HALL_REFERENCE=Object.freeze({
   tejoPrint:{width:.36,height:.50},plateDiameters:[.18,.14,.11] as readonly number[],
   betweenDoorsPrint:{width:.32,height:.45},planterDiameter:.25,clearDoorGap:.38,
 });
-export const REMOVED_INTERIOR_IDS=new Set(['builtin-hall-wall-decor','builtin-kitchen-backsplash-corner']);
+export const REMOVED_INTERIOR_IDS=new Set(['builtin-hall-wall-decor','builtin-kitchen-backsplash-corner','builtin-hall-tejo-art-plates','builtin-hall-between-door-decor']);
 export function upgradeWoltuNightstandPlacement<T extends { id: string; placements: PlannerPlacement[] }>(document: T): T {
   if (document.id !== 'wohnung-v3') return document;
   let changed = false;
@@ -79,18 +79,68 @@ export const HALL_DECOR:readonly PlannerBuiltIn[]=[
   hall('builtin-hall-tejo-art-plates','Vorraum · Bild 36 × 50 cm und Wandteller Ø 18 / 14 / 11 cm',-2.33,7.52,s(.40,.055,1.10),270,1.07,['Bildmitte 187 cm; Wandteller darunter versetzt. 40-cm-Wandfeld endet vor Tejo bei z=7.72 m. Gegensprechanlage und Schalter bleiben frei.']),
   hall('builtin-hall-between-door-decor','Vorraum zwischen Türen · Bild 32 × 45 cm und Wandpflanzgefäß Ø 25 cm',-1.30,6.012,s(.32,.16,.97),0,1.08,['Topfdurchmesser genau 25 cm. Bildbreite 32 cm passt in das rund 38-cm-Feld zwischen den Zargen. Bildmitte 180 cm; Topfmitte 125 cm. Echte Raumgeometrie statt Fotoebene.']),
 ];
+
+/** Previous art and planter groups remain available in model review. Only their
+ * active placements are retired. The new set is one purchase, ten objects. */
+export const HALL_BASKET_ARTICLE_ID='607596656326590';
+export const HALL_BASKET_SPECS = [
+  {id:'flower', label:'Blüte Creme', surface:'A', w:30, h:30, u:22, y:193},
+  {id:'leaf-horizontal', label:'Naturblatt quer', surface:'A', w:24, h:16, u:19, y:225},
+  {id:'small-spiral', label:'Kleiner Spiralkorb', surface:'A', w:11, h:11, u:34, y:168},
+  {id:'small-braid-a', label:'Kleiner Flechtkorb', surface:'A', w:11, h:11, u:10, y:159},
+  {id:'ring-white', label:'Weißer Ringkorb', surface:'B', w:25, h:25, u:20, y:203},
+  {id:'leaf-vertical', label:'Naturblatt hoch', surface:'B', w:16, h:23, u:15, y:175},
+  {id:'ring-brown', label:'Braun-weißer Ringkorb', surface:'B', w:24, h:24, u:22, y:146},
+  {id:'spiral-white', label:'Weißer Spiralkorb', surface:'C', w:25, h:25, u:17, y:198},
+  {id:'natural-round', label:'Runder Naturkorb', surface:'C', w:24, h:24, u:21, y:166},
+  {id:'small-braid-b', label:'Kleiner Flechtkorb', surface:'C', w:11, h:11, u:10, y:139},
+] as const;
+export function hallBasketDecor(wardrobe?: PlannerPlacement, includeCabinetSide=true): PlannerBuiltIn[]{
+  // Coordinates are referenced to the inside faces (12-cm walls), not
+  // centre lines. A begins at the entrance jamb, B at the WC jamb.
+  const cabinet=wardrobe?.position??p(-1.78,7.93);
+  const cabinetSize=wardrobe?.size??s(1.15,.375,2.319);
+  const cabinetRotation=wardrobe?.rotation??180;
+  const angle=cabinetRotation*Math.PI/180;
+  const depth=.03;
+  const round=(n:number)=>Math.round(n*1e6)/1e6;
+  return HALL_BASKET_SPECS.filter(spec=>spec.surface!=='C'||includeCabinetSide).map(spec=>{
+    let x:number,z:number,rotation:number;
+    if(spec.surface==='A'){x=-2.345;z=7.2975+spec.u/100;rotation=270;}
+    else if(spec.surface==='B'){x=-1.495+spec.u/100;z=5.945;rotation=0;}
+    else {
+      // Match the actual TEJO side of the mirrored tall compartment
+      // (normalised side face x=-.4895), not its nominal envelope.
+      const localX=-.4895*cabinetSize.width-depth/2;
+      const localZ=cabinetSize.depth/2-spec.u/100;
+      x=cabinet.x+Math.cos(angle)*localX-Math.sin(angle)*localZ;
+      z=cabinet.z+Math.sin(angle)*localX+Math.cos(angle)*localZ;
+      rotation=((cabinetRotation+90)%360+360)%360;
+    }
+    const label='Vorraum · Wandkorb '+spec.label+' · '+(spec.w===spec.h?'Ø '+spec.w+' cm':spec.w+' × '+spec.h+' cm');
+    const target=hall('builtin-hall-woven-basket-'+spec.id,label,round(x),round(z),s(spec.w/100,depth,spec.h/100),rotation,round((spec.y-spec.h/2)/100),[
+      'Temu 10er-Set, Fläche '+spec.surface+'; Mittelpunkt '+spec.y+' cm über Boden.',
+      'Alle zehn Teile gehören zu einer Packung. Blatt-Zweitmaß und nicht ausgewiesene Tiefen sind Modellannahmen; Montage vor Ort prüfen.',
+    ]);
+    return {...target,metadata:{...target.metadata,source:'Temu Art. '+HALL_BASKET_ARTICLE_ID+' · SKU 107311636987647 · Nutzer-Produktbild',confidence:'estimated' as const}};
+  });
+}
+
 /** Pure and idempotent: unrelated furniture, room boundaries and appliances remain. */
-export function refineRoomLayout<T extends {id:string;builtIns:PlannerBuiltIn[]}>(document:T):T{
+export function refineRoomLayout<T extends {id:string;builtIns:PlannerBuiltIn[];placements?:PlannerPlacement[]}>(document:T):T{
   if(document.id!=='wohnung-v3')return document;
+  const wardrobe=document.placements?.find(item=>item.id==='hall-tejo-wardrobe');
+  const activeHallDecor=hallBasketDecor(wardrobe, !document.placements||wardrobe?.catalogId==='hallway-tejo-115');
+  const hallIds=new Set(activeHallDecor.map(item=>item.id));
   let changed=false;const builtIns:PlannerBuiltIn[]=[];
   for(const item of document.builtIns){
-    if(REMOVED_INTERIOR_IDS.has(item.id)){changed=true;continue;}
+    if(REMOVED_INTERIOR_IDS.has(item.id)||(item.id.startsWith('builtin-hall-woven-basket-')&&!hallIds.has(item.id))){changed=true;continue;}
     const update=INTERIOR_UPDATES[item.id];
     if(!update){builtIns.push(item);continue;}
     const next={...item,...update};
     if(JSON.stringify(next)===JSON.stringify(item))builtIns.push(item);else{builtIns.push(next);changed=true;}
   }
-  for(const target of HALL_DECOR){const index=builtIns.findIndex(item=>item.id===target.id);
+  for(const target of activeHallDecor){const index=builtIns.findIndex(item=>item.id===target.id);
     if(index<0){builtIns.push(structuredClone(target));changed=true;}
     else if(JSON.stringify(builtIns[index])!==JSON.stringify(target)){builtIns[index]=structuredClone(target);changed=true;}}
   return changed?{...document,builtIns}:document;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState, type KeyboardEvent } from "react";
-import { SHOPPING_ITEMS, formatShoppingPrice, shoppingItemsForDocument, shoppingItemsForRoom, shoppingPriceLabel, shoppingSubtotalForItems } from "./shopping-items.ts";
+import { ACTIVE_SHOPPING_ITEMS, formatShoppingPrice, shoppingItemsForDocument, shoppingItemsForRoom, shoppingPriceLabel, shoppingSubtotalForItems } from "./shopping-items.ts";
 import type { PlannerDocumentV3 } from "../domain/types.ts";
 import type { PlannerCommand, CommandResult } from "../domain/commands.ts";
 import { WcWallboardPicker } from "./wc-wallboard-picker.tsx";
@@ -16,7 +16,7 @@ export function ShoppingListDrawer({ onClose, document, dispatch, activeRoomId =
   const room = document?.rooms.find((item) => item.id === activeRoomId);
   const [scope, setScope] = useState<"room" | "all">(() => room ? "room" : "all");
   const activeScope = room ? scope : "all";
-  const allItems = document ? shoppingItemsForDocument(document) : SHOPPING_ITEMS;
+  const allItems = document ? shoppingItemsForDocument(document) : ACTIVE_SHOPPING_ITEMS;
   const items = activeScope === "room" && room ? shoppingItemsForRoom(allItems, room.name) : allItems;
   const total = shoppingSubtotalForItems(items);
   const showWallboard = activeScope === "all" || room?.id === "wc";
