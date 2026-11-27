@@ -139,7 +139,7 @@ describe("PlannerWorkspace", () => {
     assert.match(product.textContent ?? "", /Bad.*180 × 200 cm.*12 Metallhaken/);
     assert.equal(
       product.querySelector("a")?.getAttribute("href"),
-      "https://www.temu.com/goods.html?_bg_fs=1&goods_id=601100062257123&sku_id=17594540656721&_oak_page_source=501&page_source=10037&top_gallery_url=https%3A%2F%2Fimg.kwcdn.com%2Fproduct%2Ffancy%2Ffaf94fab-a0c4-456e-91b6-5d4ea67b9522.jpg",
+      "https://de.aliexpress.com/item/1005005852015457.html",
     );
   });
 

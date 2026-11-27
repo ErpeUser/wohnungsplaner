@@ -67,7 +67,7 @@ describe("Zimmer 1 wardrobe vinyl", () => {
     const curtain = screen.getByRole("heading", { name: "Duschvorhang Stoff Beige · 180 × 200 cm" }).closest("article");
     assert.ok(curtain);
     assert.match(curtain.textContent ?? "", /12 Metallhaken/);
-    assert.match(curtain.querySelector("a")?.getAttribute("href") ?? "", /goods_id=601100062257123&sku_id=17594540656721/);
+    assert.match(curtain.querySelector("a")?.getAttribute("href") ?? "", /1005005852015457.html$/);
   });
 
   test("lists the darker AliExpress double-shelf holder with the requested price and correct image", () => {
