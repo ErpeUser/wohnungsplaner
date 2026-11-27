@@ -1,5 +1,6 @@
 import { DEFAULT_APARTMENT_DOCUMENT, upgradeZimmer1WallLights } from "../domain/apartment-v3.ts";
 import { upgradeZimmer1EntryGold, ZIMMER1_ENTRY_ART_ID } from "../domain/zimmer1-entry-gold.ts";
+import { upgradeZimmer1WardrobeBoxes } from "../domain/zimmer1-wardrobe-boxes.ts";
 import {
   migrateStoredPlannerData,
   type MigrationResult,
@@ -58,7 +59,6 @@ const BASELINE_VISUAL_REFRESH_IDS = new Set([
   "builtin-z1-headboard-led",
   "builtin-z1-headboard-sconces",
   "builtin-z1-layered-curtain",
-  "builtin-z1-wardrobe-top-decor",
   "builtin-z1-nightstand-decor",
   "builtin-hall-wall-decor",
 ]);
@@ -337,7 +337,7 @@ export function createLocalStoragePlannerRepository(
       const migration = migrateStoredPlannerData(value, DEFAULT_APARTMENT_DOCUMENT);
       return {
         ...migration,
-        document: upgradeZimmer1EntryGold(upgradeZimmer1WallLights(removeZimmer1EntryNiche(migration.document))),
+        document: upgradeZimmer1WardrobeBoxes(upgradeZimmer1WardrobeToFly(upgradeZimmer1EntryGold(upgradeZimmer1WallLights(removeZimmer1EntryNiche(migration.document))))),
         canCommit: isValidV3(value) || isRecognizedLegacyDocument(value),
       };
     },
@@ -381,20 +381,23 @@ function readStoredValue(raw: string): MigrationResult {
       const withWc = upgradeWcPhotoReference(withTuckedDining);
       const withWallboards = upgradeZimmer1VanityWallboards(withWc);
       const withFly = upgradeZimmer1WardrobeToFly(withWallboards);
-      if (!normalized.identityChanged && isOlderBaselineModel(withFly)) {
+      const withBoxes = upgradeZimmer1WardrobeBoxes(withFly);
+      if (!normalized.identityChanged && isOlderBaselineModel(withBoxes)) {
         return {
-          document: rebaseBaselineModel(withFly),
+          document: rebaseBaselineModel(withBoxes),
           warnings: ["Das gespeicherte Möbel-Layout und die Bad-/WC-Materialien wurden auf den aktuellen Stand aktualisiert."],
           legacyBackupJson: raw,
           unmapped: [],
         };
       }
-      if (normalized.changed || withFly !== parsed) {
+      if (normalized.changed || withBoxes !== parsed) {
         return {
-          document: withFly,
+          document: withBoxes,
           warnings: [normalized.changed
             ? "Das gespeicherte Dokument wurde auf die zusammengeführte Balkon-/Loggia-Struktur aktualisiert."
-            : withFly !== withWallboards
+            : withBoxes !== withFly
+              ? "Die drei Schrankboxen wurden auf das ausgewählte ZGV-XL-Set aktualisiert; andere Möbel bleiben erhalten."
+              : withFly !== withWallboards
               ? "Der Kleiderschrank in Zimmer 1 wurde an das MID.YOU-FLY-Maß angepasst; Kaschmirfronten und angepasste Möbelpositionen bleiben erhalten."
             : withWallboards !== withWc
               ? "Die drei Wandboards der Schminkecke wurden auf die ausgewählten Möbelix-Produkte aktualisiert; andere Möbelpositionen bleiben erhalten."

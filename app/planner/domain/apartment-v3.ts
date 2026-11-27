@@ -1,5 +1,6 @@
 import { parsePlannerDocument } from "./schema.ts";
 import { ZIMMER1_ENTRY_GOLD_STRIPS } from "./zimmer1-entry-gold.ts";
+import { ZGV_WARDROBE_BOXES } from "./zimmer1-wardrobe-boxes.ts";
 import type {
   PlannerBuiltIn,
   PlannerFixture,
@@ -270,7 +271,7 @@ const builtIns: PlannerBuiltIn[] = [
     confidence: "confirmed",
     notes: ["B/H/T 23,5 × 3,8 × 23,5 cm · foliertes MDF · Eiche Artisan Dekor · max. 10 kg.", "Unteres von zwei identischen quadratischen Wandboards an der seitlichen Wand; Position ist eine Planungsannahme.", "Befestigungsmaterial enthalten."],
   }),
-  builtIn("z1-wardrobe-top-decor", "Geflochtene Aufbewahrungsboxen auf dem Schrank", "zimmer1", "storage", "zimmer1-wardrobe-top-decor", 1.125, 3.02, 1.46, 0.42, 0.25, 180, "fabric-taupe", 2.1, assumptionMetadata("Drei niedrige, helle Flechtboxen stehen auf der nun 210 cm hohen Schrankoberseite und bleiben unter der 2,56-m-Decke.")),
+  ZGV_WARDROBE_BOXES,
   builtIn("z1-nightstand-decor", "Kompakte Deko auf dem Nachttisch", "zimmer1", "other", "zimmer1-nightstand-decor", 0.22, 1.69, 0.3, 0.18, 0.22, 270, "ceramic-beige", 0.61, assumptionMetadata("Schmales Tablett als einzige Deko; die integrierte Nachttischbeleuchtung bleibt frei und wird nicht durch eine zusätzliche Lampe ergänzt.")),
   builtIn(
     "hall-wall-decor",

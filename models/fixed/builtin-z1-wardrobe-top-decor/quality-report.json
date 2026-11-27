@@ -3,30 +3,40 @@
   "assetType": "fixed",
   "status": "reference-only",
   "identity": {
-    "displayName": "Geflochtene Aufbewahrungsboxen auf dem Schrank",
+    "displayName": "ZGV · 3 XL-Aufbewahrungsbeutel auf dem Schrank · je 60 × 40 × 30 cm",
     "category": "fixed-interior",
-    "sourceConfidence": "catalog-or-folder-id"
+    "sourceConfidence": "user-product-image-and-variant"
   },
   "referenceSources": {
-    "manifestSourceUrls": [],
-    "linkEntries": [
-      "# Wohnungselement ohne externe Produktquelle; Teil der festen Wohnung/Architektur."
+    "manifestSourceUrls": [
+      "https://www.temu.com/goods.html?goods_id=607487503734082&sku_id=118252395101764"
     ],
-    "status": "no-external-source-documented"
+    "linkEntries": [
+      "https://www.temu.com/goods.html?goods_id=607487503734082&sku_id=118252395101764"
+    ],
+    "status": "user-supplied-product-reference"
   },
   "dimensions": {
-    "status": "not-verified-in-repository",
-    "verified": [],
-    "estimated": []
+    "status": "product-image-dimensions",
+    "verified": [
+      "3 pieces; each 60 × 40 × 30 cm (W/D/H)"
+    ],
+    "estimated": [
+      "194 × 40 × 30 cm installed group; 7 cm spacing; centred on the 225 cm wardrobe"
+    ]
   },
   "assetFiles": [],
   "reconstruction": {
-    "method": "parametric-runtime-preserved",
+    "method": "parametric-three-bags-with-procedural-textile",
     "meshPresent": false,
     "meshFiles": []
   },
   "materials": {
-    "declared": [],
+    "declared": [
+      "fabric-taupe",
+      "fabric-ecru",
+      "chrome-polished"
+    ],
     "pbrTexturesPresent": false,
     "textureFiles": []
   },
@@ -37,15 +47,14 @@
   },
   "checks": {
     "manifestJson": "passed",
-    "linkManifestConsistency": "no-url-to-synchronize",
+    "linkManifestConsistency": "passed",
     "geometry": "not-run-no-mesh",
     "materials": "not-run-no-pbr-textures",
-    "viewerIntegration": "parametric-fallback-preserved"
+    "viewerIntegration": "pending-live-verification"
   },
   "limitations": [
-    "No mesh asset is present in this model folder; existing runtime GLBs remain outside models/** and are not copied into this folder.",
-    "No repository PBR texture set is present; material fidelity remains runtime-defined.",
-    "Exact dimensions and product identity require source-specific verification before a photorealistic asset can be claimed."
+    "Product image establishes external dimensions and visible design; exact textile weave, transparent window and zipper details are approximated with procedural geometry and material.",
+    "No user-supplied image pixels or private session parameters are committed. Wardrobe load capacity is not verified."
   ],
-  "auditedAt": "2026-11-12"
+  "auditedAt": "2026-11-27"
 }

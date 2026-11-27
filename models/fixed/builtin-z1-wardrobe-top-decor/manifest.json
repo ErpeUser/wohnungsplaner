@@ -1,10 +1,16 @@
 {
   "id": "builtin-z1-wardrobe-top-decor",
-  "displayName": "Geflochtene Aufbewahrungsboxen auf dem Schrank",
+  "displayName": "ZGV · 3 XL-Aufbewahrungsbeutel auf dem Schrank · je 60 × 40 × 30 cm",
   "category": "fixed-interior",
   "status": "reference-only",
-  "sourceUrls": [],
-  "materials": [],
+  "sourceUrls": [
+    "https://www.temu.com/goods.html?goods_id=607487503734082&sku_id=118252395101764"
+  ],
+  "materials": [
+    "fabric-taupe",
+    "fabric-ecru",
+    "chrome-polished"
+  ],
   "variants": [
     "default"
   ],

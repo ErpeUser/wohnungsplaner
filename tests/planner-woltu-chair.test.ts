@@ -94,5 +94,5 @@ test("shopping list includes two WOLTU two-packs, excludes backup Kaleo from bud
   assert.equal(woltu?.price, null);
   assert.match(woltu?.amountLabel ?? "", /4 Esszimmerstühle/);
   assert.equal(kaleo?.alternative, true);
-  assert.equal(Math.round(shoppingSubtotal * 100), 217876);
+  assert.equal(Math.round(shoppingSubtotal * 100), 219150);
 });
