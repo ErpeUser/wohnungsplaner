@@ -63,10 +63,10 @@ describe("Zimmer 1 wardrobe vinyl", () => {
     render(<ShoppingListDrawer onClose={() => undefined} />);
     const hooks = screen.getByRole("heading", { name: /4 runde Kleider- und Handtuchhaken/ }).closest("article");
     assert.ok(hooks);
-    assert.match(hooks.textContent ?? "", /(?:5,34\s*€|€\s*5,34)/);
+    assert.match(hooks.textContent ?? "", /(?:6,62\s*€|€\s*6,62)/);
     assert.match(hooks.textContent ?? "", /1 Packung = 4 Haken/);
     assert.match(hooks.textContent ?? "", /4PCS.*Style2/);
-    assert.match(hooks.querySelector("a")?.getAttribute("href") ?? "", /1005013057225398\.html$/);
+    assert.match(hooks.querySelector("a")?.getAttribute("href") ?? "", /goods_id=605788240242234&sku_id=89972719804189/);
     assert.match(hooks.querySelector("img")?.getAttribute("src") ?? "", /aliexpress-bath-hooks-1005013057225398-style2\.jpg$/);
 
     const curtain = screen.getByRole("heading", { name: "Duschvorhang Stoff Beige · 180 × 200 cm" }).closest("article");

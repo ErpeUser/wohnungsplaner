@@ -33,7 +33,7 @@ describe("inspector editing", () => {
 
 
   test.each([
-    ["builtin-bath-towel-hook-rail", "5,34", "https://de.aliexpress.com/item/1005013057225398.html"],
+    ["builtin-bath-towel-hook-rail", "6,62", "https://www.temu.com/goods.html?_bg_fs=1&goods_id=605788240242234&sku_id=89972719804189&_oak_page_source=501"],
     ["builtin-bath-mat", "27,20", "https://de.aliexpress.com/item/1005013137520536.html"],
     ["builtin-wc-mat", "21,84", "https://de.aliexpress.com/item/1005013137520536.html"],
     ["living-chicago-sofa", "437,49", "https://de.aliexpress.com/item/1005013379584796.html"],
@@ -41,7 +41,7 @@ describe("inspector editing", () => {
     setup(id);
     const data = screen.getByRole("region", { name: "Kaufdaten" });
     expect(data.textContent).toContain(price);
-    expect(within(data).getByRole("link", { name: /Produkt bei AliExpress öffnen/ }).getAttribute("href")).toBe(url);
+    expect(within(data).getByRole("link", { name: url.includes("temu.com") ? /Produkt bei Temu öffnen/ : /Produkt bei AliExpress öffnen/ }).getAttribute("href")).toBe(url);
   });
 
   test("updates the purchase card when the WC wallboard variant changes", () => {

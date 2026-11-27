@@ -12,10 +12,10 @@ test('preserves every existing shopping article without duplicate identities',()
  assert.equal(item('1005012445521181').url,'https://de.aliexpress.com/item/1005012445521181.html');
 });
 test('four hooks cost one supplied pack and describe a single horizontal row',()=>{
- const hooks=item('1005013057225398');assert.equal(hooks.price,5.34);assert.equal(hooks.quantity,1);assert.equal(hooks.retailer,'AliExpress');assert.equal(hooks.room,'Bad');
+ const hooks=item('1005013057225398');assert.equal(hooks.price,6.62);assert.equal(hooks.quantity,1);assert.equal(hooks.retailer,'Temu');assert.equal(hooks.room,'Bad');
  assert.match(hooks.dimensions,/nebeneinander/);assert.doesNotMatch(hooks.dimensions,/2.*2 im Plan/);
- assert.equal(hooks.url,'https://de.aliexpress.com/item/1005013057225398.html');
- assert.match(hooks.amountLabel??'',/4PCS.*Style2.*5,34/);
+ assert.equal(hooks.url,'https://www.temu.com/goods.html?_bg_fs=1&goods_id=605788240242234&sku_id=89972719804189&_oak_page_source=501');
+ assert.match(hooks.amountLabel??'',/4PCS.*Style2.*6,62/);
  assert.match(hooks.imageUrl??'',/aliexpress-bath-hooks-1005013057225398-style2\.jpg$/);
  assert.equal(SHOPPING_ITEMS.some(i=>i.id==='607039887632432'),false);
  const hook=DEFAULT_APARTMENT_DOCUMENT.builtIns.find(i=>i.id==='builtin-bath-towel-hook-rail')!;
@@ -60,7 +60,7 @@ test('includes the exact selected Temu A8447 180 x 250 cm vintage rug',()=>{
 });
 test('adds the purchased living room rug to the known-priced subtotal',()=>{
  const total=shoppingSubtotal;
- assert.equal(Math.round(total*100),211359);
+ assert.equal(Math.round(total*100),211487);
  assert.equal(SHOPPING_ITEMS.filter(i=>i.url).length,30);
 });
 test('adds the 30-piece white-gold marble wall tile set for the bathroom',()=>{
@@ -114,7 +114,7 @@ test('lists WOLTU Chenille as four primary chairs in two unpriced two-packs, wit
  assert.equal(backup.alternative,true);
  assert.equal(backup.quantity,4);
  assert.equal(backup.price,55.92);
- assert.equal(Math.round(shoppingSubtotal * 100),211359);
+ assert.equal(Math.round(shoppingSubtotal * 100),211487);
 });
 
 test('uses the requested Universal TEJO link without changing the existing furniture or its historical budget value',()=>{
@@ -165,7 +165,7 @@ test('includes the two source-linked existing bedroom products without adding re
    assert.equal(entries[0].existing,true);assert.equal(entries[0].price,null);
    assert.equal(shoppingItemsForDocument(document).filter(i=>i.id===id).length,1);
  }
- assert.equal(shoppingSubtotalForDocument(document),2113.59);
+ assert.equal(shoppingSubtotalForDocument(document),2114.87);
 });
 
 test('a selected catalogue alternative with a product link is visible once in its room and in the properties',()=>{
@@ -180,6 +180,6 @@ test('a selected catalogue alternative with a product link is visible once in it
  assert.equal(entry.quantity,2);
  assert.equal(shoppingItemsForDocument(document).filter(i=>i.id===entry.id).length,1);
  assert.equal(shoppingItemsForSelection(document,chairs[1])[0].id,entry.id);
- assert.equal(shoppingSubtotalForDocument(document),2113.59);
+ assert.equal(shoppingSubtotalForDocument(document),2114.87);
  assert.ok(!shoppingItemsForDocument(DEFAULT_APARTMENT_DOCUMENT).some(i=>i.id===entry.id));
 });
