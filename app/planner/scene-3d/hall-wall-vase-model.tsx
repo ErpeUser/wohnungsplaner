@@ -1,6 +1,7 @@
 'use client';
 
 import { getInteriorMaterial } from './interior-materials.ts';
+import { HALL_VASE_SPECS } from '../domain/room-refinement.ts';
 
 type Size=[number,number,number];
 
@@ -17,23 +18,38 @@ export function hallVasePanels(size:Size) {
   ];
 }
 
+/** Each actual product is a loose bundle of artificial wheat ears, not oats.
+ * The visible height is a styling target; actual stems can be inserted or cut. */
 function DriedStems({height,brown}:{height:number;brown:boolean}){
-  const grain=getInteriorMaterial(brown?'hall-vase-oat':'hall-vase-wheat');
-  const lengths=[.152,.172,.139,.162,.146];
-  return <group name={brown?'cream-dried-oats':'natural-wheat'} position={[0,height/2-.012,0]}>
-    {lengths.map((length,i)=><group key={i} position={[(i-2)*.006,0,((i%2)*2-1)*.005]} rotation={[.04*(i%2),0,(2-i)*.09]}>
-      <mesh position={[0,length/2,0]} material={grain} castShadow><cylinderGeometry args={[.0007,.0009,length,5]}/></mesh>
-      {brown ? Array.from({length:4},(_,j)=>{
-        const side=j%2===0?-1:1;
-        const y=length-.008-j*.014;
-        return <group key={j} position={[0,y,0]}>
-          <mesh position={[side*.006,.002,0]} rotation={[0,0,-side*1.05]} material={grain}><cylinderGeometry args={[.00045,.00045,.014,4]}/></mesh>
-          <mesh position={[side*.012,.0005,0]} rotation={[0,0,side*.4]} scale={[.003,.007,.002]} material={grain}><sphereGeometry args={[1,6,5]}/></mesh>
-        </group>;
-      }) : Array.from({length:6},(_,j)=>[-1,1].map(side=>
-        <mesh key={j+':'+side} position={[side*.0028,length-.028+j*.0045,0]} rotation={[0,0,-side*.42]} scale={[.0026,.0048,.0022]} material={grain} castShadow><sphereGeometry args={[1,6,5]}/></mesh>
-      ))}
-    </group>)}
+  const variant=HALL_VASE_SPECS.find(spec=>spec.id===(brown?'brown':'light'))!;
+  const finish=brown?'hall-wheat-cream':'hall-wheat-gold';
+  const grain=getInteriorMaterial(finish),stem=getInteriorMaterial(finish+'-stem');
+  const offsets=[.012,.025,.006,.034,0,.026,.013,.037,.019];
+  return <group name={brown?'cream-artificial-wheat':'gold-artificial-wheat'} position={[0,height/2-.012,0]}>
+    {offsets.map((offset,i)=>{
+      const length=variant.visibleWheatHeight+.012-.021-offset;
+      const ears=Array.from({length:7},(_,j)=>({y:length-.041+j*.0058,angle:j%2===0?0:Math.PI/2}));
+      const awns=new Float32Array(ears.flatMap(({y,angle})=>[-1,1].flatMap(side=>{
+        const x=side*.0025*Math.cos(angle),z=side*.0025*Math.sin(angle);
+        return [x,y+.003,z,x*2.7,y+.021,z*2.7];
+      })));
+      return <group key={i} position={[(i%3-1)*.008,0,(Math.floor(i/3)-1)*.006]}
+        rotation={[(Math.floor(i/3)-1)*.07,0,(1-i%3)*.14]}>
+        <mesh position={[0,length/2,0]} material={stem} castShadow><cylinderGeometry args={[.0008,.001,length,6]}/></mesh>
+        {ears.map(({y,angle},j)=><group key={j} position={[0,y,0]} rotation={[0,angle,0]}>
+          {[-1,1].map(side=><mesh key={side} position={[side*.0024,0,0]} rotation={[0,0,-side*.36]} scale={[.0026,.0048,.0022]} material={grain} castShadow><sphereGeometry args={[1,7,5]}/></mesh>)}
+        </group>)}
+        <lineSegments name="wheat-awns"><bufferGeometry><bufferAttribute attach="attributes-position" args={[awns,3]}/></bufferGeometry><lineBasicMaterial color={brown?'#e1d4b5':'#c59646'}/></lineSegments>
+      </group>;
+    })}
+  </group>;
+}
+
+export function HallWheatPrint({size}:{size:Size}){
+  const [width,height,depth]=size;
+  return <group name="temu-wheat-textile-wrapped-wall-picture">
+    <mesh material={getInteriorMaterial('core')} receiveShadow castShadow><boxGeometry args={[width,height,depth]}/></mesh>
+    <mesh position={[0,0,depth/2+.0001]} material={getInteriorMaterial('hall-wheat-print')} receiveShadow><planeGeometry args={[width,height]}/></mesh>
   </group>;
 }
 

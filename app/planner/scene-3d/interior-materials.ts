@@ -2,6 +2,7 @@ import {DataTexture,DoubleSide,MeshPhysicalMaterial,MeshStandardMaterial,NoColor
 import {createWafflePixels,createArtworkPixels} from './interior-geometry.ts';
 import {createWcPaperHolderWoodTexture} from './wc-paper-holder-photo.ts';
 import {createBathHookStyle2WoodTexture} from './bath-hook-style2-photo.ts';
+import {createHallVaseWoodPixels,createHallWheatPrintPixels} from './hall-decor-textures.ts';
 const cache=new Map<string,MeshStandardMaterial>();
 function pixels(data:Uint8Array,width:number,height:number,color:boolean,name:string){
   const texture=new DataTexture(data,width,height,RGBAFormat,UnsignedByteType);
@@ -33,12 +34,18 @@ export function getInteriorMaterial(kind:string):MeshStandardMaterial{
     case 'cotton-fringe':material=new MeshStandardMaterial({color:'#e5cfaa',roughness:1,side:DoubleSide,vertexColors:true});break;
     case 'wood':material=new MeshPhysicalMaterial({color:'#ffffff',roughness:.72,clearcoat:.06,map:woodTexture()});break;
     case 'hall-vase-light':case 'hall-vase-brown':{
-      // Vertical grain and warm, matte finishes estimated from the two supplied product photos.
-      const dark=kind==='hall-vase-brown';
-      material=new MeshStandardMaterial({color:'#ffffff',roughness:.83,map:woodTexture(dark?[157,103,57]:[210,173,107],kind)});break;
+      const wood=createHallVaseWoodPixels(kind==='hall-vase-brown');
+      material=new MeshStandardMaterial({color:'#ffffff',roughness:.83,map:pixels(wood.data,wood.width,wood.height,true,kind+'-vertical-grain')});break;
     }
-    case 'hall-vase-wheat':material=new MeshStandardMaterial({color:'#c6a465',roughness:.95});break;
-    case 'hall-vase-oat':material=new MeshStandardMaterial({color:'#e1d4b7',roughness:.97});break;
+    case 'hall-wheat-gold':material=new MeshStandardMaterial({color:'#ce993a',roughness:.96});break;
+    case 'hall-wheat-cream':material=new MeshStandardMaterial({color:'#ede1c5',roughness:.97});break;
+    case 'hall-wheat-gold-stem':material=new MeshStandardMaterial({color:'#b08b43',roughness:.96});break;
+    case 'hall-wheat-cream-stem':material=new MeshStandardMaterial({color:'#d2bd90',roughness:.97});break;
+    case 'hall-wheat-print':{
+      const artwork=createHallWheatPrintPixels();
+      const map=pixels(artwork.data,artwork.width,artwork.height,true,'temu-606319608216104-wheat-textile');
+      map.flipY=true;material=new MeshStandardMaterial({color:'#ffffff',roughness:1,map});break;
+    }
     case 'bath-hook-style2-wood':case 'bath-hook-style2-edge':material=new MeshPhysicalMaterial({
       color:'#ffffff',roughness:.83,clearcoat:.025,
       map:createBathHookStyle2WoodTexture(kind==='bath-hook-style2-edge'),

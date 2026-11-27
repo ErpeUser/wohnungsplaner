@@ -116,25 +116,42 @@ export function hallBasketDecor(): PlannerBuiltIn[]{
  * by the supplied dimension photograph; depth and mounting heights are estimates. */
 export const HALL_VASE_REFERENCE=Object.freeze({articleId:'1005009477769018',width:.07,height:.30,depth:.04,gap:.04,wallFaceZ:5.93,centerX:-1.30});
 export const HALL_VASE_SPECS=[
-  {id:'light',sku:'12000049222509307',label:'Helles Naturholz',fill:'Naturweizen',x:-1.355,elevation:1.06},
-  {id:'brown',sku:'12000049222509306',label:'Haselnussbraun',fill:'Cremefarbener Trockenhafer',x:-1.245,elevation:1.00},
+  {id:'light',sku:'12000049222509307',label:'Helles Naturholz',fill:'Goldgelber künstlicher Weizen',wheatArticle:'606405775986248',visibleWheatHeight:.19,x:-1.355,elevation:.90},
+  {id:'brown',sku:'12000049222509306',label:'Haselnussbraun',fill:'Cremefarbener künstlicher Weizen',wheatArticle:'606886610979660',visibleWheatHeight:.21,x:-1.245,elevation:.84},
 ] as const;
 export function hallVaseDecor():PlannerBuiltIn[]{
   const v=HALL_VASE_REFERENCE;
   return HALL_VASE_SPECS.map(spec=>{
     const target=hall('builtin-hall-wall-vase-'+spec.id,'Vorraum · Wandvase '+spec.label+' · 7 × 30 cm',spec.x,v.wallFaceZ+.001+v.depth/2,s(v.width,v.depth,v.height),0,spec.elevation,[
       'Breite 7 cm und Höhe 30 cm laut Nutzer-Maßbild; Tiefe 4 cm ist eine Planungsannahme. Zwischen WC und Abstellraum, 4 cm horizontaler Abstand und 6 cm Höhenversatz.',
-      'Füllung: '+spec.fill+' als geplante Deko (nicht im Vasenpreis enthalten).',
+      'Füllung: '+spec.fill+' · Temu Art. '+spec.wheatArticle+' · lockerer Strauß mit ca. '+Math.round(spec.visibleWheatHeight*100)+' cm sichtbarem Überstand; Stiellänge und Einstecktiefe vor Ort anpassen. Separates Set in der Einkaufsliste.',
       'Farbzuordnung nach der vom Nutzer angegebenen Variantenreihenfolge; SKU vor Bestellung prüfen.',
     ]);
     return {...target,materialVariants:{main:'hall-vase-'+spec.id},metadata:{...target.metadata,source:'AliExpress Art. '+v.articleId+' · SKU '+spec.sku+' · Nutzer-Produktbild',confidence:'estimated' as const}};
   });
 }
 
+/** Original printed textile 40 x 60 cm; 3 cm margins are wrapped around a
+ * slim, estimated backing so the piece fits the measured 38 cm clear wall. */
+export const HALL_WHEAT_PRINT_REFERENCE=Object.freeze({
+  articleId:'606319608216104',sku:'89726296053363',textileWidth:.40,textileHeight:.60,
+  width:.34,height:.54,depth:.018,elevation:1.48,wrappedMargin:.03,
+});
+export function hallWheatPrint():PlannerBuiltIn{
+  const a=HALL_WHEAT_PRINT_REFERENCE,v=HALL_VASE_REFERENCE;
+  const target=hall('builtin-hall-wheat-print','Vorraum · Weizenähren-Bild auf Textil · 40 × 60 cm · sichtbare Fläche 34 × 54 cm',
+    v.centerX,v.wallFaceZ+.001+a.depth/2,s(a.width,a.depth,a.height),0,a.elevation,[
+      'Temu Handtuch mit einseitigem Weizenährenmotiv, Originalmaß 40 × 60 cm laut Nutzerfoto. Motiv nach dem Foto rekonstruiert.',
+      'Das lichte Wandfeld misst ca. 38 cm. Planung: an allen vier Kanten 3 cm nach hinten umschlagen; sichtbare Fläche 34 × 54 cm, seitlich je 2 cm Platz. Unterkonstruktion nicht im Artikelpreis enthalten.',
+      'Bildunterkante 148 cm, Oberkante 202 cm über Boden. Rund 9 cm Abstand zum höchsten Weizenstrauß. Montagehöhe und 1,8 cm Unterkonstruktion als Planungsannahmen.',
+    ]);
+  return {...target,materialVariants:{main:'hall-wheat-print'},metadata:{...target.metadata,source:'Temu Art. '+a.articleId+' · SKU '+a.sku+' · Nutzer-Produktbild',confidence:'estimated'}};
+}
+
 /** Pure and idempotent: unrelated furniture, room boundaries and appliances remain. */
 export function refineRoomLayout<T extends {id:string;builtIns:PlannerBuiltIn[];placements?:PlannerPlacement[]}>(document:T):T{
   if(document.id!=='wohnung-v3')return document;
-  const activeHallDecor=[...hallBasketDecor(),...hallVaseDecor()];
+  const activeHallDecor=[...hallBasketDecor(),...hallVaseDecor(),hallWheatPrint()];
   const hallIds=new Set(activeHallDecor.map(item=>item.id));
   let changed=false;const builtIns:PlannerBuiltIn[]=[];
   for(const item of document.builtIns){

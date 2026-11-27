@@ -66,7 +66,7 @@ describe("PlannerWorkspace", () => {
     expect(allTab.getAttribute("aria-selected")).toBe("true");
     expect(dialog.getByRole("heading", { name: "WC-Teppich · Beige mit Fransen" })).toBeTruthy();
     expect(dialog.getByRole("heading", { name: "Polsterbett Bliss" })).toBeTruthy();
-    expect(dialog.getByText(/2[.\s]156,36/)).toBeTruthy();
+    expect(dialog.getByText(/2[.\s]170,71/)).toBeTruthy();
     await user.click(roomTab);
     act(() => { store.getState().setActiveRoom("wc"); });
     expect(dialog.getByRole("heading", { name: "WC-Teppich · Beige mit Fransen" })).toBeTruthy();

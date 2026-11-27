@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { refineRoomLayout, hookCenters, kitchenModuleWidths, KITCHEN_REFERENCE } from '../app/planner/domain/room-refinement.ts';
+import { refineRoomLayout, hookCenters, kitchenModuleWidths, KITCHEN_REFERENCE, HALL_VASE_SPECS, HALL_WHEAT_PRINT_REFERENCE } from '../app/planner/domain/room-refinement.ts';
 import { createWaffleSurface, createWafflePixels, worktopSlabs } from '../app/planner/scene-3d/interior-geometry.ts';
 import { DEFAULT_APARTMENT_DOCUMENT } from '../app/planner/domain/apartment-v3.ts';
 import { parsePlannerDocument } from '../app/planner/domain/schema.ts';
@@ -114,5 +114,25 @@ test('two 7 × 30 cm wall pockets sit safely between WC and storage doors, while
  }
  assert.ok(Math.abs(vases[1].position.x-vases[0].position.x-.07-.04)<1e-8);
  assert.ok(Math.abs((vases[0].elevation??0)-(vases[1].elevation??0)-.06)<1e-8);
+ assert.equal(refineRoomLayout(doc),doc);
+});
+
+test('fits the actual printed textile above the contrast wheat bundles without colliding with the door frames',()=>{
+ const doc=refineRoomLayout(DEFAULT_APARTMENT_DOCUMENT);
+ const picture=doc.builtIns.find(i=>i.id==='builtin-hall-wheat-print')!;
+ assert.ok(picture);
+ assert.deepEqual(picture.size,{width:.34,depth:.018,height:.54});
+ assert.equal(picture.position.x,-1.30);
+ assert.equal(picture.elevation,1.48);
+ assert.equal(HALL_WHEAT_PRINT_REFERENCE.textileWidth,.40);
+ assert.equal(HALL_WHEAT_PRINT_REFERENCE.textileHeight,.60);
+ assert.ok(Math.abs((.38-picture.size.width)/2-.02)<1e-8);
+ assert.equal(HALL_VASE_SPECS[0].wheatArticle,'606405775986248');
+ assert.equal(HALL_VASE_SPECS[1].wheatArticle,'606886610979660');
+ for(const spec of HALL_VASE_SPECS){
+   const vase=doc.builtIns.find(i=>i.id==='builtin-hall-wall-vase-'+spec.id)!;
+   assert.equal(vase.elevation,spec.elevation);
+   assert.ok((picture.elevation??0)-(spec.elevation+vase.size.height+spec.visibleWheatHeight)>=.089);
+ }
  assert.equal(refineRoomLayout(doc),doc);
 });
