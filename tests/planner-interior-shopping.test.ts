@@ -60,7 +60,7 @@ test('includes the exact selected Temu A8447 180 x 250 cm vintage rug',()=>{
 });
 test('adds the purchased living room rug to the known-priced subtotal',()=>{
  const total=shoppingSubtotal;
- assert.equal(Math.round(total*100),206377);
+ assert.equal(Math.round(total*100),211359);
  assert.equal(SHOPPING_ITEMS.filter(i=>i.url).length,30);
 });
 test('adds the 30-piece white-gold marble wall tile set for the bathroom',()=>{
@@ -114,7 +114,7 @@ test('lists WOLTU Chenille as four primary chairs in two unpriced two-packs, wit
  assert.equal(backup.alternative,true);
  assert.equal(backup.quantity,4);
  assert.equal(backup.price,55.92);
- assert.equal(Math.round(shoppingSubtotal * 100),206377);
+ assert.equal(Math.round(shoppingSubtotal * 100),211359);
 });
 
 test('uses the requested Universal TEJO link without changing the existing furniture or its historical budget value',()=>{
@@ -165,7 +165,7 @@ test('includes the two source-linked existing bedroom products without adding re
    assert.equal(entries[0].existing,true);assert.equal(entries[0].price,null);
    assert.equal(shoppingItemsForDocument(document).filter(i=>i.id===id).length,1);
  }
- assert.equal(shoppingSubtotalForDocument(document),2063.77);
+ assert.equal(shoppingSubtotalForDocument(document),2113.59);
 });
 
 test('a selected catalogue alternative with a product link is visible once in its room and in the properties',()=>{
@@ -180,6 +180,6 @@ test('a selected catalogue alternative with a product link is visible once in it
  assert.equal(entry.quantity,2);
  assert.equal(shoppingItemsForDocument(document).filter(i=>i.id===entry.id).length,1);
  assert.equal(shoppingItemsForSelection(document,chairs[1])[0].id,entry.id);
- assert.equal(shoppingSubtotalForDocument(document),2063.77);
+ assert.equal(shoppingSubtotalForDocument(document),2113.59);
  assert.ok(!shoppingItemsForDocument(DEFAULT_APARTMENT_DOCUMENT).some(i=>i.id===entry.id));
 });

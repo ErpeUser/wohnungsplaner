@@ -53,10 +53,10 @@ describe("inspector editing", () => {
     expect(within(card()).getByRole("link", { name: /Produkt bei XXXLutz öffnen/ }).getAttribute("href")).toBe("https://www.xxxlutz.at/p/livetastic-wandboard-in-90-3-5-20-cm-naturfarben-000377013101");
   });
 
-  test("shows an existing product link without inventing a missing price", () => {
+  test("shows the selected mirror price and existing product link", () => {
     setup("builtin-bath-round-mirror");
     const data = screen.getByRole("region", { name: "Kaufdaten" });
-    expect(data.textContent).toContain("Preis bei AliExpress prüfen");
+    expect(data.textContent).toContain("49,82");
     expect(within(data).getByRole("link", { name: /Produkt bei AliExpress öffnen/ }).getAttribute("href")).toContain("1005012515662602");
   });
 
