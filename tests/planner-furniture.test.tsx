@@ -115,11 +115,13 @@ describe("furniture interactions", () => {
     const document = { ...DEFAULT_APARTMENT_DOCUMENT, placements: [chair] };
     const snapped = resolvePlacementMove(document, chair, { x: 2.713, z: 0.937 });
     const free = resolvePlacementMove(document, chair, { x: 2.713, z: 0.937 }, { disableGrid: true });
-    // The real-sized SKATE/SIMPLE wallboards shift nearby object guides.
-    // Both modes prefer the same object edges over grid rounding.
-    assert.deepEqual(snapped.position, { x: 2.68, z: 0.958 });
-    assert.deepEqual(free.position, { x: 2.68, z: 0.958 });
-    assert.ok(snapped.guides.some((guide) => guide.kind === "object"));
+    // The new curtain envelope no longer introduces an extra horizontal snap guide.
+    // The vanity shelf still supplies the shared z-axis object guide.
+    assert.deepEqual(snapped.position, { x: 2.7, z: 0.958 });
+    assert.deepEqual(free.position, { x: 2.713, z: 0.958 });
+    assert.ok(snapped.guides.some((guide) => guide.axis === "x" && guide.kind === "grid"));
+    assert.ok(snapped.guides.some((guide) => guide.axis === "z" && guide.kind === "object"));
+    assert.ok(free.guides.every((guide) => guide.kind !== "grid"));
   });
 
   test("uses real wall and object guides during production placement moves", () => {
