@@ -43,7 +43,7 @@ test("one shopping row represents two covers at the supplied set price and warns
   assert.match(rows[0].amountLabel ?? "", /2 Bezüge.*Füllung separat/);
   assert.match(shoppingPriceLabel(rows[0]), /12,85/);
   assert.equal(shoppingItemsForDocument(doc).filter(item => item.id === rows[0].id).length, 1);
-  close(shoppingSubtotalForDocument(doc), 2199.78);
+  close(shoppingSubtotalForDocument(doc), 2271.64);
 });
 
 test("older saves and imports add one pillow without resetting other furniture; support-specific seat height is retained", () => {

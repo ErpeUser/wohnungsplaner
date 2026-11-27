@@ -2,7 +2,7 @@ import { RoundedBox } from "@react-three/drei";
 import type { PlannerBuiltIn } from "../../domain/types.ts";
 import { getPlannerMaterial } from "../materials.ts";
 import type { SceneObject } from "../scene-model.ts";
-import { SHARED_BOX, SHARED_CYLINDER, SHARED_SPHERE } from "../shared/architecture-primitives.ts";
+import { SHARED_BOX, SHARED_CYLINDER, SHARED_SPHERE, SHARED_TORUS } from "../shared/architecture-primitives.ts";
 
 
 
@@ -186,41 +186,56 @@ export function Zimmer1HeadboardSconces({ item }: { item: SceneObject<PlannerBui
 
 
 export function Zimmer1LayeredCurtain({ item }: { item: SceneObject<PlannerBuiltIn> }) {
-  const [width, height, depth] = item.size;
-  const sheerWidth = width * 0.72;
-  const sheerFolds = 11;
-  const sidePanelWidth = width * 0.18;
+  const [width, height] = item.size;
+  const sheerWidth = width * .72;
+  const sheerHeight = height - .04;
+  const sideWidth = width * .23;
+  const rodY = height / 2 - .04;
+  const rodLength = width - .04;
+  const gold = getPlannerMaterial("metal-gold");
+  const glass = getPlannerMaterial("glass-clear");
   return (
-    <group>
-      {Array.from({ length: sheerFolds }, (_, index) => (
-        <RoundedBox
-          key={`sheer-${index}`}
-          args={[sheerWidth / sheerFolds * 1.2, height * 0.985, depth * (index % 2 === 0 ? 0.48 : 0.68)]}
-          radius={0.018}
-          smoothness={3}
-          position={[-sheerWidth / 2 + sheerWidth * (index + 0.5) / sheerFolds, -height * 0.005, index % 2 === 0 ? -depth * 0.08 : depth * 0.04]}
-          castShadow
-          receiveShadow
-        >
+    <group name="zimmer1-temu-layered-curtains">
+      {Array.from({ length: 15 }, (_, index) => (
+        <RoundedBox key={index} args={[sheerWidth / 15 * 1.14, sheerHeight, .035 + (index % 2) * .022]} radius={.012} smoothness={3} position={[-sheerWidth / 2 + sheerWidth * (index + .5) / 15, -height / 2 + sheerHeight / 2, -.065]} castShadow receiveShadow>
           <primitive object={getPlannerMaterial("fabric-ecru-sheer")} attach="material" />
         </RoundedBox>
       ))}
-      {[-1, 1].flatMap((side) => Array.from({ length: 3 }, (_, index) => (
-        <RoundedBox
-          key={`taupe-${side}-${index}`}
-          args={[sidePanelWidth / 3 * 1.25, height, depth * (index % 2 === 0 ? 0.88 : 1.05)]}
-          radius={0.024}
-          smoothness={4}
-          position={[side * (width / 2 - sidePanelWidth / 2) + (index - 1) * sidePanelWidth / 3, 0, depth * 0.05]}
-          castShadow
-          receiveShadow
-        >
-          <primitive object={getPlannerMaterial("fabric-taupe")} attach="material" />
-        </RoundedBox>
-      )))}
-      <mesh position={[0, height / 2 + 0.025, 0]} rotation={[0, 0, Math.PI / 2]} scale={[0.016, width * 1.03, 0.016]} geometry={SHARED_CYLINDER} castShadow>
-        <primitive object={getPlannerMaterial("metal-satin")} attach="material" />
-      </mesh>
+      {[-1, 1].flatMap(side => Array.from({ length: 8 }, (_, index) => {
+        const x = side * (width / 2 - sideWidth / 2) + (index - 3.5) * sideWidth / 8;
+        const z = .070 + (index % 2 === 0 ? -.025 : .025);
+        return (
+          <group key={side + ":" + index}>
+            <RoundedBox args={[sideWidth / 8 * 1.23, height, .062]} radius={.022} smoothness={4} position={[x, 0, z]} castShadow receiveShadow>
+              <primitive object={getPlannerMaterial("fabric-taupe")} attach="material" />
+            </RoundedBox>
+            <mesh position={[x, rodY, z + .032]} rotation={[0, index % 2 === 0 ? .8 : -.8, 0]} scale={[.039, .039, .015]} geometry={SHARED_TORUS} castShadow>
+              <primitive object={getPlannerMaterial("metal-satin")} attach="material" />
+            </mesh>
+          </group>
+        );
+      }))}
+      {[-.065, .070].map((z, index) => (
+        <group key={z} name={index === 0 ? "gold-rear-rod" : "gold-front-rod"}>
+          <mesh position={[0, rodY, z]} rotation={[0, 0, Math.PI / 2]} scale={[index === 0 ? .016 : .025, rodLength, index === 0 ? .016 : .025]} geometry={SHARED_CYLINDER} castShadow>
+            <primitive object={gold} attach="material" />
+          </mesh>
+          {[-1, 1].map(side => (
+            <group key={side} position={[side * rodLength / 2, rodY, z]}>
+              <mesh position={[side * .006, 0, 0]} rotation={[0, 0, Math.PI / 2]} scale={[.032, .018, .032]} geometry={SHARED_CYLINDER}><primitive object={gold} attach="material" /></mesh>
+              <mesh position={[side * .024, 0, 0]} scale={[index === 0 ? .038 : .045, index === 0 ? .038 : .057, index === 0 ? .038 : .057]} geometry={SHARED_SPHERE}><primitive object={glass} attach="material" /></mesh>
+              {Array.from({ length: 12 }, (_, i) => <mesh key={i} position={[side * (.017 + (i % 3) * .006), Math.sin(i * 2.4) * .013, Math.cos(i * 2.4) * .013]} rotation={[i, i * .7, 0]} scale={[.006, .003, .005]} geometry={SHARED_BOX}><primitive object={gold} attach="material" /></mesh>)}
+              <mesh position={[side * .044, 0, 0]} rotation={[0, 0, Math.PI / 2]} scale={[.022, .007, .022]} geometry={SHARED_CYLINDER}><primitive object={gold} attach="material" /></mesh>
+            </group>
+          ))}
+        </group>
+      ))}
+      {[-.91, 0, .91].map(x => (
+        <group key={x}>
+          <mesh position={[x, rodY - .037, -.14]} scale={[.026, .085, .012]} geometry={SHARED_BOX}><primitive object={gold} attach="material" /></mesh>
+          <mesh position={[x, rodY - .014, -.035]} scale={[.018, .016, .21]} geometry={SHARED_BOX}><primitive object={gold} attach="material" /></mesh>
+        </group>
+      ))}
     </group>
   );
 }

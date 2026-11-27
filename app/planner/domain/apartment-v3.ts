@@ -256,7 +256,7 @@ const builtIns: PlannerBuiltIn[] = [
       "Produktdetailseite nicht zugänglich; genaue Maße, Variante, Akkudaten, Packungsinhalt und Endpreis vor dem Kauf bestätigen. Kein fotorealistisches Produktmodell.",
     ],
   }),
-  builtIn("z1-layered-curtain", "Deckenhoher Vorhang · Ecru transparent + Taupe", "zimmer1", "other", "zimmer1-layered-curtain", 3.49, 1.945, 2.06, 0.16, 2.38, 90, "fabric-ecru-sheer", 0.09, assumptionMetadata("Vorhangschiene deckennah; breiter transparenter Ecru-Layer und vollere seitliche taupefarbene Dekoschals wie in den Referenzen, Saum ca. 1 cm über Boden.")),
+  builtIn("z1-layered-curtain", "Doppellagiger Vorhang · Ecru (Bestand) + Taupe 250 cm · goldene Doppelstange", "zimmer1", "other", "zimmer1-layered-curtain", 3.35, 1.945, 2.06, 0.24, 2.50, 90, "fabric-ecru-sheer", 0.022, {"source":"Nutzerwahl 27.11.2026 · Temu 601105269560337 / SKU 17618732235492 · BHSRods Golden (Nutzerfoto)","confidence":"estimated","notes":["Taupe: 2 Schals à 132 × 250 cm, silberfarbene Ösen, 36,97 € pro Paar; vorhandene transparente Ecru-Schals bleiben erhalten.","Goldene Doppelstange mit Kristall-/Goldflitter-Endstücken, Nutzerpreis 34,89 €; geplante Gesamtbreite ca. 212 cm, genaue Händlermaße und Stangenvariante vor Kauf prüfen.","Saum 1 cm über fertigem Boden; Stoffoberkante ca. 252 cm bei Raumhöhe 256 cm. Stangenabstand, Durchmesser, Ösenanzahl und Kristalldetails sind fotoorientierte Darstellungsannahmen."]}),
   builtIn("z1-vanity-shelf-main", "Wandboard Skate · 120 cm Wotan Eiche", "zimmer1", "storage", "zimmer1-desk-shelf-main", 2.92, 0.1, 1.2, 0.2, 0.018, 0, "oak-wotan", 1.65, {
     source: "Möbelix Art. 001555006211 · Wandboard Skate Wotan Eiche",
     confidence: "confirmed",

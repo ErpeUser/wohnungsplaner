@@ -51,7 +51,7 @@ test("one 13-piece pack costs EUR 8.05 and is linked to the placed group without
   assert.equal(selected[0].url, ZIMMER1_ENTRY_GOLD_ARTICLE.url);
   assert.match(selected[0].amountLabel ?? "", /12 montiert, 1 Reserve/);
   assert.equal(shoppingItemsForDocument(doc).filter(item => item.id === selected[0].id).length, 1);
-  close(shoppingSubtotalForDocument(doc), 2199.78);
+  close(shoppingSubtotalForDocument(doc), 2271.64);
   assert.match(shoppingPriceLabel(selected[0]), /8,05/);
 });
 
