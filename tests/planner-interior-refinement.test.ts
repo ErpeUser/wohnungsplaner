@@ -47,9 +47,25 @@ test('the ten selected woven baskets replace only active old hallway decor',()=>
   assert.equal(baskets.length,10);
   assert.equal(new Set(baskets.map(item=>item.id)).size,10);
   assert.deepEqual(baskets.map(item=>Math.round(item.size.width*100)).sort((a,b)=>a-b),[11,11,11,16,24,24,24,25,25,30]);
-  assert.deepEqual(baskets.map(item=>Math.round(((item.elevation??0)+item.size.height/2)*100)),[193,225,168,159,203,175,146,198,166,139]);
-  assert.equal(baskets.filter(item=>item.rotation===270).length,7);
-  assert.equal(baskets.filter(item=>item.rotation===0).length,3);
+  assert.deepEqual(baskets.map(item=>Math.round(((item.elevation??0)+item.size.height/2)*200)/2),[213,240,239,186,184,64,126.5,82,156.5,160.5]);
+  assert.ok(baskets.every(item=>item.rotation===270&&item.position.x===-2.345));
+  const eps=1e-8,start=7.2975,end=7.7425;
+  for(const item of baskets){
+    const y=(item.elevation??0)+item.size.height/2;
+    assert.ok(item.position.z-item.size.width/2>=start+.02-eps,item.id+' entry jamb');
+    assert.ok(item.position.z+item.size.width/2<=end-.02+eps,item.id+' TEJO clearance');
+    assert.ok((item.elevation??0)>=.50&&y+item.size.height/2<=2.56-.08+eps,item.id+' vertical clearance');
+    for(const fixture of [{z:7.30,y:1.4125,w:.125,h:.165},{z:7.50,y:1.05,w:.12,h:.12}]){
+      const gapZ=Math.abs(item.position.z-fixture.z)-(item.size.width+fixture.w)/2;
+      const gapY=Math.abs(y-fixture.y)-(item.size.height+fixture.h)/2;
+      assert.ok(gapZ>=.03-eps||gapY>=.03-eps,item.id+' fixture clearance');
+    }
+  }
+  for(let i=0;i<baskets.length;i++)for(let j=i+1;j<baskets.length;j++){
+    const a=baskets[i],b=baskets[j],ay=(a.elevation??0)+a.size.height/2,by=(b.elevation??0)+b.size.height/2;
+    const radius=(Math.max(a.size.width,a.size.height)+Math.max(b.size.width,b.size.height))/2;
+    assert.ok(Math.hypot(a.position.z-b.position.z,ay-by)>radius,a.id+' overlaps '+b.id);
+  }
   assert.ok(baskets.every(item=>item.roomId==='vorraum'&&item.collision==='decorative'&&item.locked));
   assert.equal(result.placements,DEFAULT_APARTMENT_DOCUMENT.placements);
   assert.equal(refineRoomLayout(result),result);

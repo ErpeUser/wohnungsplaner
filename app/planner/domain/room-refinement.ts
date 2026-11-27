@@ -84,43 +84,28 @@ export const HALL_DECOR:readonly PlannerBuiltIn[]=[
  * active placements are retired. The new set is one purchase, ten objects. */
 export const HALL_BASKET_ARTICLE_ID='607596656326590';
 export const HALL_BASKET_SPECS = [
-  {id:'flower', label:'Blüte Creme', surface:'A', w:30, h:30, u:22, y:193},
-  {id:'leaf-horizontal', label:'Naturblatt quer', surface:'A', w:24, h:16, u:19, y:225},
-  {id:'small-spiral', label:'Kleiner Spiralkorb', surface:'A', w:11, h:11, u:34, y:168},
-  {id:'small-braid-a', label:'Kleiner Flechtkorb', surface:'A', w:11, h:11, u:10, y:159},
-  {id:'ring-white', label:'Weißer Ringkorb', surface:'B', w:25, h:25, u:20, y:203},
-  {id:'leaf-vertical', label:'Naturblatt hoch', surface:'B', w:16, h:23, u:15, y:175},
-  {id:'ring-brown', label:'Braun-weißer Ringkorb', surface:'B', w:24, h:24, u:22, y:146},
-  {id:'spiral-white', label:'Weißer Spiralkorb', surface:'C', w:25, h:25, u:17, y:198},
-  {id:'natural-round', label:'Runder Naturkorb', surface:'C', w:24, h:24, u:21, y:166},
-  {id:'small-braid-b', label:'Kleiner Flechtkorb', surface:'C', w:11, h:11, u:10, y:139},
+  {id:'flower', label:'Blüte Creme', w:30, h:30, u:22, y:213},
+  {id:'leaf-horizontal', label:'Naturblatt quer', w:24, h:16, u:29, y:240},
+  {id:'small-spiral', label:'Kleiner Spiralkorb', w:11, h:11, u:7.5, y:239},
+  {id:'small-braid-a', label:'Kleiner Flechtkorb', w:11, h:11, u:37, y:186},
+  {id:'ring-white', label:'Weißer Ringkorb', w:25, h:25, u:15, y:184},
+  {id:'leaf-vertical', label:'Naturblatt hoch', w:16, h:23, u:33.5, y:64},
+  {id:'ring-brown', label:'Braun-weißer Ringkorb', w:24, h:24, u:28.5, y:126.5},
+  {id:'spiral-white', label:'Weißer Spiralkorb', w:25, h:25, u:15, y:82},
+  {id:'natural-round', label:'Runder Naturkorb', w:24, h:24, u:29.5, y:156.5},
+  {id:'small-braid-b', label:'Kleiner Flechtkorb', w:11, h:11, u:9, y:160.5},
 ] as const;
-export function hallBasketDecor(wardrobe?: PlannerPlacement, includeCabinetSide=true): PlannerBuiltIn[]{
-  // Coordinates are referenced to the inside faces (12-cm walls), not
-  // centre lines. A begins at the entrance jamb, B at the WC jamb.
-  const cabinet=wardrobe?.position??p(-1.78,7.93);
-  const cabinetSize=wardrobe?.size??s(1.15,.375,2.319);
-  const cabinetRotation=wardrobe?.rotation??180;
-  const angle=cabinetRotation*Math.PI/180;
+/** The single white entry-wall strip, measured from the entrance jamb toward
+ * the TEJO seat. Never attach the set to the furniture or another wall. */
+export const HALL_BASKET_WALL=Object.freeze({x:-2.345,startZ:7.2975,endZ:7.7425,height:2.56,rotation:270});
+export function hallBasketDecor(): PlannerBuiltIn[]{
   const depth=.03;
   const round=(n:number)=>Math.round(n*1e6)/1e6;
-  return HALL_BASKET_SPECS.filter(spec=>spec.surface!=='C'||includeCabinetSide).map(spec=>{
-    let x:number,z:number,rotation:number;
-    if(spec.surface==='A'){x=-2.345;z=7.2975+spec.u/100;rotation=270;}
-    else if(spec.surface==='B'){x=-1.495+spec.u/100;z=5.945;rotation=0;}
-    else {
-      // Match the actual TEJO side of the mirrored tall compartment
-      // (normalised side face x=-.4895), not its nominal envelope.
-      const localX=-.4895*cabinetSize.width-depth/2;
-      const localZ=cabinetSize.depth/2-spec.u/100;
-      x=cabinet.x+Math.cos(angle)*localX-Math.sin(angle)*localZ;
-      z=cabinet.z+Math.sin(angle)*localX+Math.cos(angle)*localZ;
-      rotation=((cabinetRotation+90)%360+360)%360;
-    }
+  return HALL_BASKET_SPECS.map(spec=>{
     const label='Vorraum · Wandkorb '+spec.label+' · '+(spec.w===spec.h?'Ø '+spec.w+' cm':spec.w+' × '+spec.h+' cm');
-    const target=hall('builtin-hall-woven-basket-'+spec.id,label,round(x),round(z),s(spec.w/100,depth,spec.h/100),rotation,round((spec.y-spec.h/2)/100),[
-      'Temu 10er-Set, Fläche '+spec.surface+'; Mittelpunkt '+spec.y+' cm über Boden.',
-      'Alle zehn Teile gehören zu einer Packung. Blatt-Zweitmaß und nicht ausgewiesene Tiefen sind Modellannahmen; Montage vor Ort prüfen.',
+    const target=hall('builtin-hall-woven-basket-'+spec.id,label,HALL_BASKET_WALL.x,round(HALL_BASKET_WALL.startZ+spec.u/100),s(spec.w/100,depth,spec.h/100),HALL_BASKET_WALL.rotation,round((spec.y-spec.h/2)/100),[
+      'Alle 10 Teile auf der weißen Wand zwischen Eingangstür und TEJO-Sitzbank; Mittelpunkt '+spec.y+' cm über Boden, '+spec.u+' cm von der Eingangszarge in Richtung Garderobe.',
+      'Eine Packung; Schalter und Gegensprechanlage bleiben frei. Blatt-Zweitmaß und nicht ausgewiesene Tiefen sind Modellannahmen; Montage vor Ort prüfen.',
     ]);
     return {...target,metadata:{...target.metadata,source:'Temu Art. '+HALL_BASKET_ARTICLE_ID+' · SKU 107311636987647 · Nutzer-Produktbild',confidence:'estimated' as const}};
   });
@@ -129,8 +114,7 @@ export function hallBasketDecor(wardrobe?: PlannerPlacement, includeCabinetSide=
 /** Pure and idempotent: unrelated furniture, room boundaries and appliances remain. */
 export function refineRoomLayout<T extends {id:string;builtIns:PlannerBuiltIn[];placements?:PlannerPlacement[]}>(document:T):T{
   if(document.id!=='wohnung-v3')return document;
-  const wardrobe=document.placements?.find(item=>item.id==='hall-tejo-wardrobe');
-  const activeHallDecor=hallBasketDecor(wardrobe, !document.placements||wardrobe?.catalogId==='hallway-tejo-115');
+  const activeHallDecor=hallBasketDecor();
   const hallIds=new Set(activeHallDecor.map(item=>item.id));
   let changed=false;const builtIns:PlannerBuiltIn[]=[];
   for(const item of document.builtIns){
