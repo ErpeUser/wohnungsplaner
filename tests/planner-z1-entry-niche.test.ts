@@ -45,7 +45,7 @@ test("repository load and import do not restore the retired placement", () => {
   const result = repository.load();
   assert.equal(result.document.builtIns.some(item => item.id === nicheId), false);
   assert.equal(result.legacyBackupJson, raw);
-  assert.deepEqual(result.document.placements, saved.placements);
+  assert.deepEqual(result.document.placements, JSON.parse(raw).placements);
   const preview = repository.previewImport(saved);
   assert.equal(preview.canCommit, true);
   assert.equal(preview.document.builtIns.some(item => item.id === nicheId), false);

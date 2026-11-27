@@ -1,4 +1,4 @@
-import { DEFAULT_APARTMENT_DOCUMENT } from "../domain/apartment-v3.ts";
+import { DEFAULT_APARTMENT_DOCUMENT, upgradeZimmer1WallLights } from "../domain/apartment-v3.ts";
 import {
   migrateStoredPlannerData,
   type MigrationResult,
@@ -336,7 +336,7 @@ export function createLocalStoragePlannerRepository(
       const migration = migrateStoredPlannerData(value, DEFAULT_APARTMENT_DOCUMENT);
       return {
         ...migration,
-        document: removeZimmer1EntryNiche(migration.document),
+        document: upgradeZimmer1WallLights(removeZimmer1EntryNiche(migration.document)),
         canCommit: isValidV3(value) || isRecognizedLegacyDocument(value),
       };
     },
@@ -370,7 +370,8 @@ function readStoredValue(raw: string): MigrationResult {
       const normalized = normalizeLegacyV3Aliases(value);
       const parsed = parsePlannerDocument(normalized.document);
       const withoutEntryNiche = removeZimmer1EntryNiche(parsed);
-      const withRug = upgradeLivingRugMaterial(withoutEntryNiche);
+      const withWallLights = upgradeZimmer1WallLights(withoutEntryNiche);
+      const withRug = upgradeLivingRugMaterial(withWallLights);
       const withHall = restoreHallTejoCashmere(withRug);
       const withChair = upgradeZimmer1Chair(withHall);
       const withDining = upgradeDiningChairsToWoltu(withChair);
@@ -405,9 +406,11 @@ function readStoredValue(raw: string): MigrationResult {
                 ? "Der Stuhl in Zimmer 1 wurde auf das neue AliExpress-Modell aktualisiert; Position und Drehung bleiben erhalten."
                 : withHall !== withRug
                   ? "Die Vorraumgarderobe wurde anhand der braunen Fotoreferenz aktualisiert; Position und Maße bleiben erhalten."
-                  : withRug !== withoutEntryNiche
+                  : withRug !== withWallLights
                     ? "Der vorhandene Wohnzimmerteppich wurde auf das neue Temu-Design aktualisiert; Position und Drehung bleiben erhalten."
-                    : "Die schmale Eiche-Nische in Zimmer 1 wurde entfernt; andere Möbelpositionen bleiben erhalten."],
+                    : withWallLights !== withoutEntryNiche
+                      ? "Die zwei Wandleuchten in Zimmer 1 wurden auf die ausgewählte GGbingo-Referenz aktualisiert; andere Möbelpositionen bleiben erhalten."
+                      : "Die schmale Eiche-Nische in Zimmer 1 wurde entfernt; andere Möbelpositionen bleiben erhalten."],
           legacyBackupJson: raw,
           unmapped: [],
         };

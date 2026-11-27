@@ -156,20 +156,27 @@ export function Zimmer1HeadboardLed({ item }: { item: SceneObject<PlannerBuiltIn
 
 export function Zimmer1HeadboardSconces({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   const [width, height, depth] = item.size;
+  // Provisional globe form: the linked listing's dimension drawing is not verified.
+  const diameter = Math.min(0.12, height, depth * 0.72);
+  const plateDepth = 0.018;
+  const plateZ = -depth / 2 + plateDepth / 2;
+  const globeZ = depth / 2 - diameter / 2;
+  const armLength = globeZ - plateZ;
+  const gold = getPlannerMaterial("metal-gold");
   return (
-    <group>
+    <group name="ggbingo-wall-light-pair">
       {[-1, 1].map((side) => (
-        <group key={side} position={[side * width * 0.43, 0, 0]}>
-          <RoundedBox args={[0.11, height * 0.72, depth * 0.28]} radius={0.035} smoothness={4} position={[0, 0, -depth * 0.28]} castShadow>
-            <primitive object={getPlannerMaterial("metal-satin")} attach="material" />
-          </RoundedBox>
-          <mesh position={[0, -height * 0.05, depth * 0.18]} rotation={[Math.PI / 2, 0, 0]} scale={[0.055, depth * 2.4, 0.055]} geometry={SHARED_CYLINDER} castShadow>
-            <primitive object={getPlannerMaterial("metal-satin")} attach="material" />
+        <group key={side} name={`ggbingo-wall-light-${side}`} position={[side * (width - diameter) / 2, 0, 0]}>
+          <mesh position={[0, 0, plateZ]} rotation={[Math.PI / 2, 0, 0]} scale={[diameter * 0.75, plateDepth, diameter * 0.75]} geometry={SHARED_CYLINDER} castShadow>
+            <primitive object={gold} attach="material" />
           </mesh>
-          <mesh position={[0, -height * 0.15, depth * 0.62]} scale={[0.19, 0.14, 0.13]} geometry={SHARED_SPHERE} castShadow>
-            <meshStandardMaterial color="#e7cfa8" emissive="#ffcf8b" emissiveIntensity={0.78} roughness={0.52} />
+          <mesh position={[0, 0, (plateZ + globeZ) / 2]} rotation={[Math.PI / 2, 0, 0]} scale={[0.022, armLength, 0.022]} geometry={SHARED_CYLINDER} castShadow>
+            <primitive object={gold} attach="material" />
           </mesh>
-          <pointLight position={[0, -height * 0.2, depth * 1.2]} color="#ffd29a" intensity={0.22} distance={1.3} decay={2} />
+          <mesh position={[0, 0, globeZ]} scale={[diameter, diameter, diameter]} geometry={SHARED_SPHERE} castShadow>
+            <meshStandardMaterial color="#fff5e3" emissive="#ffd9a0" emissiveIntensity={0.38} roughness={0.42} />
+          </mesh>
+          <pointLight position={[0, 0, globeZ + diameter / 2 + 0.015]} color="#ffd29a" intensity={0.18} distance={0.9} decay={2} />
         </group>
       ))}
     </group>

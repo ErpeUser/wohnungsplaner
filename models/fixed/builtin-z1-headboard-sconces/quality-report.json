@@ -3,21 +3,26 @@
   "assetType": "fixed",
   "status": "reference-only",
   "identity": {
-    "displayName": "Zwei kompakte warme Wandleuchten am Bett",
+    "displayName": "Zwei GGbingo Akku-Kugelwandleuchten am Bett · Gold/Opal (Planungsannahme)",
     "category": "fixed-interior",
     "sourceConfidence": "catalog-or-folder-id"
   },
   "referenceSources": {
-    "manifestSourceUrls": [],
-    "linkEntries": [
-      "# Wohnungselement ohne externe Produktquelle; Teil der festen Wohnung/Architektur."
+    "manifestSourceUrls": [
+      "https://de.aliexpress.com/item/1005012428556452.html"
     ],
-    "status": "no-external-source-documented"
+    "linkEntries": [
+      "https://de.aliexpress.com/item/1005012428556452.html",
+      "# Nutzerlink zur GGbingo-Akku-Kugelwandleuchte; Produktdetailseite nicht verifiziert."
+    ],
+    "status": "user-link-only-product-details-unverified"
   },
   "dimensions": {
     "status": "not-verified-in-repository",
     "verified": [],
-    "estimated": []
+    "estimated": [
+      "Kugel Ø 12 cm; Einzelmodell ca. 12 × 18 × 15 cm (B/T/H), keine Herstellermaße."
+    ]
   },
   "assetFiles": [],
   "reconstruction": {
@@ -26,7 +31,9 @@
     "meshFiles": []
   },
   "materials": {
-    "declared": [],
+    "declared": [
+      "metal-gold"
+    ],
     "pbrTexturesPresent": false,
     "textureFiles": []
   },
@@ -37,7 +44,7 @@
   },
   "checks": {
     "manifestJson": "passed",
-    "linkManifestConsistency": "no-url-to-synchronize",
+    "linkManifestConsistency": "passed",
     "geometry": "not-run-no-mesh",
     "materials": "not-run-no-pbr-textures",
     "viewerIntegration": "parametric-fallback-preserved"
@@ -45,7 +52,8 @@
   "limitations": [
     "No mesh asset is present in this model folder; existing runtime GLBs remain outside models/** and are not copied into this folder.",
     "No repository PBR texture set is present; material fidelity remains runtime-defined.",
-    "Exact dimensions and product identity require source-specific verification before a photorealistic asset can be claimed."
+    "Exact dimensions and product identity require source-specific verification before a photorealistic asset can be claimed.",
+    "Gold/Opal-Ausführung, Abmessungen, Packungsinhalt, Akku und Preis nicht anhand der Produktdetailseite bestätigt; vereinfachte parametric Planungsdarstellung."
   ],
-  "auditedAt": "2026-11-12"
+  "auditedAt": "2026-11-27"
 }

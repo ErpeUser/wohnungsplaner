@@ -1,10 +1,14 @@
 {
   "id": "builtin-z1-headboard-sconces",
-  "displayName": "Zwei kompakte warme Wandleuchten am Bett",
+  "displayName": "Zwei GGbingo Akku-Kugelwandleuchten am Bett · Gold/Opal (Planungsannahme)",
   "category": "fixed-interior",
   "status": "reference-only",
-  "sourceUrls": [],
-  "materials": [],
+  "sourceUrls": [
+    "https://de.aliexpress.com/item/1005012428556452.html"
+  ],
+  "materials": [
+    "metal-gold"
+  ],
   "variants": [
     "default"
   ],

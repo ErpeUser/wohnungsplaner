@@ -4,6 +4,7 @@ import type {
   PlannerFixture,
   PlannerOpening,
   PlannerPlacement,
+  PlannerDocumentV3,
   PlannerWall,
   Point2,
 } from "./types.ts";
@@ -236,7 +237,16 @@ const builtIns: PlannerBuiltIn[] = [
   builtIn("z1-entry-slim-art", "Neutrales Bild direkt neben der Zimmer-1-Tür · ca. 40 × 60 cm", "zimmer1", "other", "zimmer1-entry-slim-art", 2.592, 3.65, 0.4, 0.04, 0.6, 270, "oak-light", 1.36, assumptionMetadata("Herstellerneutrale Größen- und Stilplanung: Hochformat 40 × 60 cm, mittig auf der 64 cm breiten Tapetenfläche direkt neben der Tür; ruhige creme-, taupe- und sandfarbene abstrakte Komposition ohne festgelegtes Motiv.")),
   builtIn("z1-wall-art-pair", "Zwei botanisch-abstrakte Bilder über dem Kopfteil · je 60 × 80 cm", "zimmer1", "other", "zimmer1-wall-art-pair", 0.052, 0.735, 1.3, 0.045, 0.8, 270, "oak-light", 1.32, assumptionMetadata("Zwei ruhige Hochformat-Motive mit jeweils 60 × 80 cm und 10 cm Abstand; Gesamtgruppe 130 × 80 cm. Mittig über dem 147 cm breiten Kopfteil ausgerichtet, Unterkante 132 cm, Oberkante 212 cm und 44 cm Abstand zur 256 cm hohen Decke.")),
   builtIn("z1-headboard-led", "Indirektes warmweißes Licht hinter dem Kopfteil", "zimmer1", "other", "zimmer1-headboard-led", 0.045, 0.735, 1.28, 0.025, 0.025, 270, "led-warm", 1.13, assumptionMetadata("Dimmbares Niedervolt-/USB-Licht mit 2700–3000 K; nur als indirekte Kontur hinter dem Kopfteil.")),
-  builtIn("z1-headboard-sconces", "Zwei kompakte warme Wandleuchten am Bett", "zimmer1", "other", "zimmer1-headboard-sconces", 0.043, 0.735, 1.72, 0.12, 0.24, 270, "metal-satin", 1.18, assumptionMetadata("Zwei kleine warmweiße Wandleuchten rahmen Bilder und Kopfteil symmetrisch; geringe Tiefe, damit die Bettseite frei bleibt.")),
+  builtIn("z1-headboard-sconces", "Zwei GGbingo Akku-Kugelwandleuchten am Bett · Gold/Opal (Planungsannahme)", "zimmer1", "other", "zimmer1-headboard-sconces", 0.163, 0.735, 1.28, 0.18, 0.15, 270, "metal-gold", 1.155, {
+    source: "AliExpress Art. 1005012428556452 · GGbingo · Nutzerlink und sichtbarer Browser-Titel",
+    confidence: "estimated",
+    notes: [
+      "Zwei wiederaufladbare LED-Kugelwandleuchten, dimmbar mit Fernbedienung laut sichtbarem Produkttitel. Kabellose Dekobeleuchtung; keine neue Elektroinstallation.",
+      "Goldfarbener Halter und opalweiße Kugel als gewünschte, noch nicht am Produktbild geprüfte Ausführung. Kugel ca. Ø 12 cm, Einzelmodell ca. 12 × 18 × 15 cm (B/T/H), keine bestätigten Händlermaße.",
+      "Symmetrisch unter den äußeren Bildbereichen, Mittelpunkt ca. 123 cm über Boden, beide Bilder und Kopfteil bleiben unverändert. Warmweißes Licht als Darstellungswunsch.",
+      "Produktdetailseite nicht zugänglich; genaue Maße, Variante, Akkudaten, Packungsinhalt und Endpreis vor dem Kauf bestätigen. Kein fotorealistisches Produktmodell.",
+    ],
+  }),
   builtIn("z1-layered-curtain", "Deckenhoher Vorhang · Ecru transparent + Taupe", "zimmer1", "other", "zimmer1-layered-curtain", 3.49, 1.945, 2.06, 0.16, 2.38, 90, "fabric-ecru-sheer", 0.09, assumptionMetadata("Vorhangschiene deckennah; breiter transparenter Ecru-Layer und vollere seitliche taupefarbene Dekoschals wie in den Referenzen, Saum ca. 1 cm über Boden.")),
   builtIn("z1-vanity-shelf-main", "Wandboard Skate · 120 cm Wotan Eiche", "zimmer1", "storage", "zimmer1-desk-shelf-main", 2.92, 0.1, 1.2, 0.2, 0.018, 0, "oak-wotan", 1.65, {
     source: "Möbelix Art. 001555006211 · Wandboard Skate Wotan Eiche",
@@ -740,6 +750,19 @@ export const DEFAULT_APARTMENT_DOCUMENT = parsePlannerDocument({
     overlays: { dimensions: true, fixtures: false, evidence: false },
   },
 });
+
+/** Replace the existing fixed bedroom pair in older saves without rebasing furniture. */
+export function upgradeZimmer1WallLights(document: PlannerDocumentV3): PlannerDocumentV3 {
+  if (document.id !== DEFAULT_APARTMENT_DOCUMENT.id || !document.rooms.some(room => room.id === "zimmer1")) return document;
+  const target = DEFAULT_APARTMENT_DOCUMENT.builtIns.find(item => item.id === "builtin-z1-headboard-sconces");
+  if (!target) return document;
+  const previous = document.builtIns.find(item => item.id === target.id);
+  if (previous?.metadata?.source === target.metadata?.source) return document;
+  const builtIns = previous
+    ? document.builtIns.map(item => item.id === target.id ? structuredClone(target) : item)
+    : [...document.builtIns, structuredClone(target)];
+  return { ...document, builtIns };
+}
 
 function point(x: number, z: number): Point2 {
   return { x, z };

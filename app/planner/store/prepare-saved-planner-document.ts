@@ -1,4 +1,4 @@
-import { DEFAULT_APARTMENT_DOCUMENT } from "../domain/apartment-v3.ts";
+import { DEFAULT_APARTMENT_DOCUMENT, upgradeZimmer1WallLights } from "../domain/apartment-v3.ts";
 import { INTERIOR_UPDATES, refineRoomLayout, upgradeWoltuNightstandPlacement } from "../domain/room-refinement.ts";
 import { projectPublicApartmentDocument } from "../domain/public-scene.ts";
 import { restoreWcMeasuredLayout } from "../domain/wc-layout.ts";
@@ -33,7 +33,7 @@ export function prepareSavedPlannerDocument(document: PlannerDocumentV3): Planne
   const withWc = upgradeWcPhotoReference(withTuckedDining);
   const withWallboards = upgradeZimmer1VanityWallboards(withWc);
   const withWardrobe = upgradeZimmer1WardrobeToFly(withWallboards);
-  const updated = upgradeWoltuNightstandPlacement(withWardrobe);
+  const updated = upgradeZimmer1WallLights(upgradeWoltuNightstandPlacement(withWardrobe));
 
   const existing = new Set(updated.builtIns.map((item) => item.id));
   const missing = DEFAULT_APARTMENT_DOCUMENT.builtIns.filter(
