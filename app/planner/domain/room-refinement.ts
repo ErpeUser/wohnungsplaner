@@ -84,27 +84,28 @@ export const HALL_DECOR:readonly PlannerBuiltIn[]=[
  * active placements are retired. The new set is one purchase, ten objects. */
 export const HALL_BASKET_ARTICLE_ID='607596656326590';
 export const HALL_BASKET_SPECS = [
-  {id:'flower', label:'Blüte Creme', w:30, h:30, u:22, y:213},
-  {id:'leaf-horizontal', label:'Naturblatt quer', w:24, h:16, u:29, y:240},
-  {id:'small-spiral', label:'Kleiner Spiralkorb', w:11, h:11, u:7.5, y:239},
-  {id:'small-braid-a', label:'Kleiner Flechtkorb', w:11, h:11, u:37, y:186},
-  {id:'ring-white', label:'Weißer Ringkorb', w:25, h:25, u:15, y:184},
-  {id:'leaf-vertical', label:'Naturblatt hoch', w:16, h:23, u:33.5, y:64},
-  {id:'ring-brown', label:'Braun-weißer Ringkorb', w:24, h:24, u:28.5, y:126.5},
-  {id:'spiral-white', label:'Weißer Spiralkorb', w:25, h:25, u:15, y:82},
-  {id:'natural-round', label:'Runder Naturkorb', w:24, h:24, u:29.5, y:156.5},
-  {id:'small-braid-b', label:'Kleiner Flechtkorb', w:11, h:11, u:9, y:160.5},
+  {id:'flower', label:'Blüte Creme', w:30, h:30, u:50, y:143},
+  {id:'leaf-horizontal', label:'Naturblatt quer', w:24, h:16, u:52, y:173},
+  {id:'small-spiral', label:'Kleiner Spiralkorb', w:11, h:11, u:35, y:193},
+  {id:'small-braid-a', label:'Kleiner Flechtkorb', w:11, h:11, u:69.5, y:130},
+  {id:'ring-white', label:'Weißer Ringkorb', w:25, h:25, u:19, y:80.5},
+  {id:'leaf-vertical', label:'Naturblatt hoch', w:16, h:23, u:30.5, y:50},
+  {id:'ring-brown', label:'Braun-weißer Ringkorb', w:24, h:24, u:22.5, y:126.5},
+  {id:'spiral-white', label:'Weißer Spiralkorb', w:25, h:25, u:17, y:173},
+  {id:'natural-round', label:'Runder Naturkorb', w:24, h:24, u:53, y:105},
+  {id:'small-braid-b', label:'Kleiner Flechtkorb', w:11, h:11, u:8.5, y:54},
 ] as const;
-/** The single white entry-wall strip, measured from the entrance jamb toward
- * the TEJO seat. Never attach the set to the furniture or another wall. */
-export const HALL_BASKET_WALL=Object.freeze({x:-2.345,startZ:7.2975,endZ:7.7425,height:2.56,rotation:270});
+/** One gallery on the entry wall. The narrow 44.5 cm strip opens into the
+ * white wall beside the open TEJO seating bay between 75 and 181 cm.
+ * Use that wider area without touching the cabinet, door or fittings. */
+export const HALL_BASKET_WALL=Object.freeze({x:-2.345,startZ:7.2975,narrowEndZ:7.7425,endZ:8.06,openBottom:.75,openTop:1.81,height:2.56,rotation:270});
 export function hallBasketDecor(): PlannerBuiltIn[]{
   const depth=.03;
   const round=(n:number)=>Math.round(n*1e6)/1e6;
   return HALL_BASKET_SPECS.map(spec=>{
     const label='Vorraum · Wandkorb '+spec.label+' · '+(spec.w===spec.h?'Ø '+spec.w+' cm':spec.w+' × '+spec.h+' cm');
     const target=hall('builtin-hall-woven-basket-'+spec.id,label,HALL_BASKET_WALL.x,round(HALL_BASKET_WALL.startZ+spec.u/100),s(spec.w/100,depth,spec.h/100),HALL_BASKET_WALL.rotation,round((spec.y-spec.h/2)/100),[
-      'Alle 10 Teile auf der weißen Wand zwischen Eingangstür und TEJO-Sitzbank; Mittelpunkt '+spec.y+' cm über Boden, '+spec.u+' cm von der Eingangszarge in Richtung Garderobe.',
+      'Alle 10 Teile auf derselben weißen Eingangswand, einschließlich der offenen Wand neben der TEJO-Sitzbank; Mittelpunkt '+spec.y+' cm über Boden, '+spec.u+' cm von der Eingangszarge in Richtung Garderobe.',
       'Eine Packung; Schalter und Gegensprechanlage bleiben frei. Blatt-Zweitmaß und nicht ausgewiesene Tiefen sind Modellannahmen; Montage vor Ort prüfen.',
     ]);
     return {...target,metadata:{...target.metadata,source:'Temu Art. '+HALL_BASKET_ARTICLE_ID+' · SKU 107311636987647 · Nutzer-Produktbild',confidence:'estimated' as const}};
