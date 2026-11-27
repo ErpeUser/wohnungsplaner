@@ -6,6 +6,7 @@ import { MarbleTileSurface, bathMarbleWallBounds, wcMarbleWallBounds } from "./m
 import { BathMat, BathRoundMirror, BathShowerCurtain, BathShowerRod, BathShowerSet, BathTiledFinish, BathTowelHookRail, ScoutBasinCabinet, ScoutWasherCabinet, Washbasin, WcBrush, WcFlushPlate, WcPaperHolder, WcRevisionPanel } from "./bathroom";
 import { WcArtisanWallboard, WcWallVent, WcShelfStyling, WcWallHungPan } from "./wc-reference";
 import { isWcWallboardCatalogId } from "../../domain/wc-wallboards.ts";
+import { Zimmer1EntryGoldStrips } from "./zimmer1-entry-gold";
 import { DeskLedMirror, WallpaperFinish, WindowCurtain, Zimmer1DeskAccessories, Zimmer1DeskShelf, Zimmer1EntryNiche, Zimmer1EntrySlimArt, Zimmer1HeadboardLed, Zimmer1HeadboardSconces, Zimmer1LayeredCurtain, Zimmer1NightstandDecor, Zimmer1WallArtPair, Zimmer1WardrobeTopDecor, ZimmerWallPanel } from "./bedroom";
 import { DoorAssembly, DoorFrame } from "./doors";
 import { FixtureMarker } from "./fixtures";
@@ -271,6 +272,7 @@ function ParametricBuiltIn({ item, bathFrontEndZ }: { item: SceneObject<PlannerB
   if (item.catalogId === "window-curtain") return <WindowCurtain item={item} />;
   if (item.catalogId === "zimmer1-wall-art-pair") return <Zimmer1WallArtPair item={item} />;
   if (item.catalogId === "zimmer1-entry-slim-art") return <Zimmer1EntrySlimArt item={item} />;
+  if (item.catalogId === "zimmer1-entry-gold-strips") return <Zimmer1EntryGoldStrips item={item} />;
   if (item.catalogId === "zimmer1-headboard-led") return <Zimmer1HeadboardLed item={item} />;
   if (item.catalogId === "zimmer1-headboard-sconces") return <Zimmer1HeadboardSconces item={item} />;
   if (item.catalogId === "zimmer1-layered-curtain") return <Zimmer1LayeredCurtain item={item} />;

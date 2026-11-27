@@ -406,6 +406,7 @@ function planObjectColor(catalogId: string | undefined, kind: string) {
   if (catalogId === "wc-shelf-styling") return "#9fa988";
   if (catalogId === "zimmer1-wall-art-pair") return "#c99d68";
   if (catalogId === "zimmer1-entry-slim-art") return "#c99d68";
+  if (catalogId === "zimmer1-entry-gold-strips") return "#c5a15c";
   if (catalogId === "zimmer1-headboard-led") return "#f2bd78";
   if (catalogId === "zimmer1-headboard-sconces") return "#c89d62";
   if (catalogId === "zimmer1-layered-curtain") return "#c9b6a4";

@@ -1,5 +1,5 @@
 import { FURNITURE_CATALOG, type FurnitureMaterial } from "../catalog/catalog.ts";
-import { DEFAULT_APARTMENT_DOCUMENT, ZIMMER1_ENTRY_NICHE_MODEL } from "../domain/apartment-v3.ts";
+import { DEFAULT_APARTMENT_DOCUMENT, ZIMMER1_ENTRY_NICHE_MODEL, ZIMMER1_ENTRY_ART_MODEL } from "../domain/apartment-v3.ts";
 import { HALL_DECOR, refineRoomLayout } from "../domain/room-refinement.ts";
 import type { PlannerBuiltIn, PlannerPlacement, Size3 } from "../domain/types.ts";
 import { createSceneModel } from "../scene-3d/scene-model.ts";
@@ -28,7 +28,7 @@ const furniture: ReviewModel[] = FURNITURE_CATALOG.map((item) => {
 // The workspace applies this refinement to its default apartment before rendering.
 const REVIEW_DOCUMENT = refineRoomLayout(DEFAULT_APARTMENT_DOCUMENT);
 const fixed = new Map<string, PlannerBuiltIn>();
-for (const item of [...REVIEW_DOCUMENT.builtIns, ...HALL_DECOR, ZIMMER1_ENTRY_NICHE_MODEL]) {
+for (const item of [...REVIEW_DOCUMENT.builtIns, ...HALL_DECOR, ZIMMER1_ENTRY_NICHE_MODEL, ZIMMER1_ENTRY_ART_MODEL]) {
   const id = `builtin:${item.catalogId ?? item.id}`;
   if (!fixed.has(id)) fixed.set(id, item);
 }

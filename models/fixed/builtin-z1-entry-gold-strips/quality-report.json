@@ -1,0 +1,59 @@
+{
+  "modelId": "builtin-z1-entry-gold-strips",
+  "assetType": "fixed",
+  "status": "reference-only",
+  "identity": {
+    "displayName": "Goldene Acryl-Spiegelstreifen neben der Tür · 4 Linien à 180 cm",
+    "category": "fixed-interior",
+    "sourceConfidence": "user-image-and-product-listing"
+  },
+  "referenceSources": {
+    "manifestSourceUrls": [
+      "https://www.temu.com/at/13-stuck-acryl-2cm-x-60cm-spiegel-wandaufkleber-kein-bohren-erforderlich-mit-selbstklebender-ruckseite--kombinier-und-montierbar--fur-wohnzimmer-hintergrundwande-eingangsbereiche-schlafzimmer-und-gewerbeflachen-g-607229268836803.html"
+    ],
+    "linkEntries": [
+      "https://www.temu.com/at/13-stuck-acryl-2cm-x-60cm-spiegel-wandaufkleber-kein-bohren-erforderlich-mit-selbstklebender-ruckseite--kombinier-und-montierbar--fur-wohnzimmer-hintergrundwande-eingangsbereiche-schlafzimmer-und-gewerbeflachen-g-607229268836803.html"
+    ],
+    "status": "product-listing-and-user-photo"
+  },
+  "dimensions": {
+    "status": "supplier-strip-width-and-length-verified-in-listing",
+    "verified": [
+      "13 pieces per set, 2 × 60 cm each"
+    ],
+    "estimated": [
+      "2 mm thickness",
+      "38 × 180 cm installed arrangement, 37 cm above floor (design)"
+    ]
+  },
+  "assetFiles": [],
+  "reconstruction": {
+    "method": "parametric-twelve-separate-strips",
+    "meshPresent": false,
+    "meshFiles": []
+  },
+  "materials": {
+    "declared": [
+      "metal-gold"
+    ],
+    "pbrTexturesPresent": false,
+    "textureFiles": []
+  },
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "zimmer1-entry-gold-strips",
+    "sourceFile": "app/planner/scene-3d"
+  },
+  "checks": {
+    "manifestJson": "passed",
+    "linkManifestConsistency": "passed",
+    "geometry": "static-layout-checked",
+    "materials": "not-run-no-pbr-textures",
+    "viewerIntegration": "pending-live-verification"
+  },
+  "limitations": [
+    "Gold acrylic mirror effect is approximated with the existing gold material; actual reflection, thickness and adhesion on wallpaper are not verified.",
+    "The visible listing price of EUR 8.05 precedes variant selection; final Golden variant price must be checked before purchase."
+  ],
+  "auditedAt": "2026-11-27"
+}

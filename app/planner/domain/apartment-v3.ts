@@ -1,4 +1,5 @@
 import { parsePlannerDocument } from "./schema.ts";
+import { ZIMMER1_ENTRY_GOLD_STRIPS } from "./zimmer1-entry-gold.ts";
 import type {
   PlannerBuiltIn,
   PlannerFixture,
@@ -102,6 +103,12 @@ const defaultOpenDoorIds = new Set<string>(["hall-bath-door"]);
 /** Model reference retained for isolated preview; no active placement. */
 export const ZIMMER1_ENTRY_NICHE_MODEL: PlannerBuiltIn = {
   ...builtIn("z1-entry-niche", "Schmale beleuchtete Eiche-Nische neben dem Schrank", "zimmer1", "storage", "zimmer1-entry-niche", 2.37, 3.255, 0.22, 0.13, 1.88, 180, "oak-light", 0.08, assumptionMetadata("Nur 22 cm breit und 13 cm tief, damit der Zugang frei bleibt; drei flache Ablagen und verdeckte warmweiße LED-Linie.")),
+  collision: "decorative",
+};
+
+/** Former door-side picture retained for independent model review. */
+export const ZIMMER1_ENTRY_ART_MODEL: PlannerBuiltIn = {
+  ...builtIn("z1-entry-slim-art", "Neutrales Bild direkt neben der Zimmer-1-Tür · ca. 40 × 60 cm", "zimmer1", "other", "zimmer1-entry-slim-art", 2.592, 3.65, 0.4, 0.04, 0.6, 270, "oak-light", 1.36, assumptionMetadata("Herstellerneutrale Größen- und Stilplanung: Hochformat 40 × 60 cm, mittig auf der 64 cm breiten Tapetenfläche direkt neben der Tür; ruhige creme-, taupe- und sandfarbene abstrakte Komposition ohne festgelegtes Motiv.")),
   collision: "decorative",
 };
 
@@ -234,7 +241,7 @@ const builtIns: PlannerBuiltIn[] = [
     confidence: "confirmed",
     notes: ["Die Tapete wird um die Ecke auf dem 26 cm breiten Wandstreifen zwischen Türzarge und Außenwand fortgeführt, sodass sie aus der frontalen Türperspektive sichtbar bleibt."],
   }),
-  builtIn("z1-entry-slim-art", "Neutrales Bild direkt neben der Zimmer-1-Tür · ca. 40 × 60 cm", "zimmer1", "other", "zimmer1-entry-slim-art", 2.592, 3.65, 0.4, 0.04, 0.6, 270, "oak-light", 1.36, assumptionMetadata("Herstellerneutrale Größen- und Stilplanung: Hochformat 40 × 60 cm, mittig auf der 64 cm breiten Tapetenfläche direkt neben der Tür; ruhige creme-, taupe- und sandfarbene abstrakte Komposition ohne festgelegtes Motiv.")),
+  ZIMMER1_ENTRY_GOLD_STRIPS,
   builtIn("z1-wall-art-pair", "Zwei botanisch-abstrakte Bilder über dem Kopfteil · je 60 × 80 cm", "zimmer1", "other", "zimmer1-wall-art-pair", 0.052, 0.735, 1.3, 0.045, 0.8, 270, "oak-light", 1.32, assumptionMetadata("Zwei ruhige Hochformat-Motive mit jeweils 60 × 80 cm und 10 cm Abstand; Gesamtgruppe 130 × 80 cm. Mittig über dem 147 cm breiten Kopfteil ausgerichtet, Unterkante 132 cm, Oberkante 212 cm und 44 cm Abstand zur 256 cm hohen Decke.")),
   builtIn("z1-headboard-led", "Indirektes warmweißes Licht hinter dem Kopfteil", "zimmer1", "other", "zimmer1-headboard-led", 0.045, 0.735, 1.28, 0.025, 0.025, 270, "led-warm", 1.13, assumptionMetadata("Dimmbares Niedervolt-/USB-Licht mit 2700–3000 K; nur als indirekte Kontur hinter dem Kopfteil.")),
   builtIn("z1-headboard-sconces", "Zwei GGbingo Akku-Kugelwandleuchten am Bett · Gold/Opal (Planungsannahme)", "zimmer1", "other", "zimmer1-headboard-sconces", 0.163, 0.735, 1.28, 0.18, 0.15, 270, "metal-gold", 1.155, {
@@ -312,7 +319,7 @@ const DECORATIVE_BUILT_IN_IDS = new Set([
   "builtin-z1-bed-accent-wall",
   "builtin-z1-entry-wallpaper-return",
   "builtin-z1-entry-wallpaper-door-strip",
-  "builtin-z1-entry-slim-art",
+  "builtin-z1-entry-gold-strips",
   "builtin-z1-wall-art-pair",
   "builtin-z1-headboard-led",
   "builtin-z1-headboard-sconces",

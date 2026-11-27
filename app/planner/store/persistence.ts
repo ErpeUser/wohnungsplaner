@@ -1,4 +1,5 @@
 import { DEFAULT_APARTMENT_DOCUMENT, upgradeZimmer1WallLights } from "../domain/apartment-v3.ts";
+import { upgradeZimmer1EntryGold, ZIMMER1_ENTRY_ART_ID } from "../domain/zimmer1-entry-gold.ts";
 import {
   migrateStoredPlannerData,
   type MigrationResult,
@@ -53,7 +54,6 @@ const BASELINE_VISUAL_REFRESH_IDS = new Set([
   "builtin-z1-bed-accent-wall",
   "builtin-z1-entry-wallpaper-return",
   "builtin-z1-entry-wallpaper-door-strip",
-  "builtin-z1-entry-slim-art",
   "builtin-z1-wall-art-pair",
   "builtin-z1-headboard-led",
   "builtin-z1-headboard-sconces",
@@ -64,6 +64,7 @@ const BASELINE_VISUAL_REFRESH_IDS = new Set([
 ]);
 
 const RETIRED_BASELINE_BUILT_IN_IDS = new Set([
+  ZIMMER1_ENTRY_ART_ID,
   "builtin-z1-entry-mirror-console",
   "builtin-z1-desk-mirror",
   "builtin-z1-desk-shelf",
@@ -336,7 +337,7 @@ export function createLocalStoragePlannerRepository(
       const migration = migrateStoredPlannerData(value, DEFAULT_APARTMENT_DOCUMENT);
       return {
         ...migration,
-        document: upgradeZimmer1WallLights(removeZimmer1EntryNiche(migration.document)),
+        document: upgradeZimmer1EntryGold(upgradeZimmer1WallLights(removeZimmer1EntryNiche(migration.document))),
         canCommit: isValidV3(value) || isRecognizedLegacyDocument(value),
       };
     },
@@ -370,7 +371,8 @@ function readStoredValue(raw: string): MigrationResult {
       const normalized = normalizeLegacyV3Aliases(value);
       const parsed = parsePlannerDocument(normalized.document);
       const withoutEntryNiche = removeZimmer1EntryNiche(parsed);
-      const withWallLights = upgradeZimmer1WallLights(withoutEntryNiche);
+      const withEntryGold = upgradeZimmer1EntryGold(withoutEntryNiche);
+      const withWallLights = upgradeZimmer1WallLights(withEntryGold);
       const withRug = upgradeLivingRugMaterial(withWallLights);
       const withHall = restoreHallTejoCashmere(withRug);
       const withChair = upgradeZimmer1Chair(withHall);
@@ -408,9 +410,11 @@ function readStoredValue(raw: string): MigrationResult {
                   ? "Die Vorraumgarderobe wurde anhand der braunen Fotoreferenz aktualisiert; Position und Maße bleiben erhalten."
                   : withRug !== withWallLights
                     ? "Der vorhandene Wohnzimmerteppich wurde auf das neue Temu-Design aktualisiert; Position und Drehung bleiben erhalten."
-                    : withWallLights !== withoutEntryNiche
+                    : withWallLights !== withEntryGold
                       ? "Die zwei Wandleuchten in Zimmer 1 wurden auf die ausgewählte GGbingo-Referenz aktualisiert; andere Möbelpositionen bleiben erhalten."
-                      : "Die schmale Eiche-Nische in Zimmer 1 wurde entfernt; andere Möbelpositionen bleiben erhalten."],
+                      : withEntryGold !== withoutEntryNiche
+                        ? "Das Bild neben der Zimmer-1-Tür wurde durch vier goldene Acryl-Spiegellinien ersetzt; andere Möbelpositionen bleiben erhalten."
+                        : "Die schmale Eiche-Nische in Zimmer 1 wurde entfernt; andere Möbelpositionen bleiben erhalten."],
           legacyBackupJson: raw,
           unmapped: [],
         };
