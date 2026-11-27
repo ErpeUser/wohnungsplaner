@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createHallVaseWoodPixels,createHallWheatPrintPixels} from '../app/planner/scene-3d/hall-decor-textures.ts';
+import {readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import {createHallVaseWoodPixels} from '../app/planner/scene-3d/hall-decor-textures.ts';
+import {HALL_WHEAT_PRINT_REFERENCE} from '../app/planner/domain/room-refinement.ts';
 test('selected wooden pockets have separate high resolution vertical grain textures',()=>{
  const light=createHallVaseWoodPixels(false),brown=createHallVaseWoodPixels(true);
  assert.equal(light.width,192);assert.equal(light.height,768);
@@ -8,11 +11,11 @@ test('selected wooden pockets have separate high resolution vertical grain textu
  assert.ok(light.data[0]>brown.data[0]);assert.ok(light.data[1]>brown.data[1]);
  assert.ok(new Set(light.data.filter((_,i)=>i%4===0)).size>15);
 });
-test('reconstructs the exact two-tone botanical textile silhouette from the supplied image',()=>{
- const {data,width,height}=createHallWheatPrintPixels();
- assert.equal(width,136);assert.equal(height,216);
- assert.equal(data.length,width*height*4);
- assert.ok(data[0]>data[(width-1)*4]);
- let white=0;for(let i=0;i<data.length;i+=4){assert.equal(data[i+3],255);if(data[i]>245)white++;}
- assert.ok(white>1500&&white<15000);
+test('uses the exact WebP derivative of the user TIFF, with 2:3 aspect ratio and no frame baked in',()=>{
+ const bytes=readFileSync(new URL('../public'+HALL_WHEAT_PRINT_REFERENCE.texturePath,import.meta.url));
+ assert.equal(bytes.length,4080);
+ assert.equal(createHash('sha256').update(bytes).digest('hex'),'a91ae566e7b9b8ce81ad26fae0688023cfd6aeb3593813fe302a89ed98859979');
+ assert.equal(bytes.toString('ascii',0,4),'RIFF');assert.equal(bytes.toString('ascii',8,12),'WEBP');
+ assert.equal(bytes.readUInt16LE(26)&0x3fff,240);assert.equal(bytes.readUInt16LE(28)&0x3fff,360);
+ assert.equal(HALL_WHEAT_PRINT_REFERENCE.paperWidth/HALL_WHEAT_PRINT_REFERENCE.paperHeight,240/360);
 });

@@ -181,6 +181,20 @@
       "sha256": "9de7c1e90f6f2d263a3bdeb0d0a86d9e700a929a6fd420d7adb8c0e39354b6d6",
       "byteLength": 77,
       "meterScale": 1
+    },
+    {
+      "id": "texture-hall-wheat-final",
+      "type": "texture",
+      "path": "/planner-assets/textures/art/hall-wheat-final.webp",
+      "mediaType": "image/webp",
+      "license": {
+        "spdx": "LicenseRef-UserProvided",
+        "sourceUrl": "https://github.com/ErpeUser/wohnungsplaner/blob/main/public/planner-assets/textures/art/hall-wheat-final.webp",
+        "note": "User-provided custom artwork, authorized for the Wohnplaner visualization. No general open-source license is asserted. WebP derivative of Weizen_Final_30x45cm(1).tif."
+      },
+      "sha256": "a91ae566e7b9b8ce81ad26fae0688023cfd6aeb3593813fe302a89ed98859979",
+      "byteLength": 4080,
+      "meterScale": 0.3
     }
   ]
 }

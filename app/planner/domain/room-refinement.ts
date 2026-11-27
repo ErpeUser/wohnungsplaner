@@ -141,21 +141,23 @@ export function hallVaseDecor():PlannerBuiltIn[]{
   });
 }
 
-/** Original printed textile 40 x 60 cm; 3 cm margins are wrapped around a
- * slim, estimated backing so the piece fits the measured 38 cm clear wall. */
+/** Custom 30 x 45 cm art print from the user's original TIFF; two 31 cm
+ * wooden hanging strips. Rail cross-section, cord length and height are estimates. */
 export const HALL_WHEAT_PRINT_REFERENCE=Object.freeze({
-  articleId:'606319608216104',sku:'89726296053363',textileWidth:.40,textileHeight:.60,
-  width:.34,height:.54,depth:.018,elevation:1.48,wrappedMargin:.03,
+  sourceFile:'Weizen_Final_30x45cm(1).tif',
+  texturePath:'/planner-assets/textures/art/hall-wheat-final.webp',
+  paperWidth:.30,paperHeight:.45,railWidth:.31,railHeight:.016,railDepth:.020,cordRise:.07,cordHalfSpan:.105,
+  width:.31,height:.536,depth:.020,elevation:1.48,
 });
 export function hallWheatPrint():PlannerBuiltIn{
   const a=HALL_WHEAT_PRINT_REFERENCE,v=HALL_VASE_REFERENCE;
-  const target=hall('builtin-hall-wheat-print','Vorraum · Weizenähren-Bild auf Textil · 40 × 60 cm · sichtbare Fläche 34 × 54 cm',
+  const target=hall('builtin-hall-wheat-print','Vorraum · Eigenanfertigung Weizenbild 30 × 45 cm · Holz-Posterleisten 31 cm',
     v.centerX,v.wallFaceZ+.001+a.depth/2,s(a.width,a.depth,a.height),0,a.elevation,[
-      'Temu Handtuch mit einseitigem Weizenährenmotiv, Originalmaß 40 × 60 cm laut Nutzerfoto. Motiv nach dem Foto rekonstruiert.',
-      'Das lichte Wandfeld misst ca. 38 cm. Planung: an allen vier Kanten 3 cm nach hinten umschlagen; sichtbare Fläche 34 × 54 cm, seitlich je 2 cm Platz. Unterkonstruktion nicht im Artikelpreis enthalten.',
-      'Bildunterkante 148 cm, Oberkante 202 cm über Boden. Rund 9 cm Abstand zum höchsten Weizenstrauß. Montagehöhe und 1,8 cm Unterkonstruktion als Planungsannahmen.',
+      'Originales Nutzer-Druckmotiv aus '+a.sourceFile+' (30 × 45 cm, 300 dpi); WebP-Textur für die 3D-Ansicht, ohne Beschnitt oder Rahmen.',
+      'Zwei helle Naturholz-Posterleisten je 31 cm, dünne dunkle Aufhängeschnur; 38 cm lichtes Wandfeld, seitlich je 3,5 cm Abstand. Leistenhöhe 1,6 cm und Tiefe 2 cm sind Darstellungsannahmen.',
+      'Unterkante der unteren Leiste 148 cm, Schnurspitze ca. 202 cm über Boden; rund 9 cm Abstand zum höchsten Weizenstrauß. Preis für Druck und Leisten noch offen.',
     ]);
-  return {...target,materialVariants:{main:'hall-wheat-print'},metadata:{...target.metadata,source:'Temu Art. '+a.articleId+' · SKU '+a.sku+' · Nutzer-Produktbild',confidence:'estimated'}};
+  return {...target,materialVariants:{main:'hall-wheat-print'},metadata:{...target.metadata,source:'Nutzer-TIFF '+a.sourceFile+' · Posterleisten-Nutzerfoto',confidence:'estimated'}};
 }
 
 /** Pure and idempotent: unrelated furniture, room boundaries and appliances remain. */

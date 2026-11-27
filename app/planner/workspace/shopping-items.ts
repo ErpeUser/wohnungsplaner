@@ -84,7 +84,7 @@ export const SHOPPING_ITEMS: ShoppingItem[] = [
   {"id":"1005009477769018-12000049222509306","name":"Wandvase Holz · Haselnussbraun","room":"Vorraum","dimensions":"7 × 30 cm (B/H) · Tiefe ca. 4 cm (Planungsannahme)","price":8.34,"quantity":1,"amountLabel":"1 Stück · SKU 12000049222509306 · 8,34 € laut Nutzer · rechts, tiefer · cremefarbener Weizen separat","url":"https://www.aliexpress.com/item/1005009477769018.html?sku_id=12000049222509306","type":"decor","retailer":"AliExpress"},
   {"id":"606886610979660","name":"Künstliche Weizenähren · Creme / Naturhell · 60 Stück","room":"Vorraum","dimensions":"60 Halme je Packung · ca. 21 cm sichtbarer Überstand in der dunklen 30-cm-Holzvase; Gesamtlänge vor Kauf prüfen","price":5.88,"quantity":1,"amountLabel":"1 Set = 60 Stück · Lihanrui · 5,88 € laut Nutzer · nur einen lockeren Teilstrauß in die Vase stecken","imageUrl":"https://img.kwcdn.com/product/fancy/a036d289-217e-4238-9a3e-101e97fc6375.jpg","url":"https://www.temu.com/goods.html?_bg_fs=1&goods_id=606886610979660","type":"decor","retailer":"Temu"},
   {"id":"606405775986248","name":"Künstliche Weizenähren · Goldgelb / Dunkel · 68 Stück","room":"Vorraum","dimensions":"68 Halme je Packung · ca. 19 cm sichtbarer Überstand in der hellen 30-cm-Holzvase; Gesamtlänge vor Kauf prüfen","price":3.9,"quantity":1,"amountLabel":"1 Set = 68 Stück · SKU 98744653625148 · 3,90 € laut Nutzer","imageUrl":"https://img.kwcdn.com/product/open/e2369478a09548519428566ae6e77888-goods.jpeg","url":"https://www.temu.com/goods.html?_bg_fs=1&goods_id=606405775986248&sku_id=98744653625148","type":"decor","retailer":"Temu"},
-  {"id":"606319608216104","name":"Weizenähren-Textilbild · Beige / Taupe","room":"Vorraum","dimensions":"40 × 60 cm Handtuch mit einseitigem Druck · sichtbare Bildfläche 34 × 54 cm bei umgeschlagenen 3-cm-Rändern","price":4.57,"quantity":1,"amountLabel":"1 Stück · Futululu · SKU 89726296053363 · 4,57 € laut Nutzer · Unterkonstruktion/Rahmen separat, nicht bepreist","url":"https://www.temu.com/goods.html?_bg_fs=1&goods_id=606319608216104&sku_id=89726296053363","type":"decor","retailer":"Temu"}
+  {"id":"hall-wheat-custom-print","name":"Eigenanfertigung · Weizenbild mit Naturholz-Posterleisten","room":"Vorraum","dimensions":"Druck 30 × 45 cm · Posterleisten je 31 cm · Schnuraufhängung","price":null,"quantity":1,"amountLabel":"Original-TIFF des Nutzers · Druck und Posterleisten noch nicht bepreist","imageUrl":"/planner-assets/textures/art/hall-wheat-final.webp","searchHint":"Posterleiste Naturholz 31 cm für Poster 30 × 45 cm","type":"decor","retailer":"Eigenanfertigung"}
 ];
 
 /** Archived decor remains in the catalogue, but not in the active budget. */
@@ -181,7 +181,7 @@ const builtInShoppingIds: Readonly<Record<string, readonly string[]>> = {
   "builtin-hall-between-door-decor": ["hall-decor-between-doors-print", "hall-decor-planter"],
   "builtin-hall-wall-vase-light": ["1005009477769018-12000049222509307", "606405775986248"],
   "builtin-hall-wall-vase-brown": ["1005009477769018-12000049222509306", "606886610979660"],
-  "builtin-hall-wheat-print": ["606319608216104"],
+  "builtin-hall-wheat-print": ["hall-wheat-custom-print"],
 };
 
 const catalogShoppingIds: Readonly<Record<string, readonly string[]>> = {

@@ -61,8 +61,8 @@ test('includes the exact selected Temu A8447 180 x 250 cm vintage rug',()=>{
 });
 test('adds the purchased living room rug to the known-priced subtotal',()=>{
  const total=shoppingSubtotal;
- assert.equal(Math.round(total*100),219150);
- assert.equal(SHOPPING_ITEMS.filter(i=>i.url).length,39);
+ assert.equal(Math.round(total*100),218693);
+ assert.equal(SHOPPING_ITEMS.filter(i=>i.url).length,38);
 });
 test('adds the 30-piece white-gold marble wall tile set for the bathroom',()=>{
  const tile=item('601100207687761');
@@ -115,7 +115,7 @@ test('lists WOLTU Chenille as four primary chairs in two unpriced two-packs, wit
  assert.equal(backup.alternative,true);
  assert.equal(backup.quantity,4);
  assert.equal(backup.price,55.92);
- assert.equal(Math.round(shoppingSubtotal * 100),219150);
+ assert.equal(Math.round(shoppingSubtotal * 100),218693);
 });
 
 test('uses the requested Universal TEJO link without changing the existing furniture or its historical budget value',()=>{
@@ -166,7 +166,7 @@ test('includes the two source-linked existing bedroom products without adding re
    assert.equal(entries[0].existing,true);assert.equal(entries[0].price,null);
    assert.equal(shoppingItemsForDocument(document).filter(i=>i.id===id).length,1);
  }
- assert.equal(shoppingSubtotalForDocument(document),2191.50);
+ assert.equal(shoppingSubtotalForDocument(document),2186.93);
 });
 
 test('a selected catalogue alternative with a product link is visible once in its room and in the properties',()=>{
@@ -181,7 +181,7 @@ test('a selected catalogue alternative with a product link is visible once in it
  assert.equal(entry.quantity,2);
  assert.equal(shoppingItemsForDocument(document).filter(i=>i.id===entry.id).length,1);
  assert.equal(shoppingItemsForSelection(document,chairs[1])[0].id,entry.id);
- assert.equal(shoppingSubtotalForDocument(document),2191.50);
+ assert.equal(shoppingSubtotalForDocument(document),2186.93);
  assert.ok(!shoppingItemsForDocument(DEFAULT_APARTMENT_DOCUMENT).some(i=>i.id===entry.id));
 });
 
@@ -209,19 +209,24 @@ test('both selected wooden hall vases have exact SKU, unit price, separate selec
    assert.ok(placement);assert.deepEqual(shoppingItemsForSelection(doc,placement).map(i=>i.id).sort(),[id,finish==='light'?'606405775986248':'606886610979660'].sort());
  }
  assert.equal(Math.round(variants.reduce((sum,v)=>sum+v[2],0)*100),1679);
- assert.equal(shoppingSubtotalForDocument(doc),2191.50);
+ assert.equal(shoppingSubtotalForDocument(doc),2186.93);
 });
 
-test('adds the three exact selected Temu purchases once, links matching wheat to each vase, and keeps the original textile size',()=>{
+test('preserves both wheat purchases and replaces the obsolete towel with the custom print',()=>{
  const doc=refineRoomLayout(DEFAULT_APARTMENT_DOCUMENT),active=shoppingItemsForDocument(doc);
- const rows=[['606886610979660',5.88,'60'],['606405775986248',3.90,'68'],['606319608216104',4.57,'40 × 60']] as const;
+ const rows=[['606886610979660',5.88,'60'],['606405775986248',3.90,'68']] as const;
  for(const [id,price,dimension] of rows){
    const product=item(id);assert.equal(product.price,price);assert.equal(product.quantity,1);
    assert.equal(product.room,'Vorraum');assert.equal(product.retailer,'Temu');assert.ok(product.dimensions.includes(dimension));
    assert.ok(product.url?.includes('goods_id='+id));assert.equal(active.filter(i=>i.id===id).length,1);
  }
- assert.equal(Math.round(rows.reduce((sum,row)=>sum+row[1],0)*100),1435);
+ assert.equal(Math.round(rows.reduce((sum,row)=>sum+row[1],0)*100),978);
  const picture=doc.builtIns.find(i=>i.id==='builtin-hall-wheat-print')!;
- assert.ok(picture);assert.deepEqual(shoppingItemsForSelection(doc,picture).map(i=>i.id),['606319608216104']);
- assert.equal(shoppingSubtotalForDocument(doc),2191.50);
+ assert.ok(picture);assert.deepEqual(shoppingItemsForSelection(doc,picture).map(i=>i.id),['hall-wheat-custom-print']);
+ const custom=item('hall-wheat-custom-print');
+ assert.equal(custom.price,null);assert.equal(custom.quantity,1);assert.equal(custom.retailer,'Eigenanfertigung');
+ assert.match(custom.dimensions,/30 × 45 cm/);assert.match(custom.dimensions,/31 cm/);
+ assert.equal(active.filter(i=>i.id===custom.id).length,1);
+ assert.ok(!SHOPPING_ITEMS.some(i=>i.id==='606319608216104'));
+ assert.equal(shoppingSubtotalForDocument(doc),2186.93);
 });

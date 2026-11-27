@@ -117,16 +117,18 @@ test('two 7 × 30 cm wall pockets sit safely between WC and storage doors, while
  assert.equal(refineRoomLayout(doc),doc);
 });
 
-test('fits the actual printed textile above the contrast wheat bundles without colliding with the door frames',()=>{
+test('fits the original 30 x 45 cm poster and 31 cm hanger above the unchanged wheat bundles',()=>{
  const doc=refineRoomLayout(DEFAULT_APARTMENT_DOCUMENT);
  const picture=doc.builtIns.find(i=>i.id==='builtin-hall-wheat-print')!;
  assert.ok(picture);
- assert.deepEqual(picture.size,{width:.34,depth:.018,height:.54});
+ assert.deepEqual(picture.size,{width:.31,depth:.020,height:.536});
  assert.equal(picture.position.x,-1.30);
  assert.equal(picture.elevation,1.48);
- assert.equal(HALL_WHEAT_PRINT_REFERENCE.textileWidth,.40);
- assert.equal(HALL_WHEAT_PRINT_REFERENCE.textileHeight,.60);
- assert.ok(Math.abs((.38-picture.size.width)/2-.02)<1e-8);
+ assert.equal(HALL_WHEAT_PRINT_REFERENCE.paperWidth,.30);
+ assert.equal(HALL_WHEAT_PRINT_REFERENCE.paperHeight,.45);
+ assert.equal(HALL_WHEAT_PRINT_REFERENCE.railWidth,.31);
+ assert.ok(Math.abs(HALL_WHEAT_PRINT_REFERENCE.paperHeight+HALL_WHEAT_PRINT_REFERENCE.railHeight+HALL_WHEAT_PRINT_REFERENCE.cordRise-picture.size.height)<1e-8);
+ assert.ok(Math.abs((.38-picture.size.width)/2-.035)<1e-8);
  assert.equal(HALL_VASE_SPECS[0].wheatArticle,'606405775986248');
  assert.equal(HALL_VASE_SPECS[1].wheatArticle,'606886610979660');
  for(const spec of HALL_VASE_SPECS){

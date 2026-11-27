@@ -26,7 +26,12 @@ test("planner asset manifest is local, licensed, hashed and meter-normalized", a
   for (const asset of PLANNER_ASSET_MANIFEST.assets) {
     assert.match(asset.path, /^\/planner-assets\//);
     assert.doesNotMatch(asset.path, /^https?:/);
-    assert.match(asset.license.spdx, /^(CC0-1\.0|MIT)$/);
+    if (asset.id === "texture-hall-wheat-final") {
+      assert.equal(asset.license.spdx, "LicenseRef-UserProvided");
+      assert.equal(asset.path, "/planner-assets/textures/art/hall-wheat-final.webp");
+    } else {
+      assert.match(asset.license.spdx, /^(CC0-1\.0|MIT)$/);
+    }
     assert.match(asset.license.sourceUrl, /^https:\/\//);
     assert.match(asset.sha256, /^[a-f0-9]{64}$/);
     assert.ok(asset.meterScale > 0);

@@ -1,7 +1,7 @@
 'use client';
 
 import { getInteriorMaterial } from './interior-materials.ts';
-import { HALL_VASE_SPECS } from '../domain/room-refinement.ts';
+import { HALL_VASE_SPECS, HALL_WHEAT_PRINT_REFERENCE } from '../domain/room-refinement.ts';
 
 type Size=[number,number,number];
 
@@ -45,11 +45,17 @@ function DriedStems({height,brown}:{height:number;brown:boolean}){
   </group>;
 }
 
+/** Open-sided poster hanger: the image is not a framed panel or textile. */
 export function HallWheatPrint({size}:{size:Size}){
   const [width,height,depth]=size;
-  return <group name="temu-wheat-textile-wrapped-wall-picture">
-    <mesh material={getInteriorMaterial('core')} receiveShadow castShadow><boxGeometry args={[width,height,depth]}/></mesh>
-    <mesh position={[0,0,depth/2+.0001]} material={getInteriorMaterial('hall-wheat-print')} receiveShadow><planeGeometry args={[width,height]}/></mesh>
+  const a=HALL_WHEAT_PRINT_REFERENCE;
+  const bottom=-height/2,lower=bottom+a.railHeight/2,upper=lower+a.paperHeight;
+  const cordBase=upper+a.railHeight/2;
+  const cordLength=Math.hypot(a.cordHalfSpan,a.cordRise);
+  return <group name="custom-wheat-print-with-wooden-poster-hanger">
+    <mesh name="poster-paper-30x45" position={[0,lower+a.paperHeight/2,0]} material={getInteriorMaterial('hall-wheat-print')} receiveShadow><planeGeometry args={[a.paperWidth,a.paperHeight]}/></mesh>
+    {([lower,upper]).map((y,i)=><mesh key={i} name={i===0?'lower-wooden-strip':'upper-wooden-strip'} position={[0,y,0]} material={getInteriorMaterial('hall-poster-rail')} castShadow receiveShadow><boxGeometry args={[width,a.railHeight,depth]}/></mesh>)}
+    {[-1,1].map(side=><mesh key={side} name="hanging-cord" position={[side*a.cordHalfSpan/2,cordBase+a.cordRise/2,-depth/4]} rotation={[0,0,side*Math.atan2(a.cordHalfSpan,a.cordRise)]} material={getInteriorMaterial('hall-poster-cord')} castShadow><cylinderGeometry args={[.0009,.0009,cordLength,8]}/></mesh>)}
   </group>;
 }
 

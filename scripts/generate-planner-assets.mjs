@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
 import {
@@ -89,6 +89,17 @@ await addAsset({
   license: authoredLicense(),
 });
 
+// Preserve and hash the user-authorized artwork instead of generating replacement pixels.
+await addAsset({
+  id: "texture-hall-wheat-final",
+  type: "texture",
+  relativePath: "textures/art/hall-wheat-final.webp",
+  bytes: await readFile(resolve(root, "textures/art/hall-wheat-final.webp")),
+  mediaType: "image/webp",
+  meterScale: 0.30,
+  license: {"spdx":"LicenseRef-UserProvided","sourceUrl":"https://github.com/ErpeUser/wohnungsplaner/blob/main/public/planner-assets/textures/art/hall-wheat-final.webp","note":"User-provided custom artwork, authorized for the Wohnplaner visualization. No general open-source license is asserted. WebP derivative of Weizen_Final_30x45cm(1).tif."},
+});
+
 const manifest = {
   version: 1,
   generatedBy: "scripts/generate-planner-assets.mjs",
@@ -102,7 +113,7 @@ async function addTextAsset(id, type, relativePath, content, mediaType) {
   return addAsset({ id, type, relativePath, bytes: Buffer.from(content), mediaType, license: authoredLicense() });
 }
 
-async function addAsset({ id, type, relativePath, bytes, catalogIds = [], mediaType, license }) {
+async function addAsset({ id, type, relativePath, bytes, catalogIds = [], mediaType, license, meterScale = 1 }) {
   const path = resolve(root, relativePath);
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, bytes);
@@ -114,7 +125,7 @@ async function addAsset({ id, type, relativePath, bytes, catalogIds = [], mediaT
     license,
     sha256: createHash("sha256").update(bytes).digest("hex"),
     byteLength: bytes.byteLength,
-    meterScale: 1,
+    meterScale,
     ...(catalogIds.length ? { catalogIds } : {}),
   });
 }

@@ -1,8 +1,10 @@
-import {DataTexture,DoubleSide,MeshPhysicalMaterial,MeshStandardMaterial,NoColorSpace,RGBAFormat,RepeatWrapping,SRGBColorSpace,LinearFilter,LinearMipmapLinearFilter,UnsignedByteType} from 'three';
+import {ClampToEdgeWrapping,DataTexture,DoubleSide,MeshPhysicalMaterial,MeshStandardMaterial,NoColorSpace,RGBAFormat,RepeatWrapping,SRGBColorSpace,LinearFilter,LinearMipmapLinearFilter,UnsignedByteType} from 'three';
 import {createWafflePixels,createArtworkPixels} from './interior-geometry.ts';
 import {createWcPaperHolderWoodTexture} from './wc-paper-holder-photo.ts';
 import {createBathHookStyle2WoodTexture} from './bath-hook-style2-photo.ts';
-import {createHallVaseWoodPixels,createHallWheatPrintPixels} from './hall-decor-textures.ts';
+import {createHallVaseWoodPixels} from './hall-decor-textures.ts';
+import {HALL_WHEAT_PRINT_REFERENCE} from '../domain/room-refinement.ts';
+import {loadPlannerTexture} from './materials/texture-factory.ts';
 const cache=new Map<string,MeshStandardMaterial>();
 function pixels(data:Uint8Array,width:number,height:number,color:boolean,name:string){
   const texture=new DataTexture(data,width,height,RGBAFormat,UnsignedByteType);
@@ -42,10 +44,17 @@ export function getInteriorMaterial(kind:string):MeshStandardMaterial{
     case 'hall-wheat-gold-stem':material=new MeshStandardMaterial({color:'#b08b43',roughness:.96});break;
     case 'hall-wheat-cream-stem':material=new MeshStandardMaterial({color:'#d2bd90',roughness:.97});break;
     case 'hall-wheat-print':{
-      const artwork=createHallWheatPrintPixels();
-      const map=pixels(artwork.data,artwork.width,artwork.height,true,'temu-606319608216104-wheat-textile');
-      map.flipY=true;material=new MeshStandardMaterial({color:'#ffffff',roughness:1,map});break;
+      // TextureLoader is a browser API; retain a neutral material for server/test rendering.
+      const map=typeof document==='undefined'?null:loadPlannerTexture(HALL_WHEAT_PRINT_REFERENCE.texturePath);
+      if(map){map.repeat.set(1,1);map.wrapS=map.wrapT=ClampToEdgeWrapping;map.needsUpdate=true;}
+      material=new MeshStandardMaterial({color:'#ffffff',roughness:1,map,side:DoubleSide});break;
     }
+    case 'hall-poster-rail':{
+      const map=woodTexture([228,203,162],'hall-poster-rail-natural-wood');
+      map.center.set(.5,.5);map.rotation=Math.PI/2;
+      material=new MeshStandardMaterial({color:'#ffffff',roughness:.84,map});break;
+    }
+    case 'hall-poster-cord':material=new MeshStandardMaterial({color:'#51473a',roughness:1});break;
     case 'bath-hook-style2-wood':case 'bath-hook-style2-edge':material=new MeshPhysicalMaterial({
       color:'#ffffff',roughness:.83,clearcoat:.025,
       map:createBathHookStyle2WoodTexture(kind==='bath-hook-style2-edge'),

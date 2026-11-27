@@ -10,7 +10,7 @@ export type PlannerAsset = {
   path: string;
   mediaType: string;
   license: {
-    spdx: "CC0-1.0" | "MIT";
+    spdx: "CC0-1.0" | "MIT" | "LicenseRef-UserProvided";
     sourceUrl: string;
     note: string;
   };
