@@ -1,6 +1,7 @@
 import { DEFAULT_APARTMENT_DOCUMENT, upgradeZimmer1WallLights } from "../domain/apartment-v3.ts";
 import { upgradeZimmer1EntryGold, ZIMMER1_ENTRY_ART_ID } from "../domain/zimmer1-entry-gold.ts";
 import { upgradeZimmer1WardrobeBoxes } from "../domain/zimmer1-wardrobe-boxes.ts";
+import { ensureHallTejoPillow } from "../domain/hall-tejo-pillow.ts";
 import {
   migrateStoredPlannerData,
   type MigrationResult,
@@ -337,7 +338,7 @@ export function createLocalStoragePlannerRepository(
       const migration = migrateStoredPlannerData(value, DEFAULT_APARTMENT_DOCUMENT);
       return {
         ...migration,
-        document: upgradeZimmer1WardrobeBoxes(upgradeZimmer1WardrobeToFly(upgradeZimmer1EntryGold(upgradeZimmer1WallLights(removeZimmer1EntryNiche(migration.document))))),
+        document: ensureHallTejoPillow(upgradeZimmer1WardrobeBoxes(upgradeZimmer1WardrobeToFly(upgradeZimmer1EntryGold(upgradeZimmer1WallLights(removeZimmer1EntryNiche(migration.document)))))),
         canCommit: isValidV3(value) || isRecognizedLegacyDocument(value),
       };
     },
@@ -382,20 +383,23 @@ function readStoredValue(raw: string): MigrationResult {
       const withWallboards = upgradeZimmer1VanityWallboards(withWc);
       const withFly = upgradeZimmer1WardrobeToFly(withWallboards);
       const withBoxes = upgradeZimmer1WardrobeBoxes(withFly);
-      if (!normalized.identityChanged && isOlderBaselineModel(withBoxes)) {
+      const withPillow = ensureHallTejoPillow(withBoxes);
+      if (!normalized.identityChanged && isOlderBaselineModel(withPillow)) {
         return {
-          document: rebaseBaselineModel(withBoxes),
+          document: ensureHallTejoPillow(rebaseBaselineModel(withPillow)),
           warnings: ["Das gespeicherte Möbel-Layout und die Bad-/WC-Materialien wurden auf den aktuellen Stand aktualisiert."],
           legacyBackupJson: raw,
           unmapped: [],
         };
       }
-      if (normalized.changed || withBoxes !== parsed) {
+      if (normalized.changed || withPillow !== parsed) {
         return {
-          document: withBoxes,
+          document: withPillow,
           warnings: [normalized.changed
             ? "Das gespeicherte Dokument wurde auf die zusammengeführte Balkon-/Loggia-Struktur aktualisiert."
-            : withBoxes !== withFly
+            : withPillow !== withBoxes
+              ? "Das bronzefarbene Chenille-Kissen wurde auf der TEJO-Sitzbank ergänzt; andere Möbel bleiben erhalten."
+              : withBoxes !== withFly
               ? "Die drei Schrankboxen wurden auf das ausgewählte ZGV-XL-Set aktualisiert; andere Möbel bleiben erhalten."
               : withFly !== withWallboards
               ? "Der Kleiderschrank in Zimmer 1 wurde an das MID.YOU-FLY-Maß angepasst; Kaschmirfronten und angepasste Möbelpositionen bleiben erhalten."

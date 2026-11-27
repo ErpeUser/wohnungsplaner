@@ -1,6 +1,7 @@
 import { parsePlannerDocument } from "./schema.ts";
 import { ZIMMER1_ENTRY_GOLD_STRIPS } from "./zimmer1-entry-gold.ts";
 import { ZGV_WARDROBE_BOXES } from "./zimmer1-wardrobe-boxes.ts";
+import { ensureHallTejoPillow } from "./hall-tejo-pillow.ts";
 import type {
   PlannerBuiltIn,
   PlannerFixture,
@@ -745,7 +746,7 @@ export const DEFAULT_APARTMENT_DOCUMENT = parsePlannerDocument({
   walls: wallGraph.walls,
   rooms: wallGraph.rooms,
   openings,
-  builtIns: finalBuiltIns,
+  builtIns: ensureHallTejoPillow({ id: "wohnung-v3", builtIns: finalBuiltIns, placements }).builtIns,
   fixtures,
   placements,
   doorStates: Object.fromEntries(

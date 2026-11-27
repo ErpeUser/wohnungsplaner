@@ -1,0 +1,58 @@
+{
+  "modelId": "builtin-hall-tejo-bronze-pillow",
+  "assetType": "fixed",
+  "status": "reference-only",
+  "identity": {
+    "displayName": "Vorraum · Chenille-Dekokissen Bronze · 40 × 40 cm · TEJO-Sitzbank",
+    "category": "fixed-interior",
+    "sourceConfidence": "user-selected-product-variant"
+  },
+  "referenceSources": {
+    "manifestSourceUrls": [
+      "https://www.temu.com/goods.html?goods_id=605638990106029&sku_id=103514751647878"
+    ],
+    "linkEntries": [
+      "https://www.temu.com/goods.html?goods_id=605638990106029&sku_id=103514751647878"
+    ],
+    "status": "user-supplied-product-reference"
+  },
+  "dimensions": {
+    "status": "user-selected-cover-size",
+    "verified": [
+      "2 covers, each 40 × 40 cm, Bronze; set price 12.85 EUR (user)"
+    ],
+    "estimated": [
+      "15 cm filled thickness; slightly rearward lean; seat height based on existing TEJO model geometry"
+    ]
+  },
+  "assetFiles": [],
+  "reconstruction": {
+    "method": "parametric-soft-square-cushion",
+    "meshPresent": false,
+    "meshFiles": []
+  },
+  "materials": {
+    "declared": [
+      "fabric-hall-bronze-chenille"
+    ],
+    "pbrTexturesPresent": false,
+    "textureFiles": []
+  },
+  "runtime": {
+    "renderer": "parametric",
+    "catalogId": "hall-tejo-bronze-pillow",
+    "sourceFile": "app/planner/scene-3d"
+  },
+  "checks": {
+    "manifestJson": "passed",
+    "linkManifestConsistency": "passed",
+    "geometry": "static-layout-checked",
+    "materials": "procedural-preview",
+    "viewerIntegration": "pending-live-verification"
+  },
+  "limitations": [
+    "Only two covers are included in purchase; filling is separate and not priced.",
+    "Actual bronze shade, chenille embossing, and filled dimensions are approximated; no private image embedded."
+  ],
+  "auditedAt": "2026-11-27"
+}

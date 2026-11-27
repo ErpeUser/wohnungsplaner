@@ -393,6 +393,7 @@ function planObjectLabel(item: PlanObjectDescriptor) {
 }
 
 function planObjectColor(catalogId: string | undefined, kind: string) {
+  if (catalogId === "hall-tejo-bronze-pillow") return "#96734e";
   if (catalogId === "floor-zone-kitchen") return "#e8e7e2";
   if (catalogId === "living-slat-wall" || catalogId === "kitchen-backsplash-oak") return "#98613a";
   if (catalogId === "living-moss-panel") return "#405539";

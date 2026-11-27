@@ -39,7 +39,7 @@ test("replaces the shopping placeholder with one ZGV XL pack of three for the su
   assert.match(entries[0].url ?? "", /goods_id=607487503734082&sku_id=118252395101764/);
   assert.match(entries[0].amountLabel ?? "", /3 Stück XL/);
   assert.equal(shoppingItemsForDocument(doc).filter(item => item.id === entries[0].id).length, 1);
-  close(shoppingSubtotalForDocument(doc), 2186.93);
+  close(shoppingSubtotalForDocument(doc), 2199.78);
   assert.match(shoppingPriceLabel(entries[0]), /12,74/);
 });
 

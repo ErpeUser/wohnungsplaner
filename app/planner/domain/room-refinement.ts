@@ -1,6 +1,7 @@
 import {TILE_SIZE_METRES} from './tile-dimensions.ts';
 import { upgradeZimmer1EntryGold, ZIMMER1_ENTRY_ART_ID } from './zimmer1-entry-gold.ts';
 import { upgradeZimmer1WardrobeBoxes } from './zimmer1-wardrobe-boxes.ts';
+import { ensureHallTejoPillow } from './hall-tejo-pillow.ts';
 import type {PlannerBuiltIn,PlannerMetadata,PlannerPlacement} from './types.ts';
 
 export const INTERIOR_REVISION='interior-refinement-2026-11-11';
@@ -163,7 +164,7 @@ export function hallWheatPrint():PlannerBuiltIn{
 /** Pure and idempotent: unrelated furniture, room boundaries and appliances remain. */
 export function refineRoomLayout<T extends {id:string;builtIns:PlannerBuiltIn[];placements?:PlannerPlacement[]}>(document:T):T{
   if(document.id!=='wohnung-v3')return document;
-  document=upgradeZimmer1WardrobeBoxes(upgradeZimmer1EntryGold(document));
+  document=ensureHallTejoPillow(upgradeZimmer1WardrobeBoxes(upgradeZimmer1EntryGold(document)));
   const activeHallDecor=[...hallBasketDecor(),...hallVaseDecor(),hallWheatPrint()];
   const hallIds=new Set(activeHallDecor.map(item=>item.id));
   let changed=false;const builtIns:PlannerBuiltIn[]=[];

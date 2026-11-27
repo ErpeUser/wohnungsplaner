@@ -111,6 +111,7 @@ export const RECIPES: Record<string, MaterialRecipe> = {
   "bath-hook-oak-natural": { color: "#c2976a", roughness: 0.83 },
   "bath-hook-black": { color: "#191918", roughness: 0.56, metalness: 0.14 },
   "fabric-taupe": { color: "#aa9684", roughness: 0.98 },
+  "fabric-hall-bronze-chenille": { color: "#96734e", roughness: 0.97 },
   // Warm beige fabric; the previous near-white value made the sofa read as
   // white under the 3D tone mapping.
   "fabric-ali-ivory": { color: "#d8c8b6", roughness: 0.99 },
@@ -198,6 +199,7 @@ export const TEXTURES: Record<string, string> = {
   "shower-curtain-linen-beige": "/planner-assets/textures/fabric/shower-curtain-linen-beige.svg",
   "temu-shower-curtain-beige": "/planner-assets/textures/fabric/shower-curtain-linen-beige.svg",
   "fabric-taupe": "/planner-assets/textures/fabric/weave.svg",
+  "fabric-hall-bronze-chenille": "/planner-assets/textures/fabric/weave.svg",
   "fabric-chicago-beige": "/planner-assets/textures/fabric/weave.svg",
   "fabric-kaleo-beige": "/planner-assets/textures/fabric/weave.svg",
   "tejo-panel-greige": "/planner-assets/textures/fabric/weave.svg",

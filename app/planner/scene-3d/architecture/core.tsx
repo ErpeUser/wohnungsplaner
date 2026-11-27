@@ -8,6 +8,7 @@ import { WcArtisanWallboard, WcWallVent, WcShelfStyling, WcWallHungPan } from ".
 import { isWcWallboardCatalogId } from "../../domain/wc-wallboards.ts";
 import { Zimmer1EntryGoldStrips } from "./zimmer1-entry-gold";
 import { Zimmer1ZgvStorageBags } from "./zimmer1-zgv-storage-bags";
+import { HallTejoBronzePillow } from "./hall-tejo-bronze-pillow";
 import { DeskLedMirror, WallpaperFinish, WindowCurtain, Zimmer1DeskAccessories, Zimmer1DeskShelf, Zimmer1EntryNiche, Zimmer1EntrySlimArt, Zimmer1HeadboardLed, Zimmer1HeadboardSconces, Zimmer1LayeredCurtain, Zimmer1NightstandDecor, Zimmer1WallArtPair, ZimmerWallPanel } from "./bedroom";
 import { DoorAssembly, DoorFrame } from "./doors";
 import { FixtureMarker } from "./fixtures";
@@ -281,6 +282,7 @@ function ParametricBuiltIn({ item, bathFrontEndZ }: { item: SceneObject<PlannerB
   if (item.catalogId === "zimmer1-desk-accessories") return <Zimmer1DeskAccessories item={item} />;
   if (item.catalogId === "zimmer1-entry-niche") return <Zimmer1EntryNiche item={item} />;
   if (item.catalogId === "zimmer1-wardrobe-top-decor") return <Zimmer1ZgvStorageBags item={item} />;
+  if (item.catalogId === "hall-tejo-bronze-pillow") return <HallTejoBronzePillow item={item} />;
   if (item.catalogId === "zimmer1-nightstand-decor") return <Zimmer1NightstandDecor item={item} />;
   if (item.catalogId === "vorraum-wall-decor") return <VorraumWallDecor item={item} />;
   return (

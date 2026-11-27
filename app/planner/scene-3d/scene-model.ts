@@ -10,6 +10,7 @@ import type {
   Point2,
 } from "../domain/types.ts";
 import { deriveRoomPolygon } from "../domain/wall-graph.ts";
+import { createHallTejoPillow, HALL_TEJO_PILLOW_ID } from "../domain/hall-tejo-pillow.ts";
 
 export type SceneFloor = {
   id: string;
@@ -306,6 +307,17 @@ export function derivePerspectiveCutaway(
       });
       return support ? [{ decorationId: decoration.id, supportId: support.id }] : [];
     });
+  // The pillow rests on the open bench, not the top of the tall cabinet.
+  const hallPillow = scene.builtIns.find((item) => item.id === HALL_TEJO_PILLOW_ID);
+  const hallBench = scene.placements.find((item) => item.id === "hall-tejo-wardrobe");
+  const expectedPillow = hallBench && createHallTejoPillow(hallBench.source);
+  if (hallPillow && hallBench && expectedPillow
+    && Math.abs(hallPillow.source.position.x - expectedPillow.position.x) < GEOMETRY_EPSILON
+    && Math.abs(hallPillow.source.position.z - expectedPillow.position.z) < GEOMETRY_EPSILON
+    && Math.abs((hallPillow.source.elevation ?? 0) - (expectedPillow.elevation ?? 0)) < GEOMETRY_EPSILON
+    && hallPillow.source.rotation === expectedPillow.rotation) {
+    supportedDecorations.push({ decorationId: hallPillow.id, supportId: hallBench.id });
+  }
   const protectedObjectIds = new Set(selectedId ? [selectedId] : []);
   for (const { decorationId, supportId } of supportedDecorations) {
     if (selectedId === decorationId || selectedId === supportId) {
