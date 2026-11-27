@@ -51,7 +51,12 @@ describe("Zimmer 1 wardrobe vinyl", () => {
       const gallerySource = product.querySelector("img")?.getAttribute("src")
         ?? within(product).getByRole("link", { name: /Produktbild öffnen/ }).getAttribute("href");
       assert.match(gallerySource ?? "", new RegExp(lookupGalleryFile.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
-      assert.match(product.querySelector("a")?.getAttribute("href") ?? "", /top_gallery_url=/);
+      const purchaseUrl = product.querySelector("a")?.getAttribute("href") ?? "";
+      if (name === "Duschvorhang Nordic Leinenoptik Beige") {
+        assert.equal(purchaseUrl, "https://de.aliexpress.com/item/1005005852015457.html");
+      } else {
+        assert.match(purchaseUrl, /top_gallery_url=/);
+      }
     }
   });
   test("shows the 4-pack of oak-and-black bathroom hooks and the 180 × 200 cm washable curtain", () => {
