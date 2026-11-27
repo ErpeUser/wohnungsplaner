@@ -1,4 +1,5 @@
 /** Metric geometry and a repeatable photo-derived textile surface. No merchant image planes. */
+import { TILE_SIZE_METRES } from '../domain/tile-dimensions.ts';
 import { sampleWaffleReference } from "./waffle-photo-reference.ts";
 export type InteriorMesh={positions:Float32Array;normals:Float32Array;uvs:Float32Array;indices:Uint32Array;colors?:Float32Array};
 export const WAFFLE_PITCH=.02;
@@ -72,7 +73,7 @@ export function worktopSlabs(width:number,depth:number,hole?:Slab):Slab[]{
   return [{x:(-width/2+left)/2,z:0,width:left+width/2,depth},{x:(right+width/2)/2,z:0,width:width/2-right,depth},{x:hole.x,z:(-depth/2+back)/2,width:hole.width,depth:back+depth/2},{x:hole.x,z:(front+depth/2)/2,width:hole.width,depth:depth/2-front}];
 }
 /** Both arms of the L use one world-coordinate grout grid. */
-export function createKitchenTiles(width:number,depth:number,worldX:number,worldZ:number,pitch=.32,grout=.002):InteriorMesh{
+export function createKitchenTiles(width:number,depth:number,worldX:number,worldZ:number,pitch=TILE_SIZE_METRES,grout=.002):InteriorMesh{
   [width,depth,pitch,grout].forEach((v,i)=>positive(v,['width','depth','pitch','grout'][i]));
   if(!Number.isFinite(worldX)||!Number.isFinite(worldZ)||width>20||depth>20||pitch<.01||grout>=pitch)throw new RangeError('Invalid tile patch.');
   const pos:number[]=[],normal:number[]=[],uv:number[]=[],colors:number[]=[],indices:number[]=[];

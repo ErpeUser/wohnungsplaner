@@ -1,3 +1,4 @@
+import { TILE_ATLAS_METRES } from "../../domain/tile-dimensions.ts";
 import { useMemo } from "react";
 import { DoubleSide, Shape } from "three";
 import { getPlannerMaterial } from "../materials.ts";
@@ -24,12 +25,10 @@ export function Floor({ floor }: { floor: SceneFloor }) {
       const depth = Math.max(...floor.points.map((point) => point.z)) - Math.min(...floor.points.map((point) => point.z));
       const isWood = floor.materialId.includes("parquet") || floor.materialId.includes("oak");
       const isTile = floor.materialId.includes("tile") || floor.materialId.includes("porcelain");
-      // Tile atlases contain two cells across their 0..1 UV range.  A 0.64 m
-      // UV repeat therefore produces the photographed 32 cm floor modules;
-      // the previous 0.32 m repeat made the grout read as tiny mosaic.
-      const scale = isWood ? 0.42 : isTile ? 0.64 : null;
+      // ShapeGeometry uses metre coordinates; the tile atlas spans two 20 cm cells.
       clone.map = clone.map.clone();
-      if (scale) clone.map.repeat.set(Math.max(1, width / scale), Math.max(1, depth / scale));
+      if (isTile) clone.map.repeat.set(1 / TILE_ATLAS_METRES, 1 / TILE_ATLAS_METRES);
+      else if (isWood) clone.map.repeat.set(Math.max(1, width / 0.42), Math.max(1, depth / 0.42));
       clone.map.needsUpdate = true;
       if (clone.bumpMap) {
         clone.bumpMap = clone.map;

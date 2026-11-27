@@ -1,5 +1,6 @@
 import { RoundedBox } from "@react-three/drei";
-import { useMemo } from "react";
+import { TILE_SIZE_METRES } from "../../domain/tile-dimensions.ts";
+import { useTileBoxGeometry } from "../shared/tile-box-geometry.ts";
 import type { PlannerBuiltIn } from "../../domain/types.ts";
 import { getPlannerMaterial } from "../materials.ts";
 import type { SceneObject } from "../scene-model.ts";
@@ -35,25 +36,13 @@ export function KitchenBacksplash({ item }: { item: SceneObject<PlannerBuiltIn> 
 
 export function KitchenFloorZone({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   const [width, height, depth] = item.size;
-  const tileSize = 0.32;
+  const tileSize = TILE_SIZE_METRES;
   const tileHeight = Math.min(height, 0.006);
-  const tileMaterial = useMemo(() => {
-    const base = getPlannerMaterial(item.materialId);
-    const clone = base.clone();
-    clone.name = `${base.name}-${item.source.id}`;
-    if (base.map) {
-      clone.map = base.map.clone();
-      // The generated tile atlas contains two 32-px cells across its 64-px
-      // texture. Repeat at half the apparent tile count so the rendered
-      // joints are the measured 32 cm grid, rather than 16 cm micro-tiles.
-      clone.map.repeat.set(Math.max(1, width / (tileSize * 2)), Math.max(1, depth / (tileSize * 2)));
-      clone.map.needsUpdate = true;
-    }
-    return clone;
-  }, [depth, item.materialId, item.source.id, width]);
+  const tileMaterial = getPlannerMaterial(item.materialId);
+  const tileGeometry = useTileBoxGeometry([width, tileHeight, depth]);
   return (
     <group>
-      <mesh position={[0, -height / 2 + tileHeight / 2, 0]} scale={[width, tileHeight, depth]} geometry={SHARED_BOX} receiveShadow>
+      <mesh position={[0, -height / 2 + tileHeight / 2, 0]} scale={[width, tileHeight, depth]} geometry={tileGeometry} receiveShadow>
         <primitive object={tileMaterial} attach="material" />
       </mesh>
       <group position={[0, -height / 2 + tileHeight + 0.0015, 0]}>

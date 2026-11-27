@@ -34,7 +34,7 @@ test('four hooks form a horizontal row with 20-cm centres',()=>{
 test('supplier west chain equals 2562 mm',()=>{
   assert.deepEqual(kitchenModuleWidths(),[.45,.15,.6,.6,.112,.65]);assert.ok(Math.abs(kitchenModuleWidths().reduce((a,b)=>a+b,0)-2.562)<1e-9);
 });
-test('tile size remains prior 32-cm reference, not an invented supplier PDF dimension',()=>assert.equal(KITCHEN_REFERENCE.tilePitch,.32));
+test('tile size uses the measured 20-cm apartment reference',()=>assert.equal(KITCHEN_REFERENCE.tilePitch,.2));
 test('appliances and user-movable furniture are retained',()=>{
   const original=structuredClone(DEFAULT_APARTMENT_DOCUMENT),snapshot=structuredClone(original),result=refineRoomLayout(original);
   assert.deepEqual(original,snapshot);assert.equal(result.placements,original.placements);assert.equal(result.assets,original.assets);assert.equal(result.doorStates,original.doorStates);

@@ -223,11 +223,11 @@ export const TEXTURES: Record<string, string> = {
 
 
 
-export const TILE_TEXTURES: Record<string, { base: [number, number, number]; grout: [number, number, number]; rectangular?: boolean }> = {
+export const TILE_TEXTURES: Record<string, { base: [number, number, number]; grout: [number, number, number]; staggered?: boolean }> = {
   "porcelain-light-taupe": { base: [216, 213, 206], grout: [174, 171, 165] },
   "tile-white-square": { base: [232, 231, 227], grout: [190, 190, 185] },
   "tile-kitchen-grey-square": { base: [216, 216, 211], grout: [176, 176, 171] },
-  "tile-white-rect": { base: [234, 233, 229], grout: [191, 191, 186], rectangular: true },
+  "tile-white-rect": { base: [234, 233, 229], grout: [191, 191, 186], staggered: true },
 };
 
 

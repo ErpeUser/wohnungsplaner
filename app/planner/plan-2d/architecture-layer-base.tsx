@@ -1,3 +1,4 @@
+import { TILE_SIZE_METRES } from '../domain/tile-dimensions.ts';
 import { Arc, Circle, Group, Line, Text } from "react-konva";
 
 import type { PlanObjectDescriptor, PlanOpeningDescriptor, PlanScene } from "./plan-scene.ts";
@@ -183,7 +184,7 @@ function BuiltInDetail({ item }: { item: PlanObjectDescriptor }) {
   const width = box.maxX - box.minX;
   const depth = box.maxZ - box.minZ;
   if (id === "floor-zone-kitchen") {
-    const tileSize = 0.12;
+    const tileSize = TILE_SIZE_METRES;
     const verticalLines = Math.floor(width / tileSize);
     const horizontalLines = Math.floor(depth / tileSize);
     return (

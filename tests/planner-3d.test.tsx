@@ -184,6 +184,9 @@ describe("createSceneModel", () => {
     expect(rectangular.map).toBeInstanceOf(DataTexture);
     expect(taupe.map).toBeInstanceOf(DataTexture);
     expect(square.color.getHexString()).toBe("efeeea");
+    expect(square.map?.repeat.toArray()).toEqual([2.5, 2.5]);
+    expect(rectangular.map?.repeat.toArray()).toEqual([2.5, 2.5]);
+    expect(taupe.map?.repeat.toArray()).toEqual([2.5, 2.5]);
   });
   test("keeps generated outdoor surfaces in sRGB with linear bump relief", () => {
     const concrete = getPlannerMaterial("outdoor-concrete");

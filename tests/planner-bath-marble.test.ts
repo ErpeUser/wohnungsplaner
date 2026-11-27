@@ -23,11 +23,11 @@ test("tiles the complete bathtub wall from corner to corner and floor to ceiling
   }
 });
 
-test("uses a 60 × 30 cm module and crops the finish at the surface edges", () => {
+test("uses a 20 x 20 cm module and crops the finish at the surface edges", () => {
   const { positions, uvs } = marbleTileBuffers(1.6, 0.53);
-  assert.equal(positions.length / 18, 7);
-  assert.ok(Math.abs(positions[3] - positions[0] - 0.59925) < 1e-6);
-  assert.ok(Math.abs(positions[7] - positions[1] - 0.29925) < 1e-6);
+  assert.equal(positions.length / 18, 25);
+  assert.ok(Math.abs(positions[3] - positions[0] - 0.19925) < 1e-6);
+  assert.ok(Math.abs(positions[7] - positions[1] - 0.19925) < 1e-6);
   const xs = positions.filter((_, index) => index % 3 === 0);
   const ys = positions.filter((_, index) => index % 3 === 1);
   assert.ok(Math.abs(Math.min(...xs) + 0.8) < 1e-6);
@@ -83,5 +83,5 @@ test("finishes every WC-facing tiled wall without crossing into the neighboring 
   const tiles = marbleTileBuffers(0.9, 2.56, 0, "wc");
   const firstTileWidth = tiles.positions[3] - tiles.positions[0];
   // The warmer ceramic finish uses a 1.5-mm joint instead of 0.75 mm.
-  assert.ok(Math.abs(firstTileWidth - 0.44925) < 1e-6);
+  assert.ok(Math.abs(firstTileWidth - 0.14925) < 1e-6);
 });

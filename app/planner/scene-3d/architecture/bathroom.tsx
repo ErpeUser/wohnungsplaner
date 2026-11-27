@@ -1,3 +1,4 @@
+import { useTileBoxGeometry } from "../shared/tile-box-geometry.ts";
 import { RoundedBox } from "@react-three/drei";
 import { DoubleSide } from "three";
 import type { PlannerBuiltIn } from "../../domain/types.ts";
@@ -13,6 +14,10 @@ import { WaffleMat } from "../interior-models.tsx";
 export function BathTiledFinish({ item, frontWallEndZ }: { item: SceneObject<PlannerBuiltIn>; frontWallEndZ?: number }) {
   const [width, height, depth] = item.size;
   const tile = getPlannerMaterial(item.materialId);
+  const tileGeometry = useTileBoxGeometry(item.size);
+  const joint = height > 0.06 ? Math.min(0.012, depth * 0.12) : Math.min(0.006, width * 0.02);
+  const topSize: [number, number, number] = [Math.max(0.04, width - joint), 0.004, Math.max(0.04, depth - joint)];
+  const topGeometry = useTileBoxGeometry(topSize);
   if (item.roomId === "bad" && item.catalogId === "bath-tub-apron") {
     // The side cap reaches the bathroom wall before the 160-cm tub starts.
     // Cover that remaining distance with the SAME marble face, not grey tiles.
@@ -20,7 +25,7 @@ export function BathTiledFinish({ item, frontWallEndZ }: { item: SceneObject<Pla
     const extension = Math.max(0, tubFrontEndZ - (frontWallEndZ ?? tubFrontEndZ));
     return (
       <group name={`bath-tiled-finish-${item.source.id}`}>
-        <mesh scale={item.size} geometry={SHARED_BOX} material={tile} castShadow receiveShadow />
+        <mesh scale={item.size} geometry={tileGeometry} material={tile} castShadow receiveShadow />
         {/* Local −Z faces into the room at the installed 90° rotation. */}
         <group position={[-extension / 2, 0, -depth / 2 - 0.002]} rotation={[0, Math.PI, 0]}>
           <MarbleTileSurface width={width + extension} height={height} patternOffset={3} />
@@ -28,32 +33,15 @@ export function BathTiledFinish({ item, frontWallEndZ }: { item: SceneObject<Pla
       </group>
     );
   }
-  const grout = getPlannerMaterial("tile-grout");
-  const vertical = height > 0.06;
-  const joint = vertical ? Math.min(0.012, depth * 0.12) : Math.min(0.006, width * 0.02);
-  const jointCount = Math.max(1, Math.floor(width / 0.32));
-
+  // The existing tile material provides the metric joints on every face.
   return (
-    <group name={`bath-tiled-finish-${item.source.id}`}>
-      <mesh scale={[width, height, depth]} geometry={SHARED_BOX} castShadow receiveShadow>
+    <group name={"bath-tiled-finish-" + item.source.id}>
+      <mesh scale={[width, height, depth]} geometry={tileGeometry} castShadow receiveShadow>
         <primitive object={tile} attach="material" />
       </mesh>
-      <mesh position={[0, height / 2 + 0.002, 0]} scale={[Math.max(0.04, width - joint), 0.004, Math.max(0.04, depth - joint)]} geometry={SHARED_BOX} receiveShadow>
+      <mesh position={[0, height / 2 + 0.002, 0]} scale={topSize} geometry={topGeometry} receiveShadow>
         <primitive object={tile} attach="material" />
       </mesh>
-      {Array.from({ length: jointCount }, (_, index) => {
-        const x = -width / 2 + (index + 1) * width / (jointCount + 1);
-        return (
-          <mesh key={`bath-joint-x-${index}`} position={[x, vertical ? 0 : height / 2 + 0.006, depth / 2 + 0.002]} scale={[0.006, vertical ? height : 0.004, 0.008]} geometry={SHARED_BOX}>
-            <primitive object={grout} attach="material" />
-          </mesh>
-        );
-      })}
-      {vertical ? (
-        <mesh position={[0, 0, depth / 2 + 0.003]} scale={[width, 0.006, 0.008]} geometry={SHARED_BOX}>
-          <primitive object={grout} attach="material" />
-        </mesh>
-      ) : null}
     </group>
   );
 }
@@ -85,12 +73,14 @@ export function WcFlushPlate({ item }: { item: SceneObject<PlannerBuiltIn> }) {
 export function WcRevisionPanel({ item }: { item: SceneObject<PlannerBuiltIn> }) {
   const [width, height, depth] = item.size;
   const tile = getPlannerMaterial(item.materialId);
+  const panelGeometry = useTileBoxGeometry([width, height, depth]);
+  const doorGeometry = useTileBoxGeometry([width - 0.046, height - 0.046, 0.004]);
   const frame = getPlannerMaterial("#c9bdb0");
   const hinge = getPlannerMaterial("metal-satin");
   return (
     <group name={`wc-revision-panel-${item.source.id}`}>
       {/* Tiled wall-integrated service shaft: keep the original recess envelope. */}
-      <mesh scale={[width, height, depth]} geometry={SHARED_BOX} castShadow receiveShadow>
+      <mesh scale={[width, height, depth]} geometry={panelGeometry} castShadow receiveShadow>
         <primitive object={tile} attach="material" />
       </mesh>
       <mesh name="wc-service-hatch-frame" position={[0, 0, depth / 2 + 0.006]}
@@ -98,7 +88,7 @@ export function WcRevisionPanel({ item }: { item: SceneObject<PlannerBuiltIn> })
         <primitive object={frame} attach="material" />
       </mesh>
       <mesh name="wc-service-hatch-door" position={[0, 0, depth / 2 + 0.011]}
-        scale={[width - 0.046, height - 0.046, 0.004]} geometry={SHARED_BOX} castShadow receiveShadow>
+        scale={[width - 0.046, height - 0.046, 0.004]} geometry={doorGeometry} castShadow receiveShadow>
         <primitive object={tile} attach="material" />
       </mesh>
       <mesh name="wc-service-hatch-latch" position={[-width * 0.37, -height * 0.01, depth / 2 + 0.017]}

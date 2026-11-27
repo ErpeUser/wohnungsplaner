@@ -1,10 +1,11 @@
+import { TILE_SIZE_METRES } from "../../domain/tile-dimensions.ts";
 import { useMemo } from "react";
 import type { PlannerBuiltIn } from "../../domain/types.ts";
 import { loadPlannerTexture } from "../materials/texture-factory.ts";
 import type { SceneObject, SceneWall, SceneWallSegment } from "../scene-model.ts";
 
-const TILE_WIDTH = 0.6;
-const TILE_HEIGHT = 0.3;
+const TILE_WIDTH = TILE_SIZE_METRES;
+const TILE_HEIGHT = TILE_SIZE_METRES;
 const FINISHES = {
   bath: {
     atlas: "/planner-assets/textures/stone/temu-white-gold-601100207687761.webp",

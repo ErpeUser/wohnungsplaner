@@ -1,3 +1,4 @@
+import {TILE_SIZE_METRES} from './tile-dimensions.ts';
 import type {PlannerBuiltIn,PlannerMetadata,PlannerPlacement} from './types.ts';
 
 export const INTERIOR_REVISION='interior-refinement-2026-11-11';
@@ -6,8 +7,8 @@ export const KITCHEN_REFERENCE=Object.freeze({
   originX:.06,originZ:3.53,northRun:2.425,westRun:2.562,plinth:.12,carcass:.75,
   worktopThickness:.04,worktopTop:.91,backsplashHeight:.56,upperBottom:1.47,upperHeight:.75,
   endPanel:.016,cabinetNorthEnd:1.766,nicheStart:1.768,nicheWidth:.657,worktopDepth:.603,
-  // Prior project floor reference; NOT a dimension from the supplier PDF.
-  tilePitch:.32,tileGrout:.002,
+  // User-confirmed apartment tile size; not a supplier PDF dimension.
+  tilePitch:TILE_SIZE_METRES,tileGrout:.002,
 });
 export const HALL_REFERENCE=Object.freeze({
   tejoPrint:{width:.36,height:.50},plateDiameters:[.18,.14,.11] as readonly number[],
@@ -68,8 +69,8 @@ export const INTERIOR_UPDATES:Readonly<Record<string,Update>>={
   'builtin-kitchen-microwave':k({position:p(1.51,3.88),rotation:0,elevation:1.49,label:'Mikrowelle im OM60-Modul über der Geschirrspülerfront'}),
   // Keep the refrigerator's existing size, material, identity and product source.
   'builtin-kitchen-fridge':{position:p(2.139,3.855),elevation:FINISHED_FLOOR_Y},
-  'builtin-kitchen-tile-north':{position:p(1.25,4.225),size:s(2.38,1.39,.003),rotation:0,elevation:.0122,collision:'decorative',metadata:{...kitchenEvidence,notes:[...(kitchenEvidence.notes??[]),'Unbemasste L-Bodenzone an bestehende lichte Wandbreite geclippt. 32-cm-Fliesenraster und 2-mm-Fugen sind als Visualisierungsannahme gekennzeichnet.']}},
-  'builtin-kitchen-tile-west':{position:p(.665,5.506),size:s(1.21,1.172,.003),rotation:0,elevation:.0122,collision:'decorative',metadata:{...kitchenEvidence,notes:[...(kitchenEvidence.notes??[]),'Durchlaufendes 32-cm-Raster; Bodenzone im Lieferplan nicht bemasst.']}},
+  'builtin-kitchen-tile-north':{position:p(1.25,4.225),size:s(2.38,1.39,.003),rotation:0,elevation:.0122,collision:'decorative',metadata:{...kitchenEvidence,notes:[...(kitchenEvidence.notes??[]),'Unbemasste L-Bodenzone an bestehende lichte Wandbreite geclippt. 20-cm-Fliesenraster laut Nutzerangabe, 2-mm-Fugen als Visualisierungsannahme.']}},
+  'builtin-kitchen-tile-west':{position:p(.665,5.506),size:s(1.21,1.172,.003),rotation:0,elevation:.0122,collision:'decorative',metadata:{...kitchenEvidence,notes:[...(kitchenEvidence.notes??[]),'Durchlaufendes 20-cm-Raster; Bodenzone im Lieferplan nicht bemasst.']}},
 };
 function hall(id:string,label:string,x:number,z:number,size:PlannerBuiltIn['size'],rotation:number,elevation:number,notes:string[]):PlannerBuiltIn{
   return {id,label,catalogId:id.replace('builtin-',''),roomId:'vorraum',kind:'other',locked:true,position:p(x,z),size,rotation,elevation,collision:'decorative',materialVariants:{main:'oak-light'},metadata:{source:'Nutzerreferenzen; herstellerneutrale Deko-Planung',confidence:'estimated',notes:[INTERIOR_REVISION,...notes]}};

@@ -1,3 +1,4 @@
+import { TILE_ATLAS_METRES } from '../../domain/tile-dimensions.ts';
 import { Color, DataTexture, LinearFilter, LinearMipmapLinearFilter, NoColorSpace, RepeatWrapping, RGBAFormat, SRGBColorSpace, Texture, TextureLoader, UnsignedByteType } from "three";
 import { plannerAssetUrl } from "../asset-url.ts";
 import { RECIPES } from "./recipes.ts";
@@ -677,7 +678,7 @@ export function loadPlannerTexture(path: string) {
 
 export function loadPlannerTileTexture(
   materialId: string,
-  recipe: { base: [number, number, number]; grout: [number, number, number]; rectangular?: boolean },
+  recipe: { base: [number, number, number]; grout: [number, number, number]; staggered?: boolean },
 ) {
   const key = `generated:${materialId}`;
   const cached = textureCache.get(key);
@@ -685,12 +686,10 @@ export function loadPlannerTileTexture(
   const size = 64;
   const data = new Uint8Array(size * size * 4);
   for (let y = 0; y < size; y += 1) {
-    const row = Math.floor(y / 16);
+    const row = Math.floor(y / 32);
     for (let x = 0; x < size; x += 1) {
-      const staggeredX = (x + (recipe.rectangular && row % 2 ? 16 : 0)) % 32;
-      const grout = recipe.rectangular
-        ? y % 16 < 2 || staggeredX < 2
-        : y % 32 < 2 || x % 32 < 2;
+      const staggeredX = (x + (recipe.staggered && row % 2 ? 16 : 0)) % 32;
+      const grout = y % 32 < 2 || staggeredX < 2;
       const color = grout ? recipe.grout : recipe.base;
       const offset = (y * size + x) * 4;
       data[offset] = color[0];
@@ -704,7 +703,7 @@ export function loadPlannerTileTexture(
   texture.colorSpace = SRGBColorSpace;
   texture.wrapS = RepeatWrapping;
   texture.wrapT = RepeatWrapping;
-  texture.repeat.set(recipe.rectangular ? 3.2 : 2.4, recipe.rectangular ? 4.8 : 2.4);
+  texture.repeat.set(1 / TILE_ATLAS_METRES, 1 / TILE_ATLAS_METRES);
   texture.magFilter = LinearFilter;
   texture.minFilter = LinearMipmapLinearFilter;
   texture.generateMipmaps = true;

@@ -1,5 +1,6 @@
 "use client";
 
+import { isTileMaterial, useTileBoxGeometry } from "../shared/tile-box-geometry.ts";
 import { BalconyArchitecture, isBalconyExteriorWall } from "./balcony";
 import { MarbleTileSurface, bathMarbleWallBounds, wcMarbleWallBounds } from "./marble-tiles";
 import { BathMat, BathRoundMirror, BathShowerCurtain, BathShowerRod, BathShowerSet, BathTiledFinish, BathTowelHookRail, ScoutBasinCabinet, ScoutWasherCabinet, Washbasin, WcBrush, WcFlushPlate, WcPaperHolder, WcRevisionPanel } from "./bathroom";
@@ -102,6 +103,10 @@ function WallSegmentMesh({ wall, segment, bathtub }: {
   const base = getPlannerMaterial(wall.materialId);
   const positive = getPlannerMaterial(wall.sideMaterialIds[0]);
   const negative = getPlannerMaterial(wall.sideMaterialIds[1]);
+  const tileFaces = (isTileMaterial(wall.materialId) ? 15 : 0)
+    | (isTileMaterial(wall.sideMaterialIds[0]) ? 16 : 0)
+    | (isTileMaterial(wall.sideMaterialIds[1]) ? 32 : 0);
+  const geometry = useTileBoxGeometry(segment.size, tileFaces);
   const bathMarble = bathtub && bathMarbleWallBounds(wall, segment, bathtub);
   const wcMarble = wcMarbleWallBounds(wall, segment);
   return (
@@ -110,7 +115,7 @@ function WallSegmentMesh({ wall, segment, bathtub }: {
         position={segment.position}
         rotation={[0, segment.rotationY, 0]}
         scale={segment.size}
-        geometry={SHARED_BOX}
+        geometry={geometry}
         material={[base, base, base, base, positive, negative]}
         castShadow
         receiveShadow
